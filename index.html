@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pajara Studio — studio desain grafis dari Kabupaten Bogor. Branding, konten media sosial, poster, banner, kemasan, dan kebutuhan visual bisnis.">
+  <meta name="author" content="Muhamad Rijik Rifa'i">
+  <meta name="theme-color" content="#0b3d2e">
+  <title>Pajara Studio — Berakar di Tanah Pasundan</title>
+  <link rel="icon" type="image/jpeg" href="assets/pajara-logo.jpg">
+  <style>
+    :root{
+      --green:#0b3d2e;
+      --green-2:#145a43;
+      --cream:#f5f2ea;
+      --paper:#fffdf8;
+      --black:#101513;
+      --muted:#68716d;
+      --line:#dfe4de;
+      --max:1120px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--black); background:var(--paper); line-height:1.6;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{width:min(var(--max),calc(100% - 40px));margin:auto}
+    header{
+      position:sticky;top:0;z-index:20;background:rgba(255,253,248,.92);
+      backdrop-filter:blur(14px);border-bottom:1px solid rgba(223,228,222,.8);
+    }
+    nav{height:76px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.03em}
+    .brand img{width:42px;height:42px;object-fit:contain;border-radius:10px}
+    .brand span{font-size:18px}
+    .navlinks{display:flex;gap:28px;font-size:14px;color:#3d4642}
+    .navlinks a:hover{color:var(--green)}
+    .menu{display:none;border:0;background:none;font-size:25px}
+    .hero{padding:110px 0 95px;background:linear-gradient(180deg,var(--cream),var(--paper))}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:70px;align-items:center}
+    .eyebrow{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:800;margin-bottom:20px}
+    h1{font-size:clamp(48px,7vw,88px);line-height:.96;letter-spacing:-.065em;margin-bottom:25px}
+    h1 em{font-style:normal;color:var(--green)}
+    .hero p{font-size:18px;color:var(--muted);max-width:620px}
+    .actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+    .btn{display:inline-flex;padding:13px 20px;border-radius:999px;font-weight:750;font-size:14px;border:1px solid var(--green)}
+    .btn.primary{background:var(--green);color:white}
+    .btn.secondary{background:transparent;color:var(--green)}
+    .hero-card{background:var(--green);padding:45px;border-radius:28px;color:white;box-shadow:0 25px 70px rgba(11,61,46,.18)}
+    .hero-card img{width:190px;height:190px;object-fit:contain;background:#f4f0e8;border-radius:22px;padding:22px;margin:auto auto 28px}
+    .hero-card h2{font-size:28px;letter-spacing:-.04em}
+    .hero-card p{font-size:14px;color:#dce9e2;margin-top:8px}
+    section{padding:95px 0}
+    .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:45px}
+    .section-head h2{font-size:clamp(34px,5vw,56px);line-height:1;letter-spacing:-.055em}
+    .section-head p{max-width:430px;color:var(--muted)}
+    .about{background:var(--paper)}
+    .about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px}
+    .owner{background:var(--cream);border-radius:28px;padding:34px}
+    .owner-label{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800}
+    .owner h3{font-size:29px;line-height:1.1;margin:12px 0}
+    .owner p{color:var(--muted)}
+    .about-copy{font-size:21px;line-height:1.55}
+    .about-copy strong{color:var(--green)}
+    .services{background:var(--green);color:white}
+    .services .section-head p{color:#c9d9d1}
+    .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .service{border:1px solid rgba(255,255,255,.17);padding:28px;border-radius:22px;min-height:190px;background:rgba(255,255,255,.035)}
+    .num{font-size:12px;color:#a9c9ba;letter-spacing:.12em;font-weight:800}
+    .service h3{font-size:21px;margin:28px 0 8px}
+    .service p{color:#c9d9d1;font-size:14px}
+    .portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .project{border-radius:22px;overflow:hidden;background:var(--cream);border:1px solid var(--line)}
+    .project img{width:100%;aspect-ratio:4/5;object-fit:cover}
+    .project-info{padding:18px 20px 21px}
+    .project-info h3{font-size:18px}
+    .project-info p{font-size:13px;color:var(--muted);margin-top:3px}
+    .process{background:var(--cream)}
+    .process-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .step{background:var(--paper);border-radius:20px;padding:22px;min-height:170px}
+    .step b{color:var(--green);font-size:13px}
+    .step h3{margin:28px 0 7px;font-size:17px}
+    .step p{font-size:13px;color:var(--muted)}
+    .packages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .package{border:1px solid var(--line);border-radius:24px;padding:30px}
+    .package.featured{background:var(--green);color:white;border-color:var(--green)}
+    .package .tag{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--green)}
+    .featured .tag{color:#b8d5c8}
+    .package h3{font-size:24px;margin:10px 0}
+    .price{font-size:29px;font-weight:850;margin:22px 0}
+    .package ul{list-style:none;color:var(--muted);font-size:14px}
+    .featured ul{color:#dce9e2}
+    .package li{padding:7px 0;border-bottom:1px solid var(--line)}
+    .featured li{border-color:rgba(255,255,255,.14)}
+    .contact{background:#101513;color:white}
+    .contact-grid{display:grid;grid-template-columns:1fr .9fr;gap:70px;align-items:center}
+    .contact h2{font-size:clamp(40px,6vw,70px);line-height:.98;letter-spacing:-.06em}
+    .contact p{color:#cbd5d0;margin-top:20px;max-width:560px}
+    .contact-box{border:1px solid rgba(255,255,255,.16);border-radius:25px;padding:30px}
+    .contact-box div{padding:15px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+    .contact-box div:last-child{border-bottom:0}
+    .contact-box small{display:block;color:#9eaaa4;margin-bottom:3px}
+    footer{background:#101513;color:#89958f;border-top:1px solid rgba(255,255,255,.1);padding:25px 0;font-size:13px}
+    .footer-row{display:flex;justify-content:space-between;gap:20px}
+    @media(max-width:850px){
+      .navlinks{display:none}
+      .menu{display:block}
+      .hero{padding:75px 0}
+      .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr;gap:40px}
+      .service-grid,.portfolio-grid,.packages{grid-template-columns:1fr 1fr}
+      .process-grid{grid-template-columns:1fr 1fr}
+      .section-head{display:block}
+      .section-head p{margin-top:16px}
+    }
+    @media(max-width:560px){
+      .container{width:min(var(--max),calc(100% - 28px))}
+      nav{height:68px}
+      .brand img{width:36px;height:36px}
+      .brand span{font-size:16px}
+      .service-grid,.portfolio-grid,.packages,.process-grid{grid-template-columns:1fr}
+      .hero-card{padding:28px}
+      section{padding:70px 0}
+      .footer-row{display:block}
+      .footer-row span{display:block;margin-top:7px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <nav>
+      <a class="brand" href="#beranda">
+        <img src="assets/pajara-logo.jpg" alt="Logo Pajara Studio">
+        <span>Pajara Studio</span>
+      </a>
+      <div class="navlinks">
+        <a href="#tentang">Tentang</a>
+        <a href="#layanan">Layanan</a>
+        <a href="#portofolio">Portofolio</a>
+        <a href="#proses">Proses</a>
+        <a href="#kontak">Kontak</a>
+      </div>
+      <button class="menu" aria-label="Menu">☰</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="beranda">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">Studio Desain Grafis · Kabupaten Bogor</div>
+      <h1>Visual yang punya <em>arah.</em></h1>
+      <p>Pajara Studio membantu bisnis membangun visual yang lebih profesional, konsisten, dan berkarakter—dari identitas brand hingga kebutuhan promosi.</p>
+      <div class="actions">
+        <a class="btn primary" href="#portofolio">Lihat Portofolio</a>
+        <a class="btn secondary" href="#kontak">Hubungi Pajara</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <img src="assets/pajara-logo.jpg" alt="Logo Pajara Studio">
+      <h2>Berakar di Tanah Pasundan.</h2>
+      <p>Desain grafis, branding, dan visual untuk membantu brand tampil lebih percaya diri.</p>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="tentang">
+  <div class="container">
+    <div class="section-head">
+      <h2>Tentang<br>Pajara.</h2>
+      <p>Bukan sekadar membuat desain. Kami membangun visual yang punya tujuan dan karakter.</p>
+    </div>
+    <div class="about-grid">
+      <div class="owner">
+        <div class="owner-label">Founder & Graphic Designer</div>
+        <h3>Muhamad Rijik Rifa'i</h3>
+        <p>Pendiri Pajara Studio dan desainer grafis freelance dari Kabupaten Bogor.</p>
+      </div>
+      <div class="about-copy">
+        <p><strong>Pajara Studio</strong> adalah studio desain grafis yang berfokus pada branding, identitas visual, konten media sosial, dan materi promosi.</p>
+        <br>
+        <p>Berakar di Tanah Pasundan, Pajara hadir untuk membantu bisnis dan brand mengembangkan tampilan visual yang lebih <strong>profesional, konsisten, dan berkarakter.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="layanan">
+  <div class="container">
+    <div class="section-head">
+      <h2>Layanan.</h2>
+      <p>Mulai dari satu kebutuhan desain hingga kebutuhan visual yang berjalan secara rutin.</p>
+    </div>
+    <div class="service-grid">
+      <article class="service"><div class="num">01</div><h3>Logo & Identitas Visual</h3><p>Membangun wajah brand melalui logo dan elemen visual yang konsisten.</p></article>
+      <article class="service"><div class="num">02</div><h3>Konten Media Sosial</h3><p>Feed, story, dan materi visual untuk kebutuhan komunikasi digital.</p></article>
+      <article class="service"><div class="num">03</div><h3>Poster & Promosi</h3><p>Visual promosi yang informatif, menarik, dan sesuai karakter brand.</p></article>
+      <article class="service"><div class="num">04</div><h3>Banner Digital</h3><p>Materi banner untuk promosi online maupun kebutuhan digital lainnya.</p></article>
+      <article class="service"><div class="num">05</div><h3>Desain Kemasan</h3><p>Membantu produk tampil lebih menarik dan memiliki identitas visual.</p></article>
+      <article class="service"><div class="num">06</div><h3>Kebutuhan Visual Lainnya</h3><p>Desain dapat disesuaikan dengan kebutuhan dan brief setiap project.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="portofolio">
+  <div class="container">
+    <div class="section-head">
+      <h2>Portofolio.</h2>
+      <p>Beberapa karya desain yang pernah dikerjakan Pajara Studio.</p>
+    </div>
+    <div class="portfolio-grid">
+      <article class="project">
+        <img src="assets/portfolio-01.jpg" alt="Desain promosi Samara Coffee">
+        <div class="project-info"><h3>Samara Coffee</h3><p>Desain promosi · Matcha Latte</p></div>
+      </article>
+      <article class="project">
+        <img src="assets/portfolio-02.jpg" alt="Desain promosi Ayam Betutul">
+        <div class="project-info"><h3>Ayam Betutul</h3><p>Desain promosi · Produk makanan</p></div>
+      </article>
+      <article class="project">
+        <img src="assets/portfolio-03.jpg" alt="Desain promosi Ayam Goreng Kremes">
+        <div class="project-info"><h3>Ayam Goreng Kremes Anundari</h3><p>Desain promosi · Produk makanan</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="proses">
+  <div class="container">
+    <div class="section-head">
+      <h2>Pajara<br>Process.</h2>
+      <p>Alur kerja dibuat sederhana agar proses dari brief sampai file final tetap jelas.</p>
+    </div>
+    <div class="process-grid">
+      <article class="step"><b>01</b><h3>Pilih Paket</h3><p>Pilih layanan sesuai kebutuhan.</p></article>
+      <article class="step"><b>02</b><h3>Brief & Konfirmasi</h3><p>Sampaikan detail dan bahan desain.</p></article>
+      <article class="step"><b>03</b><h3>DP 50%</h3><p>Pengerjaan dimulai setelah DP diterima.</p></article>
+      <article class="step"><b>04</b><h3>Desain & Revisi</h3><p>Desain dikerjakan lalu masuk tahap revisi.</p></article>
+      <article class="step"><b>05</b><h3>Pelunasan & Final</h3><p>File final dikirim setelah pelunasan.</p></article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>Pilihan<br>Paket.</h2>
+      <p>Mulai dari kebutuhan satu desain hingga kebutuhan rutin.</p>
+    </div>
+    <div class="packages">
+      <article class="package">
+        <div class="tag">01 · Fleksibel</div><h3>Per-Desain</h3><div class="price">Mulai Rp40K</div>
+        <ul><li>Bebas pilih jenis desain</li><li>Revisi maksimal 2×</li><li>File final siap digunakan</li><li>Konsultasi desain</li></ul>
+      </article>
+      <article class="package featured">
+        <div class="tag">02 · Mingguan</div><h3>Per Minggu</h3><div class="price">Rp175K</div>
+        <ul><li>4 desain per minggu</li><li>Bebas pilih jenis desain reguler</li><li>Revisi maksimal 2×/desain</li><li>Prioritas pengerjaan</li></ul>
+      </article>
+      <article class="package">
+        <div class="tag">03 · Rutin</div><h3>Per Bulan</h3><div class="price">Rp450K</div>
+        <ul><li>12 desain per bulan</li><li>Revisi maksimal 3×/desain</li><li>Prioritas & konsultasi desain</li><li>File final + penyimpanan proyek</li></ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="kontak">
+  <div class="container contact-grid">
+    <div>
+      <div class="eyebrow" style="color:#a9c9ba">Mari berkolaborasi</div>
+      <h2>Punya kebutuhan desain?</h2>
+      <p>Diskusikan kebutuhan visual brand-mu bersama Pajara Studio. Sampaikan brief, lalu kita tentukan solusi yang sesuai.</p>
+      <div class="actions">
+        <a class="btn primary" style="background:white;color:#101513;border-color:white" href="https://wa.me/6285800866347" target="_blank">Hubungi via WhatsApp</a>
+      </div>
+    </div>
+    <div class="contact-box">
+      <div><small>Studio</small><strong>Pajara Studio</strong></div>
+      <div><small>Founder</small><strong>Muhamad Rijik Rifa'i</strong></div>
+      <div><small>Lokasi</small><strong>Kabupaten Bogor, Jawa Barat</strong></div>
+      <div><small>Tagline</small><strong>Berakar di Tanah Pasundan.</strong></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container footer-row">
+    <strong>Pajara Studio</strong>
+    <span>© 2026 Pajara Studio · Berakar di Tanah Pasundan.</span>
+  </div>
+</footer>
+</body>
+</html>
