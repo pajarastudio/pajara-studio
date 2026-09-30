@@ -1,298 +1,44 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Pajara Studio — studio desain grafis dari Kabupaten Bogor. Branding, konten media sosial, poster, banner, kemasan, dan kebutuhan visual bisnis.">
-  <meta name="author" content="Muhamad Rijik Rifa'i">
-  <meta name="theme-color" content="#0b3d2e">
-  <title>Pajara Studio — Berakar di Tanah Pasundan</title>
-  <link rel="icon" type="image/jpeg" href="pajara-logo.jpg">
-  <style>
-    :root{
-      --green:#0b3d2e;
-      --green-2:#145a43;
-      --cream:#f5f2ea;
-      --paper:#fffdf8;
-      --black:#101513;
-      --muted:#68716d;
-      --line:#dfe4de;
-      --max:1120px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--black); background:var(--paper); line-height:1.6;
-    }
-    a{color:inherit;text-decoration:none}
-    img{max-width:100%;display:block}
-    .container{width:min(var(--max),calc(100% - 40px));margin:auto}
-    header{
-      position:sticky;top:0;z-index:20;background:rgba(255,253,248,.92);
-      backdrop-filter:blur(14px);border-bottom:1px solid rgba(223,228,222,.8);
-    }
-    nav{height:76px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.03em}
-    .brand img{width:42px;height:42px;object-fit:contain;border-radius:10px}
-    .brand span{font-size:18px}
-    .navlinks{display:flex;gap:28px;font-size:14px;color:#3d4642}
-    .navlinks a:hover{color:var(--green)}
-    .menu{display:none;border:0;background:none;font-size:25px}
-    .hero{padding:110px 0 95px;background:linear-gradient(180deg,var(--cream),var(--paper))}
-    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:70px;align-items:center}
-    .eyebrow{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:800;margin-bottom:20px}
-    h1{font-size:clamp(48px,7vw,88px);line-height:.96;letter-spacing:-.065em;margin-bottom:25px}
-    h1 em{font-style:normal;color:var(--green)}
-    .hero p{font-size:18px;color:var(--muted);max-width:620px}
-    .actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
-    .btn{display:inline-flex;padding:13px 20px;border-radius:999px;font-weight:750;font-size:14px;border:1px solid var(--green)}
-    .btn.primary{background:var(--green);color:white}
-    .btn.secondary{background:transparent;color:var(--green)}
-    .hero-card{background:var(--green);padding:45px;border-radius:28px;color:white;box-shadow:0 25px 70px rgba(11,61,46,.18)}
-    .hero-card img{width:190px;height:190px;object-fit:contain;background:#f4f0e8;border-radius:22px;padding:22px;margin:auto auto 28px}
-    .hero-card h2{font-size:28px;letter-spacing:-.04em}
-    .hero-card p{font-size:14px;color:#dce9e2;margin-top:8px}
-    section{padding:95px 0}
-    .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:45px}
-    .section-head h2{font-size:clamp(34px,5vw,56px);line-height:1;letter-spacing:-.055em}
-    .section-head p{max-width:430px;color:var(--muted)}
-    .about{background:var(--paper)}
-    .about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px}
-    .owner{background:var(--cream);border-radius:28px;padding:34px}
-    .owner-label{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800}
-    .owner h3{font-size:29px;line-height:1.1;margin:12px 0}
-    .owner p{color:var(--muted)}
-    .about-copy{font-size:21px;line-height:1.55}
-    .about-copy strong{color:var(--green)}
-    .services{background:var(--green);color:white}
-    .services .section-head p{color:#c9d9d1}
-    .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .service{border:1px solid rgba(255,255,255,.17);padding:28px;border-radius:22px;min-height:190px;background:rgba(255,255,255,.035)}
-    .num{font-size:12px;color:#a9c9ba;letter-spacing:.12em;font-weight:800}
-    .service h3{font-size:21px;margin:28px 0 8px}
-    .service p{color:#c9d9d1;font-size:14px}
-    .portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .project{border-radius:22px;overflow:hidden;background:var(--cream);border:1px solid var(--line)}
-    .project img{width:100%;aspect-ratio:4/5;object-fit:cover}
-    .project-info{padding:18px 20px 21px}
-    .project-info h3{font-size:18px}
-    .project-info p{font-size:13px;color:var(--muted);margin-top:3px}
-    .process{background:var(--cream)}
-    .process-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-    .step{background:var(--paper);border-radius:20px;padding:22px;min-height:170px}
-    .step b{color:var(--green);font-size:13px}
-    .step h3{margin:28px 0 7px;font-size:17px}
-    .step p{font-size:13px;color:var(--muted)}
-    .packages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .package{border:1px solid var(--line);border-radius:24px;padding:30px}
-    .package.featured{background:var(--green);color:white;border-color:var(--green)}
-    .package .tag{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--green)}
-    .featured .tag{color:#b8d5c8}
-    .package h3{font-size:24px;margin:10px 0}
-    .price{font-size:29px;font-weight:850;margin:22px 0}
-    .package ul{list-style:none;color:var(--muted);font-size:14px}
-    .featured ul{color:#dce9e2}
-    .package li{padding:7px 0;border-bottom:1px solid var(--line)}
-    .featured li{border-color:rgba(255,255,255,.14)}
-    .contact{background:#101513;color:white}
-    .contact-grid{display:grid;grid-template-columns:1fr .9fr;gap:70px;align-items:center}
-    .contact h2{font-size:clamp(40px,6vw,70px);line-height:.98;letter-spacing:-.06em}
-    .contact p{color:#cbd5d0;margin-top:20px;max-width:560px}
-    .contact-box{border:1px solid rgba(255,255,255,.16);border-radius:25px;padding:30px}
-    .contact-box div{padding:15px 0;border-bottom:1px solid rgba(255,255,255,.12)}
-    .contact-box div:last-child{border-bottom:0}
-    .contact-box small{display:block;color:#9eaaa4;margin-bottom:3px}
-    footer{background:#101513;color:#89958f;border-top:1px solid rgba(255,255,255,.1);padding:25px 0;font-size:13px}
-    .footer-row{display:flex;justify-content:space-between;gap:20px}
-    @media(max-width:850px){
-      .navlinks{display:none}
-      .menu{display:block}
-      .hero{padding:75px 0}
-      .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr;gap:40px}
-      .service-grid,.portfolio-grid,.packages{grid-template-columns:1fr 1fr}
-      .process-grid{grid-template-columns:1fr 1fr}
-      .section-head{display:block}
-      .section-head p{margin-top:16px}
-    }
-    @media(max-width:560px){
-      .container{width:min(var(--max),calc(100% - 28px))}
-      nav{height:68px}
-      .brand img{width:36px;height:36px}
-      .brand span{font-size:16px}
-      .service-grid,.portfolio-grid,.packages,.process-grid{grid-template-columns:1fr}
-      .hero-card{padding:28px}
-      section{padding:70px 0}
-      .footer-row{display:block}
-      .footer-row span{display:block;margin-top:7px}
-    }
-  </style>
-</head>
-<body>
-<header>
-  <div class="container">
-    <nav>
-      <a class="brand" href="#beranda">
-        <img src="pajara-logo.jpg" alt="Logo Pajara Studio">
-        <span>Pajara Studio</span>
-      </a>
-      <div class="navlinks">
-        <a href="#tentang">Tentang</a>
-        <a href="#layanan">Layanan</a>
-        <a href="#portofolio">Portofolio</a>
-        <a href="#proses">Proses</a>
-        <a href="#kontak">Kontak</a>
-      </div>
-      <button class="menu" aria-label="Menu">☰</button>
-    </nav>
-  </div>
-</header>
-
-<main>
-<section class="hero" id="beranda">
-  <div class="container hero-grid">
-    <div>
-      <div class="eyebrow">Studio Desain Grafis · Kabupaten Bogor</div>
-      <h1>Visual yang punya <em>arah.</em></h1>
-      <p>Pajara Studio membantu bisnis membangun visual yang lebih profesional, konsisten, dan berkarakter—dari identitas brand hingga kebutuhan promosi.</p>
-      <div class="actions">
-        <a class="btn primary" href="#portofolio">Lihat Portofolio</a>
-        <a class="btn secondary" href="#kontak">Hubungi Pajara</a>
-      </div>
-    </div>
-    <div class="hero-card">
-      <img src="pajara-logo.jpg" alt="Logo Pajara Studio">
-      <h2>Berakar di Tanah Pasundan.</h2>
-      <p>Desain grafis, branding, dan visual untuk membantu brand tampil lebih percaya diri.</p>
-    </div>
-  </div>
-</section>
-
-<section class="about" id="tentang">
-  <div class="container">
-    <div class="section-head">
-      <h2>Tentang<br>Pajara.</h2>
-      <p>Bukan sekadar membuat desain. Kami membangun visual yang punya tujuan dan karakter.</p>
-    </div>
-    <div class="about-grid">
-      <div class="owner">
-        <div class="owner-label">Founder & Graphic Designer</div>
-        <h3>Muhamad Rijik Rifa'i</h3>
-        <p>Pendiri Pajara Studio dan desainer grafis freelance dari Kabupaten Bogor.</p>
-      </div>
-      <div class="about-copy">
-        <p><strong>Pajara Studio</strong> adalah studio desain grafis yang berfokus pada branding, identitas visual, konten media sosial, dan materi promosi.</p>
-        <br>
-        <p>Berakar di Tanah Pasundan, Pajara hadir untuk membantu bisnis dan brand mengembangkan tampilan visual yang lebih <strong>profesional, konsisten, dan berkarakter.</strong></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="services" id="layanan">
-  <div class="container">
-    <div class="section-head">
-      <h2>Layanan.</h2>
-      <p>Mulai dari satu kebutuhan desain hingga kebutuhan visual yang berjalan secara rutin.</p>
-    </div>
-    <div class="service-grid">
-      <article class="service"><div class="num">01</div><h3>Logo & Identitas Visual</h3><p>Membangun wajah brand melalui logo dan elemen visual yang konsisten.</p></article>
-      <article class="service"><div class="num">02</div><h3>Konten Media Sosial</h3><p>Feed, story, dan materi visual untuk kebutuhan komunikasi digital.</p></article>
-      <article class="service"><div class="num">03</div><h3>Poster & Promosi</h3><p>Visual promosi yang informatif, menarik, dan sesuai karakter brand.</p></article>
-      <article class="service"><div class="num">04</div><h3>Banner Digital</h3><p>Materi banner untuk promosi online maupun kebutuhan digital lainnya.</p></article>
-      <article class="service"><div class="num">05</div><h3>Desain Kemasan</h3><p>Membantu produk tampil lebih menarik dan memiliki identitas visual.</p></article>
-      <article class="service"><div class="num">06</div><h3>Kebutuhan Visual Lainnya</h3><p>Desain dapat disesuaikan dengan kebutuhan dan brief setiap project.</p></article>
-    </div>
-  </div>
-</section>
-
-<section id="portofolio">
-  <div class="container">
-    <div class="section-head">
-      <h2>Portofolio.</h2>
-      <p>Beberapa karya desain yang pernah dikerjakan Pajara Studio.</p>
-    </div>
-    <div class="portfolio-grid">
-      <article class="project">
-        <img src="portfolio-01.jpg" alt="Desain promosi Samara Coffee">
-        <div class="project-info"><h3>Samara Coffee</h3><p>Desain promosi · Matcha Latte</p></div>
-      </article>
-      <article class="project">
-        <img src="portfolio-02.jpg" alt="Desain promosi Ayam Betutul">
-        <div class="project-info"><h3>Ayam Betutul</h3><p>Desain promosi · Produk makanan</p></div>
-      </article>
-      <article class="project">
-        <img src="portfolio-03.jpg" alt="Desain promosi Ayam Goreng Kremes">
-        <div class="project-info"><h3>Ayam Goreng Kremes Anundari</h3><p>Desain promosi · Produk makanan</p></div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="process" id="proses">
-  <div class="container">
-    <div class="section-head">
-      <h2>Pajara<br>Process.</h2>
-      <p>Alur kerja dibuat sederhana agar proses dari brief sampai file final tetap jelas.</p>
-    </div>
-    <div class="process-grid">
-      <article class="step"><b>01</b><h3>Pilih Paket</h3><p>Pilih layanan sesuai kebutuhan.</p></article>
-      <article class="step"><b>02</b><h3>Brief & Konfirmasi</h3><p>Sampaikan detail dan bahan desain.</p></article>
-      <article class="step"><b>03</b><h3>DP 50%</h3><p>Pengerjaan dimulai setelah DP diterima.</p></article>
-      <article class="step"><b>04</b><h3>Desain & Revisi</h3><p>Desain dikerjakan lalu masuk tahap revisi.</p></article>
-      <article class="step"><b>05</b><h3>Pelunasan & Final</h3><p>File final dikirim setelah pelunasan.</p></article>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="section-head">
-      <h2>Pilihan<br>Paket.</h2>
-      <p>Mulai dari kebutuhan satu desain hingga kebutuhan rutin.</p>
-    </div>
-    <div class="packages">
-      <article class="package">
-        <div class="tag">01 · Fleksibel</div><h3>Per-Desain</h3><div class="price">Mulai Rp40K</div>
-        <ul><li>Bebas pilih jenis desain</li><li>Revisi maksimal 2×</li><li>File final siap digunakan</li><li>Konsultasi desain</li></ul>
-      </article>
-      <article class="package featured">
-        <div class="tag">02 · Mingguan</div><h3>Per Minggu</h3><div class="price">Rp175K</div>
-        <ul><li>4 desain per minggu</li><li>Bebas pilih jenis desain reguler</li><li>Revisi maksimal 2×/desain</li><li>Prioritas pengerjaan</li></ul>
-      </article>
-      <article class="package">
-        <div class="tag">03 · Rutin</div><h3>Per Bulan</h3><div class="price">Rp450K</div>
-        <ul><li>12 desain per bulan</li><li>Revisi maksimal 3×/desain</li><li>Prioritas & konsultasi desain</li><li>File final + penyimpanan proyek</li></ul>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="kontak">
-  <div class="container contact-grid">
-    <div>
-      <div class="eyebrow" style="color:#a9c9ba">Mari berkolaborasi</div>
-      <h2>Punya kebutuhan desain?</h2>
-      <p>Diskusikan kebutuhan visual brand-mu bersama Pajara Studio. Sampaikan brief, lalu kita tentukan solusi yang sesuai.</p>
-      <div class="actions">
-        <a class="btn primary" style="background:white;color:#101513;border-color:white" href="https://wa.me/6285800866347" target="_blank">Hubungi via WhatsApp</a>
-      </div>
-    </div>
-    <div class="contact-box">
-      <div><small>Studio</small><strong>Pajara Studio</strong></div>
-      <div><small>Founder</small><strong>Muhamad Rijik Rifa'i</strong></div>
-      <div><small>Lokasi</small><strong>Kabupaten Bogor, Jawa Barat</strong></div>
-      <div><small>Tagline</small><strong>Berakar di Tanah Pasundan.</strong></div>
-    </div>
-  </div>
-</section>
-</main>
-
-<footer>
-  <div class="container footer-row">
-    <strong>Pajara Studio</strong>
-    <span>© 2026 Pajara Studio · Berakar di Tanah Pasundan.</span>
-  </div>
-</footer>
-</body>
-</html>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pajara Studio App V1.3</title>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f3;color:#172019}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.app{max-width:480px;margin:auto;min-height:100vh;background:#fff}.login{min-height:100vh;padding:28px 22px;display:flex;flex-direction:column;justify-content:center}.logo{font-size:28px;font-weight:900;letter-spacing:1px}.eyebrow{font-size:12px;letter-spacing:1.5px;font-weight:700;color:#52715b}.login h1{font-size:32px;margin:8px 0}.login p{color:#687169;line-height:1.5}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:13px;border:1px solid #dce2dc;border-radius:12px;outline:none;background:#fff}.field textarea{min-height:90px;resize:vertical}.primary{width:100%;padding:14px;border:0;border-radius:12px;background:#173b25;color:#fff;font-weight:700;margin-top:8px}.secondary{width:100%;padding:13px;border:1px solid #173b25;border-radius:12px;background:#fff;color:#173b25;font-weight:700;margin-top:10px}.note{text-align:center;font-size:12px;color:#8a928b;margin-top:14px}.screen{padding-bottom:82px}.top{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #edf0ed;position:sticky;top:0;background:#fff;z-index:3}.brand{font-weight:800}.content{padding:20px}.card{border:1px solid #e2e7e2;border-radius:16px;padding:16px;margin-bottom:12px;background:#fff}.hero{background:#173b25;color:#fff;border-radius:20px;padding:22px;margin-bottom:16px}.hero h2{margin:5px 0}.hero p{margin:0;color:#dce8df}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);display:flex;background:#fff;border-top:1px solid #e5e9e5;z-index:5}.nav button{flex:1;border:0;background:#fff;padding:14px 4px;font-size:12px}.nav button.active{color:#173b25;font-weight:700}.status{display:inline-block;padding:6px 9px;border-radius:20px;background:#edf4ee;font-size:12px}.admin-head{background:#111b14;color:#fff;padding:22px}.admin-list .card{margin-bottom:10px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.small{font-size:12px;color:#737c75}.danger{color:#a33}.logout{border:0;background:none;color:#777;padding:8px}.price{font-size:20px;font-weight:800;margin:8px 0}.pill{font-size:11px;background:#edf4ee;padding:5px 8px;border-radius:20px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}.tabs button{white-space:nowrap;border:1px solid #dce2dc;background:#fff;border-radius:20px;padding:8px 12px}.tabs button.on{background:#173b25;color:#fff}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{padding:14px;border-radius:14px;background:#f4f6f3}.back{border:0;background:none;padding:0;color:#173b25;font-weight:700}.admin-login{min-height:100vh;padding:28px 22px;display:flex;flex-direction:column;justify-content:center}.error{color:#a33;font-size:12px;margin-top:8px}.success{color:#27613b;font-size:12px;margin-top:8px}.filebox{padding:14px;border:1px dashed #b9c5ba;border-radius:12px}.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;z-index:10}.modalbox{background:#fff;width:min(480px,100%);border-radius:20px 20px 0 0;padding:20px;max-height:85vh;overflow:auto}</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://txrtckiumslbxufobtma.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HrsehGpFXmw4LejotkG89Q_KLE4XtgF";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+</script></head><body><div class="app">
+<section id="loginScreen" class="login"><div class="logo">PAJARA</div><div class="eyebrow">STUDIO · BERAKAR DI TANAH PASUNDAN</div><h1>Selamat datang.</h1><p>Masuk untuk mengelola kebutuhan desain Kang/Teh.</p><div class="field"><label>Nama</label><input id="loginName" placeholder="Nama Kang/Teh"></div><div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="nama@email.com"></div><button id="loginBtn" class="primary">Masuk sebagai Customer</button><button id="adminBtn" class="secondary">Login Khusus Admin</button><div class="note">Pajara Studio · V1.3</div></section>
+<section id="adminLoginScreen" class="admin-login hidden"><button id="backLogin" class="back">← Kembali</button><div class="eyebrow" style="margin-top:30px">PAJARA STUDIO</div><h1>Login Admin</h1><p>Masukkan akun khusus untuk membuka Dashboard Admin.</p><div class="field"><label>Email Admin</label><input id="adminEmail" type="email" placeholder="admin@pajara.studio"></div><div class="field"><label>Password Admin</label><input id="adminPassword" type="password" placeholder="Password"></div><div id="adminError" class="error hidden">Email atau password admin salah.</div><button id="adminLoginBtn" class="primary">Masuk ke Dashboard</button><div class="note">Akun demo: admin@pajara.studio · pajara123</div></section>
+<section id="customerScreen" class="screen hidden"><div class="top"><div class="brand">PAJARA STUDIO</div><button id="logoutBtn" class="logout">Keluar</button></div><div id="customerHome" class="content"><div class="hero"><div class="eyebrow">PAJARA STUDIO</div><h2 id="helloName">Halo, Kang/Teh 👋</h2><p>Kelola kebutuhan desain Kang/Teh di satu tempat.</p></div><div class="card"><div class="row"><b>Pesanan Terbaru</b><span id="homeStatus" class="pill">Belum ada</span></div><p class="small">Pantau proses pesanan dari brief sampai selesai.</p><button id="goStatus" class="secondary">Lihat Status Pesanan</button></div><div class="card"><b>Buat Pesanan</b><p class="small">Pilih paket, jenis desain, dan kirim brief.</p><button id="goOrder" class="primary">Buat Pesanan</button></div><h3>Paket Pajara Studio</h3><div id="homePackages"></div></div>
+<div id="packagesPage" class="content hidden"><h2>Paket & Harga</h2><div id="packagesList"></div></div>
+<div id="orderPage" class="content hidden"><h2>Buat Pesanan</h2><p class="small">Isi kebutuhan desain Kang/Teh selengkap mungkin.</p><div class="field"><label>Paket</label><select id="package"><option>Per-Desain</option><option>Mingguan</option><option>Bulanan</option></select></div><div class="field"><label>Jenis Desain</label><input id="design" placeholder="Contoh: Feed Instagram"></div><div class="field"><label>Jumlah</label><input id="qty" type="number" min="1" value="1"></div><div class="field"><label>Deadline</label><input id="deadline" type="date"></div><div class="field"><label>Brief / Detail Kebutuhan</label><textarea id="brief" placeholder="Jelaskan konsep, ukuran, teks, referensi, dan kebutuhan lainnya..."></textarea></div><div class="field"><label>Catatan / Referensi</label><textarea id="notes" placeholder="Opsional"></textarea></div><button id="submitOrder" class="primary">Kirim Pesanan</button></div>
+<div id="statusPage" class="content hidden"><h2>Pesanan Saya</h2><div id="orderList"></div></div>
+<div id="profilePage" class="content hidden"><h2>Profil</h2><div class="card"><b id="profileName"></b><p class="small" id="profileEmail"></p></div><div class="card"><b>Informasi Pembayaran</b><p class="small">DP 50% sebelum pengerjaan. Pelunasan setelah desain disetujui, sebelum file final dikirim.</p><button id="paymentInfo" class="secondary">Lihat Metode Pembayaran</button></div></div>
+<div class="nav"><button id="navHome">Home</button><button id="navPackages">Paket</button><button id="navOrder">Order</button><button id="navStatus">Status</button><button id="navProfile">Profil</button></div></section>
+<section id="adminScreen" class="screen hidden"><div class="admin-head"><div class="eyebrow">PAJARA STUDIO</div><div class="row"><h2>Dashboard Admin</h2><button id="adminLogout" class="logout" style="color:#ddd">Keluar</button></div><p>Kelola pesanan, pembayaran, brief, dan status customer.</p></div><div class="content"><div class="detail-grid"><div class="stat"><div class="small">Total Order</div><h2 id="totalOrders">0</h2></div><div class="stat"><div class="small">Order Aktif</div><h2 id="activeOrders">0</h2></div></div><div class="tabs" style="margin-top:16px"><button class="on" id="adminTabOrders">Pesanan</button><button id="adminTabFinance">Pembayaran</button></div><div id="adminOrders"></div><div id="adminFinance" class="hidden"></div></div></section>
+<div id="orderModal" class="modal hidden"><div class="modalbox"><div class="row"><h2>Detail Pesanan</h2><button id="closeModal" class="logout">Tutup</button></div><div id="modalContent"></div></div></div>
+</div><script>
+async function testSupabaseConnection(){
+  try{
+    const { error } = await supabaseClient.from("orders").select("id", { count: "exact", head: true });
+    if(error) console.warn("Supabase tersambung, tetapi tabel orders belum cocok/terakses:", error.message);
+    else console.log("Supabase tersambung. Tabel orders dapat diakses.");
+  }catch(e){ console.warn("Koneksi Supabase gagal:", e); }
+}
+testSupabaseConnection();
+const $=id=>document.getElementById(id);const statuses=['Order diterima','Brief diterima','Menunggu DP','Sedang dikerjakan','Preview','Revisi','Menunggu pelunasan','Selesai'];const packages={"Per-Desain":{price:'Mulai Rp40K',desc:'Bebas pilih jenis desain, revisi max 2x.'},"Mingguan":{price:'Rp175K/minggu',desc:'4 desain/minggu, revisi max 2x/desain.'},"Bulanan":{price:'Rp450K/bulan',desc:'12 desain/bulan, revisi max 3x/desain.'}};
+function getOrders(){try{return JSON.parse(localStorage.getItem('pajara_orders')||'[]')}catch(e){return[]}}function saveOrders(x){localStorage.setItem('pajara_orders',JSON.stringify(x))}function getPayments(){try{return JSON.parse(localStorage.getItem('pajara_payments')||'[]')}catch(e){return[]}}function savePayments(x){localStorage.setItem('pajara_payments',JSON.stringify(x))}
+function hideCustomerPages(){['customerHome','packagesPage','orderPage','statusPage','profilePage'].forEach(x=>$(x).classList.add('hidden'))}function setNav(id){['navHome','navPackages','navOrder','navStatus','navProfile'].forEach(x=>$(x).classList.remove('active'));$(id).classList.add('active')}
+function showCustomer(){ $('loginScreen').classList.add('hidden');$('adminLoginScreen').classList.add('hidden');$('adminScreen').classList.add('hidden');$('customerScreen').classList.remove('hidden');$('helloName').textContent='Halo, '+(localStorage.getItem('pajara_name')||'Kang/Teh')+' 👋';$('profileName').textContent=localStorage.getItem('pajara_name')||'Customer';$('profileEmail').textContent=localStorage.getItem('pajara_email')||'';renderOrders();renderPackages();home()}
+function home(){hideCustomerPages();$('customerHome').classList.remove('hidden');setNav('navHome');let o=getOrders().filter(x=>x.email===localStorage.getItem('pajara_email'));$('homeStatus').textContent=o.length?o[o.length-1].status:'Belum ada'}
+function renderPackages(){let html=Object.entries(packages).map(([n,p])=>`<div class="card"><div class="row"><b>${n}</b><span class="pill">${p.price}</span></div><p class="small">${p.desc}</p></div>`).join('');$('packagesList').innerHTML=html;$('homePackages').innerHTML=html}
+function renderOrders(){let email=localStorage.getItem('pajara_email');let orders=getOrders().filter(o=>o.email===email);$('orderList').innerHTML=orders.length?orders.slice().reverse().map(o=>`<div class="card"><div class="row"><b>${o.id}</b><span class="status">${o.status}</span></div><p><b>${o.design}</b> · ${o.package} · ${o.qty}x</p><div class="small">Deadline: ${o.deadline||'-'}</div><div class="small">Pembayaran: ${o.paymentStatus||'Menunggu DP'}</div><button class="secondary" onclick="openDetail('${o.id}')">Lihat Detail</button></div>`).join(''):'<div class="card">Belum ada pesanan.</div>';}
+window.openDetail=id=>{let o=getOrders().find(x=>x.id===id);if(!o)return;$('modalContent').innerHTML=`<div class="card"><b>${o.id}</b><p>${o.design} · ${o.package} · ${o.qty}x</p><p class="small">Deadline: ${o.deadline||'-'}</p><p class="small">Status: ${o.status}</p><p class="small">Pembayaran: ${o.paymentStatus||'Menunggu DP'}</p><hr><b>Brief</b><p>${o.brief||'-'}</p><b>Catatan</b><p>${o.notes||'-'}</p><div class="filebox">Preview & file final akan tersedia di tahap berikutnya.</div></div>`;$('orderModal').classList.remove('hidden')}
+function renderAdmin(){let orders=getOrders();$('totalOrders').textContent=orders.length;$('activeOrders').textContent=orders.filter(o=>o.status!=='Selesai').length;$('adminOrders').innerHTML=orders.length?orders.slice().reverse().map(o=>`<div class="card"><div class="row"><b>${o.id}</b><span class="status">${o.status}</span></div><p><b>${o.name}</b><br>${o.email}<br>${o.design} · ${o.package} · ${o.qty}x</p><div class="small">Deadline: ${o.deadline||'-'}</div><div class="small">Pembayaran: ${o.paymentStatus||'Menunggu DP'}</div><div class="field"><label>Ubah Status</label><select onchange="changeStatus('${o.id}',this.value)">${statuses.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></div><button class="secondary" onclick="adminDetail('${o.id}')">Buka Detail</button></div>`).join(''):'<div class="card">Belum ada pesanan masuk.</div>';renderFinance()}
+window.changeStatus=(id,status)=>{let o=getOrders();let i=o.findIndex(x=>x.id===id);if(i>=0){o[i].status=status;saveOrders(o);renderAdmin();renderOrders()}};
+window.adminDetail=id=>{let o=getOrders().find(x=>x.id===id);if(!o)return;$('modalContent').innerHTML=`<div class="card"><b>${o.id}</b><p><b>Customer:</b> ${o.name}<br><b>Email:</b> ${o.email}<br><b>Paket:</b> ${o.package}<br><b>Desain:</b> ${o.design}<br><b>Jumlah:</b> ${o.qty}<br><b>Deadline:</b> ${o.deadline||'-'}</p><hr><b>Brief</b><p>${o.brief||'-'}</p><b>Catatan</b><p>${o.notes||'-'}</p><hr><div class="field"><label>Status Pembayaran</label><select onchange="changePayment('${o.id}',this.value)"><option ${o.paymentStatus==='Menunggu DP'?'selected':''}>Menunggu DP</option><option ${o.paymentStatus==='DP Diterima'?'selected':''}>DP Diterima</option><option ${o.paymentStatus==='Lunas'?'selected':''}>Lunas</option></select></div><button class="secondary" onclick="openInvoice('${o.id}')">Lihat Invoice</button></div>`;$('orderModal').classList.remove('hidden')};
+window.changePayment=(id,status)=>{let o=getOrders();let i=o.findIndex(x=>x.id===id);if(i>=0){o[i].paymentStatus=status;saveOrders(o);renderAdmin();}};window.openInvoice=id=>{let o=getOrders().find(x=>x.id===id);if(!o)return;alert('INVOICE '+o.id+'\nCustomer: '+o.name+'\nPaket: '+o.package+'\nStatus pembayaran: '+(o.paymentStatus||'Menunggu DP'));}
+function renderFinance(){let p=getPayments();$('adminFinance').innerHTML=`<div class="card"><b>Ringkasan Pembayaran</b><p class="small">Data pembayaran lokal prototype.</p></div>`+(p.length?p.map(x=>`<div class="card"><b>${x.orderId}</b><p>${x.method} · Rp${Number(x.amount||0).toLocaleString('id-ID')} · ${x.status}</p></div>`).join(''):'<div class="card">Belum ada catatan pembayaran.</div>')}
+$('loginBtn').onclick=()=>{let name=$('loginName').value.trim(),email=$('loginEmail').value.trim();if(!name||!email){alert('Isi nama dan email dulu.');return}localStorage.setItem('pajara_name',name);localStorage.setItem('pajara_email',email);showCustomer()};$('adminBtn').onclick=()=>{$('loginScreen').classList.add('hidden');$('adminLoginScreen').classList.remove('hidden');$('adminError').classList.add('hidden')};$('backLogin').onclick=()=>{$('adminLoginScreen').classList.add('hidden');$('loginScreen').classList.remove('hidden')};$('adminLoginBtn').onclick=()=>{let e=$('adminEmail').value.trim(),p=$('adminPassword').value;if(e==='admin@pajara.studio'&&p==='pajara123'){$('adminLoginScreen').classList.add('hidden');$('adminScreen').classList.remove('hidden');renderAdmin()}else $('adminError').classList.remove('hidden')};$('adminLogout').onclick=()=>{$('adminScreen').classList.add('hidden');$('loginScreen').classList.remove('hidden')};$('logoutBtn').onclick=()=>{$('customerScreen').classList.add('hidden');$('loginScreen').classList.remove('hidden')};
+$('goOrder').onclick=()=>{$('navOrder').click()};$('goStatus').onclick=()=>{$('navStatus').click()};$('navHome').onclick=home;$('navPackages').onclick=()=>{hideCustomerPages();$('packagesPage').classList.remove('hidden');setNav('navPackages');renderPackages()};$('navOrder').onclick=()=>{hideCustomerPages();$('orderPage').classList.remove('hidden');setNav('navOrder')};$('navStatus').onclick=()=>{hideCustomerPages();$('statusPage').classList.remove('hidden');setNav('navStatus');renderOrders()};$('navProfile').onclick=()=>{hideCustomerPages();$('profilePage').classList.remove('hidden');setNav('navProfile')};
+$('submitOrder').onclick=()=>{let design=$('design').value.trim();if(!design){alert('Isi jenis desain dulu.');return}let orders=getOrders();let o={id:'PJ-'+String(orders.length+1).padStart(4,'0'),name:localStorage.getItem('pajara_name'),email:localStorage.getItem('pajara_email'),package:$('package').value,design,qty:Number($('qty').value)||1,deadline:$('deadline').value,brief:$('brief').value.trim(),notes:$('notes').value.trim(),status:'Order diterima',paymentStatus:'Menunggu DP',createdAt:new Date().toISOString()};orders.push(o);saveOrders(orders);alert('Pesanan berhasil dibuat: '+o.id);$('design').value='';$('brief').value='';$('notes').value='';renderOrders();home()};
+$('adminTabOrders').onclick=()=>{$('adminOrders').classList.remove('hidden');$('adminFinance').classList.add('hidden');$('adminTabOrders').classList.add('on');$('adminTabFinance').classList.remove('on')};$('adminTabFinance').onclick=()=>{$('adminOrders').classList.add('hidden');$('adminFinance').classList.remove('hidden');$('adminTabFinance').classList.add('on');$('adminTabOrders').classList.remove('on');renderFinance()};$('closeModal').onclick=()=>$('orderModal').classList.add('hidden');$('paymentInfo').onclick=()=>alert('Metode pembayaran Pajara Studio:\n1. QRIS\n2. DANA\n3. GoPay\n4. SeaBank\n\nDP 50% sebelum pengerjaan.');renderPackages();
+</script></body></html>
