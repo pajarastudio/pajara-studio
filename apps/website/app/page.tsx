@@ -27,6 +27,21 @@ description:
 },
 ];
 
+const testimonials = [
+{
+name: "Testimoni Customer",
+text: "Testimoni customer Pajara Studio akan ditampilkan di sini.",
+},
+{
+name: "Testimoni Customer",
+text: "Kumpulan pengalaman customer akan menjadi bagian dari halaman Pajara.",
+},
+{
+name: "Testimoni Customer",
+text: "Testimoni akan dikelola melalui sistem Pajara Studio.",
+},
+];
+
 return (
 <main>
 {/* NAVBAR */}
@@ -144,9 +159,7 @@ return (
     <div className="pajara-container">
       <p className="pajara-eyebrow">Tentang Pajara</p>
 
-      <h2>
-        Berakar di Tanah Pasundan.
-      </h2>
+      <h2>Berakar di Tanah Pasundan.</h2>
 
       <p className="pajara-section-description">
         Pajara Studio adalah studio desain grafis yang
@@ -163,7 +176,113 @@ return (
       </p>
     </div>
   </section>
+
+  {/* TESTIMONI */}
+  <section className="pajara-services">
+    <div className="pajara-container">
+      <p className="pajara-eyebrow">Testimoni</p>
+
+      <h2>Pengalaman bersama Pajara.</h2>
+
+      <p className="pajara-section-description">
+        Cerita dan pengalaman customer akan ditampilkan
+        di bagian ini.
+      </p>
+
+      <div className="pajara-services-grid">
+        {testimonials.map((testimonial, index) => (
+          <article
+            key={`${testimonial.name}-${index}`}
+            className="pajara-service-card"
+          >
+            <h3>{testimonial.name}</h3>
+            <p>{testimonial.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* CTA PESAN */}
+  <section id="pesan" className="pajara-hero">
+    <div className="pajara-container">
+      <div className="pajara-hero-content">
+        <p className="pajara-eyebrow">Mulai Project</p>
+
+        <h2>Siap membangun visual brand Anda?</h2>
+
+        <p className="pajara-hero-description">
+          Sampaikan kebutuhan desain Anda dan mulai
+          project bersama Pajara Studio.
+        </p>
+
+        <div className="pajara-hero-actions">
+          <a
+            href="/customer"
+            className="pajara-button pajara-button-primary"
+          >
+            Pesan Desain
+          </a>
+
+          <a
+            href="#kontak"
+            className="pajara-button pajara-button-secondary"
+          >
+            Hubungi Pajara
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* KONTAK */}
+  <section id="kontak" className="pajara-services">
+    <div className="pajara-container">
+      <p className="pajara-eyebrow">Kontak</p>
+
+      <h2>Terhubung dengan Pajara.</h2>
+
+      <p className="pajara-section-description">
+        Untuk pertanyaan, kerja sama, atau kebutuhan
+        desain, Anda dapat menghubungi Pajara Studio
+        melalui kanal yang tersedia.
+      </p>
+
+      <div className="pajara-services-grid">
+        <article className="pajara-service-card">
+          <h3>WhatsApp</h3>
+          <p>Hubungi Pajara Studio untuk kebutuhan project.</p>
+        </article>
+
+        <article className="pajara-service-card">
+          <h3>Instagram</h3>
+          <p>Lihat karya dan aktivitas terbaru Pajara Studio.</p>
+        </article>
+
+        <article className="pajara-service-card">
+          <h3>TikTok</h3>
+          <p>Ikuti konten desain dan perjalanan Pajara Studio.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  {/* FOOTER */}
+  <footer className="pajara-services">
+    <div className="pajara-container">
+      <p className="pajara-eyebrow">Pajara Studio</p>
+
+      <p className="pajara-section-description">
+        Berakar di Tanah Pasundan.
+      </p>
+
+      <p className="pajara-section-description">
+        © {new Date().getFullYear()} Pajara Studio. All
+        rights reserved.
+      </p>
+    </div>
+  </footer>
 </main>
 
 );
-            }
+        }
