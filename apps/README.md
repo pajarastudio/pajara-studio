@@ -1,1 +1,0 @@
-# Pajara Studio Apps
