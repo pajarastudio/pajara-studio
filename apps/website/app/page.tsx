@@ -138,7 +138,32 @@ return (
       </div>
     </div>
   </section>
+
+  {/* TENTANG */}
+  <section id="tentang" className="pajara-services">
+    <div className="pajara-container">
+      <p className="pajara-eyebrow">Tentang Pajara</p>
+
+      <h2>
+        Berakar di Tanah Pasundan.
+      </h2>
+
+      <p className="pajara-section-description">
+        Pajara Studio adalah studio desain grafis yang
+        membantu bisnis membangun identitas visual,
+        materi promosi, dan kebutuhan komunikasi visual
+        dengan pendekatan yang profesional dan terarah.
+      </p>
+
+      <p className="pajara-section-description">
+        Berangkat dari tanah Sunda, Pajara membawa
+        semangat untuk menciptakan desain yang tidak
+        hanya menarik secara visual, tetapi juga memiliki
+        karakter dan tujuan yang jelas.
+      </p>
+    </div>
+  </section>
 </main>
 
 );
-}
+            }
