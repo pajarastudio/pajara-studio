@@ -1,4 +1,45 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@pajara/supabase";
+
 export default function CustomerLogin() {
+const router = useRouter();
+
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
+
+async function handleLogin(
+event: FormEvent<HTMLFormElement>
+) {
+event.preventDefault();
+
+setError("");
+setLoading(true);
+
+const { error: loginError } =
+  await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+setLoading(false);
+
+if (loginError) {
+  setError(
+    "Email atau password salah. Silakan periksa kembali."
+  );
+  return;
+}
+
+router.push("/dashboard");
+
+}
+
 return (
 <main>
 <header className="pajara-navbar">
@@ -28,6 +69,7 @@ return (
         </p>
 
         <form
+          onSubmit={handleLogin}
           style={{
             maxWidth: "480px",
             marginTop: "32px",
@@ -38,6 +80,10 @@ return (
           <input
             type="email"
             placeholder="Email"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
             required
             style={{
               minHeight: "50px",
@@ -51,6 +97,10 @@ return (
           <input
             type="password"
             placeholder="Password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
             required
             style={{
               minHeight: "50px",
@@ -61,11 +111,28 @@ return (
             }}
           />
 
+          {error && (
+            <p
+              style={{
+                margin: 0,
+                color: "#b42318",
+                lineHeight: 1.5,
+              }}
+            >
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
             className="pajara-button pajara-button-primary"
+            disabled={loading}
+            style={{
+              border: "none",
+              opacity: loading ? 0.7 : 1,
+            }}
           >
-            Login
+            {loading ? "Login..." : "Login"}
           </button>
         </form>
 
@@ -92,4 +159,4 @@ return (
 </main>
 
 );
-            }
+}
