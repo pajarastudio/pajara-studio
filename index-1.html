@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pajara Studio — Berakar di Tanah Pasundan</title>
+  <meta name="description" content="Pajara Studio — layanan desain grafis dari Tanah Pasundan.">
+  <style>
+    :root {
+      --green: #2f6b45;
+      --brown: #8a684b;
+      --cream: #f7f5ef;
+      --white: #ffffff;
+      --text: #1d211e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+    }
+    header {
+      padding: 22px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--white);
+      border-bottom: 1px solid #e7e3da;
+    }
+    .brand { font-weight: 800; letter-spacing: 1px; color: var(--green); }
+    nav a { margin-left: 18px; color: var(--text); text-decoration: none; font-size: 14px; }
+    main { max-width: 1100px; margin: auto; padding: 70px 6%; }
+    .hero { text-align: center; }
+    .eyebrow { color: var(--brown); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 12px; }
+    h1 { font-size: clamp(42px, 9vw, 82px); line-height: .95; margin: 18px 0; }
+    .hero p { max-width: 620px; margin: 0 auto 28px; line-height: 1.7; color: #5e625e; }
+    .cta {
+      display: inline-block;
+      padding: 14px 22px;
+      background: var(--green);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    section { padding: 70px 0 0; }
+    h2 { font-size: 30px; margin-bottom: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+    .card {
+      background: white;
+      border: 1px solid #e7e3da;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .card h3 { margin-top: 0; color: var(--green); }
+    footer { margin-top: 70px; padding: 30px 6%; text-align: center; background: var(--green); color: white; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">PAJARA STUDIO</div>
+    <nav>
+      <a href="#layanan">Layanan</a>
+      <a href="#tentang">Tentang</a>
+      <a href="/pajara-studio/links/">Links</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Berakar di Tanah Pasundan</div>
+      <h1>Desain yang<br>punya arah.</h1>
+      <p>Pajara Studio membantu bisnis dan brand membangun tampilan visual yang profesional, modern, dan berkarakter.</p>
+      <a class="cta" href="/pajara-studio/customer/">Pesan Desain</a>
+    </section>
+
+    <section id="layanan">
+      <h2>Layanan</h2>
+      <div class="grid">
+        <div class="card"><h3>Logo</h3><p>Identitas visual untuk membangun karakter brand.</p></div>
+        <div class="card"><h3>Poster</h3><p>Desain promosi yang jelas dan menarik perhatian.</p></div>
+        <div class="card"><h3>Social Media</h3><p>Feed dan story yang konsisten dengan identitas brand.</p></div>
+        <div class="card"><h3>Banner</h3><p>Materi visual digital untuk kebutuhan promosi.</p></div>
+      </div>
+    </section>
+
+    <section id="tentang">
+      <h2>Pajara Studio</h2>
+      <p>Pajara Studio adalah studio desain grafis yang berakar di Tanah Pasundan, dengan pendekatan premium minimalis dan modern.</p>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Pajara Studio · Berakar di Tanah Pasundan.
+  </footer>
+</body>
+</html>
