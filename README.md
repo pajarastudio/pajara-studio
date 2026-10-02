@@ -4,6 +4,11 @@ Berakar di Tanah Pasundan.
 
 Pajara Studio adalah studio desain grafis yang menyediakan layanan branding, desain promosi, dan kebutuhan visual untuk bisnis.
 
+## Owner
+
+**Muhamad Rijik Rifa'i**  
+Founder & Owner — Pajara Studio
+
 ## Struktur Project
 
 - `apps/website` — Website publik Pajara Studio
