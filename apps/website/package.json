@@ -16,7 +16,6 @@
     "@pajara/supabase": "workspace:*"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
