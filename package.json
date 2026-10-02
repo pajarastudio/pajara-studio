@@ -3,6 +3,9 @@
 "private": true,
 "version": "1.0.0",
 "packageManager": "pnpm@10.12.1",
+  "engines": {
+  "node": "20.x"
+},
 "scripts": {
 "dev": "pnpm --parallel --filter './apps/*' dev",
 "build": "pnpm --recursive build",
