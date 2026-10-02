@@ -40,4 +40,5 @@ export interface Order {
   assigned_admin: string | null;
   created_at: string;
   updated_at: string;
-}
+  }
+export type { Profile, Service } from "./profile";
