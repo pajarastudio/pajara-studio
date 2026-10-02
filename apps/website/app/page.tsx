@@ -1,4 +1,32 @@
 export default function Home() {
+  const services = [
+    {
+      title: "Logo & Branding",
+      description:
+        "Membangun identitas visual yang kuat dan mudah dikenali.",
+    },
+    {
+      title: "Desain Promosi",
+      description:
+        "Visual promosi yang menarik untuk kebutuhan bisnis dan campaign.",
+    },
+    {
+      title: "Social Media",
+      description:
+        "Desain feed dan story yang konsisten untuk memperkuat tampilan brand.",
+    },
+    {
+      title: "Banner",
+      description:
+        "Banner digital dengan informasi yang jelas dan visual yang profesional.",
+    },
+    {
+      title: "Kemasan & Menu",
+      description:
+        "Desain kemasan dan menu yang membantu produk tampil lebih bernilai.",
+    },
+  ];
+
   return (
     <main>
       <header className="pajara-navbar">
@@ -52,6 +80,32 @@ export default function Home() {
                 Lihat Portfolio
               </a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="layanan" className="pajara-services">
+        <div className="pajara-container">
+          <p className="pajara-eyebrow">Layanan</p>
+
+          <h2>Desain untuk kebutuhan bisnis.</h2>
+
+          <p className="pajara-section-description">
+            Dari identitas brand hingga kebutuhan promosi,
+            Pajara membantu bisnis membangun visual yang
+            konsisten dan profesional.
+          </p>
+
+          <div className="pajara-services-grid">
+            {services.map((service) => (
+              <article
+                key={service.title}
+                className="pajara-service-card"
+              >
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
