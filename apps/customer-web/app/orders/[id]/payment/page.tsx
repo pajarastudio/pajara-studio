@@ -5,11 +5,7 @@ type PaymentPageProps = {
 };
 
 export function generateStaticParams() {
-  return [
-    {
-      id: "demo",
-    },
-  ];
+  return [{ id: "demo" }];
 }
 
 export default async function PaymentPage({
@@ -47,7 +43,6 @@ export default async function PaymentPage({
 
           <div style={{ marginTop: "24px" }}>
             <h2>Metode Pembayaran</h2>
-
             <p>
               Pilih metode pembayaran yang tersedia untuk
               menyelesaikan pesanan.
@@ -56,7 +51,6 @@ export default async function PaymentPage({
 
           <div style={{ marginTop: "24px" }}>
             <h2>Status Pembayaran</h2>
-
             <p>Belum ada pembayaran yang dikonfirmasi.</p>
           </div>
 
@@ -72,4 +66,4 @@ export default async function PaymentPage({
       </section>
     </main>
   );
-}
+              }
