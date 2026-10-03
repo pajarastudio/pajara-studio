@@ -1,18 +1,4 @@
-/* =========================================
-   PAJARA NAVBAR LOGO - FINAL
-   ========================================= */
-
-.pajara-navbar .pajara-brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
-  flex-shrink: 0 !important;
-}
-
-.pajara-navbar .pajara-navbar-logo-box {
+.pajara-navbar .pajara-navbar-logo-mark {
   width: 30px !important;
   height: 30px !important;
   min-width: 30px !important;
@@ -24,81 +10,26 @@
   align-items: center !important;
   justify-content: center !important;
 
-  overflow: hidden !important;
   flex-shrink: 0 !important;
+
+  background: #2f6b45 !important;
+  color: #ffffff !important;
 
   border-radius: 7px !important;
-  background: #ffffff !important;
-}
 
-.pajara-navbar .pajara-navbar-logo-box img {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  max-width: 30px !important;
-  min-height: 30px !important;
-  max-height: 30px !important;
-
-  display: block !important;
-  object-fit: cover !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-.pajara-navbar .pajara-brand-name {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
   line-height: 1 !important;
-}
-
-.pajara-navbar .pajara-brand-name strong {
-  font-size: 14px !important;
-  line-height: 1 !important;
-}
-
-.pajara-navbar .pajara-brand-name small {
-  margin-top: 3px !important;
-  font-size: 9px !important;
-  line-height: 1 !important;
-  color: var(--muted) !important;
-  font-weight: 600 !important;
 }
 
 @media (max-width: 600px) {
-  .pajara-navbar .pajara-brand {
-    gap: 7px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
-  }
-
-  .pajara-navbar .pajara-navbar-logo-box {
+  .pajara-navbar .pajara-navbar-logo-mark {
     width: 28px !important;
     height: 28px !important;
     min-width: 28px !important;
     max-width: 28px !important;
     min-height: 28px !important;
     max-height: 28px !important;
-  }
-
-  .pajara-navbar .pajara-navbar-logo-box img {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    max-width: 28px !important;
-    min-height: 28px !important;
-    max-height: 28px !important;
-  }
-
-  .pajara-navbar .pajara-brand-name strong {
-    font-size: 13px !important;
-  }
-
-  .pajara-navbar .pajara-brand-name small {
-    font-size: 8px !important;
+    font-size: 15px !important;
   }
 }
