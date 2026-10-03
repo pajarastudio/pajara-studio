@@ -1,12 +1,7 @@
 <header className="pajara-navbar">
   <div className="pajara-container pajara-navbar-inner">
     <a href="/" className="pajara-brand">
-      <span className="pajara-navbar-logo-box">
-        <img
-          src={logoImage}
-          alt="Logo Pajara Studio"
-        />
-      </span>
+      <span className="pajara-navbar-logo-mark">P</span>
 
       <span className="pajara-brand-name">
         <strong>Pajara</strong>
