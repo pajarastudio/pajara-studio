@@ -1,3 +1,29 @@
+/* =========================================
+   PAJARA NAVBAR - FINAL
+   ========================================= */
+
+.pajara-navbar {
+  width: 100% !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+.pajara-navbar .pajara-navbar-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  min-height: 64px !important;
+}
+
+.pajara-navbar .pajara-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+  text-decoration: none !important;
+}
+
 .pajara-navbar .pajara-navbar-logo-mark {
   width: 22px !important;
   height: 22px !important;
@@ -22,7 +48,48 @@
   line-height: 1 !important;
 }
 
+.pajara-navbar .pajara-brand-name {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.pajara-navbar .pajara-brand-name strong {
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.pajara-navbar .pajara-brand-name small {
+  margin-top: 3px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+}
+
+.pajara-navbar .pajara-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 22px !important;
+}
+
+.pajara-navbar .pajara-nav a {
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.pajara-navbar .pajara-nav-button {
+  flex-shrink: 0 !important;
+  font-size: 13px !important;
+}
+
 @media (max-width: 600px) {
+  .pajara-navbar .pajara-navbar-inner {
+    min-height: 56px !important;
+    gap: 10px !important;
+  }
+
   .pajara-navbar .pajara-navbar-logo-mark {
     width: 20px !important;
     height: 20px !important;
@@ -30,6 +97,26 @@
     max-width: 20px !important;
     min-height: 20px !important;
     max-height: 20px !important;
+    font-size: 11px !important;
+  }
+
+  .pajara-navbar .pajara-brand-name strong {
+    font-size: 13px !important;
+  }
+
+  .pajara-navbar .pajara-brand-name small {
+    font-size: 7px !important;
+  }
+
+  .pajara-navbar .pajara-nav {
+    gap: 10px !important;
+  }
+
+  .pajara-navbar .pajara-nav a {
+    font-size: 11px !important;
+  }
+
+  .pajara-navbar .pajara-nav-button {
     font-size: 11px !important;
   }
 }
