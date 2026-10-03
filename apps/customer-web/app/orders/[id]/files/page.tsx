@@ -55,5 +55,15 @@ export default async function OrderFiles({
           </div>
 
           <div style={{ marginTop: "24px" }}>
-            <a href={`/orders/${id}`} className="pajara-button">
-              K
+            <a
+              href={`/orders/${id}`}
+              className="pajara-button"
+            >
+              Kembali ke Pesanan
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
