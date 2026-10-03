@@ -78,6 +78,7 @@ const logoImage =
 export default function Home() {
   return (
     <main>
+      {/* NAVBAR */}
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
@@ -107,6 +108,7 @@ export default function Home() {
         </div>
       </header>
 
+      {/* HERO */}
       <section className="pajara-hero">
         <div className="pajara-container pajara-hero-grid">
           <div className="pajara-hero-content">
@@ -159,6 +161,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* LAYANAN */}
       <section id="layanan" className="pajara-section">
         <div className="pajara-container">
           <div className="pajara-section-heading">
@@ -175,7 +178,10 @@ export default function Home() {
 
           <div className="pajara-service-grid">
             {services.map((service, index) => (
-              <article className="pajara-service-card" key={service.title}>
+              <article
+                className="pajara-service-card"
+                key={service.title}
+              >
                 <span className="pajara-number">
                   {String(index + 1).padStart(2, "0")}
                 </span>
@@ -191,6 +197,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PORTFOLIO */}
       <section
         id="portfolio"
         className="pajara-section pajara-portfolio"
@@ -231,6 +238,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TENTANG */}
       <section id="tentang" className="pajara-section">
         <div className="pajara-container">
           <div className="pajara-about">
@@ -269,6 +277,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TESTIMONI */}
       <section
         id="testimoni"
         className="pajara-section pajara-testimonials"
@@ -308,6 +317,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* KONTAK */}
       <section id="kontak" className="pajara-contact-section">
         <div className="pajara-container">
           <div className="pajara-section-heading">
@@ -348,13 +358,17 @@ export default function Home() {
               Pesan Desain
             </a>
 
-            <a href={customerLogin} className="pajara-button-outline">
+            <a
+              href={customerLogin}
+              className="pajara-button-outline"
+            >
               Login Customer
             </a>
           </div>
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="pajara-footer">
         <div className="pajara-container">
           <div className="pajara-footer-grid">
@@ -396,7 +410,6 @@ export default function Home() {
               <h3>Mulai</h3>
 
               <a href={customerWeb}>Pesan Desain</a>
-
               <a href={customerLogin}>Login Customer</a>
 
               <a
@@ -433,96 +446,4 @@ export default function Home() {
       </footer>
     </main>
   );
-              }      Pesan Desain
-            </a>
-
-            <a
-              href="https://pajara-customer.pajarastd.workers.dev/login"
-              className="pajara-button-outline"
-            >
-              Login Customer
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <footer className="pajara-footer">
-        <div className="pajara-container">
-          <div className="pajara-footer-grid">
-            <div>
-              <a href="/" className="pajara-brand pajara-brand-footer">
-                <img
-                  src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-                  alt="Logo Pajara Studio"
-                  className="pajara-brand-logo"
-                />
-
-                <span>
-                  <strong>Pajara</strong>
-                  <small>Studio</small>
-                </span>
-              </a>
-
-              <p>
-                Desain yang punya arah.
-                <br />
-                Berakar di Tanah Pasundan.
-              </p>
-            </div>
-
-            <div>
-              <h3>Navigasi</h3>
-
-              <a href="#layanan">Layanan</a>
-              <a href="#portfolio">Portfolio</a>
-              <a href="#tentang">Tentang</a>
-              <a href="#testimoni">Testimoni</a>
-              <a href="#kontak">Kontak</a>
-            </div>
-
-            <div>
-              <h3>Mulai</h3>
-
-              <a href="https://pajara-customer.pajarastd.workers.dev/">
-                Pesan Desain
-              </a>
-
-              <a href="https://pajara-customer.pajarastd.workers.dev/login">
-                Login Customer
-              </a>
-
-              <a
-                href="https://wa.me/message/TBAFLG4D554PC1"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
-              </a>
-
-              <a
-                href="https://www.instagram.com/pajarastudio.id?stkn=MXU3dngxY2hiOTF0NA=="
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Instagram
-              </a>
-
-              <a
-                href="https://www.tiktok.com/@pajarastudio.id?_r=1&_t=ZS-9AFPJ6qeP0m"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                TikTok
-              </a>
-            </div>
-          </div>
-
-          <div className="pajara-footer-bottom">
-            <span>© 2026 Pajara Studio</span>
-            <span>Berakar di Tanah Pasundan.</span>
-          </div>
-        </div>
-      </footer>
-    </main>
-  );
-  }
+      }
