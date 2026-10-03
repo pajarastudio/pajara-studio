@@ -23,16 +23,48 @@ const services = [
 
 const portfolio = [
   {
-    title: "Nescafé",
+    title: "Ayam Goreng Kremes",
     category: "Desain Promosi",
+    image: "/755809946_17926162029385149_3739923509439876817_n.jpg",
   },
   {
-    title: "Kobie",
+    title: "Samara Coffee",
     category: "Social Media",
+    image: "/IMG_20261003_200614_720.jpg",
   },
   {
-    title: "Identitas Pajara",
-    category: "Branding",
+    title: "Es Teh",
+    category: "Desain Promosi",
+    image: "/IMG_20261003_200628_911.jpg",
+  },
+];
+
+const testimonials = [
+  {
+    name: "Natsu Cibinong",
+    text: "Pertama kali, tapi alhamdulillah hasilnya memuaskan, design bagus dan pengerjaan cepat. Koordinasi juga gak susah. Terima kasih.",
+  },
+  {
+    name: "Kebon Jati Keramat",
+    text: "Terima kasih banyak ya kak. Kedua kalinya design di sini, suka dengan design-nya dan yang terpenting komunikatif.",
+  },
+];
+
+const socialLinks = [
+  {
+    title: "Instagram",
+    text: "@pajarastudio.id",
+    href: "https://www.instagram.com/pajarastudio.id?stkn=MXU3dngxY2hiOTF0NA==",
+  },
+  {
+    title: "TikTok",
+    text: "@pajarastudio.id",
+    href: "https://www.tiktok.com/@pajarastudio.id?_r=1&_t=ZS-9AFPJ6qeP0m",
+  },
+  {
+    title: "WhatsApp",
+    text: "Hubungi Pajara Studio",
+    href: "https://wa.me/message/TBAFLG4D554PC1",
   },
 ];
 
@@ -42,7 +74,11 @@ export default function Home() {
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">P</span>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Logo Pajara Studio"
+              className="pajara-brand-logo"
+            />
 
             <span>
               <strong>Pajara</strong>
@@ -54,10 +90,14 @@ export default function Home() {
             <a href="#layanan">Layanan</a>
             <a href="#portfolio">Portfolio</a>
             <a href="#tentang">Tentang</a>
-            <a href="/links">Links</a>
+            <a href="#testimoni">Testimoni</a>
+            <a href="#kontak">Kontak</a>
           </nav>
 
-          <a href="/customer" className="pajara-nav-button">
+          <a
+            href="https://pajara-customer.pajarastd.workers.dev/"
+            className="pajara-nav-button"
+          >
             Pesan Desain
           </a>
         </div>
@@ -80,7 +120,10 @@ export default function Home() {
             </p>
 
             <div className="pajara-actions">
-              <a href="/customer" className="pajara-button">
+              <a
+                href="https://pajara-customer.pajarastd.workers.dev/"
+                className="pajara-button"
+              >
                 Pesan Desain
               </a>
 
@@ -98,10 +141,14 @@ export default function Home() {
           <div className="pajara-hero-card">
             <div className="pajara-hero-card-top">
               <span>01</span>
-              <span>EST. PAJARA</span>
+              <span>PAJARA STUDIO</span>
             </div>
 
-            <div className="pajara-symbol">P</div>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Logo Pajara Studio"
+              className="pajara-hero-logo"
+            />
 
             <div className="pajara-hero-card-bottom">
               <strong>Pajara Studio</strong>
@@ -148,23 +195,19 @@ export default function Home() {
           <div className="pajara-section-heading">
             <div>
               <p className="pajara-eyebrow">PORTFOLIO</p>
-              <h2>Beberapa karya kami.</h2>
+              <h2>Beberapa karya Pajara.</h2>
             </div>
 
-            <a href="/links" className="pajara-text-link">
-              Lihat selengkapnya →
+            <a href="#kontak" className="pajara-text-link">
+              Punya kebutuhan? →
             </a>
           </div>
 
           <div className="pajara-portfolio-grid">
-            {portfolio.map((item, index) => (
+            {portfolio.map((item) => (
               <article className="pajara-portfolio-card" key={item.title}>
                 <div className="pajara-portfolio-image">
-                  {index === 2 ? (
-                    <div className="pajara-portfolio-logo">P</div>
-                  ) : (
-                    <span>{item.title}</span>
-                  )}
+                  <img src={item.image} alt={item.title} />
                 </div>
 
                 <div className="pajara-portfolio-info">
@@ -206,29 +249,101 @@ export default function Home() {
               </p>
 
               <div className="pajara-about-signature">
+                <span className="pajara-eyebrow">OWNER & FOUNDER</span>
+
                 <strong>Muhamad Rijik Rifa&apos;i</strong>
-                <span>Owner & Founder Pajara Studio</span>
+
+                <span>Pajara Studio</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="pajara-cta">
-        <div className="pajara-container pajara-cta-inner">
-          <div>
-            <p className="pajara-eyebrow">PUNYA KEBUTUHAN DESAIN?</p>
-
-            <h2>Yuk, mulai dari idenya.</h2>
+      <section id="testimoni" className="pajara-section pajara-testimonials">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <div>
+              <p className="pajara-eyebrow">TESTIMONI</p>
+              <h2>Cerita dari pelanggan.</h2>
+            </div>
 
             <p>
-              Ceritakan kebutuhan desainmu kepada Pajara Studio.
+              Beberapa pengalaman pelanggan setelah bekerja bersama Pajara
+              Studio.
             </p>
           </div>
 
-          <a href="/customer" className="pajara-button pajara-button-light">
-            Pesan Desain →
-          </a>
+          <div className="pajara-testimonial-grid">
+            {testimonials.map((testimonial) => (
+              <article
+                className="pajara-testimonial-card"
+                key={testimonial.name}
+              >
+                <span className="pajara-quote-mark">&ldquo;</span>
+
+                <p>{testimonial.text}</p>
+
+                <div className="pajara-testimonial-name">
+                  <strong>{testimonial.name}</strong>
+                  <span>Pelanggan Pajara Studio</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="kontak" className="pajara-contact-section">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <div>
+              <p className="pajara-eyebrow">HUBUNGI PAJARA</p>
+              <h2>Mulai dari idemu.</h2>
+            </div>
+
+            <p>
+              Ceritakan kebutuhan desainmu dan kita mulai dari sana.
+            </p>
+          </div>
+
+          <div className="pajara-contact-grid">
+            {socialLinks.map((social) => (
+              <a
+                key={social.title}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pajara-contact-card"
+              >
+                <div>
+                  <span className="pajara-contact-label">
+                    {social.title}
+                  </span>
+
+                  <strong>{social.text}</strong>
+                </div>
+
+                <span className="pajara-contact-arrow">↗</span>
+              </a>
+            ))}
+          </div>
+
+          <div className="pajara-contact-actions">
+            <a
+              href="https://pajara-customer.pajarastd.workers.dev/"
+              className="pajara-button"
+            >
+              Pesan Desain
+            </a>
+
+            <a
+              href="https://pajara-customer.pajarastd.workers.dev/login"
+              className="pajara-button-outline"
+            >
+              Login Customer
+            </a>
+          </div>
         </div>
       </section>
 
@@ -237,7 +352,11 @@ export default function Home() {
           <div className="pajara-footer-grid">
             <div>
               <a href="/" className="pajara-brand pajara-brand-footer">
-                <span className="pajara-brand-mark">P</span>
+                <img
+                  src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+                  alt="Logo Pajara Studio"
+                  className="pajara-brand-logo"
+                />
 
                 <span>
                   <strong>Pajara</strong>
@@ -254,16 +373,48 @@ export default function Home() {
 
             <div>
               <h3>Navigasi</h3>
+
               <a href="#layanan">Layanan</a>
               <a href="#portfolio">Portfolio</a>
               <a href="#tentang">Tentang</a>
-              <a href="/links">Pajara Links</a>
+              <a href="#testimoni">Testimoni</a>
+              <a href="#kontak">Kontak</a>
             </div>
 
             <div>
               <h3>Mulai</h3>
-              <a href="/customer">Pesan Desain</a>
-              <a href="/customer/login">Login Customer</a>
+
+              <a href="https://pajara-customer.pajarastd.workers.dev/">
+                Pesan Desain
+              </a>
+
+              <a href="https://pajara-customer.pajarastd.workers.dev/login">
+                Login Customer
+              </a>
+
+              <a
+                href="https://wa.me/message/TBAFLG4D554PC1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+
+              <a
+                href="https://www.instagram.com/pajarastudio.id?stkn=MXU3dngxY2hiOTF0NA=="
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Instagram
+              </a>
+
+              <a
+                href="https://www.tiktok.com/@pajarastudio.id?_r=1&_t=ZS-9AFPJ6qeP0m"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                TikTok
+              </a>
             </div>
           </div>
 
@@ -275,4 +426,4 @@ export default function Home() {
       </footer>
     </main>
   );
-                }
+  }
