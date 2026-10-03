@@ -68,29 +68,27 @@ a {
 .pajara-brand {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
-  font-size: 17px;
+  gap: 12px;
+  min-width: 0;
   color: var(--green-dark);
 }
 
 .pajara-brand-mark {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: block;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--green);
-  color: var(--white);
-  font-weight: 800;
-  font-size: 19px;
-  flex-shrink: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 0 5px 18px rgba(33, 77, 50, 0.08);
 }
 
 .pajara-brand-mark img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -102,12 +100,13 @@ a {
 
 .pajara-brand strong {
   font-size: 16px;
+  font-weight: 800;
 }
 
 .pajara-brand small {
-  margin-top: 4px;
+  margin-top: 5px;
   color: var(--brown);
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -115,7 +114,7 @@ a {
 .pajara-nav {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 26px;
 }
 
 .pajara-nav a {
@@ -153,9 +152,9 @@ a {
 
 .pajara-hero-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1.08fr 0.92fr;
   align-items: center;
-  gap: 70px;
+  gap: 65px;
 }
 
 .pajara-eyebrow {
@@ -271,19 +270,18 @@ a {
   width: 150px;
   height: 150px;
   margin: auto;
-  display: grid;
-  place-items: center;
+  display: block;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
-  font-family: Georgia, serif;
-  font-size: 90px;
+  background: var(--white);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
 }
 
 .pajara-symbol img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -433,11 +431,17 @@ a {
   height: 105px;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border-radius: 28px;
-  background: var(--green);
-  color: var(--white);
-  font-family: Georgia, serif;
-  font-size: 65px;
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+
+.pajara-portfolio-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .pajara-portfolio-info {
@@ -642,7 +646,6 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 20px;
   color: var(--white);
-  text-decoration: none;
   transition:
     transform 0.25s ease,
     background 0.25s ease,
@@ -710,10 +713,11 @@ a {
 .pajara-brand-logo {
   width: 42px;
   height: 42px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 10px;
   display: block;
   flex-shrink: 0;
+  background: var(--white);
 }
 
 .pajara-footer-grid > div:first-child > p {
@@ -828,14 +832,23 @@ a {
     width: min(100% - 28px, 1120px);
   }
 
-  .pajara-brand-mark {
-    width: 38px;
-    height: 38px;
+  .pajara-brand {
+    gap: 10px;
   }
 
-  .pajara-nav-button {
-    padding: 10px 14px;
-    font-size: 12px;
+  .pajara-brand-mark {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 10px;
+  }
+
+  .pajara-brand strong {
+    font-size: 15px;
+  }
+
+  .pajara-brand small {
+    font-size: 8px;
   }
 
   .pajara-hero h1 {
@@ -854,7 +867,6 @@ a {
   .pajara-symbol {
     width: 120px;
     height: 120px;
-    font-size: 70px;
   }
 
   .pajara-service-grid {
@@ -907,4 +919,4 @@ a {
     flex-direction: column;
     gap: 7px;
   }
-}
+  }
