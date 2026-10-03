@@ -21,10 +21,7 @@ body {
   margin: 0;
   background: var(--cream);
   color: var(--text);
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   line-height: 1.6;
 }
 
@@ -33,10 +30,16 @@ a {
   text-decoration: none;
 }
 
+img {
+  max-width: 100%;
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* CONTAINER */
 
 .pajara-container {
   width: min(1120px, calc(100% - 40px));
@@ -71,15 +74,24 @@ a {
 }
 
 .pajara-brand-mark {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border-radius: 12px;
   background: var(--green);
   color: var(--white);
   font-weight: 800;
   font-size: 19px;
+  flex-shrink: 0;
+}
+
+.pajara-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .pajara-brand span:last-child {
@@ -121,7 +133,7 @@ a {
   padding: 11px 17px;
   border-radius: 999px;
   background: var(--green);
-  color: var(--white);
+  color: var(--white) !important;
   font-size: 13px;
   font-weight: 700;
   transition: 0.2s ease;
@@ -261,10 +273,18 @@ a {
   margin: auto;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
   font-family: Georgia, serif;
   font-size: 90px;
+}
+
+.pajara-symbol img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .pajara-hero-card-bottom {
@@ -386,16 +406,26 @@ a {
   border: 1px solid var(--border);
   border-radius: 22px;
   background: var(--cream);
+  box-shadow: 0 10px 30px rgba(33, 77, 50, 0.05);
 }
 
 .pajara-portfolio-image {
-  min-height: 310px;
-  display: grid;
-  place-items: center;
-  background: #eee9df;
-  color: var(--green-dark);
-  font-size: 25px;
-  font-weight: 800;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.pajara-portfolio-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.pajara-portfolio-card:hover .pajara-portfolio-image img {
+  transform: scale(1.035);
 }
 
 .pajara-portfolio-logo {
@@ -414,6 +444,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 15px;
   padding: 20px;
   background: var(--white);
 }
@@ -473,6 +504,74 @@ a {
   font-size: 12px;
 }
 
+/* TESTIMONIALS */
+
+.pajara-testimonials {
+  background: var(--cream);
+}
+
+.pajara-testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.pajara-testimonial-card {
+  position: relative;
+  padding: 34px;
+  overflow: hidden;
+  border: 1px solid rgba(33, 77, 50, 0.12);
+  border-radius: 24px;
+  background: var(--white);
+  box-shadow: 0 12px 35px rgba(33, 77, 50, 0.05);
+}
+
+.pajara-testimonial-card::after {
+  content: "";
+  position: absolute;
+  right: -45px;
+  bottom: -55px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(138, 106, 74, 0.08);
+}
+
+.pajara-quote-mark {
+  display: block;
+  margin-bottom: 24px;
+  color: var(--brown);
+  font-family: Georgia, serif;
+  font-size: 72px;
+  line-height: 0.7;
+}
+
+.pajara-testimonial-card > p {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.pajara-testimonial-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(33, 77, 50, 0.12);
+}
+
+.pajara-testimonial-name strong {
+  color: var(--green-dark);
+  font-size: 16px;
+}
+
+.pajara-testimonial-name span {
+  color: var(--brown);
+  font-size: 13px;
+}
+
 /* CTA */
 
 .pajara-cta {
@@ -513,6 +612,78 @@ a {
   border-color: var(--cream);
 }
 
+/* CONTACT */
+
+.pajara-contact-section {
+  padding: 110px 0;
+  background: var(--green-dark);
+  color: var(--white);
+}
+
+.pajara-contact-section .pajara-section-heading h2,
+.pajara-contact-section .pajara-section-heading p {
+  color: var(--white);
+}
+
+.pajara-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 42px;
+}
+
+.pajara-contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 130px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  color: var(--white);
+  text-decoration: none;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.pajara-contact-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.pajara-contact-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pajara-contact-label {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.pajara-contact-card strong {
+  font-size: 17px;
+}
+
+.pajara-contact-arrow {
+  font-size: 24px;
+  opacity: 0.8;
+}
+
+.pajara-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 30px;
+}
+
 /* FOOTER */
 
 .pajara-footer {
@@ -529,6 +700,20 @@ a {
 
 .pajara-brand-footer {
   color: var(--white);
+}
+
+.pajara-brand-footer .pajara-brand-logo {
+  width: 48px;
+  height: 48px;
+}
+
+.pajara-brand-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .pajara-footer-grid > div:first-child > p {
@@ -619,6 +804,14 @@ a {
     gap: 35px;
   }
 
+  .pajara-testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pajara-contact-grid {
+    grid-template-columns: 1fr;
+  }
+
   .pajara-cta-inner {
     align-items: flex-start;
     flex-direction: column;
@@ -633,6 +826,11 @@ a {
 @media (max-width: 560px) {
   .pajara-container {
     width: min(100% - 28px, 1120px);
+  }
+
+  .pajara-brand-mark {
+    width: 38px;
+    height: 38px;
   }
 
   .pajara-nav-button {
@@ -671,8 +869,34 @@ a {
     margin-top: 55px;
   }
 
+  .pajara-portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+
   .pajara-portfolio-image {
-    min-height: 250px;
+    aspect-ratio: 4 / 5;
+  }
+
+  .pajara-testimonial-card {
+    padding: 26px;
+  }
+
+  .pajara-testimonial-card > p {
+    font-size: 16px;
+  }
+
+  .pajara-contact-card {
+    min-height: 105px;
+    padding: 22px;
+  }
+
+  .pajara-contact-actions {
+    flex-direction: column;
+  }
+
+  .pajara-contact-actions a {
+    width: 100%;
+    text-align: center;
   }
 
   .pajara-footer-grid {
