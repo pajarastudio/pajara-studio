@@ -1,7 +1,0 @@
-{
-  "name": "pajara-customer",
-  "compatibility_date": "2026-10-03",
-  "assets": {
-    "directory": "./apps/customer-web/out"
-  }
-}
