@@ -1,12 +1,20 @@
-type OrderPageProps = {
+type OrderDetailPageProps = {
   params: Promise<{
     id: string;
   }>;
 };
 
+export function generateStaticParams() {
+  return [
+    {
+      id: "demo",
+    },
+  ];
+}
+
 export default async function OrderDetail({
   params,
-}: OrderPageProps) {
+}: OrderDetailPageProps) {
   const { id } = await params;
 
   return (
@@ -20,144 +28,69 @@ export default async function OrderDetail({
 
           <nav className="pajara-nav">
             <a href="/dashboard">Dashboard</a>
-
-            <a href="/order" className="pajara-nav-cta">
-              Pesan Desain
-            </a>
+            <a href="/order">Pesan Desain</a>
           </nav>
         </div>
       </header>
 
-      <section className="pajara-services">
-        <div className="pajara-container">
-          <p className="pajara-eyebrow">
-            Detail Pesanan
+      <section className="pajara-container pajara-section">
+        <div className="pajara-card">
+          <p className="pajara-eyebrow">DETAIL PESANAN</p>
+
+          <h1>Detail Pesanan</h1>
+
+          <p>
+            ID Pesanan:
+            <br />
+            <strong>{id}</strong>
           </p>
 
-          <h1>
-            Pesanan <span>#{id}</span>
-          </h1>
-
-          <p className="pajara-section-description">
-            Informasi lengkap mengenai pesanan desain Anda
-            akan ditampilkan di halaman ini.
-          </p>
-
-          <div className="pajara-services-grid">
-            <article className="pajara-service-card">
-              <h3>Status Pesanan</h3>
-
-              <p>
-                Menunggu konfirmasi dari Pajara Studio.
-              </p>
-            </article>
-
-            <article className="pajara-service-card">
-              <h3>Layanan</h3>
-
-              <p>
-                Informasi layanan yang dipesan akan
-                ditampilkan di sini.
-              </p>
-            </article>
-
-            <article className="pajara-service-card">
-              <h3>Deadline</h3>
-
-              <p>
-                Deadline pesanan akan ditampilkan setelah
-                pesanan dikonfirmasi.
-              </p>
-            </article>
-
-            <article className="pajara-service-card">
-              <h3>Total Pembayaran</h3>
-
-              <p>
-                Informasi total, DP, dan sisa pembayaran
-                akan ditampilkan di sini.
-              </p>
-            </article>
+          <div style={{ marginTop: "24px" }}>
+            <h2>Status Pesanan</h2>
+            <p>Menunggu konfirmasi.</p>
           </div>
 
-          <section
-            style={{
-              marginTop: "48px",
-              maxWidth: "760px",
-            }}
-          >
-            <p className="pajara-eyebrow">
-              Brief
-            </p>
+          <div style={{ marginTop: "24px" }}>
+            <h2>Menu Pesanan</h2>
 
-            <h2>Kebutuhan Desain</h2>
-
-            <p className="pajara-section-description">
-              Brief pesanan akan ditampilkan di bagian ini
-              setelah data diambil dari database.
-            </p>
-          </section>
-
-          <section
-            style={{
-              marginTop: "48px",
-              maxWidth: "760px",
-            }}
-          >
-            <p className="pajara-eyebrow">
-              Revisi
-            </p>
-
-            <h2>Catatan Revisi</h2>
-
-            <p className="pajara-section-description">
-              Riwayat revisi dan catatan dari admin akan
-              muncul di sini.
-            </p>
-          </section>
-
-          <section
-            style={{
-              marginTop: "48px",
-              maxWidth: "760px",
-            }}
-          >
-            <p className="pajara-eyebrow">
-              File
-            </p>
-
-            <h2>File Pesanan</h2>
-
-            <p className="pajara-section-description">
-              File referensi, preview, revisi, dan file final
-              akan tersedia di bagian ini sesuai status pesanan.
-            </p>
-          </section>
-
-          <div
-            style={{
-              marginTop: "48px",
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "12px",
-            }}
-          >
-            <a
-              href="/dashboard"
-              className="pajara-button pajara-button-secondary"
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+                marginTop: "16px",
+              }}
             >
-              Kembali ke Dashboard
-            </a>
+              <a
+                href={`/orders/${id}/payment`}
+                className="pajara-button"
+              >
+                Pembayaran
+              </a>
 
-            <a
-              href="/order"
-              className="pajara-button pajara-button-primary"
-            >
-              Pesan Lagi
+              <a
+                href={`/orders/${id}/revision`}
+                className="pajara-button"
+              >
+                Revisi
+              </a>
+
+              <a
+                href={`/orders/${id}/files`}
+                className="pajara-button"
+              >
+                File Pesanan
+              </a>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "24px" }}>
+            <a href="/dashboard">
+              ← Kembali ke Dashboard
             </a>
           </div>
         </div>
       </section>
     </main>
   );
-}
+      }
