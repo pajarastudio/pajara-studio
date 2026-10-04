@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Analytics from "./analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pajara-website.pajarastd.workers.dev"),
@@ -34,7 +35,6 @@ export const metadata: Metadata = {
 
   creator: "Pajara Studio",
   publisher: "Pajara Studio",
-
   applicationName: "Pajara Studio",
 
   robots: {
@@ -91,7 +91,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <Analytics />
+        {children}
+      </body>
     </html>
   );
 }
