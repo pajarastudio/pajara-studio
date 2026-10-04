@@ -320,11 +320,6 @@ export default function Home() {
                 harus mampu menyampaikan pesan, membangun kepercayaan,
                 dan membantu sebuah usaha tumbuh.
               </p>
-
-              <div className="pajara-about-signature">
-                <strong>Muhamad Rijik Rifa&apos;i</strong>
-                <span>FOUNDER &amp; DESIGNER</span>
-              </div>
             </div>
           </div>
         </div>
