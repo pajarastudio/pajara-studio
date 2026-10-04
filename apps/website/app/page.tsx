@@ -331,53 +331,55 @@ export default function Home() {
         id="founder"
       >
         <div className="pajara-container">
-          <div className="pajara-about-grid">
-            <div className="pajara-about-mark">
-              <div>
-                <Logo />
-              </div>
-            </div>
-
-            <div className="pajara-about-copy">
-              <span className="pajara-eyebrow">
-                THE FOUNDER
-              </span>
-
-              <h2>
-                Muhamad Rijik
-                <br />
-                Rifa&apos;i.
-              </h2>
-
-              <p>
-                Founder &amp; Designer Pajara Studio yang menjadikan
-                desain sebagai ruang untuk terus belajar, berkarya,
-                dan berkembang.
-              </p>
-
-              <div className="pajara-about-signature">
-                <strong>PROFIL</strong>
-                <span>TANGGAL LAHIR — 04-03</span>
-                <span>POSISI — FOUNDER &amp; DESIGNER</span>
-                <span>PENDIDIKAN — SMK PERTIWI CIBUNGBULANG</span>
-                <span>BIDANG — GRAPHIC DESIGN &amp; BRANDING</span>
-                <span>
-                  KEAHLIAN — PHOTOSHOP, ILLUSTRATOR, BRANDING,
-                  LAYOUT, TIPOGRAFI
-                </span>
-                <span>
-                  DOMISILI — KAB. BOGOR, KEC. LEUWILIANG
-                </span>
+          <div className="pajara-founder-card">
+            <div className="pajara-about-grid">
+              <div className="pajara-about-mark">
+                <div>
+                  <Logo />
+                </div>
               </div>
 
-              <p>
-                Fokus membangun identitas visual yang rapi, relevan,
-                dan memiliki arah untuk membantu usaha dan brand
-                tampil lebih profesional.
-              </p>
+              <div className="pajara-about-copy">
+                <span className="pajara-eyebrow">
+                  THE FOUNDER
+                </span>
 
-              <div className="pajara-about-signature">
-                <strong>&ldquo;Desain yang punya arah.&rdquo;</strong>
+                <h2>
+                  Muhamad Rijik
+                  <br />
+                  Rifa&apos;i.
+                </h2>
+
+                <p>
+                  Founder &amp; Designer Pajara Studio yang menjadikan
+                  desain sebagai ruang untuk terus belajar, berkarya,
+                  dan berkembang.
+                </p>
+
+                <div className="pajara-about-signature">
+                  <strong>PROFIL</strong>
+                  <span>TANGGAL LAHIR — 04-03</span>
+                  <span>POSISI — FOUNDER &amp; DESIGNER</span>
+                  <span>PENDIDIKAN — SMK PERTIWI CIBUNGBULANG</span>
+                  <span>BIDANG — GRAPHIC DESIGN &amp; BRANDING</span>
+                  <span>
+                    KEAHLIAN — PHOTOSHOP, ILLUSTRATOR, BRANDING,
+                    LAYOUT, TIPOGRAFI
+                  </span>
+                  <span>
+                    DOMISILI — KAB. BOGOR, KEC. LEUWILIANG
+                  </span>
+                </div>
+
+                <p>
+                  Fokus membangun identitas visual yang rapi, relevan,
+                  dan memiliki arah untuk membantu usaha dan brand
+                  tampil lebih profesional.
+                </p>
+
+                <div className="pajara-about-signature">
+                  <strong>&ldquo;Desain yang punya arah.&rdquo;</strong>
+                </div>
               </div>
             </div>
           </div>
