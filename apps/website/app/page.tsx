@@ -97,7 +97,7 @@ export default function Home() {
             </span>
           </a>
 
-          <nav className="pajara-nav">
+          <nav className="pajara-nav" aria-label="Navigasi utama">
             <a href="#layanan">Layanan</a>
             <a href="#portfolio">Portfolio</a>
             <a href="#tentang">Tentang</a>
@@ -190,15 +190,11 @@ export default function Home() {
       </section>
 
       {/* SERVICES */}
-      <section
-        className="pajara-section pajara-services"
-        id="layanan"
-      >
+      <section className="pajara-section pajara-services" id="layanan">
         <div className="pajara-container">
           <div className="pajara-section-heading">
             <div>
               <span className="pajara-eyebrow">LAYANAN</span>
-
               <h2>
                 Visual yang
                 <br />
@@ -214,10 +210,7 @@ export default function Home() {
 
           <div className="pajara-services-grid">
             {services.map((service) => (
-              <article
-                className="pajara-service-card"
-                key={service.number}
-              >
+              <article className="pajara-service-card" key={service.number}>
                 <span className="pajara-service-number">
                   {service.number}
                 </span>
@@ -263,10 +256,7 @@ export default function Home() {
                 key={item.title}
               >
                 <div className="pajara-portfolio-image">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                  />
+                  <img src={item.image} alt={item.title} />
                 </div>
 
                 <div className="pajara-portfolio-info">
@@ -299,9 +289,7 @@ export default function Home() {
             </div>
 
             <div className="pajara-about-copy">
-              <span className="pajara-eyebrow">
-                TENTANG PAJARA
-              </span>
+              <span className="pajara-eyebrow">TENTANG PAJARA</span>
 
               <h2>
                 Berakar di Tanah
@@ -340,9 +328,7 @@ export default function Home() {
               </div>
 
               <div className="pajara-about-copy">
-                <span className="pajara-eyebrow">
-                  THE FOUNDER
-                </span>
+                <span className="pajara-eyebrow">THE FOUNDER</span>
 
                 <h2>
                   Muhamad Rijik
@@ -358,14 +344,26 @@ export default function Home() {
 
                 <div className="pajara-about-signature">
                   <strong>PROFIL</strong>
+
                   <span>TANGGAL LAHIR — 04-03</span>
-                  <span>POSISI — FOUNDER &amp; DESIGNER</span>
-                  <span>PENDIDIKAN — SMK PERTIWI CIBUNGBULANG</span>
-                  <span>BIDANG — GRAPHIC DESIGN &amp; BRANDING</span>
+
+                  <span>
+                    POSISI — FOUNDER &amp; DESIGNER
+                  </span>
+
+                  <span>
+                    PENDIDIKAN — SMK PERTIWI CIBUNGBULANG
+                  </span>
+
+                  <span>
+                    BIDANG — GRAPHIC DESIGN &amp; BRANDING
+                  </span>
+
                   <span>
                     KEAHLIAN — PHOTOSHOP, ILLUSTRATOR, BRANDING,
                     LAYOUT, TIPOGRAFI
                   </span>
+
                   <span>
                     DOMISILI — KAB. BOGOR, KEC. LEUWILIANG
                   </span>
