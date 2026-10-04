@@ -433,7 +433,7 @@ img {
 }
 
 .pajara-portfolio-image {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 14px;
   background: #eee;
@@ -544,6 +544,18 @@ img {
 .pajara-about-signature span {
   color: var(--muted);
   font-size: 11px;
+}
+
+/* =========================
+   FOUNDER CARD
+   ========================= */
+
+.pajara-founder-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 60px;
+  box-shadow: 0 20px 55px rgba(33, 77, 50, 0.08);
 }
 
 /* =========================
@@ -830,6 +842,11 @@ img {
     font-size: clamp(40px, 11vw, 58px);
   }
 
+  .pajara-founder-card {
+    padding: 38px 28px;
+    border-radius: 18px;
+  }
+
   .pajara-cta-inner {
     flex-direction: column;
     align-items: flex-start;
@@ -899,5 +916,10 @@ img {
 
   .pajara-hero-logo span {
     font-size: 58px;
+  }
+
+  .pajara-founder-card {
+    padding: 28px 20px;
+    border-radius: 16px;
   }
 }
