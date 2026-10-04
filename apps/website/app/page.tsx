@@ -1,5 +1,5 @@
 <header className="pajara-navbar">
-  <div className="pajara-container pajara-navbar-inner">
+  <div className="pajara-navbar-inner">
     <a href="/" className="pajara-brand">
       <span className="pajara-navbar-logo-mark">P</span>
 
