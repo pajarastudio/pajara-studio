@@ -13,3 +13,6 @@ curl -L "https://raw.githubusercontent.com/pajarastudio/pajara-studio/main/apps/
 sed -i 's#"build": "next build"#"build": "rm -rf out \&\& next build"#' apps/website/package.json
 
 pnpm --filter @pajara/website build
+
+cp apps/website/public/robots.txt apps/website/out/robots.txt
+cp apps/website/public/sitemap.xml apps/website/out/sitemap.xml
