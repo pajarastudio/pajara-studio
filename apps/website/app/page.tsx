@@ -62,7 +62,12 @@ export default function Page() {
       <header className="pajara-navbar">
         <div className="pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-navbar-logo-mark">P</span>
+            <span className="pajara-navbar-logo-mark">
+              <img
+                src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+                alt="Logo Pajara Studio"
+              />
+            </span>
 
             <span className="pajara-brand-name">
               <strong>Pajara</strong>
@@ -88,9 +93,7 @@ export default function Page() {
       <section className="pajara-hero">
         <div className="pajara-container pajara-hero-grid">
           <div className="pajara-hero-copy">
-            <span className="pajara-eyebrow">
-              PAJARA STUDIO
-            </span>
+            <span className="pajara-eyebrow">PAJARA STUDIO</span>
 
             <h1>
               Desain yang
@@ -155,6 +158,7 @@ export default function Page() {
           <div className="pajara-section-heading">
             <div>
               <span className="pajara-eyebrow">LAYANAN</span>
+
               <h2>
                 Visual yang bekerja
                 <br />
@@ -190,11 +194,15 @@ export default function Page() {
       </section>
 
       {/* PORTFOLIO */}
-      <section id="portfolio" className="pajara-section pajara-portfolio">
+      <section
+        id="portfolio"
+        className="pajara-section pajara-portfolio"
+      >
         <div className="pajara-container">
           <div className="pajara-section-heading">
             <div>
               <span className="pajara-eyebrow">PORTFOLIO</span>
+
               <h2>
                 Beberapa karya
                 <br />
@@ -238,14 +246,19 @@ export default function Page() {
       </section>
 
       {/* ABOUT */}
-      <section id="tentang" className="pajara-section pajara-about">
+      <section
+        id="tentang"
+        className="pajara-section pajara-about"
+      >
         <div className="pajara-container pajara-about-grid">
           <div className="pajara-about-mark">
             <div>P</div>
           </div>
 
           <div className="pajara-about-copy">
-            <span className="pajara-eyebrow">TENTANG PAJARA</span>
+            <span className="pajara-eyebrow">
+              TENTANG PAJARA
+            </span>
 
             <h2>
               Berakar di Tanah
@@ -274,7 +287,10 @@ export default function Page() {
       </section>
 
       {/* TESTIMONIAL */}
-      <section id="testimoni" className="pajara-section pajara-testimonial">
+      <section
+        id="testimoni"
+        className="pajara-section pajara-testimonial"
+      >
         <div className="pajara-container">
           <div className="pajara-testimonial-label">
             <span className="pajara-eyebrow">TESTIMONI</span>
@@ -365,4 +381,4 @@ export default function Page() {
       </footer>
     </main>
   );
-      }
+}
