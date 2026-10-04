@@ -1,37 +1,39 @@
 /* =========================================
-   PAJARA NAVBAR - V2
+   PAJARA NAVBAR - FINAL
    ========================================= */
 
 .pajara-navbar {
   width: 100%;
   position: relative;
   z-index: 50;
+  background: var(--white);
 }
 
-.pajara-navbar .pajara-navbar-inner {
+.pajara-navbar-inner {
   width: 100%;
   max-width: 1200px;
-  min-height: 80px;
+  min-height: 76px;
   margin: 0 auto;
   padding: 0 24px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 24px;
 }
 
 /* BRAND */
-.pajara-navbar .pajara-brand {
+.pajara-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   flex-shrink: 0;
   text-decoration: none;
+  color: var(--text);
 }
 
-/* LOGO P */
-.pajara-navbar .pajara-navbar-logo-mark {
+/* LOGO */
+.pajara-navbar-logo-mark {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
@@ -40,8 +42,8 @@
   align-items: center;
   justify-content: center;
 
-  background: #2f6b45;
-  color: #ffffff;
+  background: var(--green);
+  color: var(--white);
 
   border-radius: 8px;
 
@@ -50,21 +52,21 @@
   line-height: 1;
 }
 
-/* NAMA PAJARA */
-.pajara-navbar .pajara-brand-name {
+/* NAMA */
+.pajara-brand-name {
   display: flex;
   flex-direction: column;
   justify-content: center;
   line-height: 1;
 }
 
-.pajara-navbar .pajara-brand-name strong {
+.pajara-brand-name strong {
   font-size: 16px;
   line-height: 1;
   font-weight: 800;
 }
 
-.pajara-navbar .pajara-brand-name small {
+.pajara-brand-name small {
   margin-top: 4px;
   font-size: 9px;
   line-height: 1;
@@ -73,20 +75,25 @@
 }
 
 /* MENU */
-.pajara-navbar .pajara-nav {
+.pajara-nav {
   display: flex;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  gap: 24px;
+  flex: 1;
 }
 
-.pajara-navbar .pajara-nav a {
+.pajara-nav a {
+  color: var(--text);
   font-size: 14px;
   line-height: 1;
+  font-weight: 500;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 /* TOMBOL */
-.pajara-navbar .pajara-nav-button {
+.pajara-nav-button {
   min-height: 42px;
   padding: 0 18px;
 
@@ -96,48 +103,88 @@
 
   flex-shrink: 0;
 
+  background: var(--green);
+  color: var(--white);
+
+  border-radius: 8px;
+
   font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-/* MOBILE */
-@media (max-width: 600px) {
-  .pajara-navbar .pajara-navbar-inner {
-    min-height: 64px;
-    padding: 0 16px;
-    gap: 12px;
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 900px) {
+  .pajara-navbar-inner {
+    min-height: 70px;
+    padding: 0 18px;
+    gap: 16px;
   }
 
-  .pajara-navbar .pajara-navbar-logo-mark {
+  .pajara-nav {
+    gap: 16px;
+  }
+
+  .pajara-nav a {
+    font-size: 12px;
+  }
+
+  .pajara-nav-button {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   HP
+   ========================================= */
+
+@media (max-width: 600px) {
+  .pajara-navbar-inner {
+    min-height: 64px;
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .pajara-navbar-logo-mark {
     width: 30px;
     height: 30px;
     flex-basis: 30px;
-    font-size: 14px;
     border-radius: 7px;
-  }
-
-  .pajara-navbar .pajara-brand {
-    gap: 8px;
-  }
-
-  .pajara-navbar .pajara-brand-name strong {
     font-size: 14px;
   }
 
-  .pajara-navbar .pajara-brand-name small {
+  .pajara-brand {
+    gap: 7px;
+  }
+
+  .pajara-brand-name strong {
+    font-size: 14px;
+  }
+
+  .pajara-brand-name small {
+    margin-top: 3px;
     font-size: 8px;
   }
 
-  .pajara-navbar .pajara-nav {
-    gap: 12px;
+  .pajara-nav {
+    gap: 9px;
   }
 
-  .pajara-navbar .pajara-nav a {
-    font-size: 11px;
+  .pajara-nav a {
+    font-size: 10px;
   }
 
-  .pajara-navbar .pajara-nav-button {
-    min-height: 36px;
-    padding: 0 12px;
-    font-size: 11px;
+  .pajara-nav-button {
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 7px;
+    font-size: 10px;
   }
 }
