@@ -7,6 +7,10 @@ const config: ExpoConfig = {
   orientation: "portrait",
   userInterfaceStyle: "light",
   scheme: "pajara-admin",
+
+  android: {
+    package: "com.pajarastudio.admin",
+  },
 };
 
 export default config;
