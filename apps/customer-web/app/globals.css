@@ -1,7 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
 :root {
-  --pajara-green: #2f6b45;
-  --pajara-brown: #8a6a4a;
-  --pajara-white: #ffffff;
+  --green: #2f6b45;
+  --green-dark: #214d32;
+  --brown: #8a6a4a;
+  --cream: #f7f4ee;
+  --white: #ffffff;
+
+  --text: #1d2a22;
+  --muted: #6d756f;
+  --line: rgba(33, 77, 50, 0.14);
+
+  --danger: #b42318;
+  --success: #2f6b45;
+
+  --shadow-sm: 0 4px 14px rgba(33, 77, 50, 0.06);
+  --shadow-md: 0 12px 30px rgba(33, 77, 50, 0.09);
+  --shadow-lg: 0 20px 50px rgba(33, 77, 50, 0.12);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  --container: 1180px;
 }
 
 * {
@@ -12,11 +33,21 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
 body {
   margin: 0;
-  background: var(--pajara-white);
-  color: #1f1f1f;
-  font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -29,4 +60,746 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(47, 107, 69, 0.18);
+  color: var(--green-dark);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.pajara-container {
+  width: min(calc(100% - 40px), var(--container));
+  margin: 0 auto;
+}
+
+.pajara-section {
+  padding: 88px 0;
+}
+
+.pajara-section-sm {
+  padding: 56px 0;
+}
+
+.pajara-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.pajara-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pajara-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.pajara-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  width: 100%;
+
+  background: rgba(247, 244, 238, 0.92);
+  border-bottom: 1px solid var(--line);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.pajara-navbar-inner {
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+}
+
+.pajara-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+
+  color: var(--green-dark);
+
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.pajara-brand-mark {
+  width: 38px;
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: var(--green);
+  color: var(--white);
+
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* =========================
+   TYPOGRAPHY
+========================= */
+
+.pajara-eyebrow {
+  margin: 0 0 14px;
+
+  color: var(--brown);
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.pajara-hero {
+  position: relative;
+  overflow: hidden;
+
+  padding: 96px 0 110px;
+
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(138, 106, 74, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 10% 80%,
+      rgba(47, 107, 69, 0.07),
+      transparent 28%
+    ),
+    var(--cream);
+}
+
+.pajara-hero-content {
+  max-width: 780px;
+}
+
+.pajara-hero h1 {
+  margin: 0;
+
+  color: var(--green-dark);
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(42px, 7vw, 76px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.pajara-hero h1 span {
+  color: var(--green);
+}
+
+.pajara-hero-description {
+  max-width: 650px;
+  margin: 24px 0 0;
+
+  color: var(--muted);
+
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+.pajara-section-title {
+  max-width: 720px;
+  margin-bottom: 42px;
+}
+
+.pajara-section-title h2 {
+  margin: 0;
+
+  color: var(--green-dark);
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.pajara-section-title p {
+  margin: 16px 0 0;
+
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.pajara-button {
+  min-height: 50px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 22px;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.pajara-button:hover {
+  transform: translateY(-2px);
+}
+
+.pajara-button:active {
+  transform: translateY(0);
+}
+
+.pajara-button-primary {
+  background: var(--green);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.pajara-button-primary:hover {
+  background: var(--green-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.pajara-button-secondary {
+  background: var(--white);
+  color: var(--green-dark);
+  border: 1px solid var(--line);
+}
+
+.pajara-button-secondary:hover {
+  border-color: rgba(47, 107, 69, 0.3);
+  box-shadow: var(--shadow-sm);
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.pajara-form {
+  width: 100%;
+  max-width: 520px;
+
+  display: grid;
+  gap: 18px;
+}
+
+.pajara-form-group {
+  display: grid;
+  gap: 8px;
+}
+
+.pajara-form-label {
+  color: var(--green-dark);
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pajara-input,
+.pajara-textarea,
+.pajara-select {
+  width: 100%;
+
+  min-height: 52px;
+
+  padding: 0 16px;
+
+  border: 1px solid rgba(33, 77, 50, 0.16);
+  border-radius: 12px;
+
+  outline: none;
+
+  background: var(--white);
+  color: var(--text);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.pajara-textarea {
+  min-height: 130px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.pajara-input::placeholder,
+.pajara-textarea::placeholder {
+  color: #9a9f9b;
+}
+
+.pajara-input:focus,
+.pajara-textarea:focus,
+.pajara-select:focus {
+  border-color: var(--green);
+
+  box-shadow:
+    0 0 0 4px rgba(47, 107, 69, 0.1);
+}
+
+.pajara-form-error {
+  margin: 0;
+
+  color: var(--danger);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pajara-form-success {
+  margin: 0;
+
+  color: var(--success);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.pajara-card {
+  padding: 28px;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+
+  background: var(--white);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.pajara-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.pajara-card h3 {
+  margin: 0;
+
+  color: var(--green-dark);
+
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.pajara-card p {
+  margin: 10px 0 0;
+
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.pajara-dashboard {
+  min-height: calc(100vh - 76px);
+  padding: 52px 0 80px;
+}
+
+.pajara-dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 36px;
+}
+
+.pajara-dashboard-header h1 {
+  margin: 0;
+
+  color: var(--green-dark);
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.1;
+}
+
+.pajara-dashboard-header p {
+  margin: 10px 0 0;
+
+  color: var(--muted);
+}
+
+.pajara-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pajara-stat-card {
+  padding: 24px;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.pajara-stat-label {
+  color: var(--muted);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pajara-stat-value {
+  margin-top: 8px;
+
+  color: var(--green-dark);
+
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* =========================
+   ORDER
+========================= */
+
+.pajara-order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.pajara-order-summary {
+  position: sticky;
+  top: 100px;
+}
+
+.pajara-order-status {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 32px;
+
+  padding: 0 12px;
+
+  border-radius: 999px;
+
+  background: rgba(47, 107, 69, 0.1);
+  color: var(--green-dark);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* =========================
+   ORDER DETAIL
+========================= */
+
+.pajara-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 28px;
+  align-items: start;
+}
+
+.pajara-detail-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pajara-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid var(--line);
+}
+
+.pajara-detail-row:last-child {
+  border-bottom: 0;
+}
+
+.pajara-detail-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pajara-detail-value {
+  color: var(--green-dark);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* =========================
+   FILE / PAYMENT / REVISION
+========================= */
+
+.pajara-action-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pajara-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 18px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--white);
+}
+
+.pajara-action-item strong {
+  display: block;
+
+  color: var(--green-dark);
+}
+
+.pajara-action-item span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.pajara-footer {
+  padding: 50px 0;
+
+  border-top: 1px solid var(--line);
+
+  background: var(--green-dark);
+  color: var(--white);
+}
+
+.pajara-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+}
+
+.pajara-footer p {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+}
+
+/* =========================
+   UTILITY
+========================= */
+
+.pajara-muted {
+  color: var(--muted);
+}
+
+.pajara-text-center {
+  text-align: center;
+}
+
+.pajara-width-full {
+  width: 100%;
+}
+
+.pajara-hidden {
+  display: none !important;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .pajara-section {
+    padding: 72px 0;
+  }
+
+  .pajara-hero {
+    padding: 78px 0 88px;
+  }
+
+  .pajara-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pajara-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pajara-order-layout,
+  .pajara-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pajara-order-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .pajara-container {
+    width: min(calc(100% - 28px), var(--container));
+  }
+
+  .pajara-navbar-inner {
+    min-height: 68px;
+  }
+
+  .pajara-brand {
+    font-size: 15px;
+  }
+
+  .pajara-brand-mark {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    font-size: 18px;
+  }
+
+  .pajara-section {
+    padding: 58px 0;
+  }
+
+  .pajara-section-sm {
+    padding: 42px 0;
+  }
+
+  .pajara-hero {
+    padding: 62px 0 72px;
+  }
+
+  .pajara-hero h1 {
+    font-size: clamp(38px, 12vw, 54px);
+  }
+
+  .pajara-hero-description {
+    margin-top: 18px;
+    font-size: 16px;
+  }
+
+  .pajara-grid-2,
+  .pajara-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .pajara-section-title {
+    margin-bottom: 30px;
+  }
+
+  .pajara-section-title h2 {
+    font-size: 34px;
+  }
+
+  .pajara-card {
+    padding: 22px;
+  }
+
+  .pajara-dashboard {
+    padding: 38px 0 60px;
+  }
+
+  .pajara-dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 28px;
+  }
+
+  .pajara-dashboard-header h1 {
+    font-size: 38px;
+  }
+
+  .pajara-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pajara-stat-card {
+    padding: 20px;
+  }
+
+  .pajara-detail-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pajara-detail-value {
+    text-align: left;
+  }
+
+  .pajara-action-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pajara-footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pajara-button {
+    width: 100%;
+  }
 }
