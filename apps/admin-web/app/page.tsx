@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AdminHome() {
   return (
     <main
@@ -12,10 +14,10 @@ export default function AdminHome() {
         Pajara Admin
       </h1>
 
-      <p>Tes tombol tanpa JavaScript.</p>
+      <p>TES NAVIGASI.</p>
 
-      <a
-        href="?clicked=yes"
+      <Link
+        href="/test"
         style={{
           display: "block",
           width: "100%",
@@ -32,12 +34,8 @@ export default function AdminHome() {
           boxSizing: "border-box",
         }}
       >
-        TEKAN SAYA
-      </a>
-
-      <p style={{ marginTop: "25px" }}>
-        Kalau URL berubah menjadi <b>?clicked=yes</b>, berarti sentuhan/link normal.
-      </p>
+        BUKA HALAMAN TEST
+      </Link>
     </main>
   );
 }
