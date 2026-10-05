@@ -1,45 +1,34 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
-
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [ready, setReady] = useState(false);
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
-    async function checkResetSession() {
-      const { data, error: sessionError } =
+    const checkSession = async () => {
+      const { data } =
         await supabase.auth.getSession();
 
-      if (!mounted) return;
-
-      setCheckingSession(false);
-
-      if (sessionError || !data.session) {
-        setError(
-          "Link reset password tidak valid atau sudah kedaluwarsa. Silakan minta link reset baru."
-        );
-        setReady(false);
-        return;
+      if (
+        mounted &&
+        data.session
+      ) {
+        setReady(true);
       }
+    };
 
-      setReady(true);
-    }
-
-    checkResetSession();
+    checkSession();
 
     const {
       data: { subscription },
@@ -51,9 +40,7 @@ export default function ResetPasswordPage() {
           event === "PASSWORD_RECOVERY" &&
           session
         ) {
-          setCheckingSession(false);
           setReady(true);
-          setError("");
         }
       }
     );
@@ -64,29 +51,24 @@ export default function ResetPasswordPage() {
     };
   }, []);
 
-  async function handleResetPassword(
+  const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
-  ) {
+  ) => {
     event.preventDefault();
 
     setError("");
     setMessage("");
 
-    if (!ready) {
-      setError(
-        "Sesi reset password belum siap. Silakan buka kembali link dari email."
-      );
-      return;
-    }
-
     if (password.length < 6) {
-      setError("Password minimal 6 karakter.");
+      setError(
+        "Password baru minimal 6 karakter."
+      );
       return;
     }
 
     if (password !== confirmPassword) {
       setError(
-        "Password dan konfirmasi password tidak sama."
+        "Konfirmasi password tidak cocok."
       );
       return;
     }
@@ -101,182 +83,261 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (updateError) {
-      setError(
-        `Supabase: ${updateError.message} (code: ${
-          updateError.status ?? "unknown"
-        })`
-      );
+      setError(updateError.message);
       return;
     }
-
-    setMessage(
-      "Password berhasil diubah. Anda akan diarahkan ke halaman login."
-    );
 
     setPassword("");
     setConfirmPassword("");
 
-    setTimeout(() => {
-      router.push("/login");
-    }, 1500);
-  }
+    setMessage(
+      "Password berhasil diperbarui. Silakan login kembali."
+    );
+  };
 
   return (
     <main>
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">
-              P
-            </span>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="pajara-brand-logo"
+            />
 
             <span>Pajara Studio</span>
           </a>
+
+          <nav className="pajara-nav">
+            <a href="/">
+              Website
+            </a>
+
+            <a
+              href="/login"
+              className="pajara-nav-cta"
+            >
+              Login
+            </a>
+          </nav>
         </div>
       </header>
 
-      <section className="pajara-hero">
+      <section
+        style={{
+          minHeight:
+            "calc(100vh - 80px)",
+          display: "flex",
+          alignItems: "center",
+          padding:
+            "64px 0",
+        }}
+      >
         <div className="pajara-container">
-          <div className="pajara-hero-content">
-            <p className="pajara-eyebrow">
-              Reset Password
-            </p>
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "520px",
+              margin: "0 auto",
+            }}
+          >
+            <div
+              className="pajara-order-detail-card"
+            >
+              <p className="pajara-eyebrow">
+                KEAMANAN AKUN
+              </p>
 
-            <h1>
-              Buat password baru di{" "}
-              <span>Pajara.</span>
-            </h1>
+              <h1>
+                Reset Password{" "}
+                <span>Pajara.</span>
+              </h1>
 
-            <p className="pajara-hero-description">
-              Masukkan password baru untuk mengamankan
-              akun Customer Anda.
-            </p>
-
-            {checkingSession ? (
-              <div
+              <p
                 style={{
-                  maxWidth: "480px",
-                  marginTop: "32px",
-                  padding: "20px",
-                  border: "1px solid var(--line)",
-                  borderRadius: "16px",
-                  background: "var(--white)",
+                  marginTop: "12px",
                   color: "var(--muted)",
+                  fontSize: "14px",
+                  lineHeight: 1.7,
                 }}
               >
-                Memeriksa link reset password...
-              </div>
-            ) : (
-              <form
-                onSubmit={handleResetPassword}
-                style={{
-                  maxWidth: "480px",
-                  marginTop: "32px",
-                  display: "grid",
-                  gap: "16px",
-                }}
-              >
-                <input
-                  type="password"
-                  placeholder="Password baru"
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
-                  required
-                  disabled={!ready || loading}
-                  style={{
-                    minHeight: "50px",
-                    padding: "0 16px",
-                    border:
-                      "1px solid rgba(33, 77, 50, 0.16)",
-                    borderRadius: "12px",
-                    background: "#ffffff",
-                    color: "#1d2a22",
-                    opacity: !ready ? 0.6 : 1,
-                  }}
-                />
+                Buat password baru untuk akun
+                Pajara Studio Anda.
+              </p>
 
-                <input
-                  type="password"
-                  placeholder="Konfirmasi password baru"
-                  value={confirmPassword}
-                  onChange={(event) =>
-                    setConfirmPassword(event.target.value)
-                  }
-                  required
-                  disabled={!ready || loading}
+              {!ready ? (
+                <div
                   style={{
-                    minHeight: "50px",
-                    padding: "0 16px",
+                    marginTop: "24px",
+                    padding: "18px 20px",
+                    borderRadius: "14px",
                     border:
-                      "1px solid rgba(33, 77, 50, 0.16)",
-                    borderRadius: "12px",
-                    background: "#ffffff",
-                    color: "#1d2a22",
-                    opacity: !ready ? 0.6 : 1,
+                      "1px solid var(--line)",
+                    background:
+                      "rgba(47, 107, 69, 0.04)",
                   }}
-                />
-
-                {error && (
-                  <p
+                >
+                  <strong
                     style={{
-                      margin: 0,
-                      color: "#b42318",
-                      lineHeight: 1.5,
+                      color:
+                        "var(--green-dark)",
                     }}
                   >
-                    {error}
-                  </p>
-                )}
+                    Menunggu sesi pemulihan...
+                  </strong>
 
-                {message && (
                   <p
                     style={{
-                      margin: 0,
-                      color: "#2f6b45",
-                      lineHeight: 1.5,
+                      margin:
+                        "8px 0 0",
+                      color:
+                        "var(--muted)",
+                      fontSize: "14px",
+                      lineHeight: 1.7,
                     }}
                   >
-                    {message}
+                    Buka halaman ini melalui
+                    link reset password yang
+                    dikirim ke email Anda.
                   </p>
-                )}
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleSubmit}
+                  style={{
+                    display: "grid",
+                    gap: "18px",
+                    marginTop: "28px",
+                  }}
+                >
+                  <div className="pajara-form-field">
+                    <label htmlFor="password">
+                      Password Baru
+                    </label>
 
-                {ready && (
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={password}
+                      onChange={(event) =>
+                        setPassword(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Masukkan password baru"
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+
+                  <div className="pajara-form-field">
+                    <label htmlFor="confirm-password">
+                      Konfirmasi Password
+                    </label>
+
+                    <input
+                      id="confirm-password"
+                      name="confirm-password"
+                      type="password"
+                      value={
+                        confirmPassword
+                      }
+                      onChange={(event) =>
+                        setConfirmPassword(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Ulangi password baru"
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+
+                  {error && (
+                    <div
+                      style={{
+                        padding:
+                          "14px 16px",
+                        borderRadius:
+                          "12px",
+                        background:
+                          "rgba(160, 50, 50, 0.07)",
+                        border:
+                          "1px solid rgba(160, 50, 50, 0.15)",
+                        color:
+                          "#8b3030",
+                        fontSize:
+                          "14px",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {error}
+                    </div>
+                  )}
+
+                  {message && (
+                    <div
+                      style={{
+                        padding:
+                          "14px 16px",
+                        borderRadius:
+                          "12px",
+                        background:
+                          "rgba(47, 107, 69, 0.07)",
+                        border:
+                          "1px solid var(--line)",
+                        color:
+                          "var(--green-dark)",
+                        fontSize:
+                          "14px",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {message}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     className="pajara-button pajara-button-primary"
                     disabled={loading}
                     style={{
-                      border: "none",
-                      opacity: loading ? 0.7 : 1,
+                      width: "100%",
+                      opacity:
+                        loading ? 0.7 : 1,
                     }}
                   >
                     {loading
-                      ? "Menyimpan..."
+                      ? "Memperbarui..."
                       : "Simpan Password Baru"}
                   </button>
-                )}
-              </form>
-            )}
+                </form>
+              )}
 
-            <p
-              style={{
-                marginTop: "24px",
-                color: "#6f6f6f",
-              }}
-            >
-              Kembali ke{" "}
-              <a
-                href="/login"
+              <div
                 style={{
-                  color: "#2f6b45",
-                  fontWeight: 700,
+                  marginTop: "24px",
+                  paddingTop: "20px",
+                  borderTop:
+                    "1px solid var(--line)",
                 }}
               >
-                Login
-              </a>
-            </p>
+                <a
+                  href="/login"
+                  style={{
+                    color:
+                      "var(--green)",
+                    fontSize:
+                      "14px",
+                    fontWeight: 700,
+                  }}
+                >
+                  ← Kembali ke Login
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
