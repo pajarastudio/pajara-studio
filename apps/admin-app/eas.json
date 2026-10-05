@@ -1,11 +1,13 @@
 {
   "build": {
     "preview": {
+      "pnpm": "10.12.1",
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "pnpm": "10.12.1",
       "android": {
         "buildType": "app-bundle"
       }
