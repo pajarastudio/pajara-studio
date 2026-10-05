@@ -1,94 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 
 export default function AdminHome() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function handleLogin() {
-    setMessage("");
-
-    if (!email || !password) {
-      setMessage("Email dan password wajib diisi.");
-      return;
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey =
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      setMessage(
-        "Konfigurasi Supabase belum terbaca. Periksa Environment Variables."
-      );
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const supabase = createClient(
-        supabaseUrl,
-        supabaseKey
-      );
-
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-
-      if (error) {
-        setMessage("Login gagal: " + error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data.user) {
-        setMessage("Login gagal: akun tidak ditemukan.");
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles_v2")
-          .select("role")
-          .eq("id", data.user.id)
-          .single();
-
-      if (profileError) {
-        await supabase.auth.signOut();
-        setMessage(
-          "Login berhasil, tetapi profil admin tidak ditemukan."
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (profile?.role !== "admin") {
-        await supabase.auth.signOut();
-        setMessage(
-          "Akun ini tidak memiliki akses admin."
-        );
-        setLoading(false);
-        return;
-      }
-
-      setMessage("Login admin berhasil. Dashboard siap.");
-    } catch (error) {
-      console.error(error);
-
-      setMessage(
-        "Terjadi kesalahan saat menghubungkan ke Supabase."
-      );
-    }
-
-    setLoading(false);
+  function handleTest() {
+    setMessage("TOMBOL BERHASIL DIKLIK.");
   }
 
   return (
@@ -120,7 +40,6 @@ export default function AdminHome() {
             fontWeight: 700,
             letterSpacing: 1.5,
             fontSize: 13,
-            marginBottom: 8,
           }}
         >
           PAJARA STUDIO
@@ -130,22 +49,13 @@ export default function AdminHome() {
           style={{
             color: "#214d32",
             fontSize: 30,
-            margin: "0 0 8px",
           }}
         >
           Admin Login
         </h1>
 
-        <p
-          style={{
-            color: "#666",
-            fontSize: 14,
-            lineHeight: 1.5,
-            marginBottom: 26,
-          }}
-        >
-          Masuk untuk mengelola pesanan dan operasional
-          Pajara Studio.
+        <p style={{ color: "#666", fontSize: 14 }}>
+          Tes interaksi tombol Admin Pajara.
         </p>
 
         <input
@@ -153,8 +63,6 @@ export default function AdminHome() {
           placeholder="Email admin"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          autoCapitalize="none"
-          autoCorrect="off"
           style={{
             width: "100%",
             height: 52,
@@ -172,11 +80,6 @@ export default function AdminHome() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
           style={{
             width: "100%",
             height: 52,
@@ -191,8 +94,7 @@ export default function AdminHome() {
 
         <button
           type="button"
-          onClick={handleLogin}
-          disabled={loading}
+          onClick={handleTest}
           style={{
             width: "100%",
             height: 52,
@@ -202,25 +104,20 @@ export default function AdminHome() {
             color: "#ffffff",
             fontSize: 15,
             fontWeight: 800,
-            cursor: loading ? "default" : "pointer",
-            opacity: loading ? 0.6 : 1,
           }}
         >
-          {loading ? "Memproses..." : "Masuk sebagai Admin"}
+          TES TOMBOL
         </button>
 
         {message && (
           <div
             style={{
               marginTop: 18,
-              padding: "12px 14px",
+              padding: 14,
               borderRadius: 12,
               background: "#f7f4ee",
-              color: message.includes("berhasil")
-                ? "#2f6b45"
-                : "#8a3d32",
-              fontSize: 14,
-              lineHeight: 1.5,
+              color: "#2f6b45",
+              fontWeight: 700,
             }}
           >
             {message}
