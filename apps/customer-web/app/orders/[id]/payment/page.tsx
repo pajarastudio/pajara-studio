@@ -58,15 +58,16 @@ export default async function PaymentPage({
             style={{
               display: "grid",
               gridTemplateColumns:
-                "minmax(0, 1.4fr) minmax(280px, 0.6fr)",
-              gap: "20px",
+                "minmax(0, 1.35fr) minmax(280px, 0.65fr)",
+              gap: "24px",
               alignItems: "start",
             }}
           >
+            {/* LEFT */}
             <div
               style={{
                 display: "grid",
-                gap: "20px",
+                gap: "24px",
               }}
             >
               <div className="pajara-order-detail-card">
@@ -146,6 +147,7 @@ export default async function PaymentPage({
                       display: "flex",
                       justifyContent: "space-between",
                       gap: "20px",
+                      alignItems: "center",
                     }}
                   >
                     <span
@@ -166,7 +168,7 @@ export default async function PaymentPage({
 
               <div className="pajara-order-detail-card">
                 <p className="pajara-eyebrow">
-                  METODE
+                  METODE PEMBAYARAN
                 </p>
 
                 <h2>Pilih Pembayaran</h2>
@@ -180,7 +182,7 @@ export default async function PaymentPage({
                 >
                   <div
                     style={{
-                      padding: "18px",
+                      padding: "20px",
                       border: "1px solid var(--line)",
                       borderRadius: "14px",
                       background:
@@ -191,7 +193,7 @@ export default async function PaymentPage({
                       style={{
                         display: "block",
                         color: "var(--green-dark)",
-                        marginBottom: "6px",
+                        marginBottom: "7px",
                       }}
                     >
                       Pembayaran Manual
@@ -213,7 +215,7 @@ export default async function PaymentPage({
 
                   <div
                     style={{
-                      padding: "18px",
+                      padding: "20px",
                       border: "1px solid var(--line)",
                       borderRadius: "14px",
                     }}
@@ -222,7 +224,7 @@ export default async function PaymentPage({
                       style={{
                         display: "block",
                         color: "var(--green-dark)",
-                        marginBottom: "6px",
+                        marginBottom: "7px",
                       }}
                     >
                       Payment Gateway
@@ -245,63 +247,111 @@ export default async function PaymentPage({
               </div>
             </div>
 
-            <div
+            {/* RIGHT */}
+            <aside
               style={{
                 display: "grid",
-                gap: "20px",
+                gap: "24px",
                 alignContent: "start",
               }}
             >
-              <div className="pajara-order-detail-card">
+              {/* STATUS */}
+              <div
+                className="pajara-order-detail-card"
+                style={{
+                  borderTop:
+                    "3px solid var(--green)",
+                }}
+              >
                 <p className="pajara-eyebrow">
-                  STATUS
-                </p>
-
-                <h2>Belum Dibayar</h2>
-
-                <p
-                  style={{
-                    marginTop: "14px",
-                    marginBottom: 0,
-                    color: "var(--muted)",
-                    fontSize: "14px",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  Pembayaran dapat dilakukan setelah
-                  detail project dan nominal dikonfirmasi
-                  oleh Pajara Studio.
+                  STATUS PEMBAYARAN
                 </p>
 
                 <div
                   style={{
-                    marginTop: "22px",
-                    paddingTop: "20px",
-                    borderTop:
-                      "1px solid var(--line)",
+                    marginTop: "18px",
+                    padding: "18px",
+                    borderRadius: "14px",
+                    background:
+                      "rgba(47, 107, 69, 0.06)",
+                    border:
+                      "1px solid rgba(47, 107, 69, 0.12)",
                   }}
                 >
-                  <a
-                    href={`/orders/${id}`}
-                    className="pajara-button pajara-button-secondary"
+                  <span
+                    className="pajara-order-status"
                     style={{
-                      width: "100%",
+                      display: "inline-flex",
                     }}
                   >
-                    Kembali ke Detail
-                  </a>
+                    Belum Dibayar
+                  </span>
+
+                  <h2
+                    style={{
+                      marginTop: "14px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Menunggu Pembayaran
+                  </h2>
+
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "var(--muted)",
+                      fontSize: "14px",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    Pembayaran dapat dilakukan setelah
+                    detail project dan nominal dikonfirmasi
+                    oleh Pajara Studio.
+                  </p>
                 </div>
+
+                <a
+                  href={`/orders/${id}`}
+                  className="pajara-button pajara-button-secondary"
+                  style={{
+                    width: "100%",
+                    marginTop: "18px",
+                  }}
+                >
+                  Kembali ke Detail
+                </a>
               </div>
 
-              <div className="pajara-order-detail-card">
-                <p className="pajara-eyebrow">
+              {/* CATATAN */}
+              <div
+                className="pajara-order-detail-card"
+                style={{
+                  background: "var(--green-dark)",
+                  color: "var(--white)",
+                }}
+              >
+                <p
+                  className="pajara-eyebrow"
+                  style={{
+                    color: "rgba(255,255,255,0.65)",
+                  }}
+                >
                   CATATAN
                 </p>
 
+                <h3
+                  style={{
+                    marginTop: "12px",
+                    color: "var(--white)",
+                  }}
+                >
+                  Perhatikan sebelum membayar
+                </h3>
+
                 <p
                   style={{
-                    margin: 0,
-                    color: "var(--muted)",
+                    margin: "12px 0 0",
+                    color: "rgba(255,255,255,0.78)",
                     fontSize: "14px",
                     lineHeight: 1.7,
                   }}
@@ -311,7 +361,7 @@ export default async function PaymentPage({
                   dari Pajara Studio.
                 </p>
               </div>
-            </div>
+            </aside>
           </div>
 
           <div
