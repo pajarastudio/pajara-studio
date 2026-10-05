@@ -28,69 +28,192 @@ export default async function OrderDetail({
 
           <nav className="pajara-nav">
             <a href="/dashboard">Dashboard</a>
-            <a href="/order">Pesan Desain</a>
+
+            <a
+              href="/order"
+              className="pajara-nav-cta"
+            >
+              Pesan Desain
+            </a>
           </nav>
         </div>
       </header>
 
-      <section className="pajara-container pajara-section">
-        <div className="pajara-card">
-          <p className="pajara-eyebrow">DETAIL PESANAN</p>
+      <section className="pajara-order-detail">
+        <div className="pajara-container">
 
-          <h1>Detail Pesanan</h1>
+          <div className="pajara-order-detail-header">
+            <p className="pajara-eyebrow">
+              Detail Pesanan
+            </p>
 
-          <p>
-            ID Pesanan:
-            <br />
-            <strong>{id}</strong>
-          </p>
+            <h1>
+              Pesanan <span>Pajara.</span>
+            </h1>
 
-          <div style={{ marginTop: "24px" }}>
-            <h2>Status Pesanan</h2>
-            <p>Menunggu konfirmasi.</p>
+            <p>
+              Pantau status project, pembayaran, revisi,
+              dan file desain Anda dari satu halaman.
+            </p>
           </div>
 
-          <div style={{ marginTop: "24px" }}>
-            <h2>Menu Pesanan</h2>
+          <div className="pajara-order-detail-grid">
 
-            <div
+            <div className="pajara-order-detail-card">
+              <p className="pajara-dashboard-label">
+                Informasi Pesanan
+              </p>
+
+              <h2>Detail Project</h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gap: "18px",
+                }}
+              >
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--brown)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    ID Pesanan
+                  </p>
+
+                  <strong
+                    style={{
+                      display: "block",
+                      marginTop: "6px",
+                      color: "var(--green-dark)",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {id}
+                  </strong>
+                </div>
+
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--brown)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Layanan
+                  </p>
+
+                  <strong
+                    style={{
+                      display: "block",
+                      marginTop: "6px",
+                      color: "var(--green-dark)",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Desain Promosi
+                  </strong>
+                </div>
+
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--brown)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Status
+                  </p>
+
+                  <div style={{ marginTop: "8px" }}>
+                    <span className="pajara-order-status">
+                      Menunggu Konfirmasi
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pajara-order-detail-card">
+              <p className="pajara-dashboard-label">
+                Menu Pesanan
+              </p>
+
+              <h2>Akses Project</h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gap: "12px",
+                  marginTop: "22px",
+                }}
+              >
+                <a
+                  href={`/orders/${id}/payment`}
+                  className="pajara-button pajara-button-primary"
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  Pembayaran
+                </a>
+
+                <a
+                  href={`/orders/${id}/revision`}
+                  className="pajara-button pajara-button-secondary"
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  Revisi
+                </a>
+
+                <a
+                  href={`/orders/${id}/files`}
+                  className="pajara-button pajara-button-secondary"
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  File Pesanan
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <div
+            style={{
+              marginTop: "28px",
+            }}
+          >
+            <a
+              href="/dashboard"
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-                marginTop: "16px",
+                color: "var(--green)",
+                fontSize: "14px",
+                fontWeight: 700,
               }}
             >
-              <a
-                href={`/orders/${id}/payment`}
-                className="pajara-button"
-              >
-                Pembayaran
-              </a>
-
-              <a
-                href={`/orders/${id}/revision`}
-                className="pajara-button"
-              >
-                Revisi
-              </a>
-
-              <a
-                href={`/orders/${id}/files`}
-                className="pajara-button"
-              >
-                File Pesanan
-              </a>
-            </div>
-          </div>
-
-          <div style={{ marginTop: "24px" }}>
-            <a href="/dashboard">
               ← Kembali ke Dashboard
             </a>
           </div>
+
         </div>
       </section>
     </main>
   );
-      }
+}
