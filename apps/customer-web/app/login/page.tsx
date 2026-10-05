@@ -37,7 +37,11 @@ export default function CustomerLogin() {
     setLoading(false);
 
     if (loginError) {
-      setError(loginError.message);
+      setError(
+        `Supabase: ${loginError.message} (code: ${
+          loginError.status ?? "unknown"
+        })`
+      );
       return;
     }
 
@@ -65,7 +69,11 @@ export default function CustomerLogin() {
     setResetLoading(false);
 
     if (resetError) {
-      setResetError(resetError.message);
+      setResetError(
+        `Supabase: ${resetError.message} (code: ${
+          resetError.status ?? "unknown"
+        })`
+      );
       return;
     }
 
@@ -284,4 +292,4 @@ export default function CustomerLogin() {
   );
 }
 
-Setelah deploy ulang, tes lagi Lupa password. Kalau masih gagal, sekarang halaman akan menampilkan error asli dari Supabase, jadi tinggal kirim error itu ke aku.
+Setelah deploy selesai, tes sekali. Kalau gagal, kirim pesan "Supabase: ..." yang muncul. Itu yang kita butuhkan untuk menyelesaikannya.
