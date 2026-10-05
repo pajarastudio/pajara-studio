@@ -7,21 +7,34 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { supabase } from "../lib/supabase";
 
 export default function AdminHome() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin() {
+  async function handleLogin() {
     if (!email || !password) {
       Alert.alert("Login Admin", "Email dan password wajib diisi.");
       return;
     }
 
-    Alert.alert(
-      "Login Admin",
-      "Login akan kita hubungkan ke Supabase pada tahap berikutnya."
-    );
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("Login gagal", error.message);
+      return;
+    }
+
+    Alert.alert("Berhasil", "Login admin berhasil.");
   }
 
   return (
@@ -42,6 +55,7 @@ export default function AdminHome() {
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          autoCorrect={false}
           keyboardType="email-address"
         />
 
@@ -52,10 +66,17 @@ export default function AdminHome() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          autoCapitalize="none"
         />
 
-        <Pressable style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Masuk sebagai Admin</Text>
+        <Pressable
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Memproses..." : "Masuk sebagai Admin"}
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -122,6 +143,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 6,
+  },
+
+  buttonDisabled: {
+    opacity: 0.6,
   },
 
   buttonText: {
