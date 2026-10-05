@@ -103,8 +103,6 @@ export default function CreateOrder() {
           ).toISOString()
         : null;
 
-      // Harga akan kita hubungkan ke sistem layanan/payment
-      // pada tahap berikutnya.
       const totalAmount = 0;
       const dpAmount = 0;
       const remainingAmount = 0;
@@ -114,23 +112,21 @@ export default function CreateOrder() {
           .from("orders")
           .insert({
             order_code: orderCode,
-            customer: user.id,
+            customer_id: user.id,
             service_id: null,
-            "service name": service,
-            "design type": designType,
+            service_name: service,
+            design_type: designType,
             quantity,
             brief,
             notes,
-            "total amount": totalAmount,
+            total_amount: totalAmount,
             dp_amount: dpAmount,
-            "remaining amount": remainingAmount,
+            remaining_amount: remainingAmount,
             status: "pending",
             deadline,
             assigned_admin: null,
-            "created at":
-              new Date().toISOString(),
-            updated_at:
-              new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           });
 
       if (insertError) {
