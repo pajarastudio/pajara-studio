@@ -37,9 +37,7 @@ export default function CustomerLogin() {
     setLoading(false);
 
     if (loginError) {
-      setError(
-        "Email atau password salah. Silakan periksa kembali."
-      );
+      setError(loginError.message);
       return;
     }
 
@@ -67,9 +65,7 @@ export default function CustomerLogin() {
     setResetLoading(false);
 
     if (resetError) {
-      setResetError(
-        "Gagal mengirim email reset password. Silakan coba lagi."
-      );
+      setResetError(resetError.message);
       return;
     }
 
@@ -287,3 +283,5 @@ export default function CustomerLogin() {
     </main>
   );
 }
+
+Setelah deploy ulang, tes lagi Lupa password. Kalau masih gagal, sekarang halaman akan menampilkan error asli dari Supabase, jadi tinggal kirim error itu ke aku.
