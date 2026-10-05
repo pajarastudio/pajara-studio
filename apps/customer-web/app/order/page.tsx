@@ -13,6 +13,8 @@ export default function CreateOrder() {
   ) => {
     event.preventDefault();
 
+    const form = event.currentTarget;
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -31,43 +33,35 @@ export default function CreateOrder() {
         return;
       }
 
-      const formData = new FormData(
-        event.currentTarget
+      const formData = new FormData(form);
+
+      const service = String(
+        formData.get("service") || ""
       );
 
-      const service =
-        String(
-          formData.get("service") || ""
-        );
-
-      const designType =
-        String(
-          formData.get("design-type") || ""
-        );
+      const designType = String(
+        formData.get("design-type") || ""
+      );
 
       const quantity = Number(
         formData.get("quantity") || 1
       );
 
-      const deadlineValue =
-        String(
-          formData.get("deadline") || ""
-        );
+      const deadlineValue = String(
+        formData.get("deadline") || ""
+      );
 
-      const brief =
-        String(
-          formData.get("brief") || ""
-        );
+      const brief = String(
+        formData.get("brief") || ""
+      );
 
-      const notes =
-        String(
-          formData.get("notes") || ""
-        );
+      const notes = String(
+        formData.get("notes") || ""
+      );
 
-      const paymentType =
-        String(
-          formData.get("payment-type") || ""
-        );
+      const paymentType = String(
+        formData.get("payment-type") || ""
+      );
 
       if (!service) {
         setError("Silakan pilih layanan.");
@@ -76,41 +70,32 @@ export default function CreateOrder() {
       }
 
       if (!designType) {
-        setError(
-          "Silakan isi jenis desain."
-        );
+        setError("Silakan isi jenis desain.");
         setLoading(false);
         return;
       }
 
       if (!brief) {
-        setError(
-          "Silakan isi brief desain."
-        );
+        setError("Silakan isi brief desain.");
         setLoading(false);
         return;
       }
 
       if (!paymentType) {
-        setError(
-          "Silakan pilih pembayaran."
-        );
+        setError("Silakan pilih pembayaran.");
         setLoading(false);
         return;
       }
 
       if (!Number.isFinite(quantity) || quantity < 1) {
-        setError(
-          "Jumlah desain minimal 1."
-        );
+        setError("Jumlah desain minimal 1.");
         setLoading(false);
         return;
       }
 
-      const orderCode =
-        `PJ-${Date.now()
-          .toString()
-          .slice(-8)}`;
+      const orderCode = `PJ-${Date.now()
+        .toString()
+        .slice(-8)}`;
 
       const deadline = deadlineValue
         ? new Date(
@@ -118,6 +103,8 @@ export default function CreateOrder() {
           ).toISOString()
         : null;
 
+      // Harga akan kita hubungkan ke sistem layanan/payment
+      // pada tahap berikutnya.
       const totalAmount = 0;
       const dpAmount = 0;
       const remainingAmount = 0;
@@ -147,9 +134,7 @@ export default function CreateOrder() {
           });
 
       if (insertError) {
-        setError(
-          insertError.message
-        );
+        setError(insertError.message);
         setLoading(false);
         return;
       }
@@ -158,7 +143,7 @@ export default function CreateOrder() {
         `Pesanan ${orderCode} berhasil dibuat.`
       );
 
-      event.currentTarget.reset();
+      form.reset();
     } catch (err) {
       setError(
         err instanceof Error
@@ -184,9 +169,7 @@ export default function CreateOrder() {
               className="pajara-brand-logo"
             />
 
-            <span>
-              Pajara Studio
-            </span>
+            <span>Pajara Studio</span>
           </a>
 
           <nav className="pajara-nav">
@@ -232,9 +215,7 @@ export default function CreateOrder() {
                 <span>01</span>
 
                 <div>
-                  <h2>
-                    Detail Pesanan
-                  </h2>
+                  <h2>Detail Pesanan</h2>
 
                   <p>
                     Tentukan layanan dan kebutuhan
@@ -328,9 +309,7 @@ export default function CreateOrder() {
                 <span>02</span>
 
                 <div>
-                  <h2>
-                    Brief Desain
-                  </h2>
+                  <h2>Brief Desain</h2>
 
                   <p>
                     Jelaskan konsep dan informasi
@@ -372,9 +351,7 @@ export default function CreateOrder() {
                 <span>03</span>
 
                 <div>
-                  <h2>
-                    Referensi
-                  </h2>
+                  <h2>Referensi</h2>
 
                   <p>
                     Tambahkan contoh visual jika
@@ -409,9 +386,7 @@ export default function CreateOrder() {
                 <span>04</span>
 
                 <div>
-                  <h2>
-                    Pembayaran
-                  </h2>
+                  <h2>Pembayaran</h2>
 
                   <p>
                     Pilih skema pembayaran untuk
