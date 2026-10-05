@@ -1,3 +1,7 @@
-import { defineCloudflareConfig } from "@opennextjs/cloudflare";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  output: "export",
+};
 
-export default defineCloudflareConfig();
+export default nextConfig;
