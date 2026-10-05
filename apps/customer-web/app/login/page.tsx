@@ -292,4 +292,6 @@ export default function CustomerLogin() {
   );
 }
 
-Setelah deploy selesai, tes sekali. Kalau gagal, kirim pesan "Supabase: ..." yang muncul. Itu yang kita butuhkan untuk menyelesaikannya.
+Setelah copas: Commit perubahan → tunggu deploy Cloudflare selesai → buka "/login" → coba Lupa password lagi.
+
+Kalau gagal, jangan screenshot dulu. Kirim saja tulisan error merah yang muncul setelah kode ini aktif. Dari situ kita bisa langsung identifikasi masalah Supabase-nya.
