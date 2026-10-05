@@ -8,9 +8,14 @@
     "start": "next start"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "latest",
     "@supabase/supabase-js": "latest",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "typescript": "latest"
   }
 }
