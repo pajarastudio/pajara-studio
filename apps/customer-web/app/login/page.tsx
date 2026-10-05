@@ -20,9 +20,7 @@ export default function CustomerLogin() {
   const [resetMessage, setResetMessage] = useState("");
   const [resetError, setResetError] = useState("");
 
-  async function handleLogin(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
@@ -96,13 +94,10 @@ export default function CustomerLogin() {
       <section className="pajara-hero">
         <div className="pajara-container">
           <div className="pajara-hero-content">
-            <p className="pajara-eyebrow">
-              Customer Login
-            </p>
+            <p className="pajara-eyebrow">Customer Login</p>
 
             <h1>
-              Selamat datang kembali di{" "}
-              <span>Pajara.</span>
+              Selamat datang kembali di <span>Pajara.</span>
             </h1>
 
             <p className="pajara-hero-description">
@@ -123,9 +118,7 @@ export default function CustomerLogin() {
                 type="email"
                 placeholder="Email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 style={{
                   minHeight: "50px",
@@ -291,7 +284,3 @@ export default function CustomerLogin() {
     </main>
   );
 }
-
-Setelah copas: Commit perubahan → tunggu deploy Cloudflare selesai → buka "/login" → coba Lupa password lagi.
-
-Kalau gagal, jangan screenshot dulu. Kirim saja tulisan error merah yang muncul setelah kode ini aktif. Dari situ kita bisa langsung identifikasi masalah Supabase-nya.
