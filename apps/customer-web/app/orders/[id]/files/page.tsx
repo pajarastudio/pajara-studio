@@ -22,12 +22,19 @@ export default async function FilesPage({
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">P</span>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="pajara-brand-logo"
+            />
+
             <span>Pajara Studio</span>
           </a>
 
           <nav className="pajara-nav">
-            <a href="/dashboard">Dashboard</a>
+            <a href="/dashboard">
+              Dashboard
+            </a>
 
             <a
               href="/order"
@@ -72,7 +79,9 @@ export default async function FilesPage({
                 RINGKASAN
               </p>
 
-              <h2>Informasi Project</h2>
+              <h2>
+                Informasi Project
+              </h2>
 
               <div
                 style={{
@@ -168,14 +177,17 @@ export default async function FilesPage({
                 FILE FINAL
               </p>
 
-              <h2>File Desain Anda</h2>
+              <h2>
+                File Desain Anda
+              </h2>
 
               <div
                 style={{
                   marginTop: "24px",
                   padding: "28px 22px",
                   borderRadius: "16px",
-                  border: "1px dashed var(--line)",
+                  border:
+                    "1px dashed var(--line)",
                   background:
                     "rgba(47, 107, 69, 0.04)",
                   textAlign: "center",
@@ -318,7 +330,8 @@ export default async function FilesPage({
               <p
                 className="pajara-eyebrow"
                 style={{
-                  color: "rgba(255,255,255,0.65)",
+                  color:
+                    "rgba(255,255,255,0.65)",
                 }}
               >
                 CATATAN
@@ -336,7 +349,8 @@ export default async function FilesPage({
               <p
                 style={{
                   margin: "12px 0 0",
-                  color: "rgba(255,255,255,0.78)",
+                  color:
+                    "rgba(255,255,255,0.78)",
                   fontSize: "14px",
                   lineHeight: 1.7,
                 }}
@@ -378,7 +392,6 @@ export default async function FilesPage({
             </div>
 
           </div>
-
         </div>
       </section>
     </main>
