@@ -4,7 +4,12 @@ export default function CustomerDashboard() {
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">P</span>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="pajara-brand-logo"
+            />
+
             <span>Pajara Studio</span>
           </a>
 
@@ -23,7 +28,6 @@ export default function CustomerDashboard() {
 
       <section className="pajara-dashboard">
         <div className="pajara-container">
-          {/* WELCOME */}
           <div className="pajara-dashboard-header">
             <div>
               <p className="pajara-eyebrow">
@@ -42,7 +46,6 @@ export default function CustomerDashboard() {
             </div>
           </div>
 
-          {/* INFORMATION CARDS */}
           <div className="pajara-dashboard-cards">
             <article className="pajara-dashboard-card">
               <div className="pajara-dashboard-icon">
@@ -121,7 +124,6 @@ export default function CustomerDashboard() {
             </article>
           </div>
 
-          {/* ACTIONS */}
           <div className="pajara-dashboard-actions">
             <a
               href="/order"
