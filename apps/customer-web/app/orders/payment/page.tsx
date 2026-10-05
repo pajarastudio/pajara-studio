@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
@@ -22,7 +22,7 @@ function formatRupiah(value: number | null) {
   }).format(value || 0);
 }
 
-export default function PaymentPage() {
+function PaymentContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -302,5 +302,31 @@ export default function PaymentPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function PaymentFallback() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "var(--cream)",
+        padding: "40px 20px",
+      }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <p style={{ color: "var(--green)" }}>
+          Memuat pembayaran...
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<PaymentFallback />}>
+      <PaymentContent />
+    </Suspense>
   );
 }
