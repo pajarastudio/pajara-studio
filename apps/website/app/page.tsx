@@ -74,7 +74,7 @@ function Logo({
     <img
       src={logo}
       alt={alt}
-      className={className}
+      className={`pajara-logo ${className}`}
     />
   );
 }
@@ -89,6 +89,7 @@ export default function Home() {
         <div className="pajara-container pajara-navbar-inner">
           <a href="#home" className="pajara-brand">
             <Logo className="pajara-navbar-logo-mark" />
+
             <span className="pajara-brand-name">
               Pajara Studio
             </span>
@@ -111,11 +112,12 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* HERO */}
       <section
         id="home"
         className="pajara-hero"
       >
-        <div className="pajara-container pajara-hero-grid">
+        <div className="pajara-container pajara-hero-inner">
           <div className="pajara-hero-copy">
             <span className="pajara-eyebrow">
               PAJARA STUDIO
@@ -124,10 +126,10 @@ export default function Home() {
             <h1>
               Desain yang
               <br />
-              punya arah.
+              <span>punya arah.</span>
             </h1>
 
-            <p>
+            <p className="pajara-hero-description">
               Pajara Studio membantu brand dan usaha
               membangun visual yang kuat, rapi, dan
               memiliki karakter.
@@ -136,14 +138,14 @@ export default function Home() {
             <div className="pajara-hero-actions">
               <a
                 href={customerWeb}
-                className="pajara-button-primary"
+                className="pajara-button pajara-button-primary"
               >
                 Mulai Pesanan
               </a>
 
               <a
                 href="#portfolio"
-                className="pajara-button-secondary"
+                className="pajara-button pajara-button-secondary"
               >
                 Lihat Portfolio
               </a>
@@ -175,15 +177,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TRUST */}
       <section className="pajara-trust">
         <div className="pajara-container pajara-trust-inner">
-          <span>IDENTITAS</span>
-          <span>VISUAL</span>
-          <span>STRATEGI</span>
-          <span>KONSISTENSI</span>
+          <span className="pajara-trust-item">
+            IDENTITAS
+          </span>
+
+          <span className="pajara-trust-item">
+            VISUAL
+          </span>
+
+          <span className="pajara-trust-item">
+            STRATEGI
+          </span>
+
+          <span className="pajara-trust-item">
+            KONSISTENSI
+          </span>
         </div>
       </section>
 
+      {/* LAYANAN */}
       <section
         id="layanan"
         className="pajara-section"
@@ -208,7 +223,7 @@ export default function Home() {
 
           <div className="pajara-services-grid">
             {services.map((service) => (
-              <div
+              <article
                 key={service.number}
                 className="pajara-service-card"
               >
@@ -223,12 +238,13 @@ export default function Home() {
                 <span className="pajara-service-arrow">
                   →
                 </span>
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
+      {/* PORTFOLIO */}
       <section
         id="portfolio"
         className="pajara-section"
@@ -275,6 +291,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TENTANG */}
       <section
         id="tentang"
         className="pajara-section"
@@ -282,11 +299,11 @@ export default function Home() {
         <div className="pajara-container">
           <div className="pajara-about-grid">
             <div className="pajara-about-mark">
-              <Logo alt="Pajara Studio" />
+              <Logo alt="Logo Pajara Studio" />
             </div>
 
-            <div className="pajara-about-copy">
-              <span className="pajara-eyebrow">
+            <div className="pajara-about-content">
+              <span className="pajara-about-label">
                 TENTANG PAJARA
               </span>
 
@@ -294,19 +311,21 @@ export default function Home() {
                 Berakar di Tanah Pasundan.
               </h2>
 
-              <p>
-                Pajara Studio adalah studio desain
-                grafis yang dibangun dengan satu
-                prinsip sederhana: setiap visual
-                harus memiliki arah.
-              </p>
+              <div className="pajara-about-text">
+                <p>
+                  Pajara Studio adalah studio desain
+                  grafis yang dibangun dengan satu
+                  prinsip sederhana: setiap visual
+                  harus memiliki arah.
+                </p>
 
-              <p>
-                Kami menggabungkan estetika, fungsi,
-                dan karakter brand untuk menghasilkan
-                desain yang bukan hanya menarik,
-                tetapi juga memiliki tujuan.
-              </p>
+                <p>
+                  Kami menggabungkan estetika, fungsi,
+                  dan karakter brand untuk menghasilkan
+                  desain yang bukan hanya menarik,
+                  tetapi juga memiliki tujuan.
+                </p>
+              </div>
 
               <div className="pajara-about-signature">
                 Pajara Studio
@@ -316,70 +335,76 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FOUNDER */}
       <section className="pajara-section">
         <div className="pajara-container">
           <div className="pajara-founder-card">
-            <div className="pajara-section-heading">
-              <span className="pajara-eyebrow">
+            <div className="pajara-founder-heading">
+              <span className="pajara-founder-label">
                 THE FOUNDER
               </span>
 
-              <h2>
-                Muhamad Rijik Rifa'i.
-              </h2>
+              <h3>
+                Muhamad Rijik Rifa'i
+              </h3>
 
-              <p>
+              <p className="pajara-founder-role">
                 Founder & Designer Pajara Studio
               </p>
             </div>
 
-            <div className="pajara-about-copy">
-              <p>
-                <strong>Tanggal Lahir</strong>
-                <br />
-                04-03
-              </p>
-
-              <p>
-                <strong>Pendidikan</strong>
-                <br />
-                SMK PERTIWI CIBUNGBULANG
-              </p>
-
-              <p>
-                <strong>Bidang</strong>
-                <br />
-                GRAPHIC DESIGN & BRANDING
-              </p>
-
-              <p>
-                <strong>Keahlian</strong>
-                <br />
-                Photoshop, Illustrator, Branding,
-                Layout, Tipografi
-              </p>
-
-              <p>
-                <strong>Domisili</strong>
-                <br />
-                Kab. Bogor, Kec. Leuwiliang
-              </p>
-
-              <p>
-                <strong>Fokus</strong>
-                <br />
-                Membangun desain yang memiliki
-                karakter, fungsi, dan arah.
-              </p>
-
-              <div className="pajara-about-signature">
-                “Desain yang punya arah.”
+            <div className="pajara-founder-info">
+              <div>
+                <span>Tanggal Lahir</span>
+                <strong>04-03</strong>
               </div>
+
+              <div>
+                <span>Pendidikan</span>
+                <strong>
+                  SMK Pertiwi Cibungbulang
+                </strong>
+              </div>
+
+              <div>
+                <span>Bidang</span>
+                <strong>
+                  Graphic Design & Branding
+                </strong>
+              </div>
+
+              <div>
+                <span>Keahlian</span>
+                <strong>
+                  Photoshop, Illustrator, Branding,
+                  Layout, Tipografi
+                </strong>
+              </div>
+
+              <div>
+                <span>Domisili</span>
+                <strong>
+                  Kab. Bogor, Kec. Leuwiliang
+                </strong>
+              </div>
+
+              <div>
+                <span>Fokus</span>
+                <strong>
+                  Membangun desain yang memiliki
+                  karakter, fungsi, dan arah.
+                </strong>
+              </div>
+            </div>
+
+            <div className="pajara-founder-signature">
+              “Desain yang punya arah.”
             </div>
           </div>
         </div>
       </section>
 
+      {/* TESTIMONI — JANGAN DIUBAH */}
       <section
         id="testimoni"
         className="pajara-section"
@@ -410,30 +435,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CTA */}
       <section
         id="kontak"
         className="pajara-cta"
       >
         <div className="pajara-container pajara-cta-inner">
-          <span className="pajara-eyebrow">
-            PUNYA PROYEK?
-          </span>
+          <div className="pajara-cta-copy">
+            <span className="pajara-cta-label">
+              PUNYA PROYEK?
+            </span>
 
-          <h2>
-            Mari buat sesuatu
-            <br />
-            yang punya arah.
-          </h2>
+            <h2>
+              Mari buat sesuatu
+              <br />
+              yang punya arah.
+            </h2>
+
+            <p>
+              Ceritakan kebutuhan desainmu dan
+              mari kita bangun visual yang tepat
+              untuk brand-mu.
+            </p>
+          </div>
 
           <a
             href={customerWeb}
-            className="pajara-button-light"
+            className="pajara-cta-button"
           >
             Pesan Desain
           </a>
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="pajara-footer">
         <div className="pajara-container">
           <div className="pajara-footer-top">
@@ -449,35 +484,11 @@ export default function Home() {
             </div>
 
             <div className="pajara-footer-links">
-              <a
-                href="#layanan"
-              >
-                Layanan
-              </a>
-
-              <a
-                href="#portfolio"
-              >
-                Portfolio
-              </a>
-
-              <a
-                href="#tentang"
-              >
-                Tentang
-              </a>
-
-              <a
-                href="#testimoni"
-              >
-                Testimoni
-              </a>
-
-              <a
-                href="#kontak"
-              >
-                Kontak
-              </a>
+              <a href="#layanan">Layanan</a>
+              <a href="#portfolio">Portfolio</a>
+              <a href="#tentang">Tentang</a>
+              <a href="#testimoni">Testimoni</a>
+              <a href="#kontak">Kontak</a>
 
               <a
                 href="https://instagram.com/"
@@ -495,9 +506,7 @@ export default function Home() {
                 TikTok
               </a>
 
-              <a
-                href={customerWeb}
-              >
+              <a href={customerWeb}>
                 Pesan Desain
               </a>
 
