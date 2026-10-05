@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
@@ -11,7 +11,7 @@ type Order = {
   status: string | null;
 };
 
-export default function RevisionPage() {
+function RevisionContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -202,5 +202,31 @@ export default function RevisionPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function RevisionFallback() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "var(--cream)",
+        padding: "40px 20px",
+      }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <p style={{ color: "var(--green)" }}>
+          Memuat revisi...
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default function RevisionPage() {
+  return (
+    <Suspense fallback={<RevisionFallback />}>
+      <RevisionContent />
+    </Suspense>
   );
 }
