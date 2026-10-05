@@ -47,7 +47,10 @@ export default function CustomerDashboard() {
           </div>
 
           <div className="pajara-dashboard-cards">
-            <article className="pajara-dashboard-card">
+            <a
+              href="/orders/demo"
+              className="pajara-dashboard-card"
+            >
               <div className="pajara-dashboard-icon">
                 01
               </div>
@@ -64,9 +67,12 @@ export default function CustomerDashboard() {
                   muncul di bagian ini.
                 </p>
               </div>
-            </article>
+            </a>
 
-            <article className="pajara-dashboard-card">
+            <a
+              href="/orders/demo/payment"
+              className="pajara-dashboard-card"
+            >
               <div className="pajara-dashboard-icon">
                 02
               </div>
@@ -83,9 +89,12 @@ export default function CustomerDashboard() {
                   verifikasi akan ditampilkan di sini.
                 </p>
               </div>
-            </article>
+            </a>
 
-            <article className="pajara-dashboard-card">
+            <a
+              href="/orders/demo/revision"
+              className="pajara-dashboard-card"
+            >
               <div className="pajara-dashboard-icon">
                 03
               </div>
@@ -102,9 +111,12 @@ export default function CustomerDashboard() {
                   akan tersedia di bagian ini.
                 </p>
               </div>
-            </article>
+            </a>
 
-            <article className="pajara-dashboard-card">
+            <a
+              href="/orders/demo/files"
+              className="pajara-dashboard-card"
+            >
               <div className="pajara-dashboard-icon">
                 04
               </div>
@@ -121,7 +133,7 @@ export default function CustomerDashboard() {
                   project selesai.
                 </p>
               </div>
-            </article>
+            </a>
           </div>
 
           <div className="pajara-dashboard-actions">
