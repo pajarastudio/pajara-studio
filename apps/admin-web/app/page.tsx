@@ -1,10 +1,4 @@
-"use client";
-
-import { useState } from "react";
-
 export default function AdminHome() {
-  const [clicked, setClicked] = useState(false);
-
   return (
     <main
       style={{
@@ -12,54 +6,38 @@ export default function AdminHome() {
         padding: "40px 20px",
         background: "#f7f4ee",
         fontFamily: "Arial, sans-serif",
-        boxSizing: "border-box",
       }}
     >
       <h1 style={{ color: "#214d32" }}>
-        Pajara Admin Test
+        Pajara Admin
       </h1>
 
-      <p style={{ color: "#555" }}>
-        Tes apakah tombol JavaScript bisa bekerja.
-      </p>
+      <p>Tes tombol tanpa JavaScript.</p>
 
-      <button
-        type="button"
-        onClick={() => setClicked(true)}
+      <a
+        href="?clicked=yes"
         style={{
           display: "block",
           width: "100%",
           maxWidth: "400px",
           height: "60px",
-          marginTop: "30px",
-          padding: "0 20px",
+          lineHeight: "60px",
+          textAlign: "center",
           background: "#2f6b45",
-          color: "#ffffff",
-          border: "0",
+          color: "white",
           borderRadius: "12px",
-          fontSize: "18px",
+          textDecoration: "none",
           fontWeight: "bold",
-          cursor: "pointer",
-          touchAction: "manipulation",
-          position: "relative",
-          zIndex: 9999,
+          fontSize: "18px",
+          boxSizing: "border-box",
         }}
       >
         TEKAN SAYA
-      </button>
+      </a>
 
-      {clicked && (
-        <p
-          style={{
-            marginTop: "25px",
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "#2f6b45",
-          }}
-        >
-          ✅ JAVASCRIPT BERHASIL!
-        </p>
-      )}
+      <p style={{ marginTop: "25px" }}>
+        Kalau URL berubah menjadi <b>?clicked=yes</b>, berarti sentuhan/link normal.
+      </p>
     </main>
   );
 }
