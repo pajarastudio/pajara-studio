@@ -22,12 +22,19 @@ export default async function RevisionPage({
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
           <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">P</span>
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="pajara-brand-logo"
+            />
+
             <span>Pajara Studio</span>
           </a>
 
           <nav className="pajara-nav">
-            <a href="/dashboard">Dashboard</a>
+            <a href="/dashboard">
+              Dashboard
+            </a>
 
             <a
               href="/order"
@@ -52,8 +59,8 @@ export default async function RevisionPage({
             </h1>
 
             <p>
-              Sampaikan catatan revisi agar Pajara dapat
-              memahami perubahan yang Anda inginkan.
+              Sampaikan catatan revisi Anda agar project
+              dapat disesuaikan dengan kebutuhan.
             </p>
           </div>
 
@@ -72,7 +79,9 @@ export default async function RevisionPage({
                 RINGKASAN
               </p>
 
-              <h2>Informasi Project</h2>
+              <h2>
+                Informasi Project
+              </h2>
 
               <div
                 style={{
@@ -130,7 +139,7 @@ export default async function RevisionPage({
                   </span>
 
                   <span className="pajara-order-status">
-                    Menunggu Revisi
+                    Menunggu Konfirmasi
                   </span>
                 </div>
 
@@ -147,7 +156,7 @@ export default async function RevisionPage({
                       fontSize: "14px",
                     }}
                   >
-                    Jumlah Revisi
+                    Revisi
                   </span>
 
                   <strong
@@ -172,18 +181,6 @@ export default async function RevisionPage({
                 Sampaikan Perubahan
               </h2>
 
-              <p
-                style={{
-                  marginTop: "10px",
-                  color: "var(--muted)",
-                  fontSize: "14px",
-                  lineHeight: 1.7,
-                }}
-              >
-                Jelaskan bagian desain yang ingin
-                diperbaiki dengan informasi yang jelas.
-              </p>
-
               <div
                 style={{
                   display: "grid",
@@ -193,14 +190,14 @@ export default async function RevisionPage({
               >
                 <div className="pajara-form-field">
                   <label htmlFor="revision">
-                    Catatan Revisi
+                    Detail Revisi
                   </label>
 
                   <textarea
                     id="revision"
                     name="revision"
-                    rows={7}
-                    placeholder="Contoh: ubah warna background menjadi hijau Pajara, perbesar logo, dan rapikan posisi teks."
+                    rows={8}
+                    placeholder="Jelaskan bagian desain yang ingin diubah, ditambahkan, atau diperbaiki."
                   />
                 </div>
 
@@ -218,14 +215,96 @@ export default async function RevisionPage({
                   />
 
                   <p className="pajara-form-help">
-                    Upload gambar atau file referensi jika
-                    diperlukan.
+                    Upload referensi tambahan jika
+                    diperlukan untuk menjelaskan revisi.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* PANDUAN */}
+            <div className="pajara-order-detail-card">
+              <p className="pajara-eyebrow">
+                PANDUAN
+              </p>
+
+              <h2>
+                Agar Revisi Lebih Jelas
+              </h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gap: "14px",
+                  marginTop: "22px",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "18px 20px",
+                    borderRadius: "14px",
+                    border:
+                      "1px solid var(--line)",
+                  }}
+                >
+                  <strong
+                    style={{
+                      display: "block",
+                      color: "var(--green-dark)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Jelaskan bagian yang diubah
+                  </strong>
+
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "var(--muted)",
+                      fontSize: "14px",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    Sebutkan elemen desain yang ingin
+                    disesuaikan agar proses revisi lebih
+                    terarah.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    padding: "18px 20px",
+                    borderRadius: "14px",
+                    border:
+                      "1px solid var(--line)",
+                  }}
+                >
+                  <strong
+                    style={{
+                      display: "block",
+                      color: "var(--green-dark)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Gunakan referensi bila perlu
+                  </strong>
+
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "var(--muted)",
+                      fontSize: "14px",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    Referensi visual dapat membantu Pajara
+                    memahami arah revisi yang diinginkan.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* CATATAN */}
             <div
               className="pajara-order-detail-card"
               style={{
@@ -236,10 +315,11 @@ export default async function RevisionPage({
               <p
                 className="pajara-eyebrow"
                 style={{
-                  color: "rgba(255,255,255,0.65)",
+                  color:
+                    "rgba(255,255,255,0.65)",
                 }}
               >
-                PANDUAN
+                CATATAN
               </p>
 
               <h3
@@ -248,21 +328,20 @@ export default async function RevisionPage({
                   color: "var(--white)",
                 }}
               >
-                Agar revisi lebih mudah diproses
+                Revisi tetap mengikuti brief project
               </h3>
 
               <p
                 style={{
                   margin: "12px 0 0",
-                  color: "rgba(255,255,255,0.78)",
+                  color:
+                    "rgba(255,255,255,0.78)",
                   fontSize: "14px",
                   lineHeight: 1.7,
                 }}
               >
-                Jelaskan bagian yang ingin diubah,
-                alasan perubahan, dan hasil yang
-                diharapkan. Semakin jelas catatannya,
-                semakin mudah proses revisi dilakukan.
+                Pajara Studio akan menyesuaikan revisi
+                berdasarkan brief dan kesepakatan project.
               </p>
             </div>
 
@@ -288,16 +367,15 @@ export default async function RevisionPage({
                 ← Kembali ke Pesanan
               </a>
 
-              <button
-                type="button"
-                className="pajara-button pajara-button-primary"
+              <a
+                href="/dashboard"
+                className="pajara-button pajara-button-secondary"
               >
-                Kirim Revisi
-              </button>
+                Dashboard
+              </a>
             </div>
 
           </div>
-
         </div>
       </section>
     </main>
