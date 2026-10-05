@@ -1,10 +1,3 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Pajara Admin",
-  description: "Dashboard Admin Pajara Studio",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -12,7 +5,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body style={{ margin: 0 }}>{children}</body>
+      <body
+        style={{
+          margin: 0,
+          padding: 0,
+          minHeight: "100vh",
+        }}
+      >
+        {children}
+      </body>
     </html>
   );
 }
