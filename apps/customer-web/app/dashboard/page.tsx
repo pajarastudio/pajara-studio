@@ -180,7 +180,7 @@ export default function CustomerDashboard() {
                       {orders.map((order) => (
                         <a
                           key={order.id}
-                          href={`/orders/${order.id}`}
+                          href={`/orders?id=${order.id}`}
                           style={{
                             display: "block",
                             padding: "16px",
@@ -231,7 +231,7 @@ export default function CustomerDashboard() {
             <a
               href={
                 orders.length > 0
-                  ? `/orders/${orders[0].id}/payment`
+                  ? `/orders/payment?id=${orders[0].id}`
                   : "/orders/demo/payment"
               }
               className="pajara-dashboard-card"
@@ -257,7 +257,7 @@ export default function CustomerDashboard() {
             <a
               href={
                 orders.length > 0
-                  ? `/orders/${orders[0].id}/revision`
+                  ? `/orders/revision?id=${orders[0].id}`
                   : "/orders/demo/revision"
               }
               className="pajara-dashboard-card"
@@ -283,7 +283,7 @@ export default function CustomerDashboard() {
             <a
               href={
                 orders.length > 0
-                  ? `/orders/${orders[0].id}/files`
+                  ? `/orders/files?id=${orders[0].id}`
                   : "/orders/demo/files"
               }
               className="pajara-dashboard-card"
