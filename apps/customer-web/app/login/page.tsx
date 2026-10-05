@@ -1,30 +1,25 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
-export default function CustomerLogin() {
-  const router = useRouter();
-
+export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [resetEmail, setResetEmail] = useState("");
-  const [showReset, setShowReset] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+  const [error, setError] =
+    useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-
-  const [error, setError] = useState("");
-  const [resetMessage, setResetMessage] = useState("");
-  const [resetError, setResetError] = useState("");
-
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  const handleLogin = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
-    setError("");
     setLoading(true);
+    setError("");
 
     const { error: loginError } =
       await supabase.auth.signInWithPassword({
@@ -32,252 +27,234 @@ export default function CustomerLogin() {
         password,
       });
 
-    setLoading(false);
-
     if (loginError) {
       setError(
-        `Supabase: ${loginError.message} (code: ${
-          loginError.status ?? "unknown"
-        })`
+        "Email atau password tidak sesuai."
       );
+      setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
-  }
-
-  async function handleForgotPassword(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
-    setResetError("");
-    setResetMessage("");
-    setResetLoading(true);
-
-    const { error: resetError } =
-      await supabase.auth.resetPasswordForEmail(
-        resetEmail,
-        {
-          redirectTo:
-            "https://pajara-customer.pajarastd.workers.dev/reset-password",
-        }
-      );
-
-    setResetLoading(false);
-
-    if (resetError) {
-      setResetError(
-        `Supabase: ${resetError.message} (code: ${
-          resetError.status ?? "unknown"
-        })`
-      );
-      return;
-    }
-
-    setResetMessage(
-      "Email reset password sudah dikirim. Silakan cek Gmail, termasuk folder Spam."
-    );
-  }
+    window.location.href =
+      "/dashboard";
+  };
 
   return (
     <main>
       <header className="pajara-navbar">
         <div className="pajara-container pajara-navbar-inner">
-          <a href="/" className="pajara-brand">
-            <span className="pajara-brand-mark">P</span>
-            <span>Pajara Studio</span>
+          <a
+            href="/"
+            className="pajara-brand"
+          >
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="pajara-brand-logo"
+            />
+
+            <span>
+              Pajara Studio
+            </span>
           </a>
+
+          <nav className="pajara-nav">
+            <a href="/">
+              Website
+            </a>
+
+            <a
+              href="/register"
+              className="pajara-nav-cta"
+            >
+              Daftar
+            </a>
+          </nav>
         </div>
       </header>
 
-      <section className="pajara-hero">
+      <section
+        style={{
+          minHeight:
+            "calc(100vh - 80px)",
+          display: "flex",
+          alignItems: "center",
+          padding:
+            "64px 0",
+        }}
+      >
         <div className="pajara-container">
-          <div className="pajara-hero-content">
-            <p className="pajara-eyebrow">Customer Login</p>
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "520px",
+              margin: "0 auto",
+            }}
+          >
+            <div className="pajara-order-detail-card">
+              <p className="pajara-eyebrow">
+                CUSTOMER LOGIN
+              </p>
 
-            <h1>
-              Selamat datang kembali di <span>Pajara.</span>
-            </h1>
+              <h1>
+                Masuk ke{" "}
+                <span>Pajara.</span>
+              </h1>
 
-            <p className="pajara-hero-description">
-              Login untuk melihat pesanan, pembayaran,
-              revisi, dan file desain Anda.
-            </p>
-
-            <form
-              onSubmit={handleLogin}
-              style={{
-                maxWidth: "480px",
-                marginTop: "32px",
-                display: "grid",
-                gap: "16px",
-              }}
-            >
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
+              <p
                 style={{
-                  minHeight: "50px",
-                  padding: "0 16px",
-                  border: "1px solid #e7e2d9",
-                  borderRadius: "12px",
-                  background: "#ffffff",
+                  marginTop: "12px",
+                  color: "var(--muted)",
+                  fontSize: "14px",
+                  lineHeight: 1.7,
                 }}
-              />
+              >
+                Kelola pesanan, pembayaran,
+                revisi, dan file desain Anda
+                dari satu tempat.
+              </p>
 
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
-                required
+              <form
+                onSubmit={handleLogin}
                 style={{
-                  minHeight: "50px",
-                  padding: "0 16px",
-                  border: "1px solid #e7e2d9",
-                  borderRadius: "12px",
-                  background: "#ffffff",
+                  display: "grid",
+                  gap: "18px",
+                  marginTop: "28px",
                 }}
-              />
+              >
+                <div className="pajara-form-field">
+                  <label htmlFor="email">
+                    Email
+                  </label>
 
-              {error && (
-                <p
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) =>
+                      setEmail(
+                        event.target.value
+                      )
+                    }
+                    placeholder="nama@email.com"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+
+                <div className="pajara-form-field">
+                  <label htmlFor="password">
+                    Password
+                  </label>
+
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(event) =>
+                      setPassword(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Masukkan password"
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+
+                <div
                   style={{
-                    margin: 0,
-                    color: "#b42318",
-                    lineHeight: 1.5,
+                    display: "flex",
+                    justifyContent:
+                      "flex-end",
                   }}
                 >
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                className="pajara-button pajara-button-primary"
-                disabled={loading}
-                style={{
-                  border: "none",
-                  opacity: loading ? 0.7 : 1,
-                }}
-              >
-                {loading ? "Login..." : "Login"}
-              </button>
-            </form>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowReset(!showReset);
-                setResetError("");
-                setResetMessage("");
-                setResetEmail(email);
-              }}
-              style={{
-                marginTop: "20px",
-                padding: 0,
-                border: "none",
-                background: "transparent",
-                color: "#2f6b45",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              {showReset
-                ? "Tutup lupa password"
-                : "Lupa password?"}
-            </button>
-
-            {showReset && (
-              <form
-                onSubmit={handleForgotPassword}
-                style={{
-                  maxWidth: "480px",
-                  marginTop: "20px",
-                  display: "grid",
-                  gap: "16px",
-                }}
-              >
-                <input
-                  type="email"
-                  placeholder="Masukkan email akun"
-                  value={resetEmail}
-                  onChange={(event) =>
-                    setResetEmail(event.target.value)
-                  }
-                  required
-                  style={{
-                    minHeight: "50px",
-                    padding: "0 16px",
-                    border: "1px solid #e7e2d9",
-                    borderRadius: "12px",
-                    background: "#ffffff",
-                  }}
-                />
-
-                {resetError && (
-                  <p
+                  <a
+                    href="/forgot-password"
                     style={{
-                      margin: 0,
-                      color: "#b42318",
-                      lineHeight: 1.5,
+                      color:
+                        "var(--green)",
+                      fontSize:
+                        "13px",
+                      fontWeight: 700,
                     }}
                   >
-                    {resetError}
-                  </p>
-                )}
+                    Lupa password?
+                  </a>
+                </div>
 
-                {resetMessage && (
-                  <p
+                {error && (
+                  <div
                     style={{
-                      margin: 0,
-                      color: "#2f6b45",
-                      lineHeight: 1.5,
+                      padding:
+                        "14px 16px",
+                      borderRadius:
+                        "12px",
+                      background:
+                        "rgba(160, 50, 50, 0.07)",
+                      border:
+                        "1px solid rgba(160, 50, 50, 0.15)",
+                      color:
+                        "#8b3030",
+                      fontSize:
+                        "14px",
+                      lineHeight: 1.6,
                     }}
                   >
-                    {resetMessage}
-                  </p>
+                    {error}
+                  </div>
                 )}
 
                 <button
                   type="submit"
                   className="pajara-button pajara-button-primary"
-                  disabled={resetLoading}
+                  disabled={loading}
                   style={{
-                    border: "none",
-                    opacity: resetLoading ? 0.7 : 1,
+                    width: "100%",
+                    opacity:
+                      loading ? 0.7 : 1,
                   }}
                 >
-                  {resetLoading
-                    ? "Mengirim..."
-                    : "Kirim Reset Password"}
+                  {loading
+                    ? "Memproses..."
+                    : "Masuk"}
                 </button>
               </form>
-            )}
 
-            <p
-              style={{
-                marginTop: "24px",
-                color: "#6f6f6f",
-              }}
-            >
-              Belum punya akun?{" "}
-              <a
-                href="/register"
+              <div
                 style={{
-                  color: "#2f6b45",
-                  fontWeight: 700,
+                  marginTop: "24px",
+                  paddingTop: "20px",
+                  borderTop:
+                    "1px solid var(--line)",
+                  textAlign: "center",
                 }}
               >
-                Buat akun
-              </a>
-            </p>
+                <p
+                  style={{
+                    margin: 0,
+                    color:
+                      "var(--muted)",
+                    fontSize:
+                      "14px",
+                  }}
+                >
+                  Belum punya akun?{" "}
+                  <a
+                    href="/register"
+                    style={{
+                      color:
+                        "var(--green)",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Daftar sekarang
+                  </a>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
