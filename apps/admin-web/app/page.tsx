@@ -1,4 +1,10 @@
+"use client";
+
+import { useState } from "react";
+
 export default function AdminHome() {
+  const [clicked, setClicked] = useState(false);
+
   return (
     <main
       style={{
@@ -12,28 +18,38 @@ export default function AdminHome() {
         PAJARA STUDIO
       </h1>
 
-      <p>Admin Login</p>
+      <p>Tes JavaScript Admin.</p>
 
-      <a
-        href="/test2"
+      <button
+        type="button"
+        onClick={() => setClicked(true)}
         style={{
-          display: "block",
           width: "100%",
           maxWidth: "400px",
           height: "60px",
-          lineHeight: "60px",
-          textAlign: "center",
           background: "#2f6b45",
           color: "#ffffff",
+          border: "none",
           borderRadius: "12px",
-          textDecoration: "none",
-          fontWeight: "bold",
           fontSize: "18px",
-          boxSizing: "border-box",
+          fontWeight: "bold",
+          touchAction: "manipulation",
         }}
       >
-        TES TOMBOL
-      </a>
+        TEKAN SAYA
+      </button>
+
+      {clicked && (
+        <p
+          style={{
+            marginTop: "20px",
+            color: "#214d32",
+            fontWeight: "bold",
+          }}
+        >
+          ✅ JAVASCRIPT BERHASIL!
+        </p>
+      )}
     </main>
   );
 }
