@@ -10,7 +10,7 @@
 "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
 },
 "dependencies": {
-"@opennextjs/cloudflare": "1.20.8",
+"@opennextjs/cloudflare": "1.20.9",
 "@supabase/supabase-js": "latest",
 "next": "16.4.0",
 "react": "latest",
