@@ -77,8 +77,9 @@ export default function AdminLogin() {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
       {
-        redirectTo: "https://pajara-admin.pajarastd.workers.dev",
-      }
+        redirectTo:
+          "https://pajara-admin.pajarastd.workers.dev/reset-password",
+      },
     );
 
     setResetLoading(false);
@@ -89,7 +90,7 @@ export default function AdminLogin() {
     }
 
     setMessage(
-      "Email reset password sudah dikirim. Silakan cek Gmail Anda."
+      "Email reset password sudah dikirim. Silakan cek Gmail Anda.",
     );
   }
 
