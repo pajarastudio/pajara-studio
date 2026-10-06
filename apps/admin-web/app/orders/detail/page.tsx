@@ -108,6 +108,8 @@ function OrderDetailContent() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     async function loadOrder() {
@@ -132,11 +134,7 @@ function OrderDetailContent() {
         .eq("id", user.id)
         .single();
 
-      if (
-        profileError ||
-        !profile ||
-        profile.role !== "admin"
-      ) {
+      if (profileError || !profile || profile.role !== "admin") {
         await supabase.auth.signOut();
         router.replace("/");
         return;
@@ -164,6 +162,37 @@ function OrderDetailContent() {
 
     loadOrder();
   }, [orderId, router]);
+
+  async function handleStatusChange(newStatus: string) {
+    if (!order) return;
+
+    setSavingStatus(true);
+    setStatusMessage("");
+
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", order.id);
+
+    if (error) {
+      setSavingStatus(false);
+      setStatusMessage(
+        "Gagal mengubah status: " + error.message
+      );
+      return;
+    }
+
+    setOrder({
+      ...order,
+      status: newStatus,
+    });
+
+    setSavingStatus(false);
+    setStatusMessage("Status pesanan berhasil diperbarui.");
+  }
 
   if (loading) {
     return (
@@ -545,23 +574,58 @@ function OrderDetailContent() {
             <strong>{getStatusLabel(order.status)}</strong>
           </p>
 
-          <button
-            type="button"
-            disabled
+          <select
+            value={order.status || "pending"}
+            onChange={(event) =>
+              handleStatusChange(event.target.value)
+            }
+            disabled={savingStatus}
             style={{
               width: "100%",
               height: "48px",
-              border: "none",
+              border: "1px solid #ddd",
               borderRadius: "10px",
-              background: "#ddd",
-              color: "#777",
+              padding: "0 14px",
+              background: "#ffffff",
+              color: "#333",
               fontSize: "15px",
-              fontWeight: "bold",
-              cursor: "not-allowed",
+              fontWeight: "600",
+              cursor: savingStatus ? "not-allowed" : "pointer",
+              outline: "none",
             }}
           >
-            Ubah Status — Step Berikutnya
-          </button>
+            <option value="pending">Pesanan Baru</option>
+            <option value="processing">Diproses</option>
+            <option value="completed">Selesai</option>
+            <option value="cancelled">Dibatalkan</option>
+          </select>
+
+          {savingStatus && (
+            <p
+              style={{
+                margin: "12px 0 0",
+                color: "#8a6a4a",
+                fontSize: "13px",
+              }}
+            >
+              Menyimpan status...
+            </p>
+          )}
+
+          {statusMessage && (
+            <p
+              style={{
+                margin: "12px 0 0",
+                color: statusMessage.startsWith("Gagal")
+                  ? "#b42318"
+                  : "#2f6b45",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              {statusMessage}
+            </p>
+          )}
         </div>
       </section>
     </main>
