@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminHome() {
-  const [clicked, setClicked] = useState(false);
+  const [status, setStatus] = useState("JavaScript belum terdeteksi");
+
+  useEffect(() => {
+    setStatus("✅ JAVASCRIPT REACT BERJALAN");
+  }, []);
 
   return (
     <main
@@ -18,38 +22,13 @@ export default function AdminHome() {
         PAJARA STUDIO
       </h1>
 
-      <p>Tes JavaScript Admin.</p>
+      <h2 style={{ color: "#2f6b45" }}>
+        {status}
+      </h2>
 
-      <button
-        type="button"
-        onClick={() => setClicked(true)}
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          height: "60px",
-          background: "#2f6b45",
-          color: "#ffffff",
-          border: "none",
-          borderRadius: "12px",
-          fontSize: "18px",
-          fontWeight: "bold",
-          touchAction: "manipulation",
-        }}
-      >
-        TEKAN SAYA
-      </button>
-
-      {clicked && (
-        <p
-          style={{
-            marginTop: "20px",
-            color: "#214d32",
-            fontWeight: "bold",
-          }}
-        >
-          ✅ JAVASCRIPT BERHASIL!
-        </p>
-      )}
+      <p>
+        Tes apakah JavaScript React aktif.
+      </p>
     </main>
   );
 }
