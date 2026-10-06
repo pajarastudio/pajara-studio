@@ -304,6 +304,55 @@ export default function DashboardPage() {
               fontSize: "19px",
             }}
           >
+            Pesanan
+          </h2>
+
+          <p
+            style={{
+              margin: "0 0 16px",
+              color: "#777",
+              fontSize: "14px",
+            }}
+          >
+            Kelola dan lihat semua pesanan pelanggan.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => router.push("/orders")}
+            style={{
+              width: "100%",
+              height: "48px",
+              border: "none",
+              borderRadius: "10px",
+              background: "#2f6b45",
+              color: "#ffffff",
+              fontSize: "15px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              touchAction: "manipulation",
+            }}
+          >
+            Lihat Semua Pesanan
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "16px",
+            padding: "22px",
+            marginBottom: "20px",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 10px",
+              color: "#214d32",
+              fontSize: "19px",
+            }}
+          >
             Aktivitas Terbaru
           </h2>
 
