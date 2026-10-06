@@ -111,6 +111,10 @@ function OrderDetailContent() {
   const [savingStatus, setSavingStatus] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+
   useEffect(() => {
     async function loadOrder() {
       if (!orderId) {
@@ -192,6 +196,86 @@ function OrderDetailContent() {
 
     setSavingStatus(false);
     setStatusMessage("Status pesanan berhasil diperbarui.");
+  }
+
+  async function handleUploadFinalFile() {
+    if (!order) return;
+
+    if (!selectedFile) {
+      setUploadMessage("Pilih file final terlebih dahulu.");
+      return;
+    }
+
+    setUploadingFile(true);
+    setUploadMessage("");
+
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (!sessionData.session?.user) {
+      setUploadingFile(false);
+      setUploadMessage("Sesi admin tidak ditemukan.");
+      return;
+    }
+
+    const user = sessionData.session.user;
+
+    const fileExtension =
+      selectedFile.name.includes(".")
+        ? selectedFile.name.split(".").pop()
+        : "file";
+
+    const safeFileName = selectedFile.name
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+      .replace(/-+/g, "-");
+
+    const filePath = `orders/${order.id}/final/${Date.now()}-${safeFileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("pajara-files")
+      .upload(filePath, selectedFile, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType:
+          selectedFile.type ||
+          `application/${fileExtension}`,
+      });
+
+    if (uploadError) {
+      setUploadingFile(false);
+      setUploadMessage(
+        "Gagal upload file: " + uploadError.message
+      );
+      return;
+    }
+
+    const { error: insertError } = await supabase
+      .from("order_files")
+      .insert({
+        order_id: order.id,
+        file_name: selectedFile.name,
+        file_path: filePath,
+        file_type: selectedFile.type || null,
+        file_size: selectedFile.size,
+        file_category: "final",
+        uploaded_by: user.id,
+      });
+
+    if (insertError) {
+      await supabase.storage
+        .from("pajara-files")
+        .remove([filePath]);
+
+      setUploadingFile(false);
+      setUploadMessage(
+        "File berhasil di-upload tetapi gagal dicatat: " +
+          insertError.message
+      );
+      return;
+    }
+
+    setSelectedFile(null);
+    setUploadingFile(false);
+    setUploadMessage("File final berhasil di-upload.");
   }
 
   if (loading) {
@@ -550,6 +634,7 @@ function OrderDetailContent() {
             background: "#ffffff",
             borderRadius: "16px",
             padding: "22px",
+            marginBottom: "18px",
             boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
@@ -624,6 +709,111 @@ function OrderDetailContent() {
               }}
             >
               {statusMessage}
+            </p>
+          )}
+        </div>
+
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "16px",
+            padding: "22px",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 10px",
+              color: "#214d32",
+              fontSize: "19px",
+            }}
+          >
+            Upload Final File
+          </h2>
+
+          <p
+            style={{
+              margin: "0 0 18px",
+              color: "#777",
+              fontSize: "14px",
+              lineHeight: 1.5,
+            }}
+          >
+            Upload file desain final untuk pesanan ini.
+          </p>
+
+          <input
+            type="file"
+            onChange={(event) => {
+              const file = event.target.files?.[0] || null;
+              setSelectedFile(file);
+              setUploadMessage("");
+            }}
+            disabled={uploadingFile}
+            style={{
+              width: "100%",
+              marginBottom: "14px",
+              fontSize: "14px",
+            }}
+          />
+
+          {selectedFile && (
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: "10px",
+                padding: "12px 14px",
+                marginBottom: "14px",
+                color: "#444",
+                fontSize: "13px",
+                wordBreak: "break-word",
+              }}
+            >
+              File dipilih: <strong>{selectedFile.name}</strong>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleUploadFinalFile}
+            disabled={uploadingFile || !selectedFile}
+            style={{
+              width: "100%",
+              height: "48px",
+              border: "none",
+              borderRadius: "10px",
+              background:
+                uploadingFile || !selectedFile
+                  ? "#b8c5bc"
+                  : "#2f6b45",
+              color: "#ffffff",
+              fontSize: "15px",
+              fontWeight: "bold",
+              cursor:
+                uploadingFile || !selectedFile
+                  ? "not-allowed"
+                  : "pointer",
+              touchAction: "manipulation",
+            }}
+          >
+            {uploadingFile
+              ? "Mengupload..."
+              : "Upload Final File"}
+          </button>
+
+          {uploadMessage && (
+            <p
+              style={{
+                margin: "12px 0 0",
+                color: uploadMessage.startsWith("Gagal")
+                  ? "#b42318"
+                  : "#2f6b45",
+                fontSize: "13px",
+                fontWeight: "600",
+                lineHeight: 1.5,
+              }}
+            >
+              {uploadMessage}
             </p>
           )}
         </div>
