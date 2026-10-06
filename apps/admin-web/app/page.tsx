@@ -13,6 +13,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) {
@@ -62,6 +63,34 @@ export default function AdminLogin() {
 
     setLoading(false);
     setMessage("Login admin berhasil.");
+  }
+
+  async function handleResetPassword() {
+    if (!email) {
+      setMessage("Masukkan email admin terlebih dahulu.");
+      return;
+    }
+
+    setResetLoading(true);
+    setMessage("");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      {
+        redirectTo: "https://pajara-admin.pajarastd.workers.dev",
+      }
+    );
+
+    setResetLoading(false);
+
+    if (error) {
+      setMessage("Gagal mengirim reset password: " + error.message);
+      return;
+    }
+
+    setMessage(
+      "Email reset password sudah dikirim. Silakan cek Gmail Anda."
+    );
   }
 
   return (
@@ -158,7 +187,7 @@ export default function AdminLogin() {
             width: "100%",
             height: "50px",
             padding: "0 14px",
-            marginBottom: "20px",
+            marginBottom: "12px",
             border: "1px solid #ddd",
             borderRadius: "10px",
             boxSizing: "border-box",
@@ -169,7 +198,7 @@ export default function AdminLogin() {
         <button
           type="button"
           onClick={handleLogin}
-          disabled={loading}
+          disabled={loading || resetLoading}
           style={{
             display: "block",
             width: "100%",
@@ -185,6 +214,26 @@ export default function AdminLogin() {
           }}
         >
           {loading ? "Memproses..." : "Masuk sebagai Admin"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleResetPassword}
+          disabled={loading || resetLoading}
+          style={{
+            display: "block",
+            width: "100%",
+            marginTop: "14px",
+            border: "none",
+            background: "transparent",
+            color: "#8a6a4a",
+            fontSize: "14px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            padding: "8px",
+          }}
+        >
+          {resetLoading ? "Mengirim..." : "Lupa Password?"}
         </button>
 
         {message && (
