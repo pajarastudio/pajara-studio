@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -57,7 +57,49 @@ function getStatusLabel(status: string | null) {
   }
 }
 
-export default function OrderDetailPage() {
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: "20px",
+        borderBottom: "1px solid #eee",
+        paddingBottom: "12px",
+      }}
+    >
+      <span
+        style={{
+          color: "#8a6a4a",
+          fontSize: "13px",
+        }}
+      >
+        {label}
+      </span>
+
+      <span
+        style={{
+          color: "#333",
+          fontSize: "14px",
+          fontWeight: "600",
+          textAlign: "right",
+          maxWidth: "60%",
+          wordBreak: "break-word",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function OrderDetailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -526,44 +568,28 @@ export default function OrderDetailPage() {
   );
 }
 
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function LoadingScreen() {
   return (
-    <div
+    <main
       style={{
+        minHeight: "100vh",
         display: "flex",
-        justifyContent: "space-between",
-        gap: "20px",
-        borderBottom: "1px solid #eee",
-        paddingBottom: "12px",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f7f4ee",
+        fontFamily: "Arial, sans-serif",
+        color: "#214d32",
       }}
     >
-      <span
-        style={{
-          color: "#8a6a4a",
-          fontSize: "13px",
-        }}
-      >
-        {label}
-      </span>
+      Memuat detail pesanan...
+    </main>
+  );
+}
 
-      <span
-        style={{
-          color: "#333",
-          fontSize: "14px",
-          fontWeight: "600",
-          textAlign: "right",
-          maxWidth: "60%",
-          wordBreak: "break-word",
-        }}
-      >
-        {value}
-      </span>
-    </div>
+export default function OrderDetailPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <OrderDetailContent />
+    </Suspense>
   );
 }
