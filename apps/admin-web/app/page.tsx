@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,6 +10,8 @@ const supabase = createClient(
 );
 
 export default function AdminLogin() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -61,8 +64,9 @@ export default function AdminLogin() {
       return;
     }
 
-    setLoading(false);
     setMessage("Login admin berhasil.");
+
+    router.push("/dashboard");
   }
 
   async function handleResetPassword() {
