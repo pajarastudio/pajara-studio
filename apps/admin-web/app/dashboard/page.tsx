@@ -15,6 +15,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
 
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [newOrders, setNewOrders] = useState(0);
+  const [processingOrders, setProcessingOrders] = useState(0);
+  const [completedOrders, setCompletedOrders] = useState(0);
+
   useEffect(() => {
     async function checkAdmin() {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -26,19 +31,44 @@ export default function DashboardPage() {
 
       const user = sessionData.session.user;
 
-      const { data: profile, error } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles_v2")
         .select("role")
         .eq("id", user.id)
         .single();
 
-      if (error || !profile || profile.role !== "admin") {
+      if (
+        profileError ||
+        !profile ||
+        profile.role !== "admin"
+      ) {
         await supabase.auth.signOut();
         router.replace("/");
         return;
       }
 
       setAdminEmail(user.email || "");
+
+      const { data: orders, error: ordersError } = await supabase
+        .from("orders")
+        .select("status");
+
+      if (!ordersError && orders) {
+        setTotalOrders(orders.length);
+
+        setNewOrders(
+          orders.filter((order) => order.status === "pending").length
+        );
+
+        setProcessingOrders(
+          orders.filter((order) => order.status === "processing").length
+        );
+
+        setCompletedOrders(
+          orders.filter((order) => order.status === "completed").length
+        );
+      }
+
       setLoading(false);
     }
 
@@ -184,7 +214,7 @@ export default function DashboardPage() {
                 fontSize: "28px",
               }}
             >
-              0
+              {totalOrders}
             </h3>
           </div>
 
@@ -207,7 +237,7 @@ export default function DashboardPage() {
                 fontSize: "28px",
               }}
             >
-              0
+              {newOrders}
             </h3>
           </div>
 
@@ -230,7 +260,7 @@ export default function DashboardPage() {
                 fontSize: "28px",
               }}
             >
-              0
+              {processingOrders}
             </h3>
           </div>
 
@@ -253,7 +283,7 @@ export default function DashboardPage() {
                 fontSize: "28px",
               }}
             >
-              0
+              {completedOrders}
             </h3>
           </div>
         </div>
