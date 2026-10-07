@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ServiceWorkerRegister from "./service-worker-register";
 
 export const metadata: Metadata = {
   title: "Pajara Admin",
@@ -27,7 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
