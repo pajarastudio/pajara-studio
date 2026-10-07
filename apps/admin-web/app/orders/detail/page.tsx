@@ -58,6 +58,10 @@ function getStatusLabel(status: string | null) {
       return "Pesanan Baru";
     case "processing":
       return "Diproses";
+    case "revision":
+      return "Revisi";
+    case "waiting_payment":
+      return "Menunggu Pelunasan";
     case "completed":
       return "Selesai";
     case "cancelled":
@@ -1187,12 +1191,23 @@ function OrderDetailContent() {
             <option value="pending">
               Pesanan Baru
             </option>
+
             <option value="processing">
               Diproses
             </option>
+
+            <option value="revision">
+              Revisi
+            </option>
+
+            <option value="waiting_payment">
+              Menunggu Pelunasan
+            </option>
+
             <option value="completed">
               Selesai
             </option>
+
             <option value="cancelled">
               Dibatalkan
             </option>
