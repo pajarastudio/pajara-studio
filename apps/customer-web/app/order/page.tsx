@@ -63,12 +63,13 @@ export default function CreateOrder() {
         formData.get("payment-type") || ""
       );
 
-      const referenceFiles = formData
-        .getAll("reference")
-        .filter(
-          (file): file is File =>
-            file instanceof File && file.size > 0
-        );
+      const referenceInput = form.elements.namedItem(
+        "reference"
+      ) as HTMLInputElement | null;
+
+      const referenceFiles = referenceInput?.files
+        ? Array.from(referenceInput.files)
+        : [];
 
       if (!service) {
         setError("Silakan pilih layanan.");
@@ -154,7 +155,9 @@ export default function CreateOrder() {
             "_"
           );
 
-          const filePath = `orders/${order.id}/reference/${Date.now()}-${safeFileName}`;
+          const filePath =
+            `orders/${order.id}/reference/` +
+            `${crypto.randomUUID()}-${safeFileName}`;
 
           const { error: uploadError } =
             await supabase.storage
@@ -163,7 +166,8 @@ export default function CreateOrder() {
                 cacheControl: "3600",
                 upsert: false,
                 contentType:
-                  file.type || "application/octet-stream",
+                  file.type ||
+                  "application/octet-stream",
               });
 
           if (uploadError) {
@@ -183,7 +187,8 @@ export default function CreateOrder() {
                 file_name: file.name,
                 file_path: filePath,
                 file_type:
-                  file.type || "application/octet-stream",
+                  file.type ||
+                  "application/octet-stream",
                 file_size: file.size,
                 file_category: "reference",
                 uploaded_by: user.id,
