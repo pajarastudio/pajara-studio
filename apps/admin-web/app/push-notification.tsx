@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -10,49 +10,79 @@ const supabase = createClient(
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+
   const base64 = (base64String + padding)
     .replace(/-/g, "+")
     .replace(/_/g, "/");
 
   const rawData = window.atob(base64);
 
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+  return Uint8Array.from(
+    [...rawData].map((char) => char.charCodeAt(0))
+  );
 }
 
 export default function PushNotification() {
+  const [status, setStatus] = useState("Memeriksa push notification...");
+
   useEffect(() => {
     async function setupPushNotification() {
       try {
+        setStatus("1. Mengecek dukungan browser...");
+
         if (
           !("serviceWorker" in navigator) ||
           !("PushManager" in window) ||
           !("Notification" in window)
         ) {
-          console.log("Push notification tidak didukung.");
+          setStatus(
+            "❌ Browser HP tidak mendukung push notification."
+          );
           return;
         }
+
+        setStatus("2. Mengecek login admin...");
 
         const {
           data: { user },
         } = await supabase.auth.getUser();
 
         if (!user) {
-          console.log("Admin belum login.");
+          setStatus("❌ Admin belum login.");
           return;
         }
 
-        const permission = await Notification.requestPermission();
+        setStatus("3. Admin terdeteksi. Mengecek izin notifikasi...");
 
-        if (permission !== "granted") {
-          console.log("Izin notifikasi belum diberikan.");
-          return;
+        if (Notification.permission !== "granted") {
+          setStatus("⚠️ Izin notifikasi belum aktif.");
+
+          const permission =
+            await Notification.requestPermission();
+
+          if (permission !== "granted") {
+            setStatus(
+              "❌ Izin notifikasi ditolak atau belum diberikan."
+            );
+            return;
+          }
         }
+
+        setStatus("4. Izin OK. Menunggu Service Worker...");
 
         const registration =
           await navigator.serviceWorker.ready;
 
+        setStatus("5. Service Worker aktif.");
+
         const existingSubscription =
           await registration.pushManager.getSubscription();
+
+        setStatus(
+          existingSubscription
+            ? "6. Subscription lama ditemukan."
+            : "6. Membuat subscription baru..."
+        );
 
         const subscription =
           existingSubscription ||
@@ -70,9 +100,13 @@ export default function PushNotification() {
           !subscriptionJson.keys?.p256dh ||
           !subscriptionJson.keys?.auth
         ) {
-          console.error("Data subscription tidak lengkap.");
+          setStatus(
+            "❌ Subscription terbentuk tetapi datanya tidak lengkap."
+          );
           return;
         }
+
+        setStatus("7. Subscription berhasil. Menyimpan ke database...");
 
         const { error } = await supabase
           .from("push_subscriptions")
@@ -89,26 +123,43 @@ export default function PushNotification() {
           );
 
         if (error) {
-          console.error(
-            "Gagal menyimpan subscription:",
-            error
+          setStatus(
+            `❌ Gagal menyimpan database: ${error.message}`
           );
           return;
         }
 
-        console.log(
-          "Pajara Push Notification berhasil aktif."
+        setStatus(
+          "✅ PUSH AKTIF. Subscription berhasil tersimpan."
         );
       } catch (error) {
-        console.error(
-          "Push notification error:",
-          error
-        );
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        setStatus(`❌ ERROR: ${message}`);
       }
     }
 
     setupPushNotification();
   }, []);
 
-  return null;
+  return (
+    <div
+      style={{
+        margin: "12px 16px",
+        padding: "12px 14px",
+        borderRadius: "10px",
+        background: "#f7f4ee",
+        border: "1px solid #d8d0c5",
+        color: "#214d32",
+        fontSize: "13px",
+        lineHeight: 1.5,
+      }}
+    >
+      <strong>Status Push:</strong>
+      <div>{status}</div>
+    </div>
+  );
 }
