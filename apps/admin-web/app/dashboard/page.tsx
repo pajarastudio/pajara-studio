@@ -249,7 +249,6 @@ export default function DashboardPage() {
           boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
         }}
       >
-        {/* DECORATIVE SHAPES */}
         <div
           style={{
             position: "absolute",
@@ -1070,11 +1069,7 @@ export default function DashboardPage() {
 
           <button
             type="button"
-            onClick={() =>
-              alert(
-                "Fitur Keuangan akan kita aktifkan setelah sistem keuangan selesai."
-              )
-            }
+            onClick={() => router.push("/finance")}
             style={{
               border: "none",
               background: "transparent",
