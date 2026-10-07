@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import PushNotification from "../push-notification";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -225,335 +226,80 @@ export default function DashboardPage() {
   ];
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f7f4ee",
-        color: "#214d32",
-        fontFamily:
-          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        paddingBottom: "82px",
-      }}
-    >
-      {/* HEADER */}
-      <header
+    <>
+      <PushNotification />
+
+      <main
         style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          overflow: "hidden",
-          background:
-            "linear-gradient(135deg, #214d32 0%, #2f6b45 55%, #214d32 100%)",
-          color: "#ffffff",
-          padding: "20px 20px 19px",
-          boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
+          minHeight: "100vh",
+          background: "#f7f4ee",
+          color: "#214d32",
+          fontFamily:
+            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          paddingBottom: "82px",
         }}
       >
-        <div
+        {/* HEADER */}
+        <header
           style={{
-            position: "absolute",
-            width: "180px",
-            height: "180px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.045)",
-            right: "-55px",
-            top: "-85px",
-          }}
-        />
-
-        <div
-          style={{
-            position: "absolute",
-            width: "95px",
-            height: "95px",
-            borderRadius: "28px",
-            border: "1px solid rgba(255,255,255,0.07)",
-            right: "85px",
-            bottom: "-48px",
-            transform: "rotate(24deg)",
-          }}
-        />
-
-        <div
-          style={{
-            position: "absolute",
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.28)",
-            right: "130px",
-            top: "22px",
-          }}
-        />
-
-        <div
-          style={{
-            maxWidth: "1080px",
-            margin: "0 auto",
-            position: "relative",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "#dcebdd",
-                  opacity: 0.9,
-                }}
-              />
-
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "10px",
-                  letterSpacing: "2.2px",
-                  fontWeight: 800,
-                  opacity: 0.72,
-                }}
-              >
-                PAJARA STUDIO
-              </p>
-            </div>
-
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "21px",
-                lineHeight: 1.15,
-                letterSpacing: "-0.5px",
-                fontWeight: 800,
-              }}
-            >
-              Admin Dashboard
-            </h1>
-
-            <div
-              style={{
-                width: "34px",
-                height: "2px",
-                borderRadius: "999px",
-                background: "#8a6a4a",
-                marginTop: "11px",
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              width: "46px",
-              height: "46px",
-              borderRadius: "15px",
-              background: "rgba(255,255,255,0.10)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "13px",
-              fontWeight: 900,
-              letterSpacing: "0.5px",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            PS
-          </div>
-        </div>
-      </header>
-
-      {/* CONTENT */}
-      <section
-        style={{
-          maxWidth: "1080px",
-          margin: "0 auto",
-          padding: "28px 20px 40px",
-        }}
-      >
-        {/* WELCOME */}
-        <section
-          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            overflow: "hidden",
             background:
-              "linear-gradient(135deg, #ffffff 0%, #f4f7f2 100%)",
-            borderRadius: "22px",
-            padding: "24px",
-            marginBottom: "18px",
-            border: "1px solid #e6ebe5",
-            boxShadow: "0 12px 35px rgba(33,77,50,0.07)",
+              "linear-gradient(135deg, #214d32 0%, #2f6b45 55%, #214d32 100%)",
+            color: "#ffffff",
+            padding: "20px 20px 19px",
+            boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
           }}
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: "18px",
+              position: "absolute",
+              width: "180px",
+              height: "180px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.045)",
+              right: "-55px",
+              top: "-85px",
             }}
-          >
-            <div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "#8a6a4a",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  letterSpacing: "1.2px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Selamat datang kembali
-              </p>
+          />
 
-              <h2
-                style={{
-                  margin: "7px 0 6px",
-                  color: "#214d32",
-                  fontSize: "25px",
-                  lineHeight: 1.15,
-                  letterSpacing: "-0.6px",
-                }}
-              >
-                Admin Pajara
-              </h2>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: "#737973",
-                  fontSize: "13px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {adminEmail}
-              </p>
-            </div>
-
-            <div
-              style={{
-                minWidth: "48px",
-                height: "48px",
-                borderRadius: "15px",
-                background: "#e8f0e9",
-                color: "#2f6b45",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 800,
-                fontSize: "15px",
-              }}
-            >
-              A
-            </div>
-          </div>
-        </section>
-
-        {/* STATS */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: "12px",
-            marginBottom: "18px",
-          }}
-        >
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              style={{
-                background: "#ffffff",
-                borderRadius: "18px",
-                padding: "18px",
-                border: "1px solid #e8ebe7",
-                boxShadow: "0 8px 24px rgba(33,77,50,0.05)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#8a6a4a",
-                    fontSize: "11px",
-                    fontWeight: 800,
-                    letterSpacing: "1px",
-                  }}
-                >
-                  {stat.symbol}
-                </span>
-
-                <span
-                  style={{
-                    width: "7px",
-                    height: "7px",
-                    borderRadius: "50%",
-                    background: "#2f6b45",
-                  }}
-                />
-              </div>
-
-              <p
-                style={{
-                  margin: "15px 0 5px",
-                  color: "#747a75",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                }}
-              >
-                {stat.label}
-              </p>
-
-              <h3
-                style={{
-                  margin: 0,
-                  color: "#214d32",
-                  fontSize: "29px",
-                  lineHeight: 1,
-                  letterSpacing: "-1px",
-                }}
-              >
-                {stat.value}
-              </h3>
-            </div>
-          ))}
-        </section>
-
-        {/* NOTIFICATIONS */}
-        <section
-          id="notifikasi"
-          style={{
-            background: "#ffffff",
-            borderRadius: "20px",
-            padding: "21px",
-            marginBottom: "18px",
-            border: "1px solid #e8ebe7",
-            boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
-          }}
-        >
           <div
             style={{
+              position: "absolute",
+              width: "95px",
+              height: "95px",
+              borderRadius: "28px",
+              border: "1px solid rgba(255,255,255,0.07)",
+              right: "85px",
+              bottom: "-48px",
+              transform: "rotate(24deg)",
+            }}
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.28)",
+              right: "130px",
+              top: "22px",
+            }}
+          />
+
+          <div
+            style={{
+              maxWidth: "1080px",
+              margin: "0 auto",
+              position: "relative",
+              zIndex: 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "12px",
-              marginBottom: "15px",
+              gap: "16px",
             }}
           >
             <div>
@@ -562,32 +308,751 @@ export default function DashboardPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
+                  marginBottom: "5px",
                 }}
               >
+                <span
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#dcebdd",
+                    opacity: 0.9,
+                  }}
+                />
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "10px",
+                    letterSpacing: "2.2px",
+                    fontWeight: 800,
+                    opacity: 0.72,
+                  }}
+                >
+                  PAJARA STUDIO
+                </p>
+              </div>
+
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: "21px",
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.5px",
+                  fontWeight: 800,
+                }}
+              >
+                Admin Dashboard
+              </h1>
+
+              <div
+                style={{
+                  width: "34px",
+                  height: "2px",
+                  borderRadius: "999px",
+                  background: "#8a6a4a",
+                  marginTop: "11px",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                width: "46px",
+                height: "46px",
+                borderRadius: "15px",
+                background: "rgba(255,255,255,0.10)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "13px",
+                fontWeight: 900,
+                letterSpacing: "0.5px",
+                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              PS
+            </div>
+          </div>
+        </header>
+
+        {/* CONTENT */}
+        <section
+          style={{
+            maxWidth: "1080px",
+            margin: "0 auto",
+            padding: "28px 20px 40px",
+          }}
+        >
+          {/* WELCOME */}
+          <section
+            style={{
+              background:
+                "linear-gradient(135deg, #ffffff 0%, #f4f7f2 100%)",
+              borderRadius: "22px",
+              padding: "24px",
+              marginBottom: "18px",
+              border: "1px solid #e6ebe5",
+              boxShadow: "0 12px 35px rgba(33,77,50,0.07)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: "18px",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#8a6a4a",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    letterSpacing: "1.2px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Selamat datang kembali
+                </p>
+
                 <h2
+                  style={{
+                    margin: "7px 0 6px",
+                    color: "#214d32",
+                    fontSize: "25px",
+                    lineHeight: 1.15,
+                    letterSpacing: "-0.6px",
+                  }}
+                >
+                  Admin Pajara
+                </h2>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#737973",
+                    fontSize: "13px",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {adminEmail}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  minWidth: "48px",
+                  height: "48px",
+                  borderRadius: "15px",
+                  background: "#e8f0e9",
+                  color: "#2f6b45",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: "15px",
+                }}
+              >
+                A
+              </div>
+            </div>
+          </section>
+
+          {/* STATS */}
+          <section
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: "12px",
+              marginBottom: "18px",
+            }}
+          >
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: "#ffffff",
+                  borderRadius: "18px",
+                  padding: "18px",
+                  border: "1px solid #e8ebe7",
+                  boxShadow: "0 8px 24px rgba(33,77,50,0.05)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#8a6a4a",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    {stat.symbol}
+                  </span>
+
+                  <span
+                    style={{
+                      width: "7px",
+                      height: "7px",
+                      borderRadius: "50%",
+                      background: "#2f6b45",
+                    }}
+                  />
+                </div>
+
+                <p
+                  style={{
+                    margin: "15px 0 5px",
+                    color: "#747a75",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                  }}
+                >
+                  {stat.label}
+                </p>
+
+                <h3
                   style={{
                     margin: 0,
                     color: "#214d32",
-                    fontSize: "18px",
+                    fontSize: "29px",
+                    lineHeight: 1,
+                    letterSpacing: "-1px",
                   }}
                 >
-                  Notifikasi
+                  {stat.value}
+                </h3>
+              </div>
+            ))}
+          </section>
+
+          {/* NOTIFICATIONS */}
+          <section
+            id="notifikasi"
+            style={{
+              background: "#ffffff",
+              borderRadius: "20px",
+              padding: "21px",
+              marginBottom: "18px",
+              border: "1px solid #e8ebe7",
+              boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+                marginBottom: "15px",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <h2
+                    style={{
+                      margin: 0,
+                      color: "#214d32",
+                      fontSize: "18px",
+                    }}
+                  >
+                    Notifikasi
+                  </h2>
+
+                  {unreadCount > 0 && (
+                    <span
+                      style={{
+                        minWidth: "22px",
+                        height: "22px",
+                        padding: "0 6px",
+                        borderRadius: "999px",
+                        background: "#2f6b45",
+                        color: "#ffffff",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+
+                <p
+                  style={{
+                    margin: "5px 0 0",
+                    color: "#8a908b",
+                    fontSize: "12px",
+                  }}
+                >
+                  Pembaruan terbaru sistem
+                </p>
+              </div>
+
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={markAllAsRead}
+                  style={{
+                    border: "none",
+                    background: "#eef4ef",
+                    color: "#2f6b45",
+                    borderRadius: "9px",
+                    padding: "9px 11px",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                  }}
+                >
+                  Tandai dibaca
+                </button>
+              )}
+            </div>
+
+            {notificationLoading ? (
+              <div
+                style={{
+                  padding: "20px 0",
+                  color: "#858b86",
+                  fontSize: "13px",
+                }}
+              >
+                Memuat notifikasi...
+              </div>
+            ) : notifications.length === 0 ? (
+              <div
+                style={{
+                  padding: "25px 16px",
+                  textAlign: "center",
+                  background: "#fafbf9",
+                  borderRadius: "14px",
+                  border: "1px dashed #dfe5df",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "22px",
+                    marginBottom: "7px",
+                  }}
+                >
+                  —
+                </div>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#777d78",
+                    fontSize: "13px",
+                  }}
+                >
+                  Belum ada notifikasi.
+                </p>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "9px",
+                }}
+              >
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    onClick={() => {
+                      if (!notification.is_read) {
+                        markAsRead(notification.id);
+                      }
+                    }}
+                    style={{
+                      padding: "14px",
+                      borderRadius: "14px",
+                      background: notification.is_read
+                        ? "#fafbf9"
+                        : "#eef5ef",
+                      border: notification.is_read
+                        ? "1px solid #edf0ec"
+                        : "1px solid #cddfce",
+                      cursor: notification.is_read
+                        ? "default"
+                        : "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: "12px",
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <p
+                          style={{
+                            margin: 0,
+                            color: "#214d32",
+                            fontWeight: 800,
+                            fontSize: "13px",
+                          }}
+                        >
+                          {notification.title}
+                        </p>
+
+                        <p
+                          style={{
+                            margin: "5px 0",
+                            color: "#5f665f",
+                            fontSize: "13px",
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {notification.message}
+                        </p>
+
+                        <p
+                          style={{
+                            margin: 0,
+                            color: "#9a9e9a",
+                            fontSize: "11px",
+                          }}
+                        >
+                          {formatNotificationDate(
+                            notification.created_at
+                          )}
+                        </p>
+                      </div>
+
+                      {!notification.is_read && (
+                        <span
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "50%",
+                            background: "#2f6b45",
+                            flexShrink: 0,
+                            marginTop: "4px",
+                            boxShadow: "0 0 0 4px #dcebdd",
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ORDERS */}
+          <section
+            style={{
+              background: "#214d32",
+              color: "#ffffff",
+              borderRadius: "20px",
+              padding: "22px",
+              marginBottom: "18px",
+              boxShadow: "0 10px 30px rgba(33,77,50,0.13)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "16px",
+                marginBottom: "18px",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#c9d9cc",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    letterSpacing: "1.2px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Workspace
+                </p>
+
+                <h2
+                  style={{
+                    margin: "6px 0 5px",
+                    fontSize: "20px",
+                  }}
+                >
+                  Pesanan
                 </h2>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#d8e2d9",
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Kelola dan lihat semua pesanan pelanggan.
+                </p>
+              </div>
+
+              <span
+                style={{
+                  fontSize: "22px",
+                  opacity: 0.7,
+                }}
+              >
+                →
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push("/orders")}
+              style={{
+                width: "100%",
+                height: "48px",
+                border: "none",
+                borderRadius: "12px",
+                background: "#ffffff",
+                color: "#214d32",
+                fontSize: "14px",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              Lihat Semua Pesanan
+            </button>
+          </section>
+
+          {/* ACTIVITY */}
+          <section
+            style={{
+              background: "#ffffff",
+              borderRadius: "20px",
+              padding: "21px",
+              marginBottom: "18px",
+              border: "1px solid #e8ebe7",
+              boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "8px",
+              }}
+            >
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#8a6a4a",
+                }}
+              />
+
+              <h2
+                style={{
+                  margin: 0,
+                  color: "#214d32",
+                  fontSize: "18px",
+                }}
+              >
+                Aktivitas Terbaru
+              </h2>
+            </div>
+
+            <p
+              style={{
+                margin: 0,
+                color: "#858b86",
+                fontSize: "13px",
+                lineHeight: 1.5,
+              }}
+            >
+              Belum ada aktivitas terbaru.
+            </p>
+          </section>
+
+          {/* LOGOUT */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              width: "100%",
+              height: "48px",
+              border: "1px solid #d8cfc6",
+              borderRadius: "12px",
+              background: "transparent",
+              color: "#8a6a4a",
+              fontSize: "13px",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            Keluar dari Admin
+          </button>
+
+          <p
+            style={{
+              margin: "22px 0 0",
+              textAlign: "center",
+              color: "#9b9d99",
+              fontSize: "10px",
+              letterSpacing: "0.8px",
+            }}
+          >
+            PAJARA STUDIO • BERAKAR DI TANAH PASUNDAN
+          </p>
+        </section>
+
+        {/* BOTTOM NAVBAR */}
+        <nav
+          style={{
+            position: "fixed",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 100,
+            background: "rgba(255,255,255,0.97)",
+            borderTop: "1px solid #e4e8e3",
+            boxShadow: "0 -8px 30px rgba(33,77,50,0.10)",
+            padding:
+              "8px 10px calc(8px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "620px",
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "5px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }
+              style={{
+                border: "none",
+                background: "#eaf2eb",
+                color: "#214d32",
+                borderRadius: "12px",
+                padding: "8px 4px",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontSize: "17px", lineHeight: 1 }}>
+                ⌂
+              </div>
+
+              <div
+                style={{
+                  marginTop: "4px",
+                  fontSize: "10px",
+                  fontWeight: 800,
+                }}
+              >
+                Dashboard
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/orders")}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "#69716b",
+                borderRadius: "12px",
+                padding: "8px 4px",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontSize: "17px", lineHeight: 1 }}>
+                ▣
+              </div>
+
+              <div
+                style={{
+                  marginTop: "4px",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                }}
+              >
+                Pesanan
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById("notifikasi")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "#69716b",
+                borderRadius: "12px",
+                padding: "8px 4px",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                  fontSize: "17px",
+                  lineHeight: 1,
+                }}
+              >
+                ♢
 
                 {unreadCount > 0 && (
                   <span
                     style={{
-                      minWidth: "22px",
-                      height: "22px",
-                      padding: "0 6px",
+                      position: "absolute",
+                      top: "-5px",
+                      right: "-8px",
+                      minWidth: "13px",
+                      height: "13px",
+                      padding: "0 3px",
                       borderRadius: "999px",
                       background: "#2f6b45",
                       color: "#ffffff",
-                      display: "inline-flex",
+                      fontSize: "8px",
+                      fontWeight: 800,
+                      display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "11px",
-                      fontWeight: 800,
                     }}
                   >
                     {unreadCount}
@@ -595,506 +1060,46 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <p
-                style={{
-                  margin: "5px 0 0",
-                  color: "#8a908b",
-                  fontSize: "12px",
-                }}
-              >
-                Pembaruan terbaru sistem
-              </p>
-            </div>
-
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={markAllAsRead}
-                style={{
-                  border: "none",
-                  background: "#eef4ef",
-                  color: "#2f6b45",
-                  borderRadius: "9px",
-                  padding: "9px 11px",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                }}
-              >
-                Tandai dibaca
-              </button>
-            )}
-          </div>
-
-          {notificationLoading ? (
-            <div
-              style={{
-                padding: "20px 0",
-                color: "#858b86",
-                fontSize: "13px",
-              }}
-            >
-              Memuat notifikasi...
-            </div>
-          ) : notifications.length === 0 ? (
-            <div
-              style={{
-                padding: "25px 16px",
-                textAlign: "center",
-                background: "#fafbf9",
-                borderRadius: "14px",
-                border: "1px dashed #dfe5df",
-              }}
-            >
               <div
                 style={{
-                  fontSize: "22px",
-                  marginBottom: "7px",
+                  marginTop: "4px",
+                  fontSize: "10px",
+                  fontWeight: 700,
                 }}
               >
-                —
+                Notifikasi
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/finance")}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "#69716b",
+                borderRadius: "12px",
+                padding: "8px 4px",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontSize: "17px", lineHeight: 1 }}>
+                Rp
               </div>
 
-              <p
+              <div
                 style={{
-                  margin: 0,
-                  color: "#777d78",
-                  fontSize: "13px",
+                  marginTop: "4px",
+                  fontSize: "10px",
+                  fontWeight: 700,
                 }}
               >
-                Belum ada notifikasi.
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "9px",
-              }}
-            >
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  onClick={() => {
-                    if (!notification.is_read) {
-                      markAsRead(notification.id);
-                    }
-                  }}
-                  style={{
-                    padding: "14px",
-                    borderRadius: "14px",
-                    background: notification.is_read
-                      ? "#fafbf9"
-                      : "#eef5ef",
-                    border: notification.is_read
-                      ? "1px solid #edf0ec"
-                      : "1px solid #cddfce",
-                    cursor: notification.is_read
-                      ? "default"
-                      : "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: "12px",
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "#214d32",
-                          fontWeight: 800,
-                          fontSize: "13px",
-                        }}
-                      >
-                        {notification.title}
-                      </p>
-
-                      <p
-                        style={{
-                          margin: "5px 0",
-                          color: "#5f665f",
-                          fontSize: "13px",
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {notification.message}
-                      </p>
-
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "#9a9e9a",
-                          fontSize: "11px",
-                        }}
-                      >
-                        {formatNotificationDate(
-                          notification.created_at
-                        )}
-                      </p>
-                    </div>
-
-                    {!notification.is_read && (
-                      <span
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          background: "#2f6b45",
-                          flexShrink: 0,
-                          marginTop: "4px",
-                          boxShadow: "0 0 0 4px #dcebdd",
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* ORDERS */}
-        <section
-          style={{
-            background: "#214d32",
-            color: "#ffffff",
-            borderRadius: "20px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow: "0 10px 30px rgba(33,77,50,0.13)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "16px",
-              marginBottom: "18px",
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "#c9d9cc",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  letterSpacing: "1.2px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Workspace
-              </p>
-
-              <h2
-                style={{
-                  margin: "6px 0 5px",
-                  fontSize: "20px",
-                }}
-              >
-                Pesanan
-              </h2>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: "#d8e2d9",
-                  fontSize: "13px",
-                  lineHeight: 1.5,
-                }}
-              >
-                Kelola dan lihat semua pesanan pelanggan.
-              </p>
-            </div>
-
-            <span
-              style={{
-                fontSize: "22px",
-                opacity: 0.7,
-              }}
-            >
-              →
-            </span>
+                Keuangan
+              </div>
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => router.push("/orders")}
-            style={{
-              width: "100%",
-              height: "48px",
-              border: "none",
-              borderRadius: "12px",
-              background: "#ffffff",
-              color: "#214d32",
-              fontSize: "14px",
-              fontWeight: 800,
-              cursor: "pointer",
-            }}
-          >
-            Lihat Semua Pesanan
-          </button>
-        </section>
-
-        {/* ACTIVITY */}
-        <section
-          style={{
-            background: "#ffffff",
-            borderRadius: "20px",
-            padding: "21px",
-            marginBottom: "18px",
-            border: "1px solid #e8ebe7",
-            boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "8px",
-            }}
-          >
-            <span
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: "#8a6a4a",
-              }}
-            />
-
-            <h2
-              style={{
-                margin: 0,
-                color: "#214d32",
-                fontSize: "18px",
-              }}
-            >
-              Aktivitas Terbaru
-            </h2>
-          </div>
-
-          <p
-            style={{
-              margin: 0,
-              color: "#858b86",
-              fontSize: "13px",
-              lineHeight: 1.5,
-            }}
-          >
-            Belum ada aktivitas terbaru.
-          </p>
-        </section>
-
-        {/* LOGOUT */}
-        <button
-          type="button"
-          onClick={handleLogout}
-          style={{
-            width: "100%",
-            height: "48px",
-            border: "1px solid #d8cfc6",
-            borderRadius: "12px",
-            background: "transparent",
-            color: "#8a6a4a",
-            fontSize: "13px",
-            fontWeight: 800,
-            cursor: "pointer",
-          }}
-        >
-          Keluar dari Admin
-        </button>
-
-        <p
-          style={{
-            margin: "22px 0 0",
-            textAlign: "center",
-            color: "#9b9d99",
-            fontSize: "10px",
-            letterSpacing: "0.8px",
-          }}
-        >
-          PAJARA STUDIO • BERAKAR DI TANAH PASUNDAN
-        </p>
-      </section>
-
-      {/* BOTTOM NAVBAR */}
-      <nav
-        style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 100,
-          background: "rgba(255,255,255,0.97)",
-          borderTop: "1px solid #e4e8e3",
-          boxShadow: "0 -8px 30px rgba(33,77,50,0.10)",
-          padding:
-            "8px 10px calc(8px + env(safe-area-inset-bottom))",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "620px",
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "5px",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() =>
-              window.scrollTo({ top: 0, behavior: "smooth" })
-            }
-            style={{
-              border: "none",
-              background: "#eaf2eb",
-              color: "#214d32",
-              borderRadius: "12px",
-              padding: "8px 4px",
-              cursor: "pointer",
-            }}
-          >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>
-              ⌂
-            </div>
-
-            <div
-              style={{
-                marginTop: "4px",
-                fontSize: "10px",
-                fontWeight: 800,
-              }}
-            >
-              Dashboard
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/orders")}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#69716b",
-              borderRadius: "12px",
-              padding: "8px 4px",
-              cursor: "pointer",
-            }}
-          >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>
-              ▣
-            </div>
-
-            <div
-              style={{
-                marginTop: "4px",
-                fontSize: "10px",
-                fontWeight: 700,
-              }}
-            >
-              Pesanan
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              document
-                .getElementById("notifikasi")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#69716b",
-              borderRadius: "12px",
-              padding: "8px 4px",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                display: "inline-block",
-                fontSize: "17px",
-                lineHeight: 1,
-              }}
-            >
-              ♢
-
-              {unreadCount > 0 && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-5px",
-                    right: "-8px",
-                    minWidth: "13px",
-                    height: "13px",
-                    padding: "0 3px",
-                    borderRadius: "999px",
-                    background: "#2f6b45",
-                    color: "#ffffff",
-                    fontSize: "8px",
-                    fontWeight: 800,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {unreadCount}
-                </span>
-              )}
-            </div>
-
-            <div
-              style={{
-                marginTop: "4px",
-                fontSize: "10px",
-                fontWeight: 700,
-              }}
-            >
-              Notifikasi
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/finance")}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#69716b",
-              borderRadius: "12px",
-              padding: "8px 4px",
-              cursor: "pointer",
-            }}
-          >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>
-              Rp
-            </div>
-
-            <div
-              style={{
-                marginTop: "4px",
-                fontSize: "10px",
-                fontWeight: 700,
-              }}
-            >
-              Keuangan
-            </div>
-          </button>
-        </div>
-      </nav>
-    </main>
+        </nav>
+      </main>
+    </>
   );
 }
