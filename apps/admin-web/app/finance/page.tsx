@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
 
 type Transaction = {
   id: string;
@@ -44,7 +49,7 @@ export default function FinancePage() {
       return;
     }
 
-    setTransactions(data || []);
+    setTransactions((data || []) as Transaction[]);
     setLoading(false);
   }
 
@@ -167,6 +172,8 @@ export default function FinancePage() {
         background: "#f7f4ee",
         color: "#214d32",
         paddingBottom: 90,
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
       {/* HEADER */}
@@ -302,7 +309,8 @@ export default function FinancePage() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(190px, 1fr))",
             gap: 14,
             marginBottom: 22,
           }}
@@ -363,16 +371,20 @@ export default function FinancePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(200px, 1fr))",
                 gap: 14,
               }}
             >
               <label style={labelStyle}>
                 Jenis Transaksi
+
                 <select
                   value={type}
                   onChange={(e) =>
-                    setType(e.target.value as "income" | "expense")
+                    setType(
+                      e.target.value as "income" | "expense"
+                    )
                   }
                   style={inputStyle}
                 >
@@ -383,6 +395,7 @@ export default function FinancePage() {
 
               <label style={labelStyle}>
                 Nominal
+
                 <input
                   type="number"
                   min="1"
@@ -395,6 +408,7 @@ export default function FinancePage() {
 
               <label style={labelStyle}>
                 Kategori
+
                 <input
                   type="text"
                   placeholder="Contoh: Desain Logo"
@@ -406,10 +420,13 @@ export default function FinancePage() {
 
               <label style={labelStyle}>
                 Tanggal
+
                 <input
                   type="date"
                   value={transactionDate}
-                  onChange={(e) => setTransactionDate(e.target.value)}
+                  onChange={(e) =>
+                    setTransactionDate(e.target.value)
+                  }
                   style={inputStyle}
                 />
               </label>
@@ -422,6 +439,7 @@ export default function FinancePage() {
               }}
             >
               Keterangan
+
               <textarea
                 placeholder="Contoh: Pembayaran desain dari pelanggan"
                 value={description}
@@ -599,6 +617,7 @@ export default function FinancePage() {
                         }}
                       >
                         {transaction.transaction_date}
+
                         {transaction.description
                           ? ` • ${transaction.description}`
                           : ""}
@@ -623,11 +642,16 @@ export default function FinancePage() {
                       }}
                     >
                       {transaction.type === "income" ? "+" : "-"}
-                      {formatRupiah(Number(transaction.amount))}
+                      {formatRupiah(
+                        Number(transaction.amount)
+                      )}
                     </strong>
 
                     <button
-                      onClick={() => handleDelete(transaction.id)}
+                      type="button"
+                      onClick={() =>
+                        handleDelete(transaction.id)
+                      }
                       style={{
                         border: "1px solid #eadfda",
                         background: "#fffaf7",
@@ -650,6 +674,7 @@ export default function FinancePage() {
 
         {/* LOGOUT */}
         <button
+          type="button"
           onClick={handleLogout}
           style={{
             marginTop: 22,
@@ -678,7 +703,8 @@ export default function FinancePage() {
           background: "rgba(255,255,255,0.97)",
           borderTop: "1px solid #e8e5df",
           boxShadow: "0 -8px 25px rgba(33,77,50,0.08)",
-          padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
+          padding:
+            "8px 10px calc(8px + env(safe-area-inset-bottom))",
         }}
       >
         <div
@@ -801,6 +827,7 @@ function NavItem({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       style={{
         border: 0,
