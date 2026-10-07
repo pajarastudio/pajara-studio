@@ -238,19 +238,61 @@ export default function DashboardPage() {
       {/* HEADER */}
       <header
         style={{
-          background: "#214d32",
-          color: "#ffffff",
-          padding: "18px 20px 16px",
           position: "sticky",
           top: 0,
           zIndex: 50,
-          boxShadow: "0 8px 30px rgba(33,77,50,0.16)",
+          overflow: "hidden",
+          background:
+            "linear-gradient(135deg, #214d32 0%, #2f6b45 55%, #214d32 100%)",
+          color: "#ffffff",
+          padding: "20px 20px 19px",
+          boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
         }}
       >
+        {/* DECORATIVE SHAPES */}
+        <div
+          style={{
+            position: "absolute",
+            width: "180px",
+            height: "180px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.045)",
+            right: "-55px",
+            top: "-85px",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            width: "95px",
+            height: "95px",
+            borderRadius: "28px",
+            border: "1px solid rgba(255,255,255,0.07)",
+            right: "85px",
+            bottom: "-48px",
+            transform: "rotate(24deg)",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            width: "7px",
+            height: "7px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.28)",
+            right: "130px",
+            top: "22px",
+          }}
+        />
+
         <div
           style={{
             maxWidth: "1080px",
             margin: "0 auto",
+            position: "relative",
+            zIndex: 2,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -258,41 +300,75 @@ export default function DashboardPage() {
           }}
         >
           <div>
-            <p
+            <div
               style={{
-                margin: 0,
-                fontSize: "10px",
-                letterSpacing: "2px",
-                fontWeight: 800,
-                opacity: 0.65,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "5px",
               }}
             >
-              PAJARA STUDIO
-            </p>
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: "#dcebdd",
+                  opacity: 0.9,
+                }}
+              />
+
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "10px",
+                  letterSpacing: "2.2px",
+                  fontWeight: 800,
+                  opacity: 0.72,
+                }}
+              >
+                PAJARA STUDIO
+              </p>
+            </div>
 
             <h1
               style={{
-                margin: "4px 0 0",
-                fontSize: "20px",
-                letterSpacing: "-0.4px",
+                margin: 0,
+                fontSize: "21px",
+                lineHeight: 1.15,
+                letterSpacing: "-0.5px",
+                fontWeight: 800,
               }}
             >
               Admin Dashboard
             </h1>
+
+            <div
+              style={{
+                width: "34px",
+                height: "2px",
+                borderRadius: "999px",
+                background: "#8a6a4a",
+                marginTop: "11px",
+              }}
+            />
           </div>
 
           <div
             style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "12px",
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              width: "46px",
+              height: "46px",
+              borderRadius: "15px",
+              background: "rgba(255,255,255,0.10)",
+              border: "1px solid rgba(255,255,255,0.18)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: "13px",
-              fontWeight: 800,
+              fontWeight: 900,
+              letterSpacing: "0.5px",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+              backdropFilter: "blur(8px)",
             }}
           >
             PS
@@ -862,7 +938,8 @@ export default function DashboardPage() {
           background: "rgba(255,255,255,0.97)",
           borderTop: "1px solid #e4e8e3",
           boxShadow: "0 -8px 30px rgba(33,77,50,0.10)",
-          padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
+          padding:
+            "8px 10px calc(8px + env(safe-area-inset-bottom))",
         }}
       >
         <div
@@ -876,7 +953,9 @@ export default function DashboardPage() {
         >
           <button
             type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() =>
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }
             style={{
               border: "none",
               background: "#eaf2eb",
@@ -886,7 +965,10 @@ export default function DashboardPage() {
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>⌂</div>
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>
+              ⌂
+            </div>
+
             <div
               style={{
                 marginTop: "4px",
@@ -910,7 +992,10 @@ export default function DashboardPage() {
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>▣</div>
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>
+              ▣
+            </div>
+
             <div
               style={{
                 marginTop: "4px",
@@ -947,6 +1032,7 @@ export default function DashboardPage() {
               }}
             >
               ♢
+
               {unreadCount > 0 && (
                 <span
                   style={{
@@ -985,7 +1071,9 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() =>
-              alert("Fitur Keuangan akan kita aktifkan setelah sistem keuangan selesai.")
+              alert(
+                "Fitur Keuangan akan kita aktifkan setelah sistem keuangan selesai."
+              )
             }
             style={{
               border: "none",
@@ -996,7 +1084,9 @@ export default function DashboardPage() {
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: "17px", lineHeight: 1 }}>Rp</div>
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>
+              Rp
+            </div>
 
             <div
               style={{
