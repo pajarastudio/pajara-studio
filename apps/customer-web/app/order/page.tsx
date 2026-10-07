@@ -101,6 +101,19 @@ export default function CreateOrder() {
         return;
       }
 
+      /*
+       * DEBUG:
+       * Pastikan browser benar-benar membaca
+       * file yang dipilih sebelum order dibuat.
+       */
+      if (referenceFiles.length === 0) {
+        setError(
+          "Belum ada file referensi yang terbaca. Silakan pilih foto kembali."
+        );
+        setLoading(false);
+        return;
+      }
+
       const orderCode = `PJ-${Date.now()
         .toString()
         .slice(-8)}`;
@@ -148,66 +161,66 @@ export default function CreateOrder() {
         return;
       }
 
-      if (referenceFiles.length > 0) {
-        for (const file of referenceFiles) {
-          const safeFileName = file.name.replace(
-            /[^a-zA-Z0-9._-]/g,
-            "_"
+      let uploadedCount = 0;
+
+      for (const file of referenceFiles) {
+        const safeFileName = file.name.replace(
+          /[^a-zA-Z0-9._-]/g,
+          "_"
+        );
+
+        const filePath =
+          `orders/${order.id}/reference/` +
+          `${crypto.randomUUID()}-${safeFileName}`;
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("pajara-files")
+            .upload(filePath, file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType:
+                file.type ||
+                "application/octet-stream",
+            });
+
+        if (uploadError) {
+          setError(
+            `Order berhasil dibuat, tetapi file "${file.name}" gagal diupload: ${uploadError.message}`
           );
-
-          const filePath =
-            `orders/${order.id}/reference/` +
-            `${crypto.randomUUID()}-${safeFileName}`;
-
-          const { error: uploadError } =
-            await supabase.storage
-              .from("pajara-files")
-              .upload(filePath, file, {
-                cacheControl: "3600",
-                upsert: false,
-                contentType:
-                  file.type ||
-                  "application/octet-stream",
-              });
-
-          if (uploadError) {
-            setError(
-              `Order berhasil dibuat, tetapi file "${file.name}" gagal diupload: ${uploadError.message}`
-            );
-            setLoading(false);
-            return;
-          }
-
-          const { error: fileRecordError } =
-            await supabase
-              .from("order_files")
-              .insert({
-                order_id: order.id,
-                revision_id: null,
-                file_name: file.name,
-                file_path: filePath,
-                file_type:
-                  file.type ||
-                  "application/octet-stream",
-                file_size: file.size,
-                file_category: "reference",
-                uploaded_by: user.id,
-              });
-
-          if (fileRecordError) {
-            setError(
-              `File "${file.name}" sudah diupload, tetapi data file gagal disimpan: ${fileRecordError.message}`
-            );
-            setLoading(false);
-            return;
-          }
+          setLoading(false);
+          return;
         }
+
+        const { error: fileRecordError } =
+          await supabase
+            .from("order_files")
+            .insert({
+              order_id: order.id,
+              revision_id: null,
+              file_name: file.name,
+              file_path: filePath,
+              file_type:
+                file.type ||
+                "application/octet-stream",
+              file_size: file.size,
+              file_category: "reference",
+              uploaded_by: user.id,
+            });
+
+        if (fileRecordError) {
+          setError(
+            `File "${file.name}" sudah diupload, tetapi data file gagal disimpan: ${fileRecordError.message}`
+          );
+          setLoading(false);
+          return;
+        }
+
+        uploadedCount++;
       }
 
       setSuccess(
-        referenceFiles.length > 0
-          ? `Pesanan ${orderCode} berhasil dibuat dan ${referenceFiles.length} file referensi berhasil diupload.`
-          : `Pesanan ${orderCode} berhasil dibuat.`
+        `Pesanan ${orderCode} berhasil dibuat dan ${uploadedCount} file referensi berhasil diupload.`
       );
 
       form.reset();
