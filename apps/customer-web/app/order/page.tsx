@@ -63,6 +63,13 @@ export default function CreateOrder() {
         formData.get("payment-type") || ""
       );
 
+      const referenceFiles = formData
+        .getAll("reference")
+        .filter(
+          (file): file is File =>
+            file instanceof File && file.size > 0
+        );
+
       if (!service) {
         setError("Silakan pilih layanan.");
         setLoading(false);
@@ -107,7 +114,7 @@ export default function CreateOrder() {
       const dpAmount = 0;
       const remainingAmount = 0;
 
-      const { error: insertError } =
+      const { data: order, error: insertError } =
         await supabase
           .from("orders")
           .insert({
@@ -127,16 +134,75 @@ export default function CreateOrder() {
             assigned_admin: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          });
+          })
+          .select("id")
+          .single();
 
-      if (insertError) {
-        setError(insertError.message);
+      if (insertError || !order) {
+        setError(
+          insertError?.message ||
+            "Pesanan gagal dibuat."
+        );
         setLoading(false);
         return;
       }
 
+      if (referenceFiles.length > 0) {
+        for (const file of referenceFiles) {
+          const safeFileName = file.name.replace(
+            /[^a-zA-Z0-9._-]/g,
+            "_"
+          );
+
+          const filePath = `orders/${order.id}/reference/${Date.now()}-${safeFileName}`;
+
+          const { error: uploadError } =
+            await supabase.storage
+              .from("pajara-files")
+              .upload(filePath, file, {
+                cacheControl: "3600",
+                upsert: false,
+                contentType:
+                  file.type || "application/octet-stream",
+              });
+
+          if (uploadError) {
+            setError(
+              `Order berhasil dibuat, tetapi file "${file.name}" gagal diupload: ${uploadError.message}`
+            );
+            setLoading(false);
+            return;
+          }
+
+          const { error: fileRecordError } =
+            await supabase
+              .from("order_files")
+              .insert({
+                order_id: order.id,
+                revision_id: null,
+                file_name: file.name,
+                file_path: filePath,
+                file_type:
+                  file.type || "application/octet-stream",
+                file_size: file.size,
+                file_category: "reference",
+                uploaded_by: user.id,
+              });
+
+          if (fileRecordError) {
+            setError(
+              `File "${file.name}" sudah diupload, tetapi data file gagal disimpan: ${fileRecordError.message}`
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       setSuccess(
-        `Pesanan ${orderCode} berhasil dibuat.`
+        referenceFiles.length > 0
+          ? `Pesanan ${orderCode} berhasil dibuat dan ${referenceFiles.length} file referensi berhasil diupload.`
+          : `Pesanan ${orderCode} berhasil dibuat.`
       );
 
       form.reset();
