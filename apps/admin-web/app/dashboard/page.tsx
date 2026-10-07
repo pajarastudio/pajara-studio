@@ -182,6 +182,7 @@ export default function DashboardPage() {
               margin: "0 auto 14px",
             }}
           />
+
           <p
             style={{
               margin: 0,
@@ -231,17 +232,19 @@ export default function DashboardPage() {
         color: "#214d32",
         fontFamily:
           "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        paddingBottom: "82px",
       }}
     >
+      {/* HEADER */}
       <header
         style={{
           background: "#214d32",
           color: "#ffffff",
-          padding: "18px 20px",
+          padding: "18px 20px 16px",
           position: "sticky",
           top: 0,
-          zIndex: 20,
-          boxShadow: "0 8px 30px rgba(33,77,50,0.12)",
+          zIndex: 50,
+          boxShadow: "0 8px 30px rgba(33,77,50,0.16)",
         }}
       >
         <div
@@ -258,10 +261,10 @@ export default function DashboardPage() {
             <p
               style={{
                 margin: 0,
-                fontSize: "11px",
+                fontSize: "10px",
                 letterSpacing: "2px",
-                fontWeight: 700,
-                opacity: 0.7,
+                fontWeight: 800,
+                opacity: 0.65,
               }}
             >
               PAJARA STUDIO
@@ -269,8 +272,8 @@ export default function DashboardPage() {
 
             <h1
               style={{
-                margin: "3px 0 0",
-                fontSize: "21px",
+                margin: "4px 0 0",
+                fontSize: "20px",
                 letterSpacing: "-0.4px",
               }}
             >
@@ -297,6 +300,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* CONTENT */}
       <section
         style={{
           maxWidth: "1080px",
@@ -304,6 +308,7 @@ export default function DashboardPage() {
           padding: "28px 20px 40px",
         }}
       >
+        {/* WELCOME */}
         <section
           style={{
             background:
@@ -380,6 +385,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        {/* STATS */}
         <section
           style={{
             display: "grid",
@@ -405,7 +411,6 @@ export default function DashboardPage() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  gap: "10px",
                 }}
               >
                 <span
@@ -455,7 +460,9 @@ export default function DashboardPage() {
           ))}
         </section>
 
+        {/* NOTIFICATIONS */}
         <section
+          id="notifikasi"
           style={{
             background: "#ffffff",
             borderRadius: "20px",
@@ -487,7 +494,6 @@ export default function DashboardPage() {
                     margin: 0,
                     color: "#214d32",
                     fontSize: "18px",
-                    letterSpacing: "-0.2px",
                   }}
                 >
                   Notifikasi
@@ -612,7 +618,6 @@ export default function DashboardPage() {
                     cursor: notification.is_read
                       ? "default"
                       : "pointer",
-                    transition: "0.2s ease",
                   }}
                 >
                   <div
@@ -679,6 +684,7 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {/* ORDERS */}
         <section
           style={{
             background: "#214d32",
@@ -716,7 +722,6 @@ export default function DashboardPage() {
                 style={{
                   margin: "6px 0 5px",
                   fontSize: "20px",
-                  letterSpacing: "-0.3px",
                 }}
               >
                 Pesanan
@@ -757,13 +762,13 @@ export default function DashboardPage() {
               fontSize: "14px",
               fontWeight: 800,
               cursor: "pointer",
-              touchAction: "manipulation",
             }}
           >
             Lihat Semua Pesanan
           </button>
         </section>
 
+        {/* ACTIVITY */}
         <section
           style={{
             background: "#ffffff",
@@ -814,6 +819,7 @@ export default function DashboardPage() {
           </p>
         </section>
 
+        {/* LOGOUT */}
         <button
           type="button"
           onClick={handleLogout}
@@ -827,7 +833,6 @@ export default function DashboardPage() {
             fontSize: "13px",
             fontWeight: 800,
             cursor: "pointer",
-            touchAction: "manipulation",
           }}
         >
           Keluar dari Admin
@@ -845,6 +850,166 @@ export default function DashboardPage() {
           PAJARA STUDIO • BERAKAR DI TANAH PASUNDAN
         </p>
       </section>
+
+      {/* BOTTOM NAVBAR */}
+      <nav
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 100,
+          background: "rgba(255,255,255,0.97)",
+          borderTop: "1px solid #e4e8e3",
+          boxShadow: "0 -8px 30px rgba(33,77,50,0.10)",
+          padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "620px",
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "5px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{
+              border: "none",
+              background: "#eaf2eb",
+              color: "#214d32",
+              borderRadius: "12px",
+              padding: "8px 4px",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>⌂</div>
+            <div
+              style={{
+                marginTop: "4px",
+                fontSize: "10px",
+                fontWeight: 800,
+              }}
+            >
+              Dashboard
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push("/orders")}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#69716b",
+              borderRadius: "12px",
+              padding: "8px 4px",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>▣</div>
+            <div
+              style={{
+                marginTop: "4px",
+                fontSize: "10px",
+                fontWeight: 700,
+              }}
+            >
+              Pesanan
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("notifikasi")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#69716b",
+              borderRadius: "12px",
+              padding: "8px 4px",
+              cursor: "pointer",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                display: "inline-block",
+                fontSize: "17px",
+                lineHeight: 1,
+              }}
+            >
+              ♢
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-5px",
+                    right: "-8px",
+                    minWidth: "13px",
+                    height: "13px",
+                    padding: "0 3px",
+                    borderRadius: "999px",
+                    background: "#2f6b45",
+                    color: "#ffffff",
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+
+            <div
+              style={{
+                marginTop: "4px",
+                fontSize: "10px",
+                fontWeight: 700,
+              }}
+            >
+              Notifikasi
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              alert("Fitur Keuangan akan kita aktifkan setelah sistem keuangan selesai.")
+            }
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#69716b",
+              borderRadius: "12px",
+              padding: "8px 4px",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ fontSize: "17px", lineHeight: 1 }}>Rp</div>
+
+            <div
+              style={{
+                marginTop: "4px",
+                fontSize: "10px",
+                fontWeight: 700,
+              }}
+            >
+              Keuangan
+            </div>
+          </button>
+        </div>
+      </nav>
     </main>
   );
 }
