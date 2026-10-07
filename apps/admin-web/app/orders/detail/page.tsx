@@ -1,13 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { useRouter, useSearchParams } from "next/navigation";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@pajara/supabase";
 
 type Order = {
   id: string;
@@ -22,20 +17,55 @@ type Order = {
   remaining_amount: number | null;
   status: string | null;
   deadline: string | null;
-  created_at: string;
+  created_at: string | null;
+  updated_at: string | null;
+  customer_id: string | null;
 };
 
-type ReferenceFile = {
+type OrderFile = {
   id: string;
+  order_id: string;
   file_name: string;
   file_path: string;
   file_type: string | null;
   file_size: number | null;
-  created_at: string;
-  url: string;
+  file_category: string | null;
+  created_at: string | null;
 };
 
-function formatRupiah(value: number | null) {
+type ReferenceFile = OrderFile & {
+  signed_url?: string;
+};
+
+function getStatusLabel(status: string | null) {
+  switch (status) {
+    case "pending":
+      return "Pesanan Baru";
+
+    case "waiting_dp":
+      return "Menunggu DP";
+
+    case "processing":
+      return "Diproses";
+
+    case "revision":
+      return "Revisi";
+
+    case "waiting_payment":
+      return "Menunggu Pelunasan";
+
+    case "completed":
+      return "Selesai";
+
+    case "cancelled":
+      return "Dibatalkan";
+
+    default:
+      return status || "-";
+  }
+}
+
+function formatRupiah(value: number | null | undefined) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -43,7 +73,7 @@ function formatRupiah(value: number | null) {
   }).format(value || 0);
 }
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null | undefined) {
   if (!value) return "-";
 
   return new Date(value).toLocaleString("id-ID", {
@@ -52,188 +82,101 @@ function formatDate(value: string | null) {
   });
 }
 
-function getStatusLabel(status: string | null) {
-  switch (status) {
-    case "pending":
-      return "Pesanan Baru";
-    case "processing":
-      return "Diproses";
-    case "revision":
-      return "Revisi";
-    case "waiting_payment":
-      return "Menunggu Pelunasan";
-    case "completed":
-      return "Selesai";
-    case "cancelled":
-      return "Dibatalkan";
-    default:
-      return status || "-";
-  }
-}
-
-function formatFileSize(size: number | null) {
-  if (!size) return "-";
-
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: "20px",
-        borderBottom: "1px solid #eee",
-        paddingBottom: "12px",
-      }}
-    >
-      <span
-        style={{
-          color: "#8a6a4a",
-          fontSize: "13px",
-        }}
-      >
-        {label}
-      </span>
-
-      <span
-        style={{
-          color: "#333",
-          fontSize: "14px",
-          fontWeight: "600",
-          textAlign: "right",
-          maxWidth: "60%",
-          wordBreak: "break-word",
-        }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function OrderDetailContent() {
-  const router = useRouter();
+export default function OrderDetailPage() {
   const searchParams = useSearchParams();
-
   const orderId = searchParams.get("id");
 
-  const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
 
-  const [referenceFiles, setReferenceFiles] = useState<
-    ReferenceFile[]
-  >([]);
-  const [loadingReferences, setLoadingReferences] =
-    useState(false);
-  const [referenceMessage, setReferenceMessage] =
-    useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [totalAmount, setTotalAmount] = useState("");
+  const [dpAmount, setDpAmount] = useState("");
+  const [remainingAmount, setRemainingAmount] = useState("");
+
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [priceMessage, setPriceMessage] = useState("");
 
   const [savingStatus, setSavingStatus] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  const [totalInput, setTotalInput] = useState("");
-  const [savingPrice, setSavingPrice] = useState(false);
-  const [priceMessage, setPriceMessage] = useState("");
-
-  const [selectedFile, setSelectedFile] =
-    useState<File | null>(null);
-  const [uploadingFile, setUploadingFile] =
-    useState(false);
-  const [uploadMessage, setUploadMessage] =
-    useState("");
+  const [finalFile, setFinalFile] = useState<File | null>(null);
+  const [uploadingFinal, setUploadingFinal] = useState(false);
+  const [finalMessage, setFinalMessage] = useState("");
 
   useEffect(() => {
-    async function loadOrder() {
-      if (!orderId) {
-        setErrorMessage("ID pesanan tidak ditemukan.");
-        setLoading(false);
-        return;
-      }
-
-      const { data: sessionData } =
-        await supabase.auth.getSession();
-
-      if (!sessionData.session?.user) {
-        router.replace("/");
-        return;
-      }
-
-      const user = sessionData.session.user;
-
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles_v2")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-
-      if (
-        profileError ||
-        !profile ||
-        profile.role !== "admin"
-      ) {
-        await supabase.auth.signOut();
-        router.replace("/");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("orders")
-        .select(
-          "id, order_code, service_name, design_type, quantity, brief, notes, total_amount, dp_amount, remaining_amount, status, deadline, created_at"
-        )
-        .eq("id", orderId)
-        .single();
-
-      if (error || !data) {
-        setErrorMessage(
-          "Pesanan tidak ditemukan atau tidak dapat dimuat."
-        );
-        setLoading(false);
-        return;
-      }
-
-      setOrder(data);
-
-      setTotalInput(
-        data.total_amount
-          ? String(data.total_amount)
-          : ""
-      );
-
-      await loadReferenceFiles(orderId);
-
+    if (!orderId) {
+      setError("ID pesanan tidak ditemukan.");
       setLoading(false);
+      return;
     }
 
     loadOrder();
-  }, [orderId, router]);
+  }, [orderId]);
+
+  async function loadOrder() {
+    if (!orderId) return;
+
+    setLoading(true);
+    setError("");
+
+    const { data, error: orderError } = await supabase
+      .from("orders")
+      .select(
+        `
+        id,
+        order_code,
+        service_name,
+        design_type,
+        quantity,
+        brief,
+        notes,
+        total_amount,
+        dp_amount,
+        remaining_amount,
+        status,
+        deadline,
+        created_at,
+        updated_at,
+        customer_id
+        `
+      )
+      .eq("id", orderId)
+      .single();
+
+    if (orderError) {
+      setError(orderError.message);
+      setLoading(false);
+      return;
+    }
+
+    setOrder(data as Order);
+
+    setTotalAmount(String(data.total_amount || ""));
+    setDpAmount(String(data.dp_amount || ""));
+    setRemainingAmount(String(data.remaining_amount || ""));
+
+    await loadReferenceFiles(orderId);
+
+    setLoading(false);
+  }
 
   async function loadReferenceFiles(id: string) {
-    setLoadingReferences(true);
-    setReferenceMessage("");
-
-    const { data, error } = await supabase
+    const { data, error: filesError } = await supabase
       .from("order_files")
       .select(
-        "id, file_name, file_path, file_type, file_size, created_at"
+        `
+        id,
+        order_id,
+        file_name,
+        file_path,
+        file_type,
+        file_size,
+        file_category,
+        created_at
+        `
       )
       .eq("order_id", id)
       .eq("file_category", "reference")
@@ -241,78 +184,62 @@ function OrderDetailContent() {
         ascending: true,
       });
 
-    if (error) {
-      setReferenceFiles([]);
-      setReferenceMessage(
-        "Referensi gagal dimuat: " +
-          error.message
-      );
-      setLoadingReferences(false);
+    if (filesError) {
+      console.error("Gagal mengambil file referensi:", filesError);
       return;
     }
 
-    if (!data || data.length === 0) {
-      setReferenceFiles([]);
-      setReferenceMessage(
-        "Belum ada file referensi dari customer."
-      );
-      setLoadingReferences(false);
-      return;
-    }
+    const files = (data || []) as ReferenceFile[];
 
-    const filesWithUrls: ReferenceFile[] = [];
+    const filesWithUrls = await Promise.all(
+      files.map(async (file) => {
+        const { data: signedData, error: signedError } =
+          await supabase.storage
+            .from("pajara-files")
+            .createSignedUrl(file.file_path, 3600);
 
-    for (const file of data) {
-      const { data: signedData, error: signedError } =
-        await supabase.storage
-          .from("pajara-files")
-          .createSignedUrl(
-            file.file_path,
-            60 * 60
+        if (signedError) {
+          console.error(
+            "Gagal membuat signed URL:",
+            signedError
           );
 
-      if (signedError || !signedData?.signedUrl) {
-        continue;
-      }
+          return file;
+        }
 
-      filesWithUrls.push({
-        ...file,
-        url: signedData.signedUrl,
-      });
-    }
-
-    setReferenceFiles(filesWithUrls);
-
-    if (filesWithUrls.length === 0) {
-      setReferenceMessage(
-        "File referensi ditemukan, tetapi tidak dapat dibuka."
-      );
-    }
-
-    setLoadingReferences(false);
-  }
-
-  async function handleSavePrice() {
-    if (!order) return;
-
-    const total = Number(
-      totalInput.replace(/[^\d]/g, "")
+        return {
+          ...file,
+          signed_url: signedData?.signedUrl,
+        };
+      })
     );
 
-    if (!Number.isFinite(total) || total <= 0) {
-      setPriceMessage(
-        "Masukkan total harga yang valid."
-      );
-      return;
-    }
+    setReferenceFiles(filesWithUrls);
+  }
 
-    const dp = Math.floor(total / 2);
+  function calculateDp(value: string) {
+    const total = Number(value) || 0;
+    const dp = Math.round(total * 0.5);
     const remaining = total - dp;
+
+    setTotalAmount(value);
+    setDpAmount(String(dp));
+    setRemainingAmount(String(remaining));
+  }
+
+  async function handleSavePrice(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!order) return;
 
     setSavingPrice(true);
     setPriceMessage("");
 
-    const { error } = await supabase
+    const total = Number(totalAmount) || 0;
+    const dp = Math.round(total * 0.5);
+    const remaining = total - dp;
+
+    const { error: updateError } = await supabase
       .from("orders")
       .update({
         total_amount: total,
@@ -322,38 +249,40 @@ function OrderDetailContent() {
       })
       .eq("id", order.id);
 
-    if (error) {
-      setSavingPrice(false);
+    if (updateError) {
       setPriceMessage(
-        "Gagal menyimpan harga: " +
-          error.message
+        `Gagal menyimpan harga: ${updateError.message}`
       );
+      setSavingPrice(false);
       return;
     }
 
-    setOrder({
-      ...order,
-      total_amount: total,
-      dp_amount: dp,
-      remaining_amount: remaining,
-    });
+    setDpAmount(String(dp));
+    setRemainingAmount(String(remaining));
 
-    setTotalInput(String(total));
-    setSavingPrice(false);
-    setPriceMessage(
-      "Harga pesanan berhasil disimpan."
+    setOrder((current) =>
+      current
+        ? {
+            ...current,
+            total_amount: total,
+            dp_amount: dp,
+            remaining_amount: remaining,
+            updated_at: new Date().toISOString(),
+          }
+        : current
     );
+
+    setPriceMessage("Harga berhasil disimpan.");
+    setSavingPrice(false);
   }
 
-  async function handleStatusChange(
-    newStatus: string
-  ) {
+  async function handleStatusChange(newStatus: string) {
     if (!order) return;
 
     setSavingStatus(true);
     setStatusMessage("");
 
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from("orders")
       .update({
         status: newStatus,
@@ -361,122 +290,119 @@ function OrderDetailContent() {
       })
       .eq("id", order.id);
 
-    if (error) {
-      setSavingStatus(false);
+    if (updateError) {
       setStatusMessage(
-        "Gagal mengubah status: " +
-          error.message
+        `Gagal memperbarui status: ${updateError.message}`
       );
+      setSavingStatus(false);
       return;
     }
 
-    setOrder({
-      ...order,
-      status: newStatus,
-    });
-
-    setSavingStatus(false);
-    setStatusMessage(
-      "Status pesanan berhasil diperbarui."
+    setOrder((current) =>
+      current
+        ? {
+            ...current,
+            status: newStatus,
+            updated_at: new Date().toISOString(),
+          }
+        : current
     );
+
+    setStatusMessage("Status pesanan berhasil diperbarui.");
+    setSavingStatus(false);
+  }
+
+  function handleFinalFileChange(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0] || null;
+
+    setFinalFile(file);
+    setFinalMessage("");
   }
 
   async function handleUploadFinalFile() {
     if (!order) return;
 
-    if (!selectedFile) {
-      setUploadMessage(
-        "Pilih file final terlebih dahulu."
-      );
+    if (!finalFile) {
+      setFinalMessage("Pilih file final terlebih dahulu.");
       return;
     }
 
-    setUploadingFile(true);
-    setUploadMessage("");
+    setUploadingFinal(true);
+    setFinalMessage("");
 
-    const { data: sessionData } =
-      await supabase.auth.getSession();
-
-    if (!sessionData.session?.user) {
-      setUploadingFile(false);
-      setUploadMessage(
-        "Sesi admin tidak ditemukan."
+    try {
+      const safeFileName = finalFile.name.replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_"
       );
-      return;
-    }
 
-    const user = sessionData.session.user;
+      const filePath =
+        `orders/${order.id}/final/` +
+        `${crypto.randomUUID()}-${safeFileName}`;
 
-    const fileExtension =
-      selectedFile.name.includes(".")
-        ? selectedFile.name.split(".").pop()
-        : "file";
-
-    const safeFileName = selectedFile.name
-      .replace(/[^a-zA-Z0-9._-]/g, "-")
-      .replace(/-+/g, "-");
-
-    const filePath =
-      `orders/${order.id}/final/` +
-      `${Date.now()}-${safeFileName}`;
-
-    const { error: uploadError } =
-      await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("pajara-files")
-        .upload(
-          filePath,
-          selectedFile,
-          {
-            cacheControl: "3600",
-            upsert: false,
-            contentType:
-              selectedFile.type ||
-              `application/${fileExtension}`,
-          }
-        );
+        .upload(filePath, finalFile, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType:
+            finalFile.type || "application/octet-stream",
+        });
 
-    if (uploadError) {
-      setUploadingFile(false);
-      setUploadMessage(
-        "Gagal upload file: " +
-          uploadError.message
-      );
-      return;
-    }
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
 
-    const { error: insertError } =
-      await supabase
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("Sesi admin tidak ditemukan.");
+      }
+
+      const { error: insertError } = await supabase
         .from("order_files")
         .insert({
           order_id: order.id,
           revision_id: null,
-          file_name: selectedFile.name,
+          file_name: finalFile.name,
           file_path: filePath,
           file_type:
-            selectedFile.type || null,
-          file_size: selectedFile.size,
+            finalFile.type || "application/octet-stream",
+          file_size: finalFile.size,
           file_category: "final",
           uploaded_by: user.id,
         });
 
-    if (insertError) {
-      await supabase.storage
-        .from("pajara-files")
-        .remove([filePath]);
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
 
-      setUploadingFile(false);
-      setUploadMessage(
-        "File berhasil di-upload tetapi gagal dicatat: " +
-          insertError.message
+      setFinalMessage(
+        "File final berhasil diupload."
       );
-      return;
-    }
 
-    setSelectedFile(null);
-    setUploadingFile(false);
-    setUploadMessage(
-      "File final berhasil di-upload."
-    );
+      setFinalFile(null);
+
+      const input = document.getElementById(
+        "final-file"
+      ) as HTMLInputElement | null;
+
+      if (input) {
+        input.value = "";
+      }
+    } catch (uploadError) {
+      setFinalMessage(
+        uploadError instanceof Error
+          ? `Gagal upload file: ${uploadError.message}`
+          : "Gagal upload file."
+      );
+    } finally {
+      setUploadingFinal(false);
+    }
   }
 
   if (loading) {
@@ -484,688 +410,336 @@ function OrderDetailContent() {
       <main
         style={{
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          padding: "32px",
           background: "#f7f4ee",
-          fontFamily: "Arial, sans-serif",
           color: "#214d32",
         }}
       >
-        Memuat detail pesanan...
+        <p>Memuat detail pesanan...</p>
       </main>
     );
   }
 
-  if (errorMessage) {
+  if (error || !order) {
     return (
       <main
         style={{
           minHeight: "100vh",
+          padding: "32px",
           background: "#f7f4ee",
-          fontFamily: "Arial, sans-serif",
-          padding: "30px 20px",
+          color: "#214d32",
         }}
       >
-        <div
-          style={{
-            maxWidth: "700px",
-            margin: "0 auto",
-            background: "#ffffff",
-            borderRadius: "16px",
-            padding: "24px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
-          }}
-        >
-          <h1
-            style={{
-              margin: "0 0 12px",
-              color: "#214d32",
-              fontSize: "22px",
-            }}
-          >
-            Detail Pesanan
-          </h1>
-
-          <p
-            style={{
-              color: "#777",
-              marginBottom: "20px",
-            }}
-          >
-            {errorMessage}
-          </p>
-
-          <button
-            type="button"
-            onClick={() =>
-              router.push("/orders")
-            }
-            style={{
-              width: "100%",
-              height: "48px",
-              border: "none",
-              borderRadius: "10px",
-              background: "#2f6b45",
-              color: "#ffffff",
-              fontSize: "15px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              touchAction: "manipulation",
-            }}
-          >
-            Kembali ke Pesanan
-          </button>
-        </div>
+        <h1>Detail Pesanan</h1>
+        <p>{error || "Pesanan tidak ditemukan."}</p>
       </main>
     );
-  }
-
-  if (!order) {
-    return null;
   }
 
   return (
     <main
       style={{
         minHeight: "100vh",
+        padding: "24px",
         background: "#f7f4ee",
-        fontFamily: "Arial, sans-serif",
-        paddingBottom: "40px",
+        color: "#214d32",
       }}
     >
-      <header
-        style={{
-          background: "#214d32",
-          color: "#ffffff",
-          padding: "22px 20px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() =>
-              router.push("/orders")
-            }
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#ffffff",
-              padding: 0,
-              marginBottom: "12px",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            ← Kembali ke Pesanan
-          </button>
-
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "25px",
-            }}
-          >
-            Detail Pesanan
-          </h1>
-
-          <p
-            style={{
-              margin: "6px 0 0",
-              opacity: 0.85,
-              fontSize: "14px",
-            }}
-          >
-            {order.order_code}
-          </p>
-        </div>
-      </header>
-
-      <section
+      <div
         style={{
           maxWidth: "900px",
           margin: "0 auto",
-          padding: "28px 20px",
         }}
       >
-        <div
+        <h1
+          style={{
+            marginBottom: "8px",
+          }}
+        >
+          Detail Pesanan
+        </h1>
+
+        <p
+          style={{
+            marginTop: 0,
+            marginBottom: "24px",
+            color: "#8a6a4a",
+          }}
+        >
+          {order.order_code}
+        </p>
+
+        <section
           style={{
             background: "#ffffff",
             borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #e5e0d7",
           }}
         >
-          <p
-            style={{
-              margin: 0,
-              color: "#8a6a4a",
-              fontSize: "13px",
-            }}
-          >
-            Kode Pesanan
-          </p>
-
-          <h2
-            style={{
-              margin: "6px 0 0",
-              color: "#214d32",
-              fontSize: "24px",
-            }}
-          >
-            {order.order_code}
-          </h2>
-        </div>
-
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 18px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Informasi Pesanan
-          </h2>
+          <h2>Informasi Pesanan</h2>
 
           <div
             style={{
               display: "grid",
-              gap: "15px",
+              gap: "12px",
             }}
           >
-            <InfoRow
-              label="Layanan"
-              value={
-                order.service_name || "-"
-              }
-            />
+            <div>
+              <strong>Kode Order</strong>
+              <div>{order.order_code}</div>
+            </div>
 
-            <InfoRow
-              label="Jenis Desain"
-              value={
-                order.design_type || "-"
-              }
-            />
+            <div>
+              <strong>Layanan</strong>
+              <div>{order.service_name || "-"}</div>
+            </div>
 
-            <InfoRow
-              label="Jumlah"
-              value={String(
-                order.quantity || 0
-              )}
-            />
+            <div>
+              <strong>Jenis Desain</strong>
+              <div>{order.design_type || "-"}</div>
+            </div>
 
-            <InfoRow
-              label="Status"
-              value={getStatusLabel(
-                order.status
-              )}
-            />
+            <div>
+              <strong>Jumlah</strong>
+              <div>{order.quantity ?? "-"}</div>
+            </div>
 
-            <InfoRow
-              label="Deadline"
-              value={formatDate(
-                order.deadline
-              )}
-            />
+            <div>
+              <strong>Brief</strong>
+              <div>{order.brief || "-"}</div>
+            </div>
 
-            <InfoRow
-              label="Dibuat"
-              value={formatDate(
-                order.created_at
-              )}
-            />
+            <div>
+              <strong>Catatan</strong>
+              <div>{order.notes || "-"}</div>
+            </div>
+
+            <div>
+              <strong>Deadline</strong>
+              <div>{formatDate(order.deadline)}</div>
+            </div>
+
+            <div>
+              <strong>Dibuat</strong>
+              <div>{formatDate(order.created_at)}</div>
+            </div>
+
+            <div>
+              <strong>Status Saat Ini</strong>
+              <div>
+                {getStatusLabel(order.status)}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
             background: "#ffffff",
             borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #e5e0d7",
           }}
         >
-          <h2
-            style={{
-              margin: "0 0 18px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Referensi Customer
-          </h2>
+          <h2>Referensi Customer</h2>
 
-          {loadingReferences ? (
-            <p
-              style={{
-                margin: 0,
-                color: "#777",
-                fontSize: "14px",
-              }}
-            >
-              Memuat referensi...
-            </p>
-          ) : referenceFiles.length === 0 ? (
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: "10px",
-                padding: "14px",
-                color: "#777",
-                fontSize: "14px",
-                lineHeight: 1.5,
-              }}
-            >
-              {referenceMessage ||
-                "Belum ada file referensi dari customer."}
-            </div>
+          {referenceFiles.length === 0 ? (
+            <p>Belum ada file referensi.</p>
           ) : (
             <div
               style={{
                 display: "grid",
-                gap: "18px",
+                gap: "12px",
               }}
             >
-              {referenceFiles.map(
-                (file) => {
-                  const isImage =
-                    file.file_type?.startsWith(
-                      "image/"
-                    );
+              {referenceFiles.map((file) => (
+                <div
+                  key={file.id}
+                  style={{
+                    border: "1px solid #e5e0d7",
+                    borderRadius: "12px",
+                    padding: "14px",
+                  }}
+                >
+                  <strong>{file.file_name}</strong>
 
-                  const isPdf =
-                    file.file_type ===
-                    "application/pdf";
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "14px",
+                      color: "#8a6a4a",
+                    }}
+                  >
+                    {file.file_type || "File"}{" "}
+                    {file.file_size
+                      ? `• ${Math.round(
+                          file.file_size / 1024
+                        )} KB`
+                      : ""}
+                  </div>
 
-                  return (
-                    <div
-                      key={file.id}
+                  {file.signed_url && (
+                    <a
+                      href={file.signed_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
-                        border:
-                          "1px solid #e5e1da",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        background:
-                          "#f7f4ee",
+                        display: "inline-block",
+                        marginTop: "12px",
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        background: "#2f6b45",
+                        color: "#ffffff",
+                        textDecoration: "none",
                       }}
                     >
-                      {isImage && (
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <img
-                            src={file.url}
-                            alt={
-                              file.file_name
-                            }
-                            style={{
-                              display:
-                                "block",
-                              width: "100%",
-                              maxHeight:
-                                "500px",
-                              objectFit:
-                                "contain",
-                              background:
-                                "#eee",
-                            }}
-                          />
-                        </a>
-                      )}
-
-                      <div
-                        style={{
-                          padding:
-                            "14px",
-                          background:
-                            "#ffffff",
-                        }}
-                      >
-                        <div
-                          style={{
-                            color:
-                              "#214d32",
-                            fontWeight:
-                              "600",
-                            fontSize:
-                              "14px",
-                            wordBreak:
-                              "break-word",
-                          }}
-                        >
-                          {file.file_name}
-                        </div>
-
-                        <p
-                          style={{
-                            margin:
-                              "6px 0 12px",
-                            color:
-                              "#777",
-                            fontSize:
-                              "12px",
-                          }}
-                        >
-                          {formatFileSize(
-                            file.file_size
-                          )}
-                        </p>
-
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            display:
-                              "inline-flex",
-                            alignItems:
-                              "center",
-                            justifyContent:
-                              "center",
-                            minHeight:
-                              "42px",
-                            padding:
-                              "0 16px",
-                            borderRadius:
-                              "9px",
-                            background:
-                              "#2f6b45",
-                            color:
-                              "#ffffff",
-                            textDecoration:
-                              "none",
-                            fontSize:
-                              "13px",
-                            fontWeight:
-                              "bold",
-                          }}
-                        >
-                          {isPdf
-                            ? "Buka PDF"
-                            : "Buka File"}
-                        </a>
-                      </div>
-                    </div>
-                  );
-                }
-              )}
+                      Buka File
+                    </a>
+                  )}
+                </div>
+              ))}
             </div>
           )}
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
             background: "#ffffff",
             borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #e5e0d7",
           }}
         >
-          <h2
-            style={{
-              margin: "0 0 18px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Brief & Catatan
-          </h2>
+          <h2>Harga & Pembayaran</h2>
 
-          <div
-            style={{
-              marginBottom: "18px",
-            }}
-          >
-            <p
-              style={{
-                margin: "0 0 7px",
-                color: "#8a6a4a",
-                fontSize: "13px",
-              }}
-            >
-              Brief
-            </p>
-
+          <form onSubmit={handleSavePrice}>
             <div
               style={{
-                background: "#f7f4ee",
-                borderRadius: "10px",
-                padding: "14px",
-                color: "#444",
-                fontSize: "14px",
-                lineHeight: 1.6,
-                whiteSpace: "pre-wrap",
+                display: "grid",
+                gap: "14px",
               }}
             >
-              {order.brief || "-"}
-            </div>
-          </div>
+              <div>
+                <label
+                  htmlFor="totalAmount"
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: 600,
+                  }}
+                >
+                  Total Harga
+                </label>
 
-          <div>
-            <p
-              style={{
-                margin: "0 0 7px",
-                color: "#8a6a4a",
-                fontSize: "13px",
-              }}
-            >
-              Catatan
-            </p>
+                <input
+                  id="totalAmount"
+                  type="number"
+                  min="0"
+                  value={totalAmount}
+                  onChange={(event) =>
+                    calculateDp(event.target.value)
+                  }
+                  placeholder="Contoh: 150000"
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    border: "1px solid #d7d1c7",
+                  }}
+                />
+              </div>
 
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: "10px",
-                padding: "14px",
-                color: "#444",
-                fontSize: "14px",
-                lineHeight: 1.6,
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {order.notes || "-"}
-            </div>
-          </div>
-        </div>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: 600,
+                  }}
+                >
+                  DP 50%
+                </label>
 
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 18px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Pembayaran
-          </h2>
+                <div
+                  style={{
+                    padding: "12px",
+                    borderRadius: "10px",
+                    background: "#f7f4ee",
+                  }}
+                >
+                  {formatRupiah(Number(dpAmount) || 0)}
+                </div>
+              </div>
 
-          <div
-            style={{
-              display: "grid",
-              gap: "15px",
-            }}
-          >
-            <div>
-              <label
-                htmlFor="total-price"
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  color: "#8a6a4a",
-                  fontSize: "13px",
-                }}
-              >
-                Total Harga
-              </label>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: 600,
+                  }}
+                >
+                  Sisa
+                </label>
 
-              <input
-                id="total-price"
-                type="number"
-                min="0"
-                step="1000"
-                value={totalInput}
-                onChange={(event) => {
-                  setTotalInput(
-                    event.target.value
-                  );
-                  setPriceMessage("");
-                }}
-                placeholder="Contoh: 150000"
+                <div
+                  style={{
+                    padding: "12px",
+                    borderRadius: "10px",
+                    background: "#f7f4ee",
+                  }}
+                >
+                  {formatRupiah(
+                    Number(remainingAmount) || 0
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
                 disabled={savingPrice}
                 style={{
-                  width: "100%",
-                  height: "48px",
-                  boxSizing: "border-box",
-                  border:
-                    "1px solid #ddd",
+                  padding: "12px 16px",
+                  border: 0,
                   borderRadius: "10px",
-                  padding:
-                    "0 14px",
-                  background:
-                    "#ffffff",
-                  color: "#333",
-                  fontSize: "15px",
-                  outline: "none",
-                }}
-              />
-            </div>
-
-            <InfoRow
-              label="DP 50%"
-              value={formatRupiah(
-                order.dp_amount
-              )}
-            />
-
-            <InfoRow
-              label="Sisa"
-              value={formatRupiah(
-                order.remaining_amount
-              )}
-            />
-
-            <button
-              type="button"
-              onClick={handleSavePrice}
-              disabled={savingPrice}
-              style={{
-                width: "100%",
-                height: "48px",
-                border: "none",
-                borderRadius: "10px",
-                background:
-                  savingPrice
-                    ? "#b8c5bc"
-                    : "#2f6b45",
-                color: "#ffffff",
-                fontSize: "15px",
-                fontWeight: "bold",
-                cursor:
-                  savingPrice
+                  background: "#2f6b45",
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  cursor: savingPrice
                     ? "not-allowed"
                     : "pointer",
-                touchAction:
-                  "manipulation",
-              }}
-            >
-              {savingPrice
-                ? "Menyimpan..."
-                : "Simpan Harga"}
-            </button>
-
-            {priceMessage && (
-              <p
-                style={{
-                  margin: 0,
-                  color:
-                    priceMessage.startsWith(
-                      "Gagal"
-                    )
-                      ? "#b42318"
-                      : "#2f6b45",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  lineHeight: 1.5,
                 }}
               >
-                {priceMessage}
-              </p>
-            )}
-          </div>
-        </div>
+                {savingPrice
+                  ? "Menyimpan..."
+                  : "Simpan Harga"}
+              </button>
 
-        <div
+              {priceMessage && (
+                <p>{priceMessage}</p>
+              )}
+            </div>
+          </form>
+        </section>
+
+        <section
           style={{
             background: "#ffffff",
             borderRadius: "16px",
-            padding: "22px",
-            marginBottom: "18px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #e5e0d7",
           }}
         >
-          <h2
-            style={{
-              margin: "0 0 10px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Status Pesanan
-          </h2>
-
-          <p
-            style={{
-              margin: "0 0 18px",
-              color: "#777",
-              fontSize: "14px",
-            }}
-          >
-            Status saat ini:{" "}
-            <strong>
-              {getStatusLabel(
-                order.status
-              )}
-            </strong>
-          </p>
+          <h2>Status Pesanan</h2>
 
           <select
-            value={
-              order.status || "pending"
-            }
+            value={order.status || "pending"}
             onChange={(event) =>
               handleStatusChange(
                 event.target.value
@@ -1174,22 +748,19 @@ function OrderDetailContent() {
             disabled={savingStatus}
             style={{
               width: "100%",
-              height: "48px",
-              border: "1px solid #ddd",
+              boxSizing: "border-box",
+              padding: "12px",
               borderRadius: "10px",
-              padding: "0 14px",
+              border: "1px solid #d7d1c7",
               background: "#ffffff",
-              color: "#333",
-              fontSize: "15px",
-              fontWeight: "600",
-              cursor: savingStatus
-                ? "not-allowed"
-                : "pointer",
-              outline: "none",
             }}
           >
             <option value="pending">
               Pesanan Baru
+            </option>
+
+            <option value="waiting_dp">
+              Menunggu DP
             </option>
 
             <option value="processing">
@@ -1214,189 +785,68 @@ function OrderDetailContent() {
           </select>
 
           {savingStatus && (
-            <p
-              style={{
-                margin: "12px 0 0",
-                color: "#8a6a4a",
-                fontSize: "13px",
-              }}
-            >
-              Menyimpan status...
-            </p>
+            <p>Menyimpan status...</p>
           )}
 
           {statusMessage && (
-            <p
-              style={{
-                margin: "12px 0 0",
-                color:
-                  statusMessage.startsWith(
-                    "Gagal"
-                  )
-                    ? "#b42318"
-                    : "#2f6b45",
-                fontSize: "13px",
-                fontWeight: "600",
-              }}
-            >
-              {statusMessage}
-            </p>
+            <p>{statusMessage}</p>
           )}
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
             background: "#ffffff",
             borderRadius: "16px",
-            padding: "22px",
-            boxShadow:
-              "0 6px 20px rgba(0,0,0,0.06)",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #e5e0d7",
           }}
         >
-          <h2
-            style={{
-              margin: "0 0 10px",
-              color: "#214d32",
-              fontSize: "19px",
-            }}
-          >
-            Upload Final File
-          </h2>
-
-          <p
-            style={{
-              margin: "0 0 18px",
-              color: "#777",
-              fontSize: "14px",
-              lineHeight: 1.5,
-            }}
-          >
-            Upload file desain final untuk
-            pesanan ini.
-          </p>
+          <h2>File Final</h2>
 
           <input
+            id="final-file"
             type="file"
-            onChange={(event) => {
-              const file =
-                event.target.files?.[0] ||
-                null;
-
-              setSelectedFile(file);
-              setUploadMessage("");
-            }}
-            disabled={uploadingFile}
-            style={{
-              width: "100%",
-              marginBottom: "14px",
-              fontSize: "14px",
-            }}
+            onChange={handleFinalFileChange}
           />
 
-          {selectedFile && (
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: "10px",
-                padding: "12px 14px",
-                marginBottom: "14px",
-                color: "#444",
-                fontSize: "13px",
-                wordBreak:
-                  "break-word",
-              }}
-            >
+          {finalFile && (
+            <p>
               File dipilih:{" "}
-              <strong>
-                {selectedFile.name}
-              </strong>
-            </div>
+              <strong>{finalFile.name}</strong>
+            </p>
           )}
 
           <button
             type="button"
-            onClick={
-              handleUploadFinalFile
-            }
+            onClick={handleUploadFinalFile}
             disabled={
-              uploadingFile ||
-              !selectedFile
+              uploadingFinal || !finalFile
             }
             style={{
-              width: "100%",
-              height: "48px",
-              border: "none",
+              marginTop: "12px",
+              padding: "12px 16px",
+              border: 0,
               borderRadius: "10px",
-              background:
-                uploadingFile ||
-                !selectedFile
-                  ? "#b8c5bc"
-                  : "#2f6b45",
+              background: "#2f6b45",
               color: "#ffffff",
-              fontSize: "15px",
-              fontWeight: "bold",
+              fontWeight: 600,
               cursor:
-                uploadingFile ||
-                !selectedFile
+                uploadingFinal || !finalFile
                   ? "not-allowed"
                   : "pointer",
-              touchAction:
-                "manipulation",
             }}
           >
-            {uploadingFile
+            {uploadingFinal
               ? "Mengupload..."
-              : "Upload Final File"}
+              : "Upload File Final"}
           </button>
 
-          {uploadMessage && (
-            <p
-              style={{
-                margin: "12px 0 0",
-                color:
-                  uploadMessage.startsWith(
-                    "Gagal"
-                  )
-                    ? "#b42318"
-                    : "#2f6b45",
-                fontSize: "13px",
-                fontWeight: "600",
-                lineHeight: 1.5,
-              }}
-            >
-              {uploadMessage}
-            </p>
+          {finalMessage && (
+            <p>{finalMessage}</p>
           )}
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#f7f4ee",
-        fontFamily: "Arial, sans-serif",
-        color: "#214d32",
-      }}
-    >
-      Memuat detail pesanan...
-    </main>
-  );
-}
-
-export default function OrderDetailPage() {
-  return (
-    <Suspense
-      fallback={<LoadingScreen />}
-    >
-      <OrderDetailContent />
-    </Suspense>
   );
 }
