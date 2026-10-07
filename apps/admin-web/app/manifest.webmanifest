@@ -3,6 +3,7 @@
   "short_name": "Pajara Admin",
   "description": "Panel administrasi Pajara Studio",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f7f4ee",
   "theme_color": "#2f6b45",
