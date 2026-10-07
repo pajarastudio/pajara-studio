@@ -25,6 +25,16 @@ type Order = {
   created_at: string;
 };
 
+type ReferenceFile = {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+  created_at: string;
+  url: string;
+};
+
 function formatRupiah(value: number | null) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -55,6 +65,20 @@ function getStatusLabel(status: string | null) {
     default:
       return status || "-";
   }
+}
+
+function formatFileSize(size: number | null) {
+  if (!size) return "-";
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function InfoRow({
@@ -108,12 +132,24 @@ function OrderDetailContent() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [referenceFiles, setReferenceFiles] = useState<
+    ReferenceFile[]
+  >([]);
+  const [loadingReferences, setLoadingReferences] =
+    useState(false);
+  const [referenceMessage, setReferenceMessage] =
+    useState("");
+
   const [savingStatus, setSavingStatus] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState("");
+  const [selectedFile, setSelectedFile] =
+    useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] =
+    useState(false);
+  const [uploadMessage, setUploadMessage] =
+    useState("");
 
   useEffect(() => {
     async function loadOrder() {
@@ -123,7 +159,8 @@ function OrderDetailContent() {
         return;
       }
 
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData } =
+        await supabase.auth.getSession();
 
       if (!sessionData.session?.user) {
         router.replace("/");
@@ -132,13 +169,18 @@ function OrderDetailContent() {
 
       const user = sessionData.session.user;
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles_v2")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+      const { data: profile, error: profileError } =
+        await supabase
+          .from("profiles_v2")
+          .select("role")
+          .eq("id", user.id)
+          .single();
 
-      if (profileError || !profile || profile.role !== "admin") {
+      if (
+        profileError ||
+        !profile ||
+        profile.role !== "admin"
+      ) {
         await supabase.auth.signOut();
         router.replace("/");
         return;
@@ -161,13 +203,84 @@ function OrderDetailContent() {
       }
 
       setOrder(data);
+
+      await loadReferenceFiles(orderId);
+
       setLoading(false);
     }
 
     loadOrder();
   }, [orderId, router]);
 
-  async function handleStatusChange(newStatus: string) {
+  async function loadReferenceFiles(id: string) {
+    setLoadingReferences(true);
+    setReferenceMessage("");
+
+    const { data, error } = await supabase
+      .from("order_files")
+      .select(
+        "id, file_name, file_path, file_type, file_size, created_at"
+      )
+      .eq("order_id", id)
+      .eq("file_category", "reference")
+      .order("created_at", {
+        ascending: true,
+      });
+
+    if (error) {
+      setReferenceFiles([]);
+      setReferenceMessage(
+        "Referensi gagal dimuat: " +
+          error.message
+      );
+      setLoadingReferences(false);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setReferenceFiles([]);
+      setReferenceMessage(
+        "Belum ada file referensi dari customer."
+      );
+      setLoadingReferences(false);
+      return;
+    }
+
+    const filesWithUrls: ReferenceFile[] = [];
+
+    for (const file of data) {
+      const { data: signedData, error: signedError } =
+        await supabase.storage
+          .from("pajara-files")
+          .createSignedUrl(
+            file.file_path,
+            60 * 60
+          );
+
+      if (signedError || !signedData?.signedUrl) {
+        continue;
+      }
+
+      filesWithUrls.push({
+        ...file,
+        url: signedData.signedUrl,
+      });
+    }
+
+    setReferenceFiles(filesWithUrls);
+
+    if (filesWithUrls.length === 0) {
+      setReferenceMessage(
+        "File referensi ditemukan, tetapi tidak dapat dibuka."
+      );
+    }
+
+    setLoadingReferences(false);
+  }
+
+  async function handleStatusChange(
+    newStatus: string
+  ) {
     if (!order) return;
 
     setSavingStatus(true);
@@ -184,7 +297,8 @@ function OrderDetailContent() {
     if (error) {
       setSavingStatus(false);
       setStatusMessage(
-        "Gagal mengubah status: " + error.message
+        "Gagal mengubah status: " +
+          error.message
       );
       return;
     }
@@ -195,25 +309,32 @@ function OrderDetailContent() {
     });
 
     setSavingStatus(false);
-    setStatusMessage("Status pesanan berhasil diperbarui.");
+    setStatusMessage(
+      "Status pesanan berhasil diperbarui."
+    );
   }
 
   async function handleUploadFinalFile() {
     if (!order) return;
 
     if (!selectedFile) {
-      setUploadMessage("Pilih file final terlebih dahulu.");
+      setUploadMessage(
+        "Pilih file final terlebih dahulu."
+      );
       return;
     }
 
     setUploadingFile(true);
     setUploadMessage("");
 
-    const { data: sessionData } = await supabase.auth.getSession();
+    const { data: sessionData } =
+      await supabase.auth.getSession();
 
     if (!sessionData.session?.user) {
       setUploadingFile(false);
-      setUploadMessage("Sesi admin tidak ditemukan.");
+      setUploadMessage(
+        "Sesi admin tidak ditemukan."
+      );
       return;
     }
 
@@ -228,37 +349,48 @@ function OrderDetailContent() {
       .replace(/[^a-zA-Z0-9._-]/g, "-")
       .replace(/-+/g, "-");
 
-    const filePath = `orders/${order.id}/final/${Date.now()}-${safeFileName}`;
+    const filePath =
+      `orders/${order.id}/final/` +
+      `${Date.now()}-${safeFileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("pajara-files")
-      .upload(filePath, selectedFile, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType:
-          selectedFile.type ||
-          `application/${fileExtension}`,
-      });
+    const { error: uploadError } =
+      await supabase.storage
+        .from("pajara-files")
+        .upload(
+          filePath,
+          selectedFile,
+          {
+            cacheControl: "3600",
+            upsert: false,
+            contentType:
+              selectedFile.type ||
+              `application/${fileExtension}`,
+          }
+        );
 
     if (uploadError) {
       setUploadingFile(false);
       setUploadMessage(
-        "Gagal upload file: " + uploadError.message
+        "Gagal upload file: " +
+          uploadError.message
       );
       return;
     }
 
-    const { error: insertError } = await supabase
-      .from("order_files")
-      .insert({
-        order_id: order.id,
-        file_name: selectedFile.name,
-        file_path: filePath,
-        file_type: selectedFile.type || null,
-        file_size: selectedFile.size,
-        file_category: "final",
-        uploaded_by: user.id,
-      });
+    const { error: insertError } =
+      await supabase
+        .from("order_files")
+        .insert({
+          order_id: order.id,
+          revision_id: null,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          file_type:
+            selectedFile.type || null,
+          file_size: selectedFile.size,
+          file_category: "final",
+          uploaded_by: user.id,
+        });
 
     if (insertError) {
       await supabase.storage
@@ -275,7 +407,9 @@ function OrderDetailContent() {
 
     setSelectedFile(null);
     setUploadingFile(false);
-    setUploadMessage("File final berhasil di-upload.");
+    setUploadMessage(
+      "File final berhasil di-upload."
+    );
   }
 
   if (loading) {
@@ -313,7 +447,8 @@ function OrderDetailContent() {
             background: "#ffffff",
             borderRadius: "16px",
             padding: "24px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h1
@@ -337,7 +472,9 @@ function OrderDetailContent() {
 
           <button
             type="button"
-            onClick={() => router.push("/orders")}
+            onClick={() =>
+              router.push("/orders")
+            }
             style={{
               width: "100%",
               height: "48px",
@@ -386,7 +523,9 @@ function OrderDetailContent() {
         >
           <button
             type="button"
-            onClick={() => router.push("/orders")}
+            onClick={() =>
+              router.push("/orders")
+            }
             style={{
               border: "none",
               background: "transparent",
@@ -434,7 +573,8 @@ function OrderDetailContent() {
             borderRadius: "16px",
             padding: "22px",
             marginBottom: "18px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <p
@@ -464,7 +604,8 @@ function OrderDetailContent() {
             borderRadius: "16px",
             padding: "22px",
             marginBottom: "18px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h2
@@ -485,32 +626,44 @@ function OrderDetailContent() {
           >
             <InfoRow
               label="Layanan"
-              value={order.service_name || "-"}
+              value={
+                order.service_name || "-"
+              }
             />
 
             <InfoRow
               label="Jenis Desain"
-              value={order.design_type || "-"}
+              value={
+                order.design_type || "-"
+              }
             />
 
             <InfoRow
               label="Jumlah"
-              value={String(order.quantity || 0)}
+              value={String(
+                order.quantity || 0
+              )}
             />
 
             <InfoRow
               label="Status"
-              value={getStatusLabel(order.status)}
+              value={getStatusLabel(
+                order.status
+              )}
             />
 
             <InfoRow
               label="Deadline"
-              value={formatDate(order.deadline)}
+              value={formatDate(
+                order.deadline
+              )}
             />
 
             <InfoRow
               label="Dibuat"
-              value={formatDate(order.created_at)}
+              value={formatDate(
+                order.created_at
+              )}
             />
           </div>
         </div>
@@ -521,7 +674,188 @@ function OrderDetailContent() {
             borderRadius: "16px",
             padding: "22px",
             marginBottom: "18px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 18px",
+              color: "#214d32",
+              fontSize: "19px",
+            }}
+          >
+            Referensi Customer
+          </h2>
+
+          {loadingReferences ? (
+            <p
+              style={{
+                margin: 0,
+                color: "#777",
+                fontSize: "14px",
+              }}
+            >
+              Memuat referensi...
+            </p>
+          ) : referenceFiles.length === 0 ? (
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: "10px",
+                padding: "14px",
+                color: "#777",
+                fontSize: "14px",
+                lineHeight: 1.5,
+              }}
+            >
+              {referenceMessage ||
+                "Belum ada file referensi dari customer."}
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gap: "18px",
+              }}
+            >
+              {referenceFiles.map(
+                (file) => {
+                  const isImage =
+                    file.file_type?.startsWith(
+                      "image/"
+                    );
+
+                  const isPdf =
+                    file.file_type ===
+                    "application/pdf";
+
+                  return (
+                    <div
+                      key={file.id}
+                      style={{
+                        border:
+                          "1px solid #e5e1da",
+                        borderRadius: "12px",
+                        overflow: "hidden",
+                        background:
+                          "#f7f4ee",
+                      }}
+                    >
+                      {isImage && (
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <img
+                            src={file.url}
+                            alt={
+                              file.file_name
+                            }
+                            style={{
+                              display:
+                                "block",
+                              width: "100%",
+                              maxHeight:
+                                "500px",
+                              objectFit:
+                                "contain",
+                              background:
+                                "#eee",
+                            }}
+                          />
+                        </a>
+                      )}
+
+                      <div
+                        style={{
+                          padding:
+                            "14px",
+                          background:
+                            "#ffffff",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color:
+                              "#214d32",
+                            fontWeight:
+                              "600",
+                            fontSize:
+                              "14px",
+                            wordBreak:
+                              "break-word",
+                          }}
+                        >
+                          {file.file_name}
+                        </div>
+
+                        <p
+                          style={{
+                            margin:
+                              "6px 0 12px",
+                            color:
+                              "#777",
+                            fontSize:
+                              "12px",
+                          }}
+                        >
+                          {formatFileSize(
+                            file.file_size
+                          )}
+                        </p>
+
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            display:
+                              "inline-flex",
+                            alignItems:
+                              "center",
+                            justifyContent:
+                              "center",
+                            minHeight:
+                              "42px",
+                            padding:
+                              "0 16px",
+                            borderRadius:
+                              "9px",
+                            background:
+                              "#2f6b45",
+                            color:
+                              "#ffffff",
+                            textDecoration:
+                              "none",
+                            fontSize:
+                              "13px",
+                            fontWeight:
+                              "bold",
+                          }}
+                        >
+                          {isPdf
+                            ? "Buka PDF"
+                            : "Buka File"}
+                        </a>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            background: "#ffffff",
+            borderRadius: "16px",
+            padding: "22px",
+            marginBottom: "18px",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h2
@@ -534,7 +868,11 @@ function OrderDetailContent() {
             Brief & Catatan
           </h2>
 
-          <div style={{ marginBottom: "18px" }}>
+          <div
+            style={{
+              marginBottom: "18px",
+            }}
+          >
             <p
               style={{
                 margin: "0 0 7px",
@@ -593,7 +931,8 @@ function OrderDetailContent() {
             borderRadius: "16px",
             padding: "22px",
             marginBottom: "18px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h2
@@ -614,17 +953,23 @@ function OrderDetailContent() {
           >
             <InfoRow
               label="Total"
-              value={formatRupiah(order.total_amount)}
+              value={formatRupiah(
+                order.total_amount
+              )}
             />
 
             <InfoRow
               label="DP"
-              value={formatRupiah(order.dp_amount)}
+              value={formatRupiah(
+                order.dp_amount
+              )}
             />
 
             <InfoRow
               label="Sisa"
-              value={formatRupiah(order.remaining_amount)}
+              value={formatRupiah(
+                order.remaining_amount
+              )}
             />
           </div>
         </div>
@@ -635,7 +980,8 @@ function OrderDetailContent() {
             borderRadius: "16px",
             padding: "22px",
             marginBottom: "18px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h2
@@ -656,13 +1002,21 @@ function OrderDetailContent() {
             }}
           >
             Status saat ini:{" "}
-            <strong>{getStatusLabel(order.status)}</strong>
+            <strong>
+              {getStatusLabel(
+                order.status
+              )}
+            </strong>
           </p>
 
           <select
-            value={order.status || "pending"}
+            value={
+              order.status || "pending"
+            }
             onChange={(event) =>
-              handleStatusChange(event.target.value)
+              handleStatusChange(
+                event.target.value
+              )
             }
             disabled={savingStatus}
             style={{
@@ -675,14 +1029,24 @@ function OrderDetailContent() {
               color: "#333",
               fontSize: "15px",
               fontWeight: "600",
-              cursor: savingStatus ? "not-allowed" : "pointer",
+              cursor: savingStatus
+                ? "not-allowed"
+                : "pointer",
               outline: "none",
             }}
           >
-            <option value="pending">Pesanan Baru</option>
-            <option value="processing">Diproses</option>
-            <option value="completed">Selesai</option>
-            <option value="cancelled">Dibatalkan</option>
+            <option value="pending">
+              Pesanan Baru
+            </option>
+            <option value="processing">
+              Diproses
+            </option>
+            <option value="completed">
+              Selesai
+            </option>
+            <option value="cancelled">
+              Dibatalkan
+            </option>
           </select>
 
           {savingStatus && (
@@ -701,9 +1065,12 @@ function OrderDetailContent() {
             <p
               style={{
                 margin: "12px 0 0",
-                color: statusMessage.startsWith("Gagal")
-                  ? "#b42318"
-                  : "#2f6b45",
+                color:
+                  statusMessage.startsWith(
+                    "Gagal"
+                  )
+                    ? "#b42318"
+                    : "#2f6b45",
                 fontSize: "13px",
                 fontWeight: "600",
               }}
@@ -718,7 +1085,8 @@ function OrderDetailContent() {
             background: "#ffffff",
             borderRadius: "16px",
             padding: "22px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+            boxShadow:
+              "0 6px 20px rgba(0,0,0,0.06)",
           }}
         >
           <h2
@@ -739,13 +1107,17 @@ function OrderDetailContent() {
               lineHeight: 1.5,
             }}
           >
-            Upload file desain final untuk pesanan ini.
+            Upload file desain final untuk
+            pesanan ini.
           </p>
 
           <input
             type="file"
             onChange={(event) => {
-              const file = event.target.files?.[0] || null;
+              const file =
+                event.target.files?.[0] ||
+                null;
+
               setSelectedFile(file);
               setUploadMessage("");
             }}
@@ -766,34 +1138,46 @@ function OrderDetailContent() {
                 marginBottom: "14px",
                 color: "#444",
                 fontSize: "13px",
-                wordBreak: "break-word",
+                wordBreak:
+                  "break-word",
               }}
             >
-              File dipilih: <strong>{selectedFile.name}</strong>
+              File dipilih:{" "}
+              <strong>
+                {selectedFile.name}
+              </strong>
             </div>
           )}
 
           <button
             type="button"
-            onClick={handleUploadFinalFile}
-            disabled={uploadingFile || !selectedFile}
+            onClick={
+              handleUploadFinalFile
+            }
+            disabled={
+              uploadingFile ||
+              !selectedFile
+            }
             style={{
               width: "100%",
               height: "48px",
               border: "none",
               borderRadius: "10px",
               background:
-                uploadingFile || !selectedFile
+                uploadingFile ||
+                !selectedFile
                   ? "#b8c5bc"
                   : "#2f6b45",
               color: "#ffffff",
               fontSize: "15px",
               fontWeight: "bold",
               cursor:
-                uploadingFile || !selectedFile
+                uploadingFile ||
+                !selectedFile
                   ? "not-allowed"
                   : "pointer",
-              touchAction: "manipulation",
+              touchAction:
+                "manipulation",
             }}
           >
             {uploadingFile
@@ -805,9 +1189,12 @@ function OrderDetailContent() {
             <p
               style={{
                 margin: "12px 0 0",
-                color: uploadMessage.startsWith("Gagal")
-                  ? "#b42318"
-                  : "#2f6b45",
+                color:
+                  uploadMessage.startsWith(
+                    "Gagal"
+                  )
+                    ? "#b42318"
+                    : "#2f6b45",
                 fontSize: "13px",
                 fontWeight: "600",
                 lineHeight: 1.5,
@@ -842,7 +1229,9 @@ function LoadingScreen() {
 
 export default function OrderDetailPage() {
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense
+      fallback={<LoadingScreen />}
+    >
       <OrderDetailContent />
     </Suspense>
   );
