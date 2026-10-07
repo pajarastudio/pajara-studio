@@ -10,4 +10,15 @@ jobs:
     steps:
       - name: Generate VAPID keys
         run: |
-          npx --yes web-push generate-vapid-keys
+          mkdir vapid
+          cd vapid
+          npm init -y
+          npm install web-push
+          node -e "const webpush=require('web-push'); const keys=webpush.generateVAPIDKeys(); require('fs').writeFileSync('vapid-keys.txt', 'VAPID_PUBLIC_KEY=' + keys.publicKey + '\nVAPID_PRIVATE_KEY=' + keys.privateKey + '\n');"
+
+      - name: Upload VAPID keys
+        uses: actions/upload-artifact@v4
+        with:
+          name: pajara-vapid-keys
+          path: vapid/vapid-keys.txt
+          retention-days: 1
