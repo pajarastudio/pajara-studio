@@ -144,6 +144,10 @@ function OrderDetailContent() {
   const [savingStatus, setSavingStatus] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
+  const [totalInput, setTotalInput] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [priceMessage, setPriceMessage] = useState("");
+
   const [selectedFile, setSelectedFile] =
     useState<File | null>(null);
   const [uploadingFile, setUploadingFile] =
@@ -203,6 +207,12 @@ function OrderDetailContent() {
       }
 
       setOrder(data);
+
+      setTotalInput(
+        data.total_amount
+          ? String(data.total_amount)
+          : ""
+      );
 
       await loadReferenceFiles(orderId);
 
@@ -276,6 +286,59 @@ function OrderDetailContent() {
     }
 
     setLoadingReferences(false);
+  }
+
+  async function handleSavePrice() {
+    if (!order) return;
+
+    const total = Number(
+      totalInput.replace(/[^\d]/g, "")
+    );
+
+    if (!Number.isFinite(total) || total <= 0) {
+      setPriceMessage(
+        "Masukkan total harga yang valid."
+      );
+      return;
+    }
+
+    const dp = Math.floor(total / 2);
+    const remaining = total - dp;
+
+    setSavingPrice(true);
+    setPriceMessage("");
+
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        total_amount: total,
+        dp_amount: dp,
+        remaining_amount: remaining,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", order.id);
+
+    if (error) {
+      setSavingPrice(false);
+      setPriceMessage(
+        "Gagal menyimpan harga: " +
+          error.message
+      );
+      return;
+    }
+
+    setOrder({
+      ...order,
+      total_amount: total,
+      dp_amount: dp,
+      remaining_amount: remaining,
+    });
+
+    setTotalInput(String(total));
+    setSavingPrice(false);
+    setPriceMessage(
+      "Harga pesanan berhasil disimpan."
+    );
   }
 
   async function handleStatusChange(
@@ -951,15 +1014,53 @@ function OrderDetailContent() {
               gap: "15px",
             }}
           >
-            <InfoRow
-              label="Total"
-              value={formatRupiah(
-                order.total_amount
-              )}
-            />
+            <div>
+              <label
+                htmlFor="total-price"
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  color: "#8a6a4a",
+                  fontSize: "13px",
+                }}
+              >
+                Total Harga
+              </label>
+
+              <input
+                id="total-price"
+                type="number"
+                min="0"
+                step="1000"
+                value={totalInput}
+                onChange={(event) => {
+                  setTotalInput(
+                    event.target.value
+                  );
+                  setPriceMessage("");
+                }}
+                placeholder="Contoh: 150000"
+                disabled={savingPrice}
+                style={{
+                  width: "100%",
+                  height: "48px",
+                  boxSizing: "border-box",
+                  border:
+                    "1px solid #ddd",
+                  borderRadius: "10px",
+                  padding:
+                    "0 14px",
+                  background:
+                    "#ffffff",
+                  color: "#333",
+                  fontSize: "15px",
+                  outline: "none",
+                }}
+              />
+            </div>
 
             <InfoRow
-              label="DP"
+              label="DP 50%"
               value={formatRupiah(
                 order.dp_amount
               )}
@@ -971,6 +1072,54 @@ function OrderDetailContent() {
                 order.remaining_amount
               )}
             />
+
+            <button
+              type="button"
+              onClick={handleSavePrice}
+              disabled={savingPrice}
+              style={{
+                width: "100%",
+                height: "48px",
+                border: "none",
+                borderRadius: "10px",
+                background:
+                  savingPrice
+                    ? "#b8c5bc"
+                    : "#2f6b45",
+                color: "#ffffff",
+                fontSize: "15px",
+                fontWeight: "bold",
+                cursor:
+                  savingPrice
+                    ? "not-allowed"
+                    : "pointer",
+                touchAction:
+                  "manipulation",
+              }}
+            >
+              {savingPrice
+                ? "Menyimpan..."
+                : "Simpan Harga"}
+            </button>
+
+            {priceMessage && (
+              <p
+                style={{
+                  margin: 0,
+                  color:
+                    priceMessage.startsWith(
+                      "Gagal"
+                    )
+                      ? "#b42318"
+                      : "#2f6b45",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  lineHeight: 1.5,
+                }}
+              >
+                {priceMessage}
+              </p>
+            )}
           </div>
         </div>
 
