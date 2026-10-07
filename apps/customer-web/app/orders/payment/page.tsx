@@ -22,6 +22,45 @@ function formatRupiah(value: number | null) {
   }).format(value || 0);
 }
 
+function getPaymentStatus(status: string | null) {
+  switch (status) {
+    case "waiting_dp":
+      return {
+        title: "Menunggu Pembayaran DP",
+        description:
+          "Silakan lakukan pembayaran DP sesuai nominal yang tercantum.",
+      };
+
+    case "processing":
+      return {
+        title: "Pembayaran DP Diproses",
+        description:
+          "Pesanan sedang diproses oleh Pajara Studio.",
+      };
+
+    case "waiting_payment":
+      return {
+        title: "Menunggu Pelunasan",
+        description:
+          "DP telah diterima. Sisa pembayaran dapat dilunasi setelah project selesai.",
+      };
+
+    case "completed":
+      return {
+        title: "Pembayaran Selesai",
+        description:
+          "Seluruh pembayaran untuk pesanan ini telah selesai.",
+      };
+
+    default:
+      return {
+        title: "Informasi Pembayaran",
+        description:
+          "Informasi pembayaran akan tersedia sesuai status pesanan.",
+      };
+  }
+}
+
 function PaymentContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -110,6 +149,10 @@ function PaymentContent() {
       </main>
     );
   }
+
+  const paymentStatus = getPaymentStatus(order.status);
+
+  const isWaitingDP = order.status === "waiting_dp";
 
   return (
     <main
@@ -210,10 +253,15 @@ function PaymentContent() {
               }}
             >
               <span style={{ color: "#666" }}>
-                DP
+                DP 50%
               </span>
 
-              <strong style={{ color: "var(--green-dark)" }}>
+              <strong
+                style={{
+                  color: "var(--green-dark)",
+                  fontSize: "18px",
+                }}
+              >
                 {formatRupiah(order.dp_amount)}
               </strong>
             </div>
@@ -261,44 +309,142 @@ function PaymentContent() {
             style={{
               color: "var(--green-dark)",
               marginTop: 0,
+              marginBottom: "8px",
             }}
           >
-            Metode Pembayaran
+            {paymentStatus.title}
           </h2>
 
           <p
             style={{
               color: "#666",
               lineHeight: 1.7,
+              marginTop: 0,
             }}
           >
-            Informasi pembayaran akan tersedia setelah metode
-            pembayaran dikonfirmasi oleh Pajara Studio.
+            {paymentStatus.description}
           </p>
 
-          <div
-            style={{
-              marginTop: "20px",
-              padding: "18px",
-              borderRadius: "14px",
-              background: "var(--cream)",
-              border: "1px dashed #cfc5b7",
-            }}
-          >
-            <strong style={{ color: "var(--green-dark)" }}>
-              Pembayaran belum tersedia
-            </strong>
+          {isWaitingDP ? (
+            <>
+              <div
+                style={{
+                  marginTop: "22px",
+                  padding: "22px",
+                  borderRadius: "16px",
+                  background: "var(--cream)",
+                  border: "1px solid #ddd3c5",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "8px",
+                    color: "#666",
+                    fontSize: "14px",
+                  }}
+                >
+                  Nominal yang perlu dibayar
+                </p>
 
-            <p
+                <strong
+                  style={{
+                    display: "block",
+                    color: "var(--green-dark)",
+                    fontSize: "28px",
+                  }}
+                >
+                  {formatRupiah(order.dp_amount)}
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "20px",
+                  padding: "18px",
+                  borderRadius: "14px",
+                  background: "#f8f6f1",
+                  border: "1px dashed #cfc5b7",
+                }}
+              >
+                <strong
+                  style={{
+                    color: "var(--green-dark)",
+                  }}
+                >
+                  Metode Pembayaran
+                </strong>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "10px",
+                    marginTop: "14px",
+                  }}
+                >
+                  {[
+                    "QRIS",
+                    "DANA",
+                    "GoPay",
+                    "SeaBank",
+                  ].map((method) => (
+                    <div
+                      key={method}
+                      style={{
+                        padding: "13px 15px",
+                        background: "#fff",
+                        borderRadius: "10px",
+                        border: "1px solid #e8e2d8",
+                        color: "var(--green-dark)",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {method}
+                    </div>
+                  ))}
+                </div>
+
+                <p
+                  style={{
+                    color: "#777",
+                    lineHeight: 1.6,
+                    marginBottom: 0,
+                    marginTop: "16px",
+                    fontSize: "14px",
+                  }}
+                >
+                  Detail tujuan pembayaran akan ditampilkan
+                  setelah sistem pembayaran Pajara Studio
+                  dikonfigurasi.
+                </p>
+              </div>
+            </>
+          ) : (
+            <div
               style={{
-                color: "#777",
-                marginBottom: 0,
-                lineHeight: 1.6,
+                marginTop: "20px",
+                padding: "18px",
+                borderRadius: "14px",
+                background: "var(--cream)",
+                border: "1px dashed #cfc5b7",
               }}
             >
-              Detail pembayaran akan muncul di sini.
-            </p>
-          </div>
+              <strong style={{ color: "var(--green-dark)" }}>
+                Informasi pembayaran
+              </strong>
+
+              <p
+                style={{
+                  color: "#777",
+                  marginBottom: 0,
+                  lineHeight: 1.6,
+                }}
+              >
+                Detail pembayaran akan menyesuaikan status
+                pesanan kamu.
+              </p>
+            </div>
+          )}
         </section>
       </div>
     </main>
