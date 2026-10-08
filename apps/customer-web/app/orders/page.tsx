@@ -27,7 +27,7 @@ type FinalFile = {
   file_type: string | null;
   file_size: number | null;
   created_at: string;
-  url: string;
+  url: string | null;
 };
 
 function formatFileSize(size: number | null) {
@@ -44,14 +44,40 @@ function formatFileSize(size: number | null) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function getStatusLabel(status: string | null) {
+  switch (status) {
+    case "pending":
+      return "Menunggu Diproses";
+
+    case "waiting_dp":
+      return "Menunggu DP";
+
+    case "processing":
+      return "Sedang Diproses";
+
+    case "revision":
+      return "Dalam Revisi";
+
+    case "waiting_payment":
+      return "Menunggu Pelunasan";
+
+    case "completed":
+      return "Selesai";
+
+    case "cancelled":
+      return "Dibatalkan";
+
+    default:
+      return status || "Menunggu";
+  }
+}
+
 function OrderDetailContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
   const [order, setOrder] = useState<Order | null>(null);
-  const [finalFiles, setFinalFiles] = useState<FinalFile[]>(
-    []
-  );
+  const [finalFiles, setFinalFiles] = useState<FinalFile[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [loadingFiles, setLoadingFiles] = useState(false);
@@ -60,8 +86,12 @@ function OrderDetailContent() {
   const [fileMessage, setFileMessage] = useState("");
 
   useEffect(() => {
+    let mounted = true;
+
     const loadOrder = async () => {
       if (!id) {
+        if (!mounted) return;
+
         setError("ID pesanan tidak ditemukan.");
         setLoading(false);
         return;
@@ -72,6 +102,8 @@ function OrderDetailContent() {
         error: userError,
       } = await supabase.auth.getUser();
 
+      if (!mounted) return;
+
       if (userError || !user) {
         setError(
           "Sesi Anda tidak ditemukan. Silakan login kembali."
@@ -80,29 +112,30 @@ function OrderDetailContent() {
         return;
       }
 
-      const { data, error: orderError } =
-        await supabase
-          .from("orders")
-          .select(
-            `
-              id,
-              order_code,
-              service_name,
-              design_type,
-              quantity,
-              brief,
-              notes,
-              total_amount,
-              dp_amount,
-              remaining_amount,
-              status,
-              deadline,
-              created_at
-            `
-          )
-          .eq("id", id)
-          .eq("customer_id", user.id)
-          .maybeSingle();
+      const { data, error: orderError } = await supabase
+        .from("orders")
+        .select(
+          `
+            id,
+            order_code,
+            service_name,
+            design_type,
+            quantity,
+            brief,
+            notes,
+            total_amount,
+            dp_amount,
+            remaining_amount,
+            status,
+            deadline,
+            created_at
+          `
+        )
+        .eq("id", id)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+
+      if (!mounted) return;
 
       if (orderError) {
         setError(orderError.message);
@@ -123,35 +156,43 @@ function OrderDetailContent() {
     };
 
     loadOrder();
+
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   const loadFinalFiles = async (orderId: string) => {
     setLoadingFiles(true);
     setFileMessage("");
 
-    const { data, error: filesError } =
-      await supabase
-        .from("order_files")
-        .select(
-          `
-            id,
-            file_name,
-            file_path,
-            file_type,
-            file_size,
-            created_at
-          `
-        )
-        .eq("order_id", orderId)
-        .eq("file_category", "final")
-        .order("created_at", {
-          ascending: false,
-        });
+    const { data, error: filesError } = await supabase
+      .from("order_files")
+      .select(
+        `
+          id,
+          file_name,
+          file_path,
+          file_type,
+          file_size,
+          created_at
+        `
+      )
+      .eq("order_id", orderId)
+      .eq("file_category", "final")
+      .order("created_at", {
+        ascending: false,
+      });
 
     if (filesError) {
+      console.error(
+        "Gagal mengambil order_files:",
+        filesError
+      );
+
       setFinalFiles([]);
       setFileMessage(
-        "File final belum dapat dimuat."
+        `File final belum dapat dimuat. ${filesError.message}`
       );
       setLoadingFiles(false);
       return;
@@ -174,15 +215,20 @@ function OrderDetailContent() {
         error: signedError,
       } = await supabase.storage
         .from("pajara-files")
-        .createSignedUrl(
+        .createSignedUrl(file.file_path, 60 * 60);
+
+      if (signedError || !signedData?.signedUrl) {
+        console.error(
+          "Gagal membuat signed URL:",
           file.file_path,
-          60 * 60
+          signedError
         );
 
-      if (
-        signedError ||
-        !signedData?.signedUrl
-      ) {
+        filesWithUrls.push({
+          ...file,
+          url: null,
+        });
+
         continue;
       }
 
@@ -194,43 +240,21 @@ function OrderDetailContent() {
 
     setFinalFiles(filesWithUrls);
 
-    if (filesWithUrls.length === 0) {
+    const accessibleFiles = filesWithUrls.filter(
+      (file) => !!file.url
+    );
+
+    if (accessibleFiles.length === 0) {
       setFileMessage(
-        "File final tersedia, tetapi belum dapat dibuka."
+        "File final tersedia, tetapi belum dapat dibuka. Silakan coba lagi."
+      );
+    } else if (accessibleFiles.length < filesWithUrls.length) {
+      setFileMessage(
+        `${accessibleFiles.length} file final dapat dibuka. Beberapa file lainnya belum dapat diakses.`
       );
     }
 
     setLoadingFiles(false);
-  };
-
-  const getStatusLabel = (
-    status: string | null
-  ) => {
-    switch (status) {
-      case "pending":
-        return "Menunggu Diproses";
-
-      case "waiting_dp":
-        return "Menunggu DP";
-
-      case "processing":
-        return "Sedang Diproses";
-
-      case "revision":
-        return "Dalam Revisi";
-
-      case "waiting_payment":
-        return "Menunggu Pelunasan";
-
-      case "completed":
-        return "Selesai";
-
-      case "cancelled":
-        return "Dibatalkan";
-
-      default:
-        return status || "Menunggu";
-    }
   };
 
   if (loading) {
@@ -338,10 +362,8 @@ function OrderDetailContent() {
                 <div
                   style={{
                     display: "flex",
-                    alignItems:
-                      "flex-start",
-                    justifyContent:
-                      "space-between",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
                     gap: "20px",
                     flexWrap: "wrap",
                   }}
@@ -350,15 +372,11 @@ function OrderDetailContent() {
                     <p
                       style={{
                         margin: 0,
-                        color:
-                          "var(--brown)",
-                        fontSize:
-                          "12px",
+                        color: "var(--brown)",
+                        fontSize: "12px",
                         fontWeight: 700,
-                        letterSpacing:
-                          "0.1em",
-                        textTransform:
-                          "uppercase",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
                       }}
                     >
                       ID Pesanan
@@ -366,8 +384,7 @@ function OrderDetailContent() {
 
                     <h2
                       style={{
-                        marginTop:
-                          "8px",
+                        marginTop: "8px",
                         marginBottom: 0,
                       }}
                     >
@@ -376,9 +393,7 @@ function OrderDetailContent() {
                   </div>
 
                   <span className="pajara-order-status">
-                    {getStatusLabel(
-                      order.status
-                    )}
+                    {getStatusLabel(order.status)}
                   </span>
                 </div>
               </div>
@@ -396,8 +411,7 @@ function OrderDetailContent() {
                   style={{
                     display: "grid",
                     gap: "16px",
-                    marginTop:
-                      "22px",
+                    marginTop: "22px",
                   }}
                 >
                   <div>
@@ -424,9 +438,7 @@ function OrderDetailContent() {
                     </p>
 
                     <strong>
-                      {order.quantity ||
-                        1}{" "}
-                      desain
+                      {order.quantity || 1} desain
                     </strong>
                   </div>
 
@@ -436,9 +448,7 @@ function OrderDetailContent() {
                     </p>
 
                     <strong>
-                      {getStatusLabel(
-                        order.status
-                      )}
+                      {getStatusLabel(order.status)}
                     </strong>
                   </div>
                 </div>
@@ -455,10 +465,8 @@ function OrderDetailContent() {
 
                 <p
                   style={{
-                    marginTop:
-                      "16px",
-                    whiteSpace:
-                      "pre-wrap",
+                    marginTop: "16px",
+                    whiteSpace: "pre-wrap",
                   }}
                 >
                   {order.brief ||
@@ -468,10 +476,8 @@ function OrderDetailContent() {
                 {order.notes && (
                   <div
                     style={{
-                      marginTop:
-                        "20px",
-                      paddingTop:
-                        "20px",
+                      marginTop: "20px",
+                      paddingTop: "20px",
                       borderTop:
                         "1px solid var(--line)",
                     }}
@@ -482,8 +488,7 @@ function OrderDetailContent() {
 
                     <p
                       style={{
-                        whiteSpace:
-                          "pre-wrap",
+                        whiteSpace: "pre-wrap",
                       }}
                     >
                       {order.notes}
@@ -503,50 +508,38 @@ function OrderDetailContent() {
 
                 <p
                   style={{
-                    marginTop:
-                      "10px",
-                    color:
-                      "var(--muted)",
-                    fontSize:
-                      "14px",
+                    marginTop: "10px",
+                    color: "var(--muted)",
+                    fontSize: "14px",
                     lineHeight: 1.6,
                   }}
                 >
-                  File final akan tersedia
-                  di sini setelah Pajara
-                  Studio menyelesaikan dan
-                  mengunggah desain Anda.
+                  File hasil desain akan
+                  tersedia di halaman ini
+                  setelah pesanan selesai dan
+                  file final sudah diunggah
+                  oleh tim Pajara Studio.
                 </p>
 
                 {loadingFiles ? (
                   <div
                     style={{
-                      marginTop:
-                        "18px",
-                      padding:
-                        "16px",
-                      borderRadius:
-                        "12px",
-                      background:
-                        "var(--soft)",
+                      marginTop: "18px",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      background: "var(--soft)",
                     }}
                   >
                     Memuat file final...
                   </div>
-                ) : finalFiles.length ===
-                  0 ? (
+                ) : finalFiles.length === 0 ? (
                   <div
                     style={{
-                      marginTop:
-                        "18px",
-                      padding:
-                        "16px",
-                      borderRadius:
-                        "12px",
-                      background:
-                        "var(--soft)",
-                      fontSize:
-                        "14px",
+                      marginTop: "18px",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      background: "var(--soft)",
+                      fontSize: "14px",
                       lineHeight: 1.6,
                     }}
                   >
@@ -556,144 +549,114 @@ function OrderDetailContent() {
                 ) : (
                   <div
                     style={{
-                      display:
-                        "grid",
+                      display: "grid",
                       gap: "14px",
-                      marginTop:
-                        "20px",
+                      marginTop: "20px",
                     }}
                   >
-                    {finalFiles.map(
-                      (file) => {
-                        const isImage =
-                          file.file_type?.startsWith(
-                            "image/"
-                          );
+                    {finalFiles.map((file) => {
+                      const isImage =
+                        file.file_type?.startsWith(
+                          "image/"
+                        );
 
-                        const isPdf =
-                          file.file_type ===
-                          "application/pdf";
+                      const isPdf =
+                        file.file_type ===
+                        "application/pdf";
 
-                        return (
+                      return (
+                        <div
+                          key={file.id}
+                          style={{
+                            border:
+                              "1px solid var(--line)",
+                            borderRadius: "14px",
+                            padding: "16px",
+                            background: "#fff",
+                          }}
+                        >
                           <div
-                            key={
-                              file.id
-                            }
                             style={{
-                              border:
-                                "1px solid var(--line)",
-                              borderRadius:
-                                "14px",
-                              padding:
-                                "16px",
-                              background:
-                                "#fff",
+                              display: "flex",
+                              alignItems:
+                                "flex-start",
+                              justifyContent:
+                                "space-between",
+                              gap: "14px",
+                              flexWrap: "wrap",
                             }}
                           >
                             <div
                               style={{
-                                display:
-                                  "flex",
-                                alignItems:
-                                  "flex-start",
-                                justifyContent:
-                                  "space-between",
-                                gap:
-                                  "14px",
-                                flexWrap:
-                                  "wrap",
+                                minWidth: 0,
+                                flex:
+                                  "1 1 220px",
                               }}
                             >
-                              <div
+                              <p
                                 style={{
-                                  minWidth:
-                                    0,
-                                  flex:
-                                    "1 1 220px",
+                                  margin: 0,
+                                  fontWeight: 700,
+                                  color:
+                                    "var(--green)",
+                                  wordBreak:
+                                    "break-word",
                                 }}
                               >
-                                <p
-                                  style={{
-                                    margin:
-                                      0,
-                                    fontWeight:
-                                      700,
-                                    color:
-                                      "var(--green)",
-                                    wordBreak:
-                                      "break-word",
-                                  }}
-                                >
-                                  {file.file_name}
-                                </p>
+                                {file.file_name}
+                              </p>
 
-                                <p
-                                  style={{
-                                    margin:
-                                      "6px 0 0",
-                                    fontSize:
-                                      "12px",
-                                    color:
-                                      "var(--muted)",
-                                  }}
-                                >
-                                  {formatFileSize(
-                                    file.file_size
-                                  )}
-                                </p>
-                              </div>
+                              <p
+                                style={{
+                                  margin:
+                                    "6px 0 0",
+                                  fontSize: "12px",
+                                  color:
+                                    "var(--muted)",
+                                }}
+                              >
+                                {formatFileSize(
+                                  file.file_size
+                                )}
+                              </p>
                             </div>
+                          </div>
 
-                            {isImage && (
-                              <div
-                                style={{
-                                  marginTop:
-                                    "16px",
-                                  borderRadius:
-                                    "10px",
-                                  overflow:
-                                    "hidden",
-                                  background:
-                                    "#f5f5f5",
-                                }}
-                              >
-                                <img
-                                  src={
-                                    file.url
-                                  }
-                                  alt={
-                                    file.file_name
-                                  }
-                                  style={{
-                                    display:
-                                      "block",
-                                    width:
-                                      "100%",
-                                    maxHeight:
-                                      "500px",
-                                    objectFit:
-                                      "contain",
-                                  }}
-                                />
-                              </div>
-                            )}
-
+                          {isImage && file.url && (
                             <div
                               style={{
-                                display:
-                                  "flex",
-                                gap:
-                                  "10px",
-                                flexWrap:
-                                  "wrap",
-                                marginTop:
-                                  "16px",
+                                marginTop: "16px",
+                                borderRadius: "10px",
+                                overflow: "hidden",
+                                background:
+                                  "#f5f5f5",
+                              }}
+                            >
+                              <img
+                                src={file.url}
+                                alt={file.file_name}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  maxHeight: "500px",
+                                  objectFit:
+                                    "contain",
+                                }}
+                              />
+                            </div>
+                          )}
+
+                          {file.url ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "10px",
+                                flexWrap: "wrap",
+                                marginTop: "16px",
                               }}
                             >
                               <a
-                                href={
-                                  file.url
-                                }
+                                href={file.url}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="pajara-button pajara-button-primary"
@@ -704,20 +667,47 @@ function OrderDetailContent() {
                               </a>
 
                               <a
-                                href={
-                                  file.url
-                                }
-                                download={
-                                  file.file_name
-                                }
+                                href={file.url}
+                                download={file.file_name}
                                 className="pajara-button pajara-button-secondary"
                               >
                                 Download
                               </a>
                             </div>
-                          </div>
-                        );
-                      }
+                          ) : (
+                            <div
+                              style={{
+                                marginTop: "16px",
+                                padding: "12px",
+                                borderRadius: "10px",
+                                background:
+                                  "var(--soft)",
+                                fontSize: "13px",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              File tercatat di
+                              sistem, tetapi link
+                              file belum dapat
+                              dibuat.
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {fileMessage && (
+                      <div
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: "10px",
+                          background: "var(--soft)",
+                          fontSize: "13px",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {fileMessage}
+                      </div>
                     )}
                   </div>
                 )}
@@ -728,8 +718,7 @@ function OrderDetailContent() {
               style={{
                 display: "grid",
                 gap: "20px",
-                alignContent:
-                  "start",
+                alignContent: "start",
               }}
             >
               <div className="pajara-order-detail-card">
@@ -743,11 +732,9 @@ function OrderDetailContent() {
 
                 <div
                   style={{
-                    display:
-                      "grid",
+                    display: "grid",
                     gap: "12px",
-                    marginTop:
-                      "22px",
+                    marginTop: "22px",
                   }}
                 >
                   <a
@@ -784,41 +771,30 @@ function OrderDetailContent() {
 
                 <div
                   style={{
-                    display:
-                      "grid",
+                    display: "grid",
                     gap: "12px",
-                    marginTop:
-                      "18px",
+                    marginTop: "18px",
                   }}
                 >
                   <div>
                     Total: Rp{" "}
                     {(
-                      order.total_amount ||
-                      0
-                    ).toLocaleString(
-                      "id-ID"
-                    )}
+                      order.total_amount || 0
+                    ).toLocaleString("id-ID")}
                   </div>
 
                   <div>
                     DP: Rp{" "}
                     {(
-                      order.dp_amount ||
-                      0
-                    ).toLocaleString(
-                      "id-ID"
-                    )}
+                      order.dp_amount || 0
+                    ).toLocaleString("id-ID")}
                   </div>
 
                   <div>
                     Sisa: Rp{" "}
                     {(
-                      order.remaining_amount ||
-                      0
-                    ).toLocaleString(
-                      "id-ID"
-                    )}
+                      order.remaining_amount || 0
+                    ).toLocaleString("id-ID")}
                   </div>
                 </div>
               </div>
@@ -833,10 +809,8 @@ function OrderDetailContent() {
             <a
               href="/dashboard"
               style={{
-                color:
-                  "var(--green)",
-                fontSize:
-                  "14px",
+                color: "var(--green)",
+                fontSize: "14px",
                 fontWeight: 700,
               }}
             >
