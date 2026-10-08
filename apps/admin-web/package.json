@@ -17,7 +17,9 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "latest",
     "@types/react": "latest",
+    "tailwindcss": "latest",
     "typescript": "latest",
     "wrangler": "latest"
   }
