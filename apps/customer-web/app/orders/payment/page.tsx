@@ -29,18 +29,26 @@ const PAYMENT_METHODS = [
   {
     name: "QRIS",
     description: "Bayar menggunakan QRIS",
+    account: "A/N Pajara Studio",
+    note: "Kode QRIS akan tersedia pada tahap berikutnya.",
   },
   {
     name: "DANA",
     description: "Bayar menggunakan DANA",
+    account: "0858-8242-1145",
+    owner: "A/N TUTI",
   },
   {
     name: "GoPay",
     description: "Bayar menggunakan GoPay",
+    account: "0858-8242-1145",
+    owner: "A/N TUTI",
   },
   {
     name: "SeaBank",
     description: "Transfer melalui SeaBank",
+    account: "901052450932",
+    owner: "A/N TUTI",
   },
 ];
 
@@ -219,7 +227,7 @@ function PaymentContent() {
 
     if (createdPayment) {
       setMessage(
-        "Metode pembayaran berhasil disimpan. Silakan upload bukti pembayaran."
+        "Metode pembayaran berhasil disimpan. Silakan lakukan pembayaran sesuai metode yang dipilih, kemudian upload bukti pembayaran."
       );
     }
 
@@ -296,7 +304,8 @@ function PaymentContent() {
           revision_id: null,
           file_name: proofFile.name,
           file_path: filePath,
-          file_type: proofFile.type || "application/octet-stream",
+          file_type:
+            proofFile.type || "application/octet-stream",
           file_size: proofFile.size,
           file_category: "payment_proof",
         })
@@ -316,17 +325,19 @@ function PaymentContent() {
       return;
     }
 
-    const { data: updatedPayment, error: updatePaymentError } =
-      await supabase
-        .from("payments")
-        .update({
-          proof_file_id: orderFile.id,
-        })
-        .eq("id", payment.id)
-        .select(
-          "id, order_id, payment_method, payment_type, amount, proof_file_id, status, created_at"
-        )
-        .single();
+    const {
+      data: updatedPayment,
+      error: updatePaymentError,
+    } = await supabase
+      .from("payments")
+      .update({
+        proof_file_id: orderFile.id,
+      })
+      .eq("id", payment.id)
+      .select(
+        "id, order_id, payment_method, payment_type, amount, proof_file_id, status, created_at"
+      )
+      .single();
 
     if (updatePaymentError || !updatedPayment) {
       await supabase
@@ -348,12 +359,17 @@ function PaymentContent() {
 
     setPayment(updatedPayment);
     setProofFile(null);
+
     setMessage(
       "Bukti pembayaran berhasil diupload. Pembayaran menunggu verifikasi Admin Pajara Studio."
     );
 
     setUploadingProof(false);
   }
+
+  const selectedPaymentMethod = PAYMENT_METHODS.find(
+    (method) => method.name === selectedMethod
+  );
 
   if (loading) {
     return (
@@ -761,7 +777,7 @@ function PaymentContent() {
                         gap: "16px",
                       }}
                     >
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <strong
                           style={{
                             color: "var(--green-dark)",
@@ -779,6 +795,51 @@ function PaymentContent() {
                           }}
                         >
                           {method.description}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: "12px",
+                            padding: "10px 12px",
+                            borderRadius: "10px",
+                            background: "#f7f4ee",
+                          }}
+                        >
+                          <div
+                            style={{
+                              color: "var(--green-dark)",
+                              fontWeight: 700,
+                              fontSize: "14px",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {method.account}
+                          </div>
+
+                          {method.owner && (
+                            <div
+                              style={{
+                                marginTop: "3px",
+                                color: "#777",
+                                fontSize: "12px",
+                              }}
+                            >
+                              {method.owner}
+                            </div>
+                          )}
+
+                          {method.note && (
+                            <div
+                              style={{
+                                marginTop: "4px",
+                                color: "#777",
+                                fontSize: "12px",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {method.note}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -798,6 +859,34 @@ function PaymentContent() {
                 );
               })}
             </div>
+
+            {selectedPaymentMethod && (
+              <div
+                style={{
+                  marginTop: "18px",
+                  padding: "16px",
+                  borderRadius: "12px",
+                  background: "#edf6ef",
+                  border: "1px solid #c8dfcc",
+                  color: "var(--green-dark)",
+                  lineHeight: 1.6,
+                  fontSize: "14px",
+                }}
+              >
+                <strong>
+                  Metode dipilih:{" "}
+                  {selectedPaymentMethod.name}
+                </strong>
+
+                <div style={{ marginTop: "5px" }}>
+                  Silakan lakukan pembayaran sebesar{" "}
+                  <strong>
+                    {formatRupiah(order.dp_amount)}
+                  </strong>{" "}
+                  menggunakan metode tersebut.
+                </div>
+              </div>
+            )}
 
             <button
               type="button"
