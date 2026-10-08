@@ -4,7 +4,18 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
-type Plan = {
+type Subscription = {
+  id: string;
+  customer_id: string;
+  plan_id: string;
+  status: string;
+  started_at: string | null;
+  expires_at: string | null;
+  quota_total: number;
+  quota_used: number;
+};
+
+type SubscriptionPlan = {
   id: string;
   name: string;
   description: string | null;
@@ -13,22 +24,7 @@ type Plan = {
   quota_total: number;
 };
 
-type Subscription = {
-  id: string;
-  plan_id: string;
-  customer_id: string;
-  status: string;
-  quota_total: number;
-  quota_used: number;
-};
-
-function formatRupiah(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+type PaymentMethod = "QRIS" | "DANA" | "GoPay" | "SeaBank";
 
 function PaymentPageContent() {
   const router = useRouter();
@@ -36,107 +32,119 @@ function PaymentPageContent() {
 
   const subscriptionId = searchParams.get("subscription");
 
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscription, setSubscription] =
+    useState<Subscription | null>(null);
+  const [plan, setPlan] = useState<SubscriptionPlan | null>(null);
 
-  const [paymentMethod, setPaymentMethod] = useState("QRIS");
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("QRIS");
   const [transactionId, setTransactionId] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      setError("");
+    loadSubscription();
+  }, [subscriptionId]);
 
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          router.replace("/login");
-          return;
-        }
-
-        if (!subscriptionId) {
-          setError("Data paket tidak ditemukan.");
-          setLoading(false);
-          return;
-        }
-
-        const { data: subscriptionData, error: subscriptionError } =
-          await supabase
-            .from("subscriptions")
-            .select(
-              "id, plan_id, customer_id, status, quota_total, quota_used"
-            )
-            .eq("id", subscriptionId)
-            .eq("customer_id", user.id)
-            .single();
-
-        if (subscriptionError || !subscriptionData) {
-          setError("Paket yang dipilih tidak ditemukan.");
-          setLoading(false);
-          return;
-        }
-
-        if (subscriptionData.status !== "pending") {
-          setError("Paket ini tidak sedang menunggu pembayaran.");
-          setSubscription(subscriptionData);
-          setLoading(false);
-          return;
-        }
-
-        const { data: planData, error: planError } = await supabase
-          .from("subscription_plans")
-          .select(
-            "id, name, description, price, duration_days, quota_total"
-          )
-          .eq("id", subscriptionData.plan_id)
-          .single();
-
-        if (planError || !planData) {
-          setError("Data paket tidak ditemukan.");
-          setLoading(false);
-          return;
-        }
-
-        setSubscription(subscriptionData);
-        setPlan(planData);
-      } catch (err) {
-        console.error(err);
-        setError("Terjadi kesalahan saat memuat pembayaran.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, [router, subscriptionId]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function loadSubscription() {
+    setLoading(true);
     setError("");
-    setSuccess("");
 
-    if (!subscription || !plan) {
-      setError("Data pembayaran tidak lengkap.");
+    if (!subscriptionId) {
+      setError("Data pembelian paket tidak ditemukan.");
+      setLoading(false);
       return;
     }
 
-    if (!proofFile) {
-      setError("Silakan upload bukti pembayaran terlebih dahulu.");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("Silakan login terlebih dahulu.");
+      setLoading(false);
       return;
     }
 
-    if (proofFile.size > 10 * 1024 * 1024) {
-      setError("Ukuran bukti pembayaran maksimal 10 MB.");
+    const { data: subscriptionData, error: subscriptionError } =
+      await supabase
+        .from("subscriptions")
+        .select(
+          "id, customer_id, plan_id, status, started_at, expires_at, quota_total, quota_used"
+        )
+        .eq("id", subscriptionId)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+
+    if (subscriptionError) {
+      console.error(subscriptionError);
+      setError("Data pembelian paket gagal dimuat.");
+      setLoading(false);
+      return;
+    }
+
+    if (!subscriptionData) {
+      setError("Pembelian paket tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    if (subscriptionData.status !== "pending") {
+      setError(
+        "Pembelian paket ini sudah tidak menunggu pembayaran."
+      );
+      setLoading(false);
+      return;
+    }
+
+    const { data: planData, error: planError } = await supabase
+      .from("subscription_plans")
+      .select(
+        "id, name, description, price, duration_days, quota_total"
+      )
+      .eq("id", subscriptionData.plan_id)
+      .maybeSingle();
+
+    if (planError) {
+      console.error(planError);
+      setError("Informasi paket gagal dimuat.");
+      setLoading(false);
+      return;
+    }
+
+    if (!planData) {
+      setError("Informasi paket tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    setSubscription(subscriptionData);
+    setPlan(planData);
+    setLoading(false);
+  }
+
+  function formatRupiah(value: number) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
+
+  function handleFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setError("");
+
+    const file = event.target.files?.[0] || null;
+
+    if (!file) {
+      setProofFile(null);
       return;
     }
 
@@ -147,58 +155,95 @@ function PaymentPageContent() {
       "application/pdf",
     ];
 
-    if (!allowedTypes.includes(proofFile.type)) {
-      setError("Format bukti pembayaran harus JPG, PNG, WEBP, atau PDF.");
+    const maxSize = 10 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Format bukti pembayaran harus JPG, PNG, WEBP, atau PDF."
+      );
+      event.target.value = "";
+      setProofFile(null);
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setError("Ukuran bukti pembayaran maksimal 10 MB.");
+      event.target.value = "";
+      setProofFile(null);
+      return;
+    }
+
+    setProofFile(file);
+  }
+
+  async function submitPayment() {
+    setError("");
+    setSuccess("");
+
+    if (!subscription || !plan) {
+      setError("Data paket belum siap.");
+      return;
+    }
+
+    if (!proofFile) {
+      setError("Silakan upload bukti pembayaran terlebih dahulu.");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("Silakan login terlebih dahulu.");
+      return;
+    }
+
+    if (user.id !== subscription.customer_id) {
+      setError("Akses pembelian paket tidak valid.");
       return;
     }
 
     setSubmitting(true);
 
+    let paymentId: string | null = null;
+    let uploadedStoragePath: string | null = null;
+    let paymentFileId: string | null = null;
+
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: paymentData, error: paymentError } =
+        await supabase
+          .from("subscription_payments")
+          .insert({
+            subscription_id: subscription.id,
+            customer_id: user.id,
+            amount: plan.price,
+            payment_method: paymentMethod,
+            transaction_id: transactionId.trim() || null,
+            status: "pending",
+          })
+          .select("id")
+          .single();
 
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
-
-      /*
-       * 1. Buat record pembayaran paket.
-       */
-      const { data: payment, error: paymentError } = await supabase
-        .from("subscription_payments")
-        .insert({
-          subscription_id: subscription.id,
-          customer_id: user.id,
-          amount: plan.price,
-          payment_method: paymentMethod,
-          transaction_id: transactionId.trim() || null,
-          status: "pending",
-        })
-        .select("id")
-        .single();
-
-      if (paymentError || !payment) {
+      if (paymentError) {
         console.error(paymentError);
         throw new Error(
-          paymentError?.message || "Gagal membuat data pembayaran."
+          paymentError.message ||
+            "Gagal membuat data pembayaran."
         );
       }
 
-      /*
-       * 2. Upload bukti pembayaran ke bucket pajara-files.
-       */
+      paymentId = paymentData.id;
+
       const safeFileName = proofFile.name
         .replace(/[^a-zA-Z0-9._-]/g, "-")
         .replace(/-+/g, "-");
 
-      const filePath = `subscriptions/${subscription.id}/payment-proof/${Date.now()}-${safeFileName}`;
+      const storagePath = `subscriptions/${subscription.id}/payment-proof/${Date.now()}-${safeFileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("pajara-files")
-        .upload(filePath, proofFile, {
+        .upload(storagePath, proofFile, {
           cacheControl: "3600",
           upsert: false,
           contentType: proofFile.type,
@@ -206,61 +251,75 @@ function PaymentPageContent() {
 
       if (uploadError) {
         console.error(uploadError);
-
-        await supabase
-          .from("subscription_payments")
-          .delete()
-          .eq("id", payment.id)
-          .eq("customer_id", user.id);
-
-        throw new Error("Gagal mengupload bukti pembayaran.");
+        throw new Error(
+          uploadError.message ||
+            "Gagal mengupload bukti pembayaran."
+        );
       }
 
-      /*
-       * 3. Simpan metadata file.
-       */
-      const { error: fileError } = await supabase
-        .from("subscription_payment_files")
-        .insert({
-          subscription_payment_id: payment.id,
-          customer_id: user.id,
-          file_name: proofFile.name,
-          storage_path: filePath,
-          mime_type: proofFile.type,
-          file_size: proofFile.size,
-        });
+      uploadedStoragePath = storagePath;
 
-      if (fileError) {
-        console.error(fileError);
-
-        await supabase.storage.from("pajara-files").remove([filePath]);
-
+      const { data: paymentFileData, error: paymentFileError } =
         await supabase
-          .from("subscription_payments")
-          .delete()
-          .eq("id", payment.id)
-          .eq("customer_id", user.id);
+          .from("subscription_payment_files")
+          .insert({
+            subscription_payment_id: paymentId,
+            customer_id: user.id,
+            file_name: proofFile.name,
+            storage_path: storagePath,
+            mime_type: proofFile.type,
+            file_size: proofFile.size,
+          })
+          .select("id")
+          .single();
 
-        throw new Error("Gagal menyimpan data bukti pembayaran.");
+      if (paymentFileError) {
+        console.error(paymentFileError);
+        throw new Error(
+          paymentFileError.message ||
+            "Gagal menyimpan data bukti pembayaran."
+        );
       }
+
+      paymentFileId = paymentFileData.id;
 
       setSuccess(
-        "Bukti pembayaran berhasil dikirim. Tim Pajara Studio akan memverifikasi pembayaran kamu."
+        "Bukti pembayaran berhasil dikirim. Pembayaran akan diverifikasi oleh Admin."
       );
 
       setProofFile(null);
       setTransactionId("");
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         router.push("/subscriptions");
       }, 2500);
     } catch (err) {
       console.error(err);
 
+      if (paymentFileId) {
+        await supabase
+          .from("subscription_payment_files")
+          .delete()
+          .eq("id", paymentFileId);
+      }
+
+      if (uploadedStoragePath) {
+        await supabase.storage
+          .from("pajara-files")
+          .remove([uploadedStoragePath]);
+      }
+
+      if (paymentId) {
+        await supabase
+          .from("subscription_payments")
+          .delete()
+          .eq("id", paymentId);
+      }
+
       setError(
         err instanceof Error
           ? err.message
-          : "Terjadi kesalahan saat mengirim pembayaran."
+          : "Gagal mengirim pembayaran."
       );
     } finally {
       setSubmitting(false);
@@ -273,15 +332,97 @@ function PaymentPageContent() {
         style={{
           minHeight: "100vh",
           background: "#f7f4ee",
-          padding: "24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#214d32",
+          padding: "32px 16px",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        Memuat pembayaran...
+        <div
+          style={{
+            maxWidth: 720,
+            margin: "0 auto",
+            background: "#ffffff",
+            borderRadius: 24,
+            padding: 28,
+            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: "#214d32",
+              fontSize: 16,
+            }}
+          >
+            Memuat pembayaran...
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!subscription || !plan) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "#f7f4ee",
+          padding: "32px 16px",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 720,
+            margin: "0 auto",
+            background: "#ffffff",
+            borderRadius: 24,
+            padding: 28,
+            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
+          }}
+        >
+          <h1
+            style={{
+              margin: "0 0 10px",
+              color: "#214d32",
+              fontSize: 28,
+            }}
+          >
+            Pembayaran Paket
+          </h1>
+
+          {error && (
+            <div
+              style={{
+                background: "#fff1f1",
+                color: "#a12b2b",
+                border: "1px solid #f0caca",
+                borderRadius: 14,
+                padding: 14,
+                lineHeight: 1.5,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => router.push("/subscriptions")}
+            style={{
+              marginTop: 20,
+              width: "100%",
+              border: "none",
+              borderRadius: 14,
+              padding: "14px 18px",
+              background: "#2f6b45",
+              color: "#ffffff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Kembali ke Paket
+          </button>
+        </div>
       </main>
     );
   }
@@ -291,14 +432,13 @@ function PaymentPageContent() {
       style={{
         minHeight: "100vh",
         background: "#f7f4ee",
-        padding: "24px 16px 48px",
+        padding: "28px 16px 50px",
         fontFamily: "Arial, sans-serif",
-        color: "#214d32",
       }}
     >
       <div
         style={{
-          maxWidth: "680px",
+          maxWidth: 760,
           margin: "0 auto",
         }}
       >
@@ -309,25 +449,32 @@ function PaymentPageContent() {
             border: "none",
             background: "transparent",
             color: "#2f6b45",
-            fontSize: "15px",
             fontWeight: 700,
             padding: 0,
-            marginBottom: "20px",
+            marginBottom: 18,
             cursor: "pointer",
           }}
         >
           ← Kembali ke Paket
         </button>
 
-        <div style={{ marginBottom: "24px" }}>
+        <section
+          style={{
+            background: "#ffffff",
+            borderRadius: 24,
+            padding: 24,
+            marginBottom: 16,
+            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
+          }}
+        >
           <p
             style={{
-              margin: "0 0 8px",
-              fontSize: "13px",
-              fontWeight: 800,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
+              margin: "0 0 7px",
               color: "#8a6a4a",
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              textTransform: "uppercase",
             }}
           >
             Pembayaran Paket
@@ -335,497 +482,540 @@ function PaymentPageContent() {
 
           <h1
             style={{
-              margin: 0,
-              fontSize: "32px",
-              lineHeight: 1.15,
-              fontWeight: 800,
+              margin: "0 0 12px",
+              color: "#214d32",
+              fontSize: 30,
+              lineHeight: 1.2,
             }}
           >
-            Selesaikan pembayaran
+            {plan.name}
           </h1>
 
-          <p
-            style={{
-              margin: "10px 0 0",
-              color: "#66746a",
-              lineHeight: 1.6,
-            }}
-          >
-            Paket akan aktif setelah pembayaran diverifikasi oleh tim Pajara
-            Studio.
-          </p>
-        </div>
+          {plan.description && (
+            <p
+              style={{
+                margin: "0 0 18px",
+                color: "#66736a",
+                lineHeight: 1.6,
+              }}
+            >
+              {plan.description}
+            </p>
+          )}
 
-        {error && (
           <div
             style={{
-              background: "#fff1f0",
-              border: "1px solid #e4b5b0",
-              color: "#9f3028",
-              borderRadius: "14px",
-              padding: "14px 16px",
-              marginBottom: "18px",
-              lineHeight: 1.5,
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(130px, 1fr))",
+              gap: 10,
             }}
           >
-            {error}
-          </div>
-        )}
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: 16,
+                padding: 15,
+              }}
+            >
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 12,
+                  marginBottom: 5,
+                }}
+              >
+                Harga
+              </div>
+              <strong
+                style={{
+                  color: "#214d32",
+                  fontSize: 17,
+                }}
+              >
+                {formatRupiah(plan.price)}
+              </strong>
+            </div>
 
-        {success && (
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: 16,
+                padding: 15,
+              }}
+            >
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 12,
+                  marginBottom: 5,
+                }}
+              >
+                Masa Aktif
+              </div>
+              <strong
+                style={{
+                  color: "#214d32",
+                  fontSize: 17,
+                }}
+              >
+                {plan.duration_days} hari
+              </strong>
+            </div>
+
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: 16,
+                padding: 15,
+              }}
+            >
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 12,
+                  marginBottom: 5,
+                }}
+              >
+                Kuota
+              </div>
+              <strong
+                style={{
+                  color: "#214d32",
+                  fontSize: 17,
+                }}
+              >
+                {plan.quota_total} desain
+              </strong>
+            </div>
+          </div>
+
           <div
             style={{
-              background: "#edf7ef",
-              border: "1px solid #b7d6bc",
-              color: "#245c35",
-              borderRadius: "14px",
-              padding: "14px 16px",
-              marginBottom: "18px",
+              marginTop: 16,
+              background: "#edf5ef",
+              borderRadius: 14,
+              padding: 14,
+              color: "#214d32",
               lineHeight: 1.5,
+              fontSize: 14,
             }}
           >
-            {success}
+            Pembayaran paket dilakukan <strong>100% di awal</strong>.
+            Setelah pembayaran diverifikasi Admin, paket akan aktif.
           </div>
-        )}
+        </section>
 
-        {plan && subscription && (
-          <form onSubmit={handleSubmit}>
-            <section
+        <section
+          style={{
+            background: "#ffffff",
+            borderRadius: 24,
+            padding: 24,
+            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 18px",
+              color: "#214d32",
+              fontSize: 21,
+            }}
+          >
+            Pilih Metode Pembayaran
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(130px, 1fr))",
+              gap: 10,
+              marginBottom: 20,
+            }}
+          >
+            {(
+              ["QRIS", "DANA", "GoPay", "SeaBank"] as PaymentMethod[]
+            ).map((method) => {
+              const active = paymentMethod === method;
+
+              return (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod(method);
+                    setError("");
+                  }}
+                  style={{
+                    border: active
+                      ? "2px solid #2f6b45"
+                      : "1px solid #d8dfd9",
+                    borderRadius: 14,
+                    padding: "13px 10px",
+                    background: active ? "#edf5ef" : "#ffffff",
+                    color: "#214d32",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {method}
+                </button>
+              );
+            })}
+          </div>
+
+          {paymentMethod === "QRIS" && (
+            <div
               style={{
-                background: "#ffffff",
-                borderRadius: "20px",
-                padding: "22px",
-                marginBottom: "16px",
-                boxShadow: "0 8px 30px rgba(33, 77, 50, 0.06)",
-                border: "1px solid rgba(33, 77, 50, 0.08)",
+                background: "#f7f4ee",
+                borderRadius: 18,
+                padding: 18,
+                textAlign: "center",
+                marginBottom: 20,
               }}
             >
-              <div
+              <p
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "16px",
-                  alignItems: "flex-start",
+                  margin: "0 0 14px",
+                  color: "#214d32",
+                  fontWeight: 700,
                 }}
               >
-                <div>
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: "22px",
-                    }}
-                  >
-                    {plan.name}
-                  </h2>
+                Scan QRIS Pajara Studio
+              </p>
 
-                  <p
-                    style={{
-                      margin: "8px 0 0",
-                      color: "#66746a",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {plan.description ||
-                      `${plan.duration_days} hari • ${plan.quota_total} kuota desain`}
-                  </p>
-                </div>
-
-                <strong
-                  style={{
-                    fontSize: "19px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {formatRupiah(Number(plan.price))}
-                </strong>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "18px",
-                  paddingTop: "16px",
-                  borderTop: "1px solid #e8ebe7",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#7a857e",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Masa aktif
-                  </div>
-                  <strong>{plan.duration_days} hari</strong>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#7a857e",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Kuota
-                  </div>
-                  <strong>{plan.quota_total} desain</strong>
-                </div>
-              </div>
-            </section>
-
-            <section
-              style={{
-                background: "#ffffff",
-                borderRadius: "20px",
-                padding: "22px",
-                marginBottom: "16px",
-                boxShadow: "0 8px 30px rgba(33, 77, 50, 0.06)",
-                border: "1px solid rgba(33, 77, 50, 0.08)",
-              }}
-            >
-              <h2
-                style={{
-                  margin: "0 0 16px",
-                  fontSize: "20px",
-                }}
-              >
-                Metode Pembayaran
-              </h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gap: "10px",
-                }}
-              >
-                {["QRIS", "DANA", "GoPay", "SeaBank"].map((method) => (
-                  <label
-                    key={method}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      border:
-                        paymentMethod === method
-                          ? "2px solid #2f6b45"
-                          : "1px solid #dfe5df",
-                      borderRadius: "14px",
-                      padding: "14px",
-                      cursor: "pointer",
-                      background:
-                        paymentMethod === method ? "#f1f7f2" : "#ffffff",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={method}
-                      checked={paymentMethod === method}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-
-                    <span
-                      style={{
-                        fontWeight: 700,
-                      }}
-                    >
-                      {method}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            <section
-              style={{
-                background: "#ffffff",
-                borderRadius: "20px",
-                padding: "22px",
-                marginBottom: "16px",
-                boxShadow: "0 8px 30px rgba(33, 77, 50, 0.06)",
-                border: "1px solid rgba(33, 77, 50, 0.08)",
-              }}
-            >
-              <h2
-                style={{
-                  margin: "0 0 16px",
-                  fontSize: "20px",
-                }}
-              >
-                Detail Pembayaran
-              </h2>
-
-              <div
-                style={{
-                  background: "#f7f4ee",
-                  borderRadius: "16px",
-                  padding: "18px",
-                  marginBottom: "18px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "12px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <span>Harga Paket</span>
-                  <strong>{formatRupiah(Number(plan.price))}</strong>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "12px",
-                    paddingTop: "12px",
-                    borderTop: "1px solid #ddd8cf",
-                    fontSize: "18px",
-                  }}
-                >
-                  <strong>Total</strong>
-                  <strong>{formatRupiah(Number(plan.price))}</strong>
-                </div>
-              </div>
-
-              {paymentMethod === "QRIS" && (
-                <div
-                  style={{
-                    border: "1px solid #dfe5df",
-                    borderRadius: "16px",
-                    padding: "16px",
-                    textAlign: "center",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: "0 0 12px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    Scan QRIS Pajara Studio
-                  </p>
-
-                  <img
-                    src="/qr_ID1026470184411_08.10.26_1791447334_1791447334905.jpeg"
-                    alt="QRIS Pajara Studio"
-                    style={{
-                      width: "100%",
-                      maxWidth: "320px",
-                      height: "auto",
-                      borderRadius: "12px",
-                      display: "block",
-                      margin: "0 auto",
-                    }}
-                  />
-                </div>
-              )}
-
-              {paymentMethod === "DANA" && (
-                <div
-                  style={{
-                    background: "#f7f4ee",
-                    borderRadius: "14px",
-                    padding: "16px",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <strong>DANA</strong>
-                  <p
-                    style={{
-                      margin: "6px 0 0",
-                      color: "#66746a",
-                    }}
-                  >
-                    Gunakan nomor DANA Pajara Studio yang tersedia pada
-                    informasi pembayaran resmi.
-                  </p>
-                </div>
-              )}
-
-              {paymentMethod === "GoPay" && (
-                <div
-                  style={{
-                    background: "#f7f4ee",
-                    borderRadius: "14px",
-                    padding: "16px",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <strong>GoPay</strong>
-                  <p
-                    style={{
-                      margin: "6px 0 0",
-                      color: "#66746a",
-                    }}
-                  >
-                    Gunakan nomor GoPay Pajara Studio yang tersedia pada
-                    informasi pembayaran resmi.
-                  </p>
-                </div>
-              )}
-
-              {paymentMethod === "SeaBank" && (
-                <div
-                  style={{
-                    background: "#f7f4ee",
-                    borderRadius: "14px",
-                    padding: "16px",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <strong>SeaBank</strong>
-                  <p
-                    style={{
-                      margin: "6px 0 0",
-                      color: "#66746a",
-                    }}
-                  >
-                    Gunakan rekening SeaBank Pajara Studio yang tersedia pada
-                    informasi pembayaran resmi.
-                  </p>
-                </div>
-              )}
-
-              <label
+              <img
+                src="/qr_ID1026470184411_08.10.26_1791447334_1791447334905.jpeg"
+                alt="QRIS Pajara Studio"
                 style={{
                   display: "block",
-                  fontWeight: 700,
-                  marginBottom: "8px",
-                }}
-              >
-                ID Transaksi / Referensi
-                <span
-                  style={{
-                    color: "#8a857d",
-                    fontWeight: 400,
-                  }}
-                >
-                  {" "}
-                  (opsional)
-                </span>
-              </label>
-
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="Contoh: TRX123456"
-                style={{
                   width: "100%",
-                  boxSizing: "border-box",
-                  border: "1px solid #d8ded8",
-                  borderRadius: "12px",
-                  padding: "13px 14px",
-                  fontSize: "15px",
-                  outline: "none",
-                  marginBottom: "18px",
-                  background: "#ffffff",
-                }}
-              />
-
-              <label
-                style={{
-                  display: "block",
-                  fontWeight: 700,
-                  marginBottom: "8px",
-                }}
-              >
-                Bukti Pembayaran
-              </label>
-
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,application/pdf"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setProofFile(file);
-                }}
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  border: "1px solid #d8ded8",
-                  borderRadius: "12px",
-                  padding: "12px",
+                  maxWidth: 340,
+                  margin: "0 auto",
+                  borderRadius: 14,
                   background: "#ffffff",
                 }}
               />
 
               <p
                 style={{
-                  margin: "8px 0 0",
-                  fontSize: "13px",
-                  color: "#7a857e",
+                  margin: "14px 0 0",
+                  color: "#6d776f",
+                  fontSize: 13,
                   lineHeight: 1.5,
                 }}
               >
-                Format JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
+                Pastikan nominal pembayaran sesuai dengan harga
+                paket.
               </p>
+            </div>
+          )}
 
-              {proofFile && (
-                <div
-                  style={{
-                    marginTop: "12px",
-                    padding: "12px 14px",
-                    background: "#f1f7f2",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    color: "#245c35",
-                  }}
-                >
-                  File dipilih: <strong>{proofFile.name}</strong>
-                </div>
-              )}
-            </section>
-
-            <button
-              type="submit"
-              disabled={submitting || !!success}
+          {paymentMethod === "DANA" && (
+            <div
               style={{
-                width: "100%",
-                border: "none",
-                borderRadius: "14px",
-                padding: "15px 18px",
-                background:
-                  submitting || success ? "#9aafa0" : "#2f6b45",
-                color: "#ffffff",
-                fontSize: "16px",
-                fontWeight: 800,
-                cursor:
-                  submitting || success ? "not-allowed" : "pointer",
+                background: "#f7f4ee",
+                borderRadius: 18,
+                padding: 20,
+                marginBottom: 20,
               }}
             >
-              {submitting
-                ? "Mengirim pembayaran..."
-                : success
-                ? "Bukti Pembayaran Terkirim"
-                : `Kirim Bukti Pembayaran — ${formatRupiah(
-                    Number(plan.price)
-                  )}`}
-            </button>
-          </form>
-        )}
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 13,
+                  marginBottom: 7,
+                }}
+              >
+                DANA
+              </div>
 
-        <p
-          style={{
-            textAlign: "center",
-            margin: "24px 0 0",
-            color: "#7a857e",
-            fontSize: "13px",
-            lineHeight: 1.5,
-          }}
-        >
-          Paket akan aktif setelah pembayaran diverifikasi oleh Admin Pajara
-          Studio.
-        </p>
+              <div
+                style={{
+                  color: "#214d32",
+                  fontSize: 22,
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                }}
+              >
+                0858-8242-1145
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  color: "#6d776f",
+                  fontSize: 14,
+                }}
+              >
+                A/N TUTI
+              </div>
+            </div>
+          )}
+
+          {paymentMethod === "GoPay" && (
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: 18,
+                padding: 20,
+                marginBottom: 20,
+              }}
+            >
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 13,
+                  marginBottom: 7,
+                }}
+              >
+                GoPay
+              </div>
+
+              <div
+                style={{
+                  color: "#214d32",
+                  fontSize: 22,
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                }}
+              >
+                0858-8242-1145
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  color: "#6d776f",
+                  fontSize: 14,
+                }}
+              >
+                A/N TUTI
+              </div>
+            </div>
+          )}
+
+          {paymentMethod === "SeaBank" && (
+            <div
+              style={{
+                background: "#f7f4ee",
+                borderRadius: 18,
+                padding: 20,
+                marginBottom: 20,
+              }}
+            >
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 13,
+                  marginBottom: 7,
+                }}
+              >
+                SeaBank
+              </div>
+
+              <div
+                style={{
+                  color: "#214d32",
+                  fontSize: 22,
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                }}
+              >
+                901052450932
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  color: "#6d776f",
+                  fontSize: 14,
+                }}
+              >
+                A/N TUTI
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              marginBottom: 18,
+            }}
+          >
+            <label
+              htmlFor="transaction-id"
+              style={{
+                display: "block",
+                color: "#214d32",
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              ID Transaksi
+              <span
+                style={{
+                  color: "#8a6a4a",
+                  fontWeight: 400,
+                  marginLeft: 6,
+                }}
+              >
+                (opsional)
+              </span>
+            </label>
+
+            <input
+              id="transaction-id"
+              type="text"
+              value={transactionId}
+              onChange={(event) =>
+                setTransactionId(event.target.value)
+              }
+              placeholder="Masukkan ID transaksi jika ada"
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                border: "1px solid #d8dfd9",
+                borderRadius: 14,
+                padding: "13px 14px",
+                outline: "none",
+                color: "#214d32",
+                background: "#ffffff",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              marginBottom: 18,
+            }}
+          >
+            <label
+              htmlFor="proof-file"
+              style={{
+                display: "block",
+                color: "#214d32",
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Bukti Pembayaran
+            </label>
+
+            <input
+              id="proof-file"
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+              onChange={handleFileChange}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                border: "1px solid #d8dfd9",
+                borderRadius: 14,
+                padding: 10,
+                background: "#ffffff",
+                color: "#214d32",
+              }}
+            />
+
+            <p
+              style={{
+                margin: "8px 0 0",
+                color: "#7a837d",
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
+            </p>
+
+            {proofFile && (
+              <div
+                style={{
+                  marginTop: 10,
+                  background: "#edf5ef",
+                  borderRadius: 12,
+                  padding: 11,
+                  color: "#214d32",
+                  fontSize: 13,
+                }}
+              >
+                File dipilih: <strong>{proofFile.name}</strong>
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div
+              style={{
+                marginBottom: 16,
+                background: "#fff1f1",
+                border: "1px solid #f0caca",
+                borderRadius: 14,
+                padding: 14,
+                color: "#a12b2b",
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div
+              style={{
+                marginBottom: 16,
+                background: "#edf5ef",
+                border: "1px solid #c9dfce",
+                borderRadius: 14,
+                padding: 14,
+                color: "#214d32",
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              {success}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={submitPayment}
+            disabled={submitting || !!success}
+            style={{
+              width: "100%",
+              border: "none",
+              borderRadius: 15,
+              padding: "15px 18px",
+              background:
+                submitting || !!success ? "#9aae9e" : "#2f6b45",
+              color: "#ffffff",
+              fontWeight: 800,
+              fontSize: 15,
+              cursor:
+                submitting || !!success
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+          >
+            {submitting
+              ? "Mengirim Pembayaran..."
+              : "Kirim Bukti Pembayaran"}
+          </button>
+
+          <p
+            style={{
+              margin: "14px 0 0",
+              textAlign: "center",
+              color: "#7a837d",
+              fontSize: 12,
+              lineHeight: 1.5,
+            }}
+          >
+            Setelah dikirim, Admin akan memeriksa pembayaran
+            sebelum paket diaktifkan.
+          </p>
+        </section>
       </div>
     </main>
   );
@@ -839,14 +1029,21 @@ export default function SubscriptionPaymentPage() {
           style={{
             minHeight: "100vh",
             background: "#f7f4ee",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#214d32",
+            padding: "32px 16px",
             fontFamily: "Arial, sans-serif",
           }}
         >
-          Memuat pembayaran...
+          <div
+            style={{
+              maxWidth: 720,
+              margin: "0 auto",
+              background: "#ffffff",
+              borderRadius: 24,
+              padding: 28,
+            }}
+          >
+            Memuat pembayaran...
+          </div>
         </main>
       }
     >
