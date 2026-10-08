@@ -60,6 +60,18 @@ type PaymentProof = {
   url: string | null;
 };
 
+type Revision = {
+  id: string;
+  order_id: string;
+  revision_number: number;
+  customer_note: string | null;
+  admin_note: string | null;
+  status: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 function formatRupiah(value: number | null | undefined) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -149,6 +161,42 @@ function getPaymentStatusClass(status: string | null | undefined) {
   }
 }
 
+function getRevisionStatusLabel(status: string | null | undefined) {
+  switch (status) {
+    case "pending":
+      return "Menunggu Diproses";
+
+    case "processing":
+      return "Sedang Diproses";
+
+    case "completed":
+      return "Selesai";
+
+    case "rejected":
+      return "Ditolak";
+
+    default:
+      return status || "-";
+  }
+}
+
+function getRevisionStatusClass(status: string | null | undefined) {
+  switch (status) {
+    case "completed":
+      return "border-green-200 bg-green-100 text-green-700";
+
+    case "processing":
+      return "border-blue-200 bg-blue-100 text-blue-700";
+
+    case "rejected":
+      return "border-red-200 bg-red-100 text-red-700";
+
+    case "pending":
+    default:
+      return "border-yellow-200 bg-yellow-100 text-yellow-700";
+  }
+}
+
 function isImageFile(fileType: string | null | undefined, fileName: string) {
   if (fileType?.startsWith("image/")) {
     return true;
@@ -196,8 +244,17 @@ function OrderDetailContent() {
   const [payment, setPayment] = useState<Payment | null>(null);
   const [paymentProof, setPaymentProof] = useState<PaymentProof | null>(null);
 
+  const [revisions, setRevisions] = useState<Revision[]>([]);
+  const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>(
+    {}
+  );
+  const [revisionActions, setRevisionActions] = useState<
+    Record<string, boolean>
+  >({});
+
   const [loading, setLoading] = useState(true);
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [loadingRevisions, setLoadingRevisions] = useState(false);
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -292,6 +349,7 @@ function OrderDetailContent() {
       await Promise.all([
         loadReferenceFiles(id),
         loadPayment(id),
+        loadRevisions(id),
       ]);
     } catch (err: any) {
       setError(err?.message || "Gagal memuat detail pesanan.");
@@ -429,6 +487,224 @@ function OrderDetailContent() {
     }
   }
 
+  async function loadRevisions(id: string) {
+    try {
+      setLoadingRevisions(true);
+
+      const { data, error: revisionsError } = await supabase
+        .from("revisions")
+        .select(
+          `
+          id,
+          order_id,
+          revision_number,
+          customer_note,
+          admin_note,
+          status,
+          created_by,
+          created_at,
+          updated_at
+        `
+        )
+        .eq("order_id", id)
+        .order("revision_number", { ascending: false });
+
+      if (revisionsError) {
+        console.error("Gagal memuat revisi:", revisionsError);
+        setRevisions([]);
+        return;
+      }
+
+      setRevisions(data || []);
+
+      const notes: Record<string, string> = {};
+
+      (data || []).forEach((revision) => {
+        notes[revision.id] = revision.admin_note || "";
+      });
+
+      setRevisionNotes(notes);
+    } catch (err) {
+      console.error("Gagal memuat revisi:", err);
+      setRevisions([]);
+    } finally {
+      setLoadingRevisions(false);
+    }
+  }
+
+  async function handleRevisionStatusChange(
+    revision: Revision,
+    newStatus: string
+  ) {
+    if (!order) return;
+
+    try {
+      setRevisionActions((current) => ({
+        ...current,
+        [revision.id]: true,
+      }));
+
+      setError("");
+      setMessage("");
+
+      const adminNote =
+        revisionNotes[revision.id]?.trim() || null;
+
+      const { error: revisionError } = await supabase
+        .from("revisions")
+        .update({
+          status: newStatus,
+          admin_note: adminNote,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", revision.id);
+
+      if (revisionError) {
+        throw revisionError;
+      }
+
+      /*
+       * Jika revisi selesai atau ditolak,
+       * pesanan dikembalikan ke status completed.
+       *
+       * Jika masih diproses, pesanan tetap revision.
+       */
+      if (newStatus === "completed" || newStatus === "rejected") {
+        const { error: orderError } = await supabase
+          .from("orders")
+          .update({
+            status: "completed",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", order.id);
+
+        if (orderError) {
+          throw orderError;
+        }
+
+        setOrder((current) =>
+          current
+            ? {
+                ...current,
+                status: "completed",
+              }
+            : current
+        );
+      } else if (newStatus === "processing") {
+        if (order.status !== "revision") {
+          const { error: orderError } = await supabase
+            .from("orders")
+            .update({
+              status: "revision",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", order.id);
+
+          if (orderError) {
+            throw orderError;
+          }
+
+          setOrder((current) =>
+            current
+              ? {
+                  ...current,
+                  status: "revision",
+                }
+              : current
+          );
+        }
+      }
+
+      setRevisions((current) =>
+        current.map((item) =>
+          item.id === revision.id
+            ? {
+                ...item,
+                status: newStatus,
+                admin_note: adminNote,
+                updated_at: new Date().toISOString(),
+              }
+            : item
+        )
+      );
+
+      setMessage(
+        `Revisi #${revision.revision_number} berhasil diubah menjadi ${getRevisionStatusLabel(
+          newStatus
+        )}.`
+      );
+    } catch (err: any) {
+      setError(
+        err?.message || "Gagal memperbarui status revisi."
+      );
+    } finally {
+      setRevisionActions((current) => ({
+        ...current,
+        [revision.id]: false,
+      }));
+    }
+  }
+
+  async function handleSaveRevisionNote(revision: Revision) {
+    try {
+      setRevisionActions((current) => ({
+        ...current,
+        [revision.id]: true,
+      }));
+
+      setError("");
+      setMessage("");
+
+      const adminNote =
+        revisionNotes[revision.id]?.trim() || null;
+
+      const { data, error: updateError } = await supabase
+        .from("revisions")
+        .update({
+          admin_note: adminNote,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", revision.id)
+        .select(
+          `
+          id,
+          order_id,
+          revision_number,
+          customer_note,
+          admin_note,
+          status,
+          created_by,
+          created_at,
+          updated_at
+        `
+        )
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setRevisions((current) =>
+        current.map((item) =>
+          item.id === revision.id ? data : item
+        )
+      );
+
+      setMessage(
+        `Catatan revisi #${revision.revision_number} berhasil disimpan.`
+      );
+    } catch (err: any) {
+      setError(
+        err?.message || "Gagal menyimpan catatan revisi."
+      );
+    } finally {
+      setRevisionActions((current) => ({
+        ...current,
+        [revision.id]: false,
+      }));
+    }
+  }
+
   async function handleSavePrice() {
     if (!order) return;
 
@@ -524,7 +800,9 @@ function OrderDetailContent() {
           : current
       );
 
-      setMessage(`Status pesanan diubah menjadi ${getStatusLabel(newStatus)}.`);
+      setMessage(
+        `Status pesanan diubah menjadi ${getStatusLabel(newStatus)}.`
+      );
     } catch (err: any) {
       setError(err?.message || "Gagal mengubah status pesanan.");
     } finally {
@@ -588,11 +866,6 @@ function OrderDetailContent() {
       setPayment(updatedPayment);
 
       if (action === "verify") {
-        /*
-         * Setelah DP diverifikasi, jika pesanan masih berada
-         * pada status "waiting_dp", otomatis ubah menjadi
-         * "processing" / "Diproses".
-         */
         if (order.status === "waiting_dp") {
           const { error: orderError } = await supabase
             .from("orders")
@@ -663,7 +936,10 @@ function OrderDetailContent() {
         throw new Error("Sesi admin tidak ditemukan.");
       }
 
-      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const safeFileName = file.name.replace(
+        /[^a-zA-Z0-9._-]/g,
+        "-"
+      );
 
       const filePath = `orders/${order.id}/final/${Date.now()}-${safeFileName}`;
 
@@ -692,7 +968,10 @@ function OrderDetailContent() {
         });
 
       if (insertError) {
-        await supabase.storage.from("pajara-files").remove([filePath]);
+        await supabase.storage
+          .from("pajara-files")
+          .remove([filePath]);
+
         throw insertError;
       }
 
@@ -784,18 +1063,41 @@ function OrderDetailContent() {
           {/* INFORMASI PESANAN */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-4">
-              <h2 className="text-lg font-bold">Informasi Pesanan</h2>
+              <h2 className="text-lg font-bold">
+                Informasi Pesanan
+              </h2>
+
               <p className="mt-1 text-sm text-[#777166]">
                 Informasi dasar pesanan customer.
               </p>
             </div>
 
             <div>
-              <InfoRow label="Kode Pesanan" value={order.order_code} />
-              <InfoRow label="Layanan" value={order.service_name || "-"} />
-              <InfoRow label="Jenis Desain" value={order.design_type || "-"} />
-              <InfoRow label="Jumlah" value={order.quantity ?? "-"} />
-              <InfoRow label="Tanggal Pesanan" value={formatDate(order.created_at)} />
+              <InfoRow
+                label="Kode Pesanan"
+                value={order.order_code}
+              />
+
+              <InfoRow
+                label="Layanan"
+                value={order.service_name || "-"}
+              />
+
+              <InfoRow
+                label="Jenis Desain"
+                value={order.design_type || "-"}
+              />
+
+              <InfoRow
+                label="Jumlah"
+                value={order.quantity ?? "-"}
+              />
+
+              <InfoRow
+                label="Tanggal Pesanan"
+                value={formatDate(order.created_at)}
+              />
+
               <InfoRow
                 label="Deadline"
                 value={formatDate(order.deadline)}
@@ -806,7 +1108,10 @@ function OrderDetailContent() {
           {/* REFERENSI CUSTOMER */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-5">
-              <h2 className="text-lg font-bold">Referensi Customer</h2>
+              <h2 className="text-lg font-bold">
+                Referensi Customer
+              </h2>
+
               <p className="mt-1 text-sm text-[#777166]">
                 File referensi yang dikirim oleh customer.
               </p>
@@ -826,7 +1131,10 @@ function OrderDetailContent() {
                     className="overflow-hidden rounded-2xl border border-[#e9e3d8] bg-[#faf8f4]"
                   >
                     {file.url &&
-                    isImageFile(file.file_type, file.file_name) ? (
+                    isImageFile(
+                      file.file_type,
+                      file.file_name
+                    ) ? (
                       <a
                         href={file.url}
                         target="_blank"
@@ -883,7 +1191,9 @@ function OrderDetailContent() {
           {/* BRIEF & CATATAN */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-4">
-              <h2 className="text-lg font-bold">Brief & Catatan</h2>
+              <h2 className="text-lg font-bold">
+                Brief & Catatan
+              </h2>
             </div>
 
             <div className="space-y-4">
@@ -913,10 +1223,201 @@ function OrderDetailContent() {
             </div>
           </section>
 
+          {/* REVISI */}
+          <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-5">
+              <h2 className="text-lg font-bold">
+                Revisi Customer
+              </h2>
+
+              <p className="mt-1 text-sm text-[#777166]">
+                Kelola pengajuan revisi yang dikirim oleh customer.
+              </p>
+            </div>
+
+            {loadingRevisions ? (
+              <div className="rounded-2xl bg-[#faf8f4] p-5">
+                <p className="text-sm text-[#777166]">
+                  Memuat riwayat revisi...
+                </p>
+              </div>
+            ) : revisions.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[#dcd5ca] bg-[#faf8f4] p-6 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#edf5ef]">
+                  ↻
+                </div>
+
+                <p className="text-sm font-semibold text-[#4c483f]">
+                  Belum ada pengajuan revisi
+                </p>
+
+                <p className="mt-1 text-xs text-[#777166]">
+                  Riwayat revisi customer akan muncul di sini.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {revisions.map((revision) => {
+                  const actionLoading =
+                    revisionActions[revision.id] === true;
+
+                  return (
+                    <div
+                      key={revision.id}
+                      className="rounded-2xl border border-[#e9e3d8] bg-[#faf8f4] p-4 sm:p-5"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-base font-bold">
+                              Revisi #{revision.revision_number}
+                            </span>
+
+                            <span
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${getRevisionStatusClass(
+                                revision.status
+                              )}`}
+                            >
+                              {getRevisionStatusLabel(
+                                revision.status
+                              )}
+                            </span>
+                          </div>
+
+                          <p className="mt-1 text-xs text-[#777166]">
+                            Diajukan{" "}
+                            {formatDate(revision.created_at)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* CATATAN CUSTOMER */}
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm font-semibold text-[#4c483f]">
+                          Permintaan Customer
+                        </p>
+
+                        <div className="rounded-2xl border border-[#e9e3d8] bg-white p-4">
+                          <p className="whitespace-pre-wrap text-sm leading-6 text-[#5e594f]">
+                            {revision.customer_note ||
+                              "Tidak ada catatan revisi."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* CATATAN ADMIN */}
+                      <div className="mt-4">
+                        <label className="mb-2 block text-sm font-semibold text-[#4c483f]">
+                          Catatan Admin
+                        </label>
+
+                        <textarea
+                          value={
+                            revisionNotes[revision.id] || ""
+                          }
+                          onChange={(event) =>
+                            setRevisionNotes((current) => ({
+                              ...current,
+                              [revision.id]:
+                                event.target.value,
+                            }))
+                          }
+                          placeholder="Tambahkan catatan untuk revisi ini..."
+                          rows={4}
+                          className="w-full resize-y rounded-xl border border-[#dcd5ca] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[#2f6b45] focus:ring-2 focus:ring-[#2f6b45]/10"
+                        />
+                      </div>
+
+                      {/* ACTION */}
+                      <div className="mt-4 space-y-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSaveRevisionNote(
+                              revision
+                            )
+                          }
+                          disabled={actionLoading}
+                          className="w-full rounded-xl border border-[#dcd5ca] bg-white px-4 py-3 text-sm font-semibold text-[#4c483f] transition hover:bg-[#f4f1eb] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {actionLoading
+                            ? "Menyimpan..."
+                            : "Simpan Catatan"}
+                        </button>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                          {revision.status === "pending" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRevisionStatusChange(
+                                  revision,
+                                  "processing"
+                                )
+                              }
+                              disabled={actionLoading}
+                              className="rounded-xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#245537] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {actionLoading
+                                ? "Memproses..."
+                                : "Mulai Proses"}
+                            </button>
+                          )}
+
+                          {revision.status ===
+                            "processing" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRevisionStatusChange(
+                                  revision,
+                                  "completed"
+                                )
+                              }
+                              disabled={actionLoading}
+                              className="rounded-xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#245537] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {actionLoading
+                                ? "Menyelesaikan..."
+                                : "✓ Tandai Selesai"}
+                            </button>
+                          )}
+
+                          {(revision.status === "pending" ||
+                            revision.status ===
+                              "processing") && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRevisionStatusChange(
+                                  revision,
+                                  "rejected"
+                                )
+                              }
+                              disabled={actionLoading}
+                              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {actionLoading
+                                ? "Memproses..."
+                                : "Tolak Revisi"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
           {/* PEMBAYARAN */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-5">
-              <h2 className="text-lg font-bold">Pembayaran</h2>
+              <h2 className="text-lg font-bold">
+                Pembayaran
+              </h2>
+
               <p className="mt-1 text-sm text-[#777166]">
                 Harga pesanan dan verifikasi pembayaran customer.
               </p>
@@ -937,7 +1438,9 @@ function OrderDetailContent() {
                   type="number"
                   min="0"
                   value={totalInput}
-                  onChange={(event) => setTotalInput(event.target.value)}
+                  onChange={(event) =>
+                    setTotalInput(event.target.value)
+                  }
                   placeholder="Contoh: 150000"
                   className="w-full rounded-xl border border-[#dcd5ca] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#2f6b45] focus:ring-2 focus:ring-[#2f6b45]/10"
                 />
@@ -948,27 +1451,38 @@ function OrderDetailContent() {
                   disabled={savingPrice}
                   className="rounded-xl bg-[#2f6b45] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245537] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {savingPrice ? "Menyimpan..." : "Simpan Harga"}
+                  {savingPrice
+                    ? "Menyimpan..."
+                    : "Simpan Harga"}
                 </button>
               </div>
 
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-[#e9e3d8] bg-white p-4">
-                  <p className="text-xs text-[#777166]">Total</p>
+                  <p className="text-xs text-[#777166]">
+                    Total
+                  </p>
+
                   <p className="mt-1 text-base font-bold">
                     {formatRupiah(order.total_amount)}
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-[#e9e3d8] bg-white p-4">
-                  <p className="text-xs text-[#777166]">DP 50%</p>
+                  <p className="text-xs text-[#777166]">
+                    DP 50%
+                  </p>
+
                   <p className="mt-1 text-base font-bold text-[#2f6b45]">
                     {formatRupiah(order.dp_amount)}
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-[#e9e3d8] bg-white p-4">
-                  <p className="text-xs text-[#777166]">Sisa</p>
+                  <p className="text-xs text-[#777166]">
+                    Sisa
+                  </p>
+
                   <p className="mt-1 text-base font-bold">
                     {formatRupiah(order.remaining_amount)}
                   </p>
@@ -995,7 +1509,9 @@ function OrderDetailContent() {
                       payment.status
                     )}`}
                   >
-                    {getPaymentStatusLabel(payment.status)}
+                    {getPaymentStatusLabel(
+                      payment.status
+                    )}
                   </span>
                 )}
               </div>
@@ -1076,7 +1592,9 @@ function OrderDetailContent() {
                         {paymentProof && (
                           <p className="mt-1 text-xs text-[#777166]">
                             {paymentProof.file_name} ·{" "}
-                            {formatFileSize(paymentProof.file_size)}
+                            {formatFileSize(
+                              paymentProof.file_size
+                            )}
                           </p>
                         )}
                       </div>
@@ -1099,8 +1617,8 @@ function OrderDetailContent() {
                     ) : !paymentProof ? (
                       <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-5">
                         <p className="text-sm font-medium text-yellow-800">
-                          Bukti pembayaran terhubung, tetapi file belum dapat
-                          ditampilkan.
+                          Bukti pembayaran terhubung, tetapi file
+                          belum dapat ditampilkan.
                         </p>
                       </div>
                     ) : (
@@ -1166,7 +1684,10 @@ function OrderDetailContent() {
                             </p>
 
                             <p className="mt-1 text-xs text-[#777166]">
-                              Diupload {formatDate(paymentProof.created_at)}
+                              Diupload{" "}
+                              {formatDate(
+                                paymentProof.created_at
+                              )}
                             </p>
                           </div>
 
@@ -1195,15 +1716,17 @@ function OrderDetailContent() {
                           </h4>
 
                           <p className="mt-1 text-xs leading-5 text-[#667066]">
-                            Pastikan nominal dan bukti pembayaran sudah sesuai
-                            sebelum melakukan verifikasi.
+                            Pastikan nominal dan bukti pembayaran sudah
+                            sesuai sebelum melakukan verifikasi.
                           </p>
                         </div>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
                           <button
                             type="button"
-                            onClick={() => handlePaymentAction("verify")}
+                            onClick={() =>
+                              handlePaymentAction("verify")
+                            }
                             disabled={paymentAction !== null}
                             className="flex-1 rounded-xl bg-[#2f6b45] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245537] disabled:cursor-not-allowed disabled:opacity-60"
                           >
@@ -1214,7 +1737,9 @@ function OrderDetailContent() {
 
                           <button
                             type="button"
-                            onClick={() => handlePaymentAction("reject")}
+                            onClick={() =>
+                              handlePaymentAction("reject")
+                            }
                             disabled={paymentAction !== null}
                             className="flex-1 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                           >
@@ -1235,7 +1760,10 @@ function OrderDetailContent() {
 
                       {payment.verified_at && (
                         <p className="mt-1 text-xs text-green-700">
-                          Diverifikasi pada {formatDate(payment.verified_at)}
+                          Diverifikasi pada{" "}
+                          {formatDate(
+                            payment.verified_at
+                          )}
                         </p>
                       )}
                     </div>
@@ -1250,7 +1778,10 @@ function OrderDetailContent() {
 
                       {payment.verified_at && (
                         <p className="mt-1 text-xs text-red-700">
-                          Diproses pada {formatDate(payment.verified_at)}
+                          Diproses pada{" "}
+                          {formatDate(
+                            payment.verified_at
+                          )}
                         </p>
                       )}
                     </div>
@@ -1263,7 +1794,9 @@ function OrderDetailContent() {
           {/* STATUS PESANAN */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-4">
-              <h2 className="text-lg font-bold">Status Pesanan</h2>
+              <h2 className="text-lg font-bold">
+                Status Pesanan
+              </h2>
 
               <p className="mt-1 text-sm text-[#777166]">
                 Ubah status pesanan secara manual jika diperlukan.
@@ -1276,15 +1809,33 @@ function OrderDetailContent() {
               disabled={changingStatus}
               className="w-full rounded-xl border border-[#dcd5ca] bg-white px-4 py-3 text-sm font-medium outline-none focus:border-[#2f6b45] focus:ring-2 focus:ring-[#2f6b45]/10"
             >
-              <option value="pending">Pesanan Baru</option>
-              <option value="waiting_dp">Menunggu DP</option>
-              <option value="processing">Diproses</option>
-              <option value="revision">Revisi</option>
+              <option value="pending">
+                Pesanan Baru
+              </option>
+
+              <option value="waiting_dp">
+                Menunggu DP
+              </option>
+
+              <option value="processing">
+                Diproses
+              </option>
+
+              <option value="revision">
+                Revisi
+              </option>
+
               <option value="waiting_payment">
                 Menunggu Pelunasan
               </option>
-              <option value="completed">Selesai</option>
-              <option value="cancelled">Dibatalkan</option>
+
+              <option value="completed">
+                Selesai
+              </option>
+
+              <option value="cancelled">
+                Dibatalkan
+              </option>
             </select>
 
             {changingStatus && (
@@ -1297,7 +1848,9 @@ function OrderDetailContent() {
           {/* FINAL FILE */}
           <section className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-5">
-              <h2 className="text-lg font-bold">Final File</h2>
+              <h2 className="text-lg font-bold">
+                Final File
+              </h2>
 
               <p className="mt-1 text-sm text-[#777166]">
                 Upload hasil desain final untuk customer.
