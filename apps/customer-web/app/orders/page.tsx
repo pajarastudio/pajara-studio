@@ -85,6 +85,12 @@ function OrderDetailContent() {
   const [error, setError] = useState("");
   const [fileMessage, setFileMessage] = useState("");
 
+  const [downloadingFileId, setDownloadingFileId] =
+    useState<string | null>(null);
+
+  const [downloadError, setDownloadError] =
+    useState<string | null>(null);
+
   useEffect(() => {
     let mounted = true;
 
@@ -165,6 +171,7 @@ function OrderDetailContent() {
   const loadFinalFiles = async (orderId: string) => {
     setLoadingFiles(true);
     setFileMessage("");
+    setDownloadError(null);
 
     const { data, error: filesError } = await supabase
       .from("order_files")
@@ -255,6 +262,62 @@ function OrderDetailContent() {
     }
 
     setLoadingFiles(false);
+  };
+
+  const handleDownload = async (file: FinalFile) => {
+    if (!file.url) {
+      setDownloadError(
+        "Link download file belum tersedia."
+      );
+      return;
+    }
+
+    try {
+      setDownloadingFileId(file.id);
+      setDownloadError(null);
+
+      const response = await fetch(file.url);
+
+      if (!response.ok) {
+        throw new Error(
+          `Gagal mengambil file. Status ${response.status}.`
+        );
+      }
+
+      const blob = await response.blob();
+
+      if (!blob || blob.size === 0) {
+        throw new Error(
+          "File yang diterima kosong."
+        );
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = file.file_name;
+      link.style.display = "none";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 1000);
+    } catch (downloadErr) {
+      console.error(
+        "Gagal download file:",
+        downloadErr
+      );
+
+      setDownloadError(
+        "File gagal didownload. Silakan coba lagi."
+      );
+    } finally {
+      setDownloadingFileId(null);
+    }
   };
 
   if (loading) {
@@ -564,6 +627,10 @@ function OrderDetailContent() {
                         file.file_type ===
                         "application/pdf";
 
+                      const isDownloading =
+                        downloadingFileId ===
+                        file.id;
+
                       return (
                         <div
                           key={file.id}
@@ -666,13 +733,33 @@ function OrderDetailContent() {
                                   : "Buka File"}
                               </a>
 
-                              <a
-                                href={file.url}
-                                download={file.file_name}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleDownload(
+                                    file
+                                  )
+                                }
+                                disabled={
+                                  isDownloading
+                                }
                                 className="pajara-button pajara-button-secondary"
+                                style={{
+                                  border: "none",
+                                  cursor:
+                                    isDownloading
+                                      ? "wait"
+                                      : "pointer",
+                                  opacity:
+                                    isDownloading
+                                      ? 0.7
+                                      : 1,
+                                }}
                               >
-                                Download
-                              </a>
+                                {isDownloading
+                                  ? "Mengunduh..."
+                                  : "Download"}
+                              </button>
                             </div>
                           ) : (
                             <div
@@ -692,6 +779,26 @@ function OrderDetailContent() {
                               dibuat.
                             </div>
                           )}
+
+                          {downloadError &&
+                            downloadingFileId ===
+                              null && (
+                              <div
+                                style={{
+                                  marginTop: "12px",
+                                  padding:
+                                    "12px 14px",
+                                  borderRadius:
+                                    "10px",
+                                  background:
+                                    "var(--soft)",
+                                  fontSize: "13px",
+                                  lineHeight: 1.5,
+                                }}
+                              >
+                                {downloadError}
+                              </div>
+                            )}
                         </div>
                       );
                     })}
