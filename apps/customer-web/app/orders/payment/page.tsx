@@ -25,12 +25,15 @@ type Payment = {
   created_at: string | null;
 };
 
+const QRIS_IMAGE =
+  "/qr_ID1026470184411_08.10.26_1791447334_1791447334905.jpeg";
+
 const PAYMENT_METHODS = [
   {
     name: "QRIS",
     description: "Bayar menggunakan QRIS",
     account: "A/N Pajara Studio",
-    note: "Kode QRIS akan tersedia pada tahap berikutnya.",
+    note: "Scan QRIS Pajara Studio untuk melakukan pembayaran.",
   },
   {
     name: "DANA",
@@ -701,6 +704,195 @@ function PaymentContent() {
                 </strong>
               </div>
             </div>
+
+            {payment.payment_method === "QRIS" && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  padding: "20px",
+                  borderRadius: "14px",
+                  background: "#f7f4ee",
+                  border: "1px solid #e8e2d8",
+                  textAlign: "center",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "14px",
+                    color: "var(--green-dark)",
+                    fontWeight: 700,
+                  }}
+                >
+                  QRIS Pajara Studio
+                </p>
+
+                <img
+                  src={QRIS_IMAGE}
+                  alt="QRIS Pajara Studio"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxWidth: "360px",
+                    height: "auto",
+                    margin: "0 auto",
+                    borderRadius: "12px",
+                    background: "#fff",
+                  }}
+                />
+
+                <p
+                  style={{
+                    marginTop: "14px",
+                    marginBottom: 0,
+                    color: "#666",
+                    fontSize: "13px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Scan QRIS di atas untuk melakukan pembayaran
+                  sebesar{" "}
+                  <strong style={{ color: "var(--green-dark)" }}>
+                    {formatRupiah(payment.amount)}
+                  </strong>
+                  .
+                  <br />
+                  A/N Pajara Studio
+                </p>
+              </div>
+            )}
+
+            {payment.payment_method === "DANA" && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  padding: "18px",
+                  borderRadius: "14px",
+                  background: "#f7f4ee",
+                  border: "1px solid #e8e2d8",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "8px",
+                    color: "var(--green-dark)",
+                    fontWeight: 700,
+                  }}
+                >
+                  Detail DANA
+                </p>
+
+                <div
+                  style={{
+                    color: "var(--green-dark)",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  0858-8242-1145
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "4px",
+                    color: "#777",
+                    fontSize: "13px",
+                  }}
+                >
+                  A/N TUTI
+                </div>
+              </div>
+            )}
+
+            {payment.payment_method === "GoPay" && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  padding: "18px",
+                  borderRadius: "14px",
+                  background: "#f7f4ee",
+                  border: "1px solid #e8e2d8",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "8px",
+                    color: "var(--green-dark)",
+                    fontWeight: 700,
+                  }}
+                >
+                  Detail GoPay
+                </p>
+
+                <div
+                  style={{
+                    color: "var(--green-dark)",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  0858-8242-1145
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "4px",
+                    color: "#777",
+                    fontSize: "13px",
+                  }}
+                >
+                  A/N TUTI
+                </div>
+              </div>
+            )}
+
+            {payment.payment_method === "SeaBank" && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  padding: "18px",
+                  borderRadius: "14px",
+                  background: "#f7f4ee",
+                  border: "1px solid #e8e2d8",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "8px",
+                    color: "var(--green-dark)",
+                    fontWeight: 700,
+                  }}
+                >
+                  Detail SeaBank
+                </p>
+
+                <div
+                  style={{
+                    color: "var(--green-dark)",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  901052450932
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "4px",
+                    color: "#777",
+                    fontSize: "13px",
+                  }}
+                >
+                  A/N TUTI
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -885,6 +1077,62 @@ function PaymentContent() {
                   </strong>{" "}
                   menggunakan metode tersebut.
                 </div>
+              </div>
+            )}
+
+            {selectedMethod === "QRIS" && (
+              <div
+                style={{
+                  marginTop: "18px",
+                  padding: "20px",
+                  borderRadius: "14px",
+                  background: "#f7f4ee",
+                  border: "1px solid #e8e2d8",
+                  textAlign: "center",
+                }}
+              >
+                <p
+                  style={{
+                    marginTop: 0,
+                    marginBottom: "14px",
+                    color: "var(--green-dark)",
+                    fontWeight: 700,
+                  }}
+                >
+                  QRIS Pajara Studio
+                </p>
+
+                <img
+                  src={QRIS_IMAGE}
+                  alt="QRIS Pajara Studio"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxWidth: "360px",
+                    height: "auto",
+                    margin: "0 auto",
+                    borderRadius: "12px",
+                    background: "#fff",
+                  }}
+                />
+
+                <p
+                  style={{
+                    marginTop: "14px",
+                    marginBottom: 0,
+                    color: "#666",
+                    fontSize: "13px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Scan QRIS di atas untuk pembayaran DP sebesar{" "}
+                  <strong style={{ color: "var(--green-dark)" }}>
+                    {formatRupiah(order.dp_amount)}
+                  </strong>
+                  .
+                  <br />
+                  A/N Pajara Studio
+                </p>
               </div>
             )}
 
