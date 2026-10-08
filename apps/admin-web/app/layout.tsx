@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ServiceWorkerRegister from "./service-worker-register";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pajara Admin",
