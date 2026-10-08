@@ -14,6 +14,35 @@ type Order = {
   status: string | null;
 };
 
+type Payment = {
+  id: string;
+  order_id: string;
+  payment_method: string | null;
+  payment_type: string | null;
+  amount: number | null;
+  status: string | null;
+  created_at: string | null;
+};
+
+const PAYMENT_METHODS = [
+  {
+    name: "QRIS",
+    description: "Bayar menggunakan QRIS",
+  },
+  {
+    name: "DANA",
+    description: "Bayar menggunakan DANA",
+  },
+  {
+    name: "GoPay",
+    description: "Bayar menggunakan GoPay",
+  },
+  {
+    name: "SeaBank",
+    description: "Transfer melalui SeaBank",
+  },
+];
+
 function formatRupiah(value: number | null) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -22,42 +51,18 @@ function formatRupiah(value: number | null) {
   }).format(value || 0);
 }
 
-function getPaymentStatus(status: string | null) {
-  switch (status) {
-    case "waiting_dp":
-      return {
-        title: "Menunggu Pembayaran DP",
-        description:
-          "Silakan lakukan pembayaran DP sesuai nominal yang tercantum.",
-      };
+function getPaymentStatus(payment: Payment | null) {
+  if (!payment) return null;
 
-    case "processing":
-      return {
-        title: "Pembayaran DP Diproses",
-        description:
-          "Pesanan sedang diproses oleh Pajara Studio.",
-      };
-
-    case "waiting_payment":
-      return {
-        title: "Menunggu Pelunasan",
-        description:
-          "DP telah diterima. Sisa pembayaran dapat dilunasi setelah project selesai.",
-      };
-
-    case "completed":
-      return {
-        title: "Pembayaran Selesai",
-        description:
-          "Seluruh pembayaran untuk pesanan ini telah selesai.",
-      };
-
+  switch (payment.status) {
+    case "pending":
+      return "Menunggu Verifikasi";
+    case "verified":
+      return "Pembayaran Terverifikasi";
+    case "rejected":
+      return "Pembayaran Ditolak";
     default:
-      return {
-        title: "Informasi Pembayaran",
-        description:
-          "Informasi pembayaran akan tersedia sesuai status pesanan.",
-      };
+      return payment.status || "Menunggu";
   }
 }
 
@@ -66,10 +71,15 @@ function PaymentContent() {
   const id = searchParams.get("id");
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [payment, setPayment] = useState<Payment | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadOrder() {
+    async function loadData() {
       if (!id) {
         setLoading(false);
         return;
@@ -84,7 +94,7 @@ function PaymentContent() {
         return;
       }
 
-      const { data } = await supabase
+      const { data: orderData } = await supabase
         .from("orders")
         .select(
           "id, order_code, service_name, total_amount, dp_amount, remaining_amount, status"
@@ -93,12 +103,106 @@ function PaymentContent() {
         .eq("customer_id", user.id)
         .maybeSingle();
 
-      setOrder(data);
+      if (!orderData) {
+        setLoading(false);
+        return;
+      }
+
+      setOrder(orderData);
+
+      const { data: paymentData } = await supabase
+        .from("payments")
+        .select(
+          "id, order_id, payment_method, payment_type, amount, status, created_at"
+        )
+        .eq("order_id", orderData.id)
+        .eq("payment_type", "DP")
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle();
+
+      if (paymentData) {
+        setPayment(paymentData);
+        setSelectedMethod(paymentData.payment_method || "");
+      }
+
       setLoading(false);
     }
 
-    loadOrder();
+    loadData();
   }, [id]);
+
+  async function handleCreatePayment() {
+    if (!order) return;
+
+    if (!selectedMethod) {
+      setError("Silakan pilih metode pembayaran terlebih dahulu.");
+      return;
+    }
+
+    if (!order.dp_amount || order.dp_amount <= 0) {
+      setError(
+        "Nominal DP belum tersedia. Silakan tunggu Pajara Studio menetapkan harga."
+      );
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    const { data: existingPayment } = await supabase
+      .from("payments")
+      .select(
+        "id, order_id, payment_method, payment_type, amount, status, created_at"
+      )
+      .eq("order_id", order.id)
+      .eq("payment_type", "DP")
+      .order("created_at", {
+        ascending: false,
+      })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingPayment) {
+      setPayment(existingPayment);
+      setSelectedMethod(existingPayment.payment_method || "");
+      setMessage("Pembayaran DP untuk pesanan ini sudah dibuat.");
+      setSaving(false);
+      return;
+    }
+
+    const { data, error: insertError } = await supabase
+      .from("payments")
+      .insert({
+        order_id: order.id,
+        payment_method: selectedMethod,
+        payment_type: "DP",
+        amount: order.dp_amount,
+        status: "pending",
+      })
+      .select(
+        "id, order_id, payment_method, payment_type, amount, status, created_at"
+      )
+      .single();
+
+    if (insertError) {
+      setError(
+        insertError.message ||
+          "Pembayaran gagal dibuat. Silakan coba lagi."
+      );
+      setSaving(false);
+      return;
+    }
+
+    setPayment(data);
+    setMessage(
+      "Metode pembayaran berhasil disimpan. Lanjutkan pembayaran sesuai instruksi dari Pajara Studio."
+    );
+    setSaving(false);
+  }
 
   if (loading) {
     return (
@@ -109,7 +213,12 @@ function PaymentContent() {
           padding: "40px 20px",
         }}
       >
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <div
+          style={{
+            maxWidth: "900px",
+            margin: "0 auto",
+          }}
+        >
           <p style={{ color: "var(--green)" }}>
             Memuat pembayaran...
           </p>
@@ -127,13 +236,19 @@ function PaymentContent() {
           padding: "40px 20px",
         }}
       >
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <div
+          style={{
+            maxWidth: "900px",
+            margin: "0 auto",
+          }}
+        >
           <h1 style={{ color: "var(--green-dark)" }}>
             Pesanan tidak ditemukan
           </h1>
 
           <p style={{ color: "#666" }}>
-            Pesanan yang kamu cari tidak tersedia atau bukan milik akun ini.
+            Pesanan yang kamu cari tidak tersedia atau bukan milik
+            akun ini.
           </p>
 
           <a
@@ -150,9 +265,8 @@ function PaymentContent() {
     );
   }
 
-  const paymentStatus = getPaymentStatus(order.status);
-
   const isWaitingDP = order.status === "waiting_dp";
+  const paymentStatus = getPaymentStatus(payment);
 
   return (
     <main
@@ -185,6 +299,7 @@ function PaymentContent() {
               color: "var(--brown)",
               fontWeight: 700,
               marginBottom: "8px",
+              letterSpacing: "0.08em",
             }}
           >
             PEMBAYARAN
@@ -203,6 +318,38 @@ function PaymentContent() {
             {order.service_name || "Layanan Pajara Studio"}
           </p>
         </div>
+
+        {message && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "16px 18px",
+              borderRadius: "14px",
+              background: "#edf6ef",
+              border: "1px solid #c8dfcc",
+              color: "var(--green-dark)",
+              lineHeight: 1.6,
+            }}
+          >
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "16px 18px",
+              borderRadius: "14px",
+              background: "#fff3f0",
+              border: "1px solid #ead0c9",
+              color: "#8a3d2f",
+              lineHeight: 1.6,
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         <section
           style={{
@@ -256,12 +403,7 @@ function PaymentContent() {
                 DP 50%
               </span>
 
-              <strong
-                style={{
-                  color: "var(--green-dark)",
-                  fontSize: "18px",
-                }}
-              >
+              <strong style={{ color: "var(--green-dark)" }}>
                 {formatRupiah(order.dp_amount)}
               </strong>
             </div>
@@ -296,156 +438,247 @@ function PaymentContent() {
           </div>
         </section>
 
-        <section
-          style={{
-            marginTop: "18px",
-            background: "#fff",
-            borderRadius: "18px",
-            padding: "28px",
-            border: "1px solid #e8e2d8",
-          }}
-        >
-          <h2
+        {payment && (
+          <section
             style={{
-              color: "var(--green-dark)",
-              marginTop: 0,
-              marginBottom: "8px",
+              marginTop: "18px",
+              background: "#fff",
+              borderRadius: "18px",
+              padding: "28px",
+              border: "1px solid #e8e2d8",
             }}
           >
-            {paymentStatus.title}
-          </h2>
-
-          <p
-            style={{
-              color: "#666",
-              lineHeight: 1.7,
-              marginTop: 0,
-            }}
-          >
-            {paymentStatus.description}
-          </p>
-
-          {isWaitingDP ? (
-            <>
-              <div
-                style={{
-                  marginTop: "22px",
-                  padding: "22px",
-                  borderRadius: "16px",
-                  background: "var(--cream)",
-                  border: "1px solid #ddd3c5",
-                }}
-              >
-                <p
-                  style={{
-                    marginTop: 0,
-                    marginBottom: "8px",
-                    color: "#666",
-                    fontSize: "14px",
-                  }}
-                >
-                  Nominal yang perlu dibayar
-                </p>
-
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--green-dark)",
-                    fontSize: "28px",
-                  }}
-                >
-                  {formatRupiah(order.dp_amount)}
-                </strong>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "18px",
-                  borderRadius: "14px",
-                  background: "#f8f6f1",
-                  border: "1px dashed #cfc5b7",
-                }}
-              >
-                <strong
-                  style={{
-                    color: "var(--green-dark)",
-                  }}
-                >
-                  Metode Pembayaran
-                </strong>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "10px",
-                    marginTop: "14px",
-                  }}
-                >
-                  {[
-                    "QRIS",
-                    "DANA",
-                    "GoPay",
-                    "SeaBank",
-                  ].map((method) => (
-                    <div
-                      key={method}
-                      style={{
-                        padding: "13px 15px",
-                        background: "#fff",
-                        borderRadius: "10px",
-                        border: "1px solid #e8e2d8",
-                        color: "var(--green-dark)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {method}
-                    </div>
-                  ))}
-                </div>
-
-                <p
-                  style={{
-                    color: "#777",
-                    lineHeight: 1.6,
-                    marginBottom: 0,
-                    marginTop: "16px",
-                    fontSize: "14px",
-                  }}
-                >
-                  Detail tujuan pembayaran akan ditampilkan
-                  setelah sistem pembayaran Pajara Studio
-                  dikonfigurasi.
-                </p>
-              </div>
-            </>
-          ) : (
-            <div
+            <p
               style={{
-                marginTop: "20px",
-                padding: "18px",
-                borderRadius: "14px",
-                background: "var(--cream)",
-                border: "1px dashed #cfc5b7",
+                color: "var(--brown)",
+                fontWeight: 700,
+                marginTop: 0,
+                marginBottom: "8px",
+                fontSize: "13px",
+                letterSpacing: "0.06em",
               }}
             >
-              <strong style={{ color: "var(--green-dark)" }}>
-                Informasi pembayaran
-              </strong>
+              PEMBAYARAN DP
+            </p>
 
-              <p
+            <h2
+              style={{
+                color: "var(--green-dark)",
+                marginTop: 0,
+              }}
+            >
+              {formatRupiah(payment.amount)}
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gap: "10px",
+                marginTop: "18px",
+              }}
+            >
+              <div
                 style={{
-                  color: "#777",
-                  marginBottom: 0,
-                  lineHeight: 1.6,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "20px",
                 }}
               >
-                Detail pembayaran akan menyesuaikan status
-                pesanan kamu.
-              </p>
+                <span style={{ color: "#666" }}>
+                  Metode
+                </span>
+
+                <strong style={{ color: "var(--green-dark)" }}>
+                  {payment.payment_method || "-"}
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                }}
+              >
+                <span style={{ color: "#666" }}>
+                  Status
+                </span>
+
+                <strong style={{ color: "var(--green-dark)" }}>
+                  {paymentStatus}
+                </strong>
+              </div>
             </div>
-          )}
-        </section>
+          </section>
+        )}
+
+        {isWaitingDP && !payment && (
+          <section
+            style={{
+              marginTop: "18px",
+              background: "#fff",
+              borderRadius: "18px",
+              padding: "28px",
+              border: "1px solid #e8e2d8",
+            }}
+          >
+            <h2
+              style={{
+                color: "var(--green-dark)",
+                marginTop: 0,
+              }}
+            >
+              Pilih Metode Pembayaran
+            </h2>
+
+            <p
+              style={{
+                color: "#666",
+                lineHeight: 1.7,
+              }}
+            >
+              Pilih metode yang akan digunakan untuk pembayaran
+              DP sebesar{" "}
+              <strong style={{ color: "var(--green-dark)" }}>
+                {formatRupiah(order.dp_amount)}
+              </strong>
+              .
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gap: "12px",
+                marginTop: "22px",
+              }}
+            >
+              {PAYMENT_METHODS.map((method) => {
+                const selected =
+                  selectedMethod === method.name;
+
+                return (
+                  <button
+                    key={method.name}
+                    type="button"
+                    onClick={() =>
+                      setSelectedMethod(method.name)
+                    }
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "18px",
+                      borderRadius: "14px",
+                      border: selected
+                        ? "2px solid var(--green)"
+                        : "1px solid #ddd5c9",
+                      background: selected
+                        ? "#f1f7f2"
+                        : "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "16px",
+                      }}
+                    >
+                      <div>
+                        <strong
+                          style={{
+                            color: "var(--green-dark)",
+                            fontSize: "16px",
+                          }}
+                        >
+                          {method.name}
+                        </strong>
+
+                        <div
+                          style={{
+                            marginTop: "5px",
+                            color: "#777",
+                            fontSize: "13px",
+                          }}
+                        >
+                          {method.description}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "50%",
+                          border: selected
+                            ? "6px solid var(--green)"
+                            : "2px solid #c9c0b4",
+                          flexShrink: 0,
+                        }}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCreatePayment}
+              disabled={saving}
+              style={{
+                width: "100%",
+                marginTop: "22px",
+                padding: "15px 20px",
+                border: "none",
+                borderRadius: "12px",
+                background: "var(--green)",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "15px",
+                cursor: saving ? "wait" : "pointer",
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving
+                ? "Menyimpan..."
+                : "Lanjutkan Pembayaran"}
+            </button>
+          </section>
+        )}
+
+        {!isWaitingDP && !payment && (
+          <section
+            style={{
+              marginTop: "18px",
+              background: "#fff",
+              borderRadius: "18px",
+              padding: "28px",
+              border: "1px solid #e8e2d8",
+            }}
+          >
+            <h2
+              style={{
+                color: "var(--green-dark)",
+                marginTop: 0,
+              }}
+            >
+              Pembayaran
+            </h2>
+
+            <p
+              style={{
+                color: "#666",
+                lineHeight: 1.7,
+                marginBottom: 0,
+              }}
+            >
+              Pembayaran belum dapat dilakukan pada tahap
+              pesanan saat ini.
+            </p>
+          </section>
+        )}
       </div>
     </main>
   );
@@ -460,7 +693,12 @@ function PaymentFallback() {
         padding: "40px 20px",
       }}
     >
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+        }}
+      >
         <p style={{ color: "var(--green)" }}>
           Memuat pembayaran...
         </p>
