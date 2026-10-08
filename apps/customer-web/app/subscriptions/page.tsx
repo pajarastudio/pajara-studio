@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
 
 type SubscriptionPlan = {
@@ -13,11 +14,12 @@ type SubscriptionPlan = {
 };
 
 export default function SubscriptionsPage() {
+  const router = useRouter();
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     loadPlans();
@@ -57,7 +59,6 @@ export default function SubscriptionsPage() {
   async function choosePlan(planId: string) {
     setSelecting(planId);
     setError("");
-    setSuccess("");
 
     const {
       data: { user },
@@ -85,11 +86,15 @@ export default function SubscriptionsPage() {
 
     console.log("Subscription dibuat:", data);
 
-    setSuccess(
-      "Paket berhasil dipilih. Lanjutkan ke pembayaran."
-    );
+    if (!data) {
+      setError("Subscription berhasil diproses tetapi ID paket tidak ditemukan.");
+      setSelecting(null);
+      return;
+    }
 
-    setSelecting(null);
+    router.push(
+      `/subscriptions/payment?subscription=${encodeURIComponent(data)}`
+    );
   }
 
   return (
@@ -167,23 +172,6 @@ export default function SubscriptionsPage() {
             }}
           >
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div
-            style={{
-              marginBottom: 20,
-              padding: "14px 16px",
-              borderRadius: 14,
-              background: "#edf7f0",
-              border: "1px solid #b8d7c0",
-              color: "#214d32",
-              fontSize: 14,
-              lineHeight: 1.5,
-            }}
-          >
-            {success}
           </div>
         )}
 
