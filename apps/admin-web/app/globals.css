@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --pajara-green: #2f6b45;
+  --pajara-green-dark: #214d32;
+  --pajara-brown: #8a6a4a;
+  --pajara-cream: #f7f4ee;
+  --pajara-white: #ffffff;
+  --pajara-text: #292821;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--pajara-cream);
+  color: var(--pajara-text);
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  max-width: 100%;
+}
