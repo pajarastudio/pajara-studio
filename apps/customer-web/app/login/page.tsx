@@ -289,10 +289,6 @@ return (
       animation: loginFadeUp .75s .22s ease both;
     }
 
-    .login-mobile-brand {
-      display: none;
-    }
-
     .login-eyebrow {
       margin: 0 0 14px;
       color: var(--login-green);
@@ -367,7 +363,7 @@ return (
     }
 
     .login-password-input {
-      padding-right: 75px;
+      padding-right: 85px;
     }
 
     .login-password-toggle {
@@ -538,7 +534,9 @@ return (
     }
 
     @keyframes loginSpin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @media (min-width: 1440px) {
@@ -621,7 +619,7 @@ return (
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        padding: 28px 24px 35px;
+        padding: 34px 24px 35px;
         background:
           radial-gradient(ellipse at 100% 0%, rgba(47,107,69,.07), transparent 36%),
           var(--login-cream);
@@ -631,24 +629,6 @@ return (
         max-width: 420px;
         padding-top: 4px;
         animation: loginFadeUp .65s .08s ease both;
-      }
-
-      .login-mobile-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 39px;
-        color: var(--login-forest);
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: .13em;
-      }
-
-      .login-mobile-brand img {
-        width: 38px;
-        height: 38px;
-        object-fit: cover;
-        border-radius: 11px;
       }
 
       .login-eyebrow {
@@ -725,10 +705,6 @@ return (
         padding-left: 19px;
       }
 
-      .login-mobile-brand {
-        margin-bottom: 31px;
-      }
-
       .login-form-inner h2 {
         font-size: 35px;
       }
@@ -792,14 +768,6 @@ return (
 
     <section className="login-form-panel">
       <div className="login-form-inner">
-        <div className="login-mobile-brand">
-          <img
-            src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-            alt="Logo Pajara Studio"
-          />
-          <span>PAJARA STUDIO</span>
-        </div>
-
         <p className="login-eyebrow">CUSTOMER WEB</p>
 
         <h2>Selamat datang.</h2>
