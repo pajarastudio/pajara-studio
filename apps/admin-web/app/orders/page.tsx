@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -41,6 +42,10 @@ export default function OrdersPage() {
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [subscriptionOrderIds, setSubscriptionOrderIds] = useState<string[]>(
+    []
+  );
+
   const [subscriptionPayments, setSubscriptionPayments] = useState<
     SubscriptionPayment[]
   >([]);
@@ -49,11 +54,11 @@ export default function OrdersPage() {
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [error, setError] = useState("");
   const [paymentError, setPaymentError] = useState("");
-
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadPage() {
@@ -101,7 +106,9 @@ export default function OrdersPage() {
   }
 
   async function loadOrders() {
-    const { data, error } = await supabase
+    setError("");
+
+    const { data, error: ordersError } = await supabase
       .from("orders")
       .select(
         `
@@ -120,12 +127,45 @@ export default function OrdersPage() {
       )
       .order("created_at", { ascending: false });
 
-    if (error) {
-      setError(error.message);
+    if (ordersError) {
+      setError(`Gagal memuat pesanan: ${ordersError.message}`);
+      setOrders([]);
+      setSubscriptionOrderIds([]);
       return;
     }
 
-    setOrders((data || []) as Order[]);
+    const loadedOrders = (data || []) as Order[];
+
+    if (loadedOrders.length === 0) {
+      setOrders([]);
+      setSubscriptionOrderIds([]);
+      return;
+    }
+
+    const { data: requests, error: requestsError } = await supabase
+      .from("subscription_requests")
+      .select("order_id")
+      .not("order_id", "is", null);
+
+    if (requestsError) {
+      setError(
+        `Gagal menentukan jenis pesanan paket: ${requestsError.message}. Periksa izin baca tabel subscription_requests untuk Admin.`
+      );
+      setOrders([]);
+      setSubscriptionOrderIds([]);
+      return;
+    }
+
+    const packageOrderIds = [
+      ...new Set(
+        (requests || [])
+          .map((request) => request.order_id as string | null)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+
+    setOrders(loadedOrders);
+    setSubscriptionOrderIds(packageOrderIds);
   }
 
   async function loadSubscriptionPayments() {
@@ -178,12 +218,7 @@ export default function OrdersPage() {
       const { data: subscriptions, error: subscriptionsError } =
         await supabase
           .from("subscriptions")
-          .select(
-            `
-              id,
-              plan_id
-            `
-          )
+          .select("id, plan_id")
           .in("id", subscriptionIds);
 
       if (subscriptionsError) {
@@ -202,30 +237,46 @@ export default function OrdersPage() {
         ),
       ];
 
-      const { data: plans, error: plansError } = await supabase
-        .from("subscription_plans")
-        .select("id, name")
-        .in("id", planIds);
+      let plans: { id: string; name: string }[] = [];
 
-      if (plansError) {
-        setPaymentError(
-          `Gagal memuat data paket: ${plansError.message}`
-        );
-        setSubscriptionPayments([]);
-        return;
+      if (planIds.length > 0) {
+        const { data, error: plansError } = await supabase
+          .from("subscription_plans")
+          .select("id, name")
+          .in("id", planIds);
+
+        if (plansError) {
+          setPaymentError(
+            `Gagal memuat data paket: ${plansError.message}`
+          );
+          setSubscriptionPayments([]);
+          return;
+        }
+
+        plans = data || [];
       }
 
-      const { data: customers, error: customersError } = await supabase
-        .from("profiles_v2")
-        .select("id, full_name, email")
-        .in("id", customerIds);
+      let customers: {
+        id: string;
+        full_name: string | null;
+        email: string | null;
+      }[] = [];
 
-      if (customersError) {
-        setPaymentError(
-          `Gagal memuat data customer: ${customersError.message}`
-        );
-        setSubscriptionPayments([]);
-        return;
+      if (customerIds.length > 0) {
+        const { data, error: customersError } = await supabase
+          .from("profiles_v2")
+          .select("id, full_name, email")
+          .in("id", customerIds);
+
+        if (customersError) {
+          setPaymentError(
+            `Gagal memuat data customer: ${customersError.message}`
+          );
+          setSubscriptionPayments([]);
+          return;
+        }
+
+        customers = data || [];
       }
 
       const subscriptionMap = new Map(
@@ -236,11 +287,11 @@ export default function OrdersPage() {
       );
 
       const planMap = new Map(
-        (plans || []).map((plan) => [plan.id, plan])
+        plans.map((plan) => [plan.id, plan])
       );
 
       const customerMap = new Map(
-        (customers || []).map((customer) => [customer.id, customer])
+        customers.map((customer) => [customer.id, customer])
       );
 
       const normalizedPayments: SubscriptionPayment[] = payments.map(
@@ -288,14 +339,7 @@ export default function OrdersPage() {
     try {
       const { data: file, error: fileError } = await supabase
         .from("subscription_payment_files")
-        .select(
-          `
-            id,
-            file_name,
-            storage_path,
-            mime_type
-          `
-        )
+        .select("id, file_name, storage_path, mime_type")
         .eq("subscription_payment_id", paymentId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -356,7 +400,7 @@ export default function OrdersPage() {
         return;
       }
 
-      const { error: updateError } = await supabase
+      const { data: updatedPayments, error: updateError } = await supabase
         .from("subscription_payments")
         .update({
           status: "verified",
@@ -364,10 +408,19 @@ export default function OrdersPage() {
           verified_at: new Date().toISOString(),
         })
         .eq("id", payment.id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
 
       if (updateError) {
         alert(`Gagal memverifikasi pembayaran: ${updateError.message}`);
+        return;
+      }
+
+      if (!updatedPayments || updatedPayments.length === 0) {
+        alert(
+          "Pembayaran tidak berubah. Mungkin sudah diproses sebelumnya atau izin pembaruan ditolak."
+        );
+        await loadSubscriptionPayments();
         return;
       }
 
@@ -391,21 +444,27 @@ export default function OrdersPage() {
     setActionLoading(payment.id);
 
     try {
-      const { error: updateError } = await supabase
+      const { data: updatedPayments, error: updateError } = await supabase
         .from("subscription_payments")
-        .update({
-          status: "rejected",
-        })
+        .update({ status: "rejected" })
         .eq("id", payment.id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
 
       if (updateError) {
         alert(`Gagal menolak pembayaran: ${updateError.message}`);
         return;
       }
 
-      alert("Pembayaran berhasil ditolak.");
+      if (!updatedPayments || updatedPayments.length === 0) {
+        alert(
+          "Pembayaran tidak berubah. Mungkin sudah diproses sebelumnya atau izin pembaruan ditolak."
+        );
+        await loadSubscriptionPayments();
+        return;
+      }
 
+      alert("Pembayaran berhasil ditolak.");
       await loadSubscriptionPayments();
     } finally {
       setActionLoading(null);
@@ -487,6 +546,119 @@ export default function OrdersPage() {
     }
   }
 
+  function renderOrderCard(order: Order, isPackageOrder: boolean) {
+    return (
+      <div
+        key={order.id}
+        className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-medium text-[#2f6b45]">
+              {order.order_code}
+            </p>
+
+            <h3 className="mt-1 text-lg font-bold text-[#214d32]">
+              {order.service_name || "Pesanan Desain"}
+            </h3>
+
+            <p className="mt-1 text-sm text-gray-600">
+              {order.design_type || "-"} · {order.quantity || 0} desain
+            </p>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Dibuat: {formatDate(order.created_at)}
+            </p>
+
+            {order.deadline && (
+              <p className="mt-1 text-sm text-gray-500">
+                Tenggat: {formatDate(order.deadline)}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+                isPackageOrder
+                  ? "bg-purple-100 text-purple-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {isPackageOrder ? "Pesanan Paket" : "Pesanan Satuan"}
+            </span>
+
+            <span
+              className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClass(
+                order.status
+              )}`}
+            >
+              {getOrderStatusLabel(order.status)}
+            </span>
+          </div>
+        </div>
+
+        {isPackageOrder ? (
+          <div className="mt-4 rounded-xl border border-purple-100 bg-purple-50 p-4">
+            <p className="font-semibold text-purple-800">
+              Menggunakan kuota paket
+            </p>
+            <p className="mt-1 text-sm text-purple-700">
+              Pesanan ini menggunakan kuota Paket Mingguan atau Bulanan.
+              Tidak ada tagihan tambahan per desain.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl bg-[#f7f4ee] p-3">
+              <p className="text-xs text-gray-500">Total</p>
+              <p className="mt-1 font-bold text-[#214d32]">
+                {formatRupiah(order.total_amount || 0)}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-[#f7f4ee] p-3">
+              <p className="text-xs text-gray-500">DP</p>
+              <p className="mt-1 font-bold text-[#214d32]">
+                {formatRupiah(order.dp_amount || 0)}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-[#f7f4ee] p-3">
+              <p className="text-xs text-gray-500">Sisa</p>
+              <p className="mt-1 font-bold text-[#214d32]">
+                {formatRupiah(order.remaining_amount || 0)}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <button
+            onClick={() =>
+              router.push(
+                `/orders/detail?id=${encodeURIComponent(order.id)}`
+              )
+            }
+            className="w-full rounded-xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#214d32]"
+          >
+            Lihat Detail Pesanan
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const packageOrderIdSet = new Set(subscriptionOrderIds);
+
+  const singleOrders = orders.filter(
+    (order) => !packageOrderIdSet.has(order.id)
+  );
+
+  const packageOrders = orders.filter((order) =>
+    packageOrderIdSet.has(order.id)
+  );
+
   return (
     <main className="min-h-screen bg-[#f7f4ee] px-4 py-6 md:px-8">
       <div className="mx-auto max-w-6xl">
@@ -520,14 +692,13 @@ export default function OrdersPage() {
         )}
 
         {/* PEMBAYARAN PAKET */}
-        <section className="mb-8">
+        <section className="mb-10">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-[#214d32]">
               Pembayaran Paket
             </h2>
-
             <p className="mt-1 text-sm text-gray-600">
-              Verifikasi pembayaran Paket Mingguan dan Paket Bulanan.
+              Verifikasi pembayaran pembelian dan perpanjangan paket.
             </p>
           </div>
 
@@ -558,11 +729,9 @@ export default function OrdersPage() {
                         <h3 className="text-lg font-bold text-[#214d32]">
                           {payment.plan_name}
                         </h3>
-
                         <p className="mt-1 text-sm font-semibold text-gray-800">
                           {payment.customer_name}
                         </p>
-
                         <p className="text-sm text-gray-500">
                           {payment.customer_email}
                         </p>
@@ -579,20 +748,14 @@ export default function OrdersPage() {
 
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="rounded-xl bg-[#f7f4ee] p-3">
-                        <p className="text-xs text-gray-500">
-                          Jumlah
-                        </p>
-
+                        <p className="text-xs text-gray-500">Jumlah</p>
                         <p className="mt-1 font-bold text-[#214d32]">
                           {formatRupiah(payment.amount)}
                         </p>
                       </div>
 
                       <div className="rounded-xl bg-[#f7f4ee] p-3">
-                        <p className="text-xs text-gray-500">
-                          Metode
-                        </p>
-
+                        <p className="text-xs text-gray-500">Metode</p>
                         <p className="mt-1 font-semibold text-gray-800">
                           {payment.payment_method}
                         </p>
@@ -602,17 +765,13 @@ export default function OrdersPage() {
                         <p className="text-xs text-gray-500">
                           ID Transaksi
                         </p>
-
                         <p className="mt-1 break-all font-semibold text-gray-800">
                           {payment.transaction_id || "-"}
                         </p>
                       </div>
 
                       <div className="rounded-xl bg-[#f7f4ee] p-3">
-                        <p className="text-xs text-gray-500">
-                          Waktu
-                        </p>
-
+                        <p className="text-xs text-gray-500">Waktu</p>
                         <p className="mt-1 font-semibold text-gray-800">
                           {formatDate(payment.created_at)}
                         </p>
@@ -657,110 +816,79 @@ export default function OrdersPage() {
           )}
         </section>
 
-        {/* PESANAN DESAIN */}
-        <section>
-          <div className="mb-4">
-            <h2 className="text-xl font-bold text-[#214d32]">
-              Pesanan Desain
-            </h2>
+        {/* PESANAN SATUAN */}
+        <section className="mb-10">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-xl font-bold text-[#214d32]">
+                Pesanan Satuan
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Pesanan desain biasa dengan pembayaran per pesanan.
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm text-gray-600">
-              Daftar pesanan desain dari customer.
-            </p>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#214d32] shadow-sm">
+              {singleOrders.length} pesanan
+            </span>
           </div>
 
           {loading ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
-              Memuat pesanan...
+              Memuat pesanan satuan...
             </div>
-          ) : orders.length === 0 ? (
+          ) : error ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
-              Belum ada pesanan desain.
+              Daftar pesanan belum dapat ditampilkan.
+            </div>
+          ) : singleOrders.length === 0 ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+              Belum ada pesanan satuan.
             </div>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
-                <div
-                  key={order.id}
-                  className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-[#2f6b45]">
-                        {order.order_code}
-                      </p>
+              {singleOrders.map((order) =>
+                renderOrderCard(order, false)
+              )}
+            </div>
+          )}
+        </section>
 
-                      <h3 className="mt-1 text-lg font-bold text-[#214d32]">
-                        {order.service_name || "Pesanan Desain"}
-                      </h3>
+        {/* PESANAN PAKET */}
+        <section>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-xl font-bold text-[#214d32]">
+                Pesanan Paket
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Pesanan desain yang menggunakan kuota Paket Mingguan atau
+                Bulanan.
+              </p>
+            </div>
 
-                      <p className="mt-1 text-sm text-gray-600">
-                        {order.design_type || "-"} ·{" "}
-                        {order.quantity || 0} desain
-                      </p>
+            <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700">
+              {packageOrders.length} pesanan
+            </span>
+          </div>
 
-                      <p className="mt-2 text-sm text-gray-500">
-                        Dibuat: {formatDate(order.created_at)}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClass(
-                        order.status
-                      )}`}
-                    >
-                      {getOrderStatusLabel(order.status)}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-xl bg-[#f7f4ee] p-3">
-                      <p className="text-xs text-gray-500">
-                        Total
-                      </p>
-
-                      <p className="mt-1 font-bold text-[#214d32]">
-                        {formatRupiah(order.total_amount || 0)}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-[#f7f4ee] p-3">
-                      <p className="text-xs text-gray-500">
-                        DP
-                      </p>
-
-                      <p className="mt-1 font-bold text-[#214d32]">
-                        {formatRupiah(order.dp_amount || 0)}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-[#f7f4ee] p-3">
-                      <p className="text-xs text-gray-500">
-                        Sisa
-                      </p>
-
-                      <p className="mt-1 font-bold text-[#214d32]">
-                        {formatRupiah(order.remaining_amount || 0)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <button
-                      onClick={() =>
-                        router.push(
-                          `/orders/detail?id=${encodeURIComponent(
-                            order.id
-                          )}`
-                        )
-                      }
-                      className="w-full rounded-xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#214d32]"
-                    >
-                      Lihat Detail Pesanan
-                    </button>
-                  </div>
-                </div>
-              ))}
+          {loading ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+              Memuat pesanan paket...
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+              Daftar pesanan belum dapat ditampilkan.
+            </div>
+          ) : packageOrders.length === 0 ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+              Belum ada pesanan desain paket.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {packageOrders.map((order) =>
+                renderOrderCard(order, true)
+              )}
             </div>
           )}
         </section>
