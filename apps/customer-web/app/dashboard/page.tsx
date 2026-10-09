@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@pajara/supabase";
+import CustomerBottomNav from "../components/CustomerBottomNav";
 
 type Order = {
   id: string;
@@ -344,7 +345,7 @@ export default function CustomerDashboard() {
         }
 
         .dashboard-main {
-          padding: 39px 0 76px;
+          padding: 39px 0 125px;
         }
 
         .dashboard-hero {
@@ -1145,7 +1146,7 @@ export default function CustomerDashboard() {
         }
 
         .dashboard-footer {
-          padding: 22px 0 28px;
+          padding: 22px 0 105px;
           border-top: 1px solid rgba(47, 107, 69, 0.12);
           color: #777c72;
           font-size: 11px;
@@ -1220,7 +1221,7 @@ export default function CustomerDashboard() {
 
           .dashboard-main {
             padding-top: 25px;
-            padding-bottom: 45px;
+            padding-bottom: 125px;
           }
 
           .dashboard-hero {
@@ -1868,6 +1869,8 @@ export default function CustomerDashboard() {
           <span>Berakar di Tanah Pasundan.</span>
         </div>
       </footer>
+
+      <CustomerBottomNav />
     </main>
   );
 }
