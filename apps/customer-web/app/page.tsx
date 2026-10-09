@@ -3,8 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const logo =
-  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+const logo = "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 const steps = [
   {
@@ -382,8 +381,11 @@ export default function CustomerHome() {
           box-shadow: 0 0 0 4px rgba(47, 107, 69, 0.1);
         }
 
+        /* HERO ART — PAJARA FLOATING IDENTITY */
+
         .pajara-hero-art {
           position: relative;
+          isolation: isolate;
           min-height: 410px;
           display: flex;
           align-items: center;
@@ -391,130 +393,228 @@ export default function CustomerHome() {
           animation: pajara-rise 850ms 100ms ease both;
         }
 
-        .pajara-art-orbit {
-          position: absolute;
-          width: min(100%, 400px);
-          aspect-ratio: 1;
-          border: 1px solid rgba(47, 107, 69, 0.14);
-          border-radius: 50%;
-        }
-
-        .pajara-art-orbit::before,
-        .pajara-art-orbit::after {
-          position: absolute;
-          inset: 24px;
-          border: 1px solid rgba(138, 106, 74, 0.16);
-          border-radius: 50%;
-          content: "";
-        }
-
-        .pajara-art-orbit::after {
-          inset: 51px;
-          border-style: dashed;
-        }
-
         .pajara-art-card {
           position: relative;
-          z-index: 1;
+          z-index: 3;
           width: min(100%, 300px);
           padding: 28px;
           overflow: hidden;
           color: white;
-          background: var(--pajara-deep);
+          background:
+            radial-gradient(
+              circle at 100% 0%,
+              rgba(255, 255, 255, 0.1),
+              transparent 35%
+            ),
+            linear-gradient(145deg, #285b3b, var(--pajara-deep) 72%);
+          border: 1px solid rgba(255, 255, 255, 0.13);
           border-radius: 24px;
-          box-shadow: 0 30px 80px rgba(33, 77, 50, 0.19);
+          box-shadow:
+            0 32px 70px rgba(33, 77, 50, 0.2),
+            0 8px 20px rgba(33, 77, 50, 0.08);
           transform: rotate(-3deg);
           animation: pajara-float 5s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        .pajara-art-card::before {
+          position: absolute;
+          top: 0;
+          right: 24px;
+          width: 1px;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.06);
+          content: "";
+          pointer-events: none;
         }
 
         .pajara-art-card::after {
           position: absolute;
-          top: -62px;
-          right: -55px;
-          width: 175px;
-          height: 175px;
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          top: -76px;
+          right: -68px;
+          width: 185px;
+          height: 185px;
+          border: 1px solid rgba(255, 255, 255, 0.13);
           border-radius: 50%;
           box-shadow:
-            0 0 0 20px rgba(255, 255, 255, 0.035),
-            0 0 0 40px rgba(255, 255, 255, 0.025);
+            0 0 0 18px rgba(255, 255, 255, 0.025),
+            0 0 0 38px rgba(255, 255, 255, 0.02);
           content: "";
+          pointer-events: none;
         }
 
         .pajara-art-card-label {
           position: relative;
-          z-index: 1;
+          z-index: 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
           color: #d7dfd5;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: 2px;
+          letter-spacing: 1.8px;
           text-transform: uppercase;
         }
 
-        .pajara-art-monogram {
+        .pajara-art-card-label::before {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #c8ad8f;
+          box-shadow: 0 0 0 4px rgba(200, 173, 143, 0.12);
+          content: "";
+        }
+
+        .pajara-art-logo-frame {
           position: relative;
-          z-index: 1;
+          z-index: 2;
           display: flex;
-          width: 78px;
-          height: 78px;
+          width: 86px;
+          height: 86px;
           align-items: center;
           justify-content: center;
-          margin: 34px 0 27px;
-          border: 1px solid rgba(255, 255, 255, 0.36);
-          border-radius: 23px;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 48px;
-          font-style: italic;
+          margin: 34px 0 26px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48);
+          border-radius: 24px;
+          background: rgba(247, 244, 238, 0.96);
+          box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.12),
+            inset 0 0 0 4px rgba(255, 255, 255, 0.38);
+          transform: rotate(-2deg);
+          transition:
+            transform 350ms ease,
+            box-shadow 350ms ease;
+        }
+
+        .pajara-art-logo {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .pajara-art-card:hover .pajara-art-logo-frame {
+          transform: rotate(0deg) scale(1.04);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.17);
         }
 
         .pajara-art-card h2 {
           position: relative;
-          z-index: 1;
+          z-index: 2;
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
           font-size: 29px;
           font-weight: 400;
+          line-height: 1.18;
           letter-spacing: -0.7px;
         }
 
         .pajara-art-card p {
           position: relative;
-          z-index: 1;
+          z-index: 2;
           margin: 10px 0 0;
           color: #d7dfd5;
           font-size: 11px;
           line-height: 1.8;
         }
 
-        .pajara-art-stamp {
+        /* Lapisan abstrak seperti lembar desain yang bertumpuk */
+
+        .pajara-art-shape {
           position: absolute;
-          right: 0;
-          bottom: 36px;
+          display: block;
+          pointer-events: none;
+          transform-origin: center;
+          will-change: transform;
+        }
+
+        .pajara-art-shape-one {
+          z-index: 1;
+          top: 52px;
+          right: 24px;
+          width: 235px;
+          height: 290px;
+          border: 1px solid rgba(138, 106, 74, 0.35);
+          border-radius: 36px 13px 36px 13px;
+          background: linear-gradient(
+            145deg,
+            rgba(200, 173, 143, 0.28),
+            rgba(200, 173, 143, 0.05)
+          );
+          transform: rotate(12deg);
+          animation: pajara-sheet-one 7s ease-in-out infinite;
+        }
+
+        .pajara-art-shape-two {
           z-index: 2;
-          display: grid;
-          width: 106px;
-          height: 106px;
-          align-content: center;
-          justify-items: center;
-          border: 1px solid rgba(138, 106, 74, 0.5);
+          top: 72px;
+          left: 14px;
+          width: 210px;
+          height: 255px;
+          border: 1px solid rgba(47, 107, 69, 0.2);
+          border-radius: 12px 34px 12px 34px;
+          background: linear-gradient(
+            155deg,
+            rgba(47, 107, 69, 0.12),
+            rgba(47, 107, 69, 0.025)
+          );
+          transform: rotate(-13deg);
+          animation: pajara-sheet-two 8s ease-in-out infinite;
+        }
+
+        .pajara-art-shape-three {
+          z-index: 0;
+          right: 32px;
+          bottom: 31px;
+          width: 130px;
+          height: 115px;
+          border: 1px solid rgba(138, 106, 74, 0.4);
+          border-radius: 9px 30px 9px 30px;
+          background: linear-gradient(
+            135deg,
+            rgba(138, 106, 74, 0.16),
+            rgba(138, 106, 74, 0.035)
+          );
+          transform: rotate(24deg);
+          animation: pajara-sheet-three 6s ease-in-out infinite;
+        }
+
+        .pajara-art-shape-one::before,
+        .pajara-art-shape-two::before,
+        .pajara-art-shape-three::before {
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          left: 18px;
+          height: 1px;
+          background: rgba(138, 106, 74, 0.32);
+          content: "";
+        }
+
+        .pajara-art-shape-two::before {
+          background: rgba(47, 107, 69, 0.27);
+        }
+
+        .pajara-art-shape-three::before {
+          background: rgba(138, 106, 74, 0.4);
+        }
+
+        .pajara-art-shape-one::after,
+        .pajara-art-shape-two::after {
+          position: absolute;
+          top: 30px;
+          right: 18px;
+          width: 34px;
+          height: 34px;
+          border: 1px solid currentColor;
           border-radius: 50%;
-          color: var(--pajara-brown);
-          background: var(--pajara-cream);
-          transform: rotate(9deg);
-          animation: pajara-float 6s 500ms ease-in-out infinite;
+          color: rgba(138, 106, 74, 0.45);
+          content: "";
         }
 
-        .pajara-art-stamp strong {
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 28px;
-          font-weight: 400;
-        }
-
-        .pajara-art-stamp span {
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1.4px;
-          text-transform: uppercase;
+        .pajara-art-shape-two::after {
+          color: rgba(47, 107, 69, 0.35);
         }
 
         .pajara-trust-strip {
@@ -880,6 +980,39 @@ export default function CustomerHome() {
           }
         }
 
+        @keyframes pajara-sheet-one {
+          0%,
+          100% {
+            transform: rotate(12deg) translate(0, 0);
+          }
+
+          50% {
+            transform: rotate(15deg) translate(5px, -8px);
+          }
+        }
+
+        @keyframes pajara-sheet-two {
+          0%,
+          100% {
+            transform: rotate(-13deg) translate(0, 0);
+          }
+
+          50% {
+            transform: rotate(-9deg) translate(-5px, 7px);
+          }
+        }
+
+        @keyframes pajara-sheet-three {
+          0%,
+          100% {
+            transform: rotate(24deg) translate(0, 0);
+          }
+
+          50% {
+            transform: rotate(19deg) translate(4px, -6px);
+          }
+        }
+
         @media (max-width: 900px) {
           .pajara-hero {
             padding: 70px 0;
@@ -903,11 +1036,25 @@ export default function CustomerHome() {
             padding: 23px;
           }
 
-          .pajara-art-stamp {
-            right: -5px;
-            bottom: 20px;
-            width: 88px;
-            height: 88px;
+          .pajara-art-shape-one {
+            top: 39px;
+            right: 8px;
+            width: 195px;
+            height: 245px;
+          }
+
+          .pajara-art-shape-two {
+            top: 55px;
+            left: 0;
+            width: 175px;
+            height: 220px;
+          }
+
+          .pajara-art-shape-three {
+            right: 10px;
+            bottom: 23px;
+            width: 105px;
+            height: 95px;
           }
 
           .pajara-steps {
@@ -1026,12 +1173,8 @@ export default function CustomerHome() {
           }
 
           .pajara-hero-art {
-            min-height: 310px;
+            min-height: 330px;
             margin-top: 4px;
-          }
-
-          .pajara-art-orbit {
-            width: min(100%, 310px);
           }
 
           .pajara-art-card {
@@ -1040,31 +1183,36 @@ export default function CustomerHome() {
             border-radius: 21px;
           }
 
-          .pajara-art-monogram {
-            width: 65px;
-            height: 65px;
-            margin: 24px 0 22px;
-            border-radius: 19px;
-            font-size: 41px;
+          .pajara-art-logo-frame {
+            width: 75px;
+            height: 75px;
+            margin: 27px 0 22px;
+            border-radius: 21px;
           }
 
           .pajara-art-card h2 {
             font-size: 26px;
           }
 
-          .pajara-art-stamp {
-            right: 0;
-            bottom: 16px;
-            width: 82px;
+          .pajara-art-shape-one {
+            top: 34px;
+            right: 5px;
+            width: 190px;
+            height: 245px;
+          }
+
+          .pajara-art-shape-two {
+            top: 51px;
+            left: 1px;
+            width: 165px;
+            height: 218px;
+          }
+
+          .pajara-art-shape-three {
+            right: 7px;
+            bottom: 17px;
+            width: 95px;
             height: 82px;
-          }
-
-          .pajara-art-stamp strong {
-            font-size: 23px;
-          }
-
-          .pajara-art-stamp span {
-            font-size: 7px;
           }
 
           .pajara-trust-inner {
@@ -1281,23 +1429,33 @@ export default function CustomerHome() {
             </div>
           </div>
 
-          <div className="pajara-hero-art" aria-label="Identitas visual Pajara Studio">
-            <div className="pajara-art-orbit" />
+          <div
+            className="pajara-hero-art"
+            aria-label="Identitas visual Pajara Studio"
+          >
+            <div className="pajara-art-shape pajara-art-shape-one" aria-hidden="true" />
+            <div className="pajara-art-shape pajara-art-shape-two" aria-hidden="true" />
+            <div className="pajara-art-shape pajara-art-shape-three" aria-hidden="true" />
+
             <div className="pajara-art-card">
               <span className="pajara-art-card-label">
                 Design with direction
               </span>
-              <div className="pajara-art-monogram">P.</div>
+
+              <div className="pajara-art-logo-frame">
+                <img
+                  src={logo}
+                  alt="Logo Pajara Studio"
+                  className="pajara-art-logo"
+                />
+              </div>
+
               <h2>Desain yang punya arah.</h2>
               <p>
                 Berakar di Tanah Pasundan.
                 <br />
                 Bertumbuh bersama setiap ide.
               </p>
-            </div>
-            <div className="pajara-art-stamp">
-              <strong>PS.</strong>
-              <span>Studio Kreatif</span>
             </div>
           </div>
         </div>
@@ -1385,9 +1543,7 @@ export default function CustomerHome() {
         >
           <div className="pajara-facilities-intro">
             <p className="pajara-eyebrow">Di dalam akunmu</p>
-            <h2>
-              Semua kebutuhan desain, lebih mudah dijangkau.
-            </h2>
+            <h2>Semua kebutuhan desain, lebih mudah dijangkau.</h2>
             <p>
               Customer Web menjadi tempat untuk mengikuti perjalanan
               pesanan, mulai dari informasi order hingga file hasil desain
