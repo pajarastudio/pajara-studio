@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabase } from "@pajara/supabase";
 
 type Order = {
@@ -338,11 +339,21 @@ export default function PaymentsPage() {
             </section>
 
             <footer style={styles.footer}>
-              <div style={styles.footerMark} aria-label="Pajara Studio">
-                PS
+              <div style={styles.footerMark}>
+                <Image
+                  src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+                  alt="Logo Pajara Studio"
+                  width={44}
+                  height={44}
+                  unoptimized
+                  style={styles.footerLogo}
+                />
               </div>
+
               <div>
-                <strong style={styles.footerTitle}>Pajara Studio</strong>
+                <strong style={styles.footerTitle}>
+                  Pajara Studio
+                </strong>
                 <p style={styles.footerText}>
                   Berakar di Tanah Pasundan.
                 </p>
@@ -700,16 +711,20 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: "38px",
   },
   footerMark: {
-    width: "40px",
-    height: "40px",
+    width: "44px",
+    height: "44px",
+    flexShrink: 0,
+    overflow: "hidden",
     display: "grid",
     placeItems: "center",
-    borderRadius: "13px",
-    background: "var(--green-dark, #214d32)",
-    color: "#fff",
-    fontFamily: "Georgia, serif",
-    fontSize: "16px",
-    fontWeight: 700,
+    borderRadius: "10px",
+    background: "#fff",
+  },
+  footerLogo: {
+    width: "44px",
+    height: "44px",
+    objectFit: "contain",
+    borderRadius: "10px",
   },
   footerTitle: {
     color: "var(--green-dark, #214d32)",
