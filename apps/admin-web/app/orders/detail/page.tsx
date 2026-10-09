@@ -183,6 +183,10 @@ function isPdfFile(fileType: string | null | undefined, fileName: string) {
   return /\.pdf$/i.test(fileName);
 }
 
+function isSettlement(payment: Payment | null) {
+  return payment?.payment_type?.trim().toLowerCase() === "pelunasan";
+}
+
 function InfoRow({
   label,
   value,
@@ -236,7 +240,7 @@ function OrderDetailContent() {
       return;
     }
 
-    loadOrder(orderId);
+    void loadOrder(orderId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
@@ -296,12 +300,6 @@ function OrderDetailContent() {
 
       if (orderError) throw orderError;
 
-      /*
-       * Identifikasi pesanan paket berdasarkan relasinya
-       * dengan subscription_requests, bukan berdasarkan harga Rp0.
-       * Jika pemeriksaan gagal, hentikan pemuatan agar pesanan paket
-       * tidak keliru ditampilkan sebagai pesanan satuan.
-       */
       const {
         data: subscriptionRequest,
         error: subscriptionRequestError,
@@ -336,7 +334,7 @@ function OrderDetailContent() {
       } else {
         await Promise.all([
           loadReferenceFiles(id),
-          loadPayment(id),
+          loadPayment(id, data.status),
           loadRevisions(id),
         ]);
       }
@@ -388,11 +386,21 @@ function OrderDetailContent() {
     setReferenceFiles(filesWithUrls);
   }
 
-  async function loadPayment(id: string) {
+  /*
+   * Pembayaran diambil berdasarkan tahap pesanan:
+   * waiting_dp     -> DP
+   * waiting_payment -> Pelunasan
+   *
+   * Untuk pesanan yang sudah selesai, tampilkan pelunasan
+   * jika tersedia; jika tidak, tampilkan data DP.
+   */
+  async function loadPayment(id: string, orderStatus: string) {
     try {
       setLoadingPayment(true);
+      setPayment(null);
+      setPaymentProof(null);
 
-      const { data: paymentData, error: paymentError } = await supabase
+      const { data: paymentRows, error: paymentError } = await supabase
         .from("payments")
         .select(`
           id,
@@ -409,21 +417,39 @@ function OrderDetailContent() {
           created_at
         `)
         .eq("order_id", id)
-        .eq("payment_type", "DP")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order("created_at", { ascending: false });
 
-      if (paymentError) {
-        console.error("Gagal memuat pembayaran:", paymentError);
+      if (paymentError) throw paymentError;
+
+      const rows = (paymentRows || []) as Payment[];
+
+      const dpPayment = rows.find(
+        (item) => item.payment_type?.trim().toLowerCase() === "dp"
+      );
+
+      const settlementPayment = rows.find(
+        (item) => item.payment_type?.trim().toLowerCase() === "pelunasan"
+      );
+
+      let selectedPayment: Payment | undefined;
+
+      if (orderStatus === "waiting_payment") {
+        selectedPayment = settlementPayment;
+      } else if (orderStatus === "completed") {
+        selectedPayment = settlementPayment || dpPayment;
+      } else {
+        selectedPayment = dpPayment;
+      }
+
+      if (!selectedPayment) {
         setPayment(null);
         setPaymentProof(null);
         return;
       }
 
-      setPayment(paymentData || null);
+      setPayment(selectedPayment);
 
-      if (!paymentData?.proof_file_id) {
+      if (!selectedPayment.proof_file_id) {
         setPaymentProof(null);
         return;
       }
@@ -438,14 +464,10 @@ function OrderDetailContent() {
           file_size,
           created_at
         `)
-        .eq("id", paymentData.proof_file_id)
+        .eq("id", selectedPayment.proof_file_id)
         .maybeSingle();
 
-      if (proofError) {
-        console.error("Gagal memuat bukti pembayaran:", proofError);
-        setPaymentProof(null);
-        return;
-      }
+      if (proofError) throw proofError;
 
       if (!proofData) {
         setPaymentProof(null);
@@ -457,13 +479,20 @@ function OrderDetailContent() {
         .createSignedUrl(proofData.file_path, 60 * 60);
 
       if (signedError) {
-        console.error("Gagal membuat signed URL:", signedError);
+        console.error("Gagal membuat signed URL bukti pembayaran:", signedError);
       }
 
       setPaymentProof({
         ...proofData,
         url: signedData?.signedUrl || null,
       });
+    } catch (err: any) {
+      console.error("Gagal memuat pembayaran:", err);
+      setPayment(null);
+      setPaymentProof(null);
+      setError(
+        `Gagal memuat data pembayaran: ${err?.message || "Kesalahan tidak diketahui"}`
+      );
     } finally {
       setLoadingPayment(false);
     }
@@ -510,7 +539,10 @@ function OrderDetailContent() {
     }
   }
 
-  async function handleRevisionStatusChange(revision: Revision, newStatus: string) {
+  async function handleRevisionStatusChange(
+    revision: Revision,
+    newStatus: string
+  ) {
     if (!order) return;
 
     try {
@@ -683,7 +715,9 @@ function OrderDetailContent() {
     }
   }
 
-  async function handleStatusChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  async function handleStatusChange(
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
     if (!order) return;
 
     const newStatus = event.target.value;
@@ -703,7 +737,16 @@ function OrderDetailContent() {
 
       if (updateError) throw updateError;
 
-      setOrder((current) => (current ? { ...current, status: newStatus } : current));
+      setOrder((current) =>
+        current ? { ...current, status: newStatus } : current
+      );
+
+      // Saat status berubah ke Menunggu Pelunasan,
+      // muat pembayaran Pelunasan, bukan data DP.
+      if (!isPackageOrder) {
+        await loadPayment(order.id, newStatus);
+      }
+
       setMessage(`Status pesanan diubah menjadi ${getStatusLabel(newStatus)}.`);
     } catch (err: any) {
       setError(err?.message || "Gagal mengubah status pesanan.");
@@ -729,14 +772,15 @@ function OrderDetailContent() {
       if (!user) return;
 
       const newStatus = action === "verify" ? "verified" : "rejected";
-      const verifiedAt = new Date().toISOString();
+      const processedAt = new Date().toISOString();
+      const settlement = isSettlement(payment);
 
       const { data: updatedPayment, error: paymentError } = await supabase
         .from("payments")
         .update({
           status: newStatus,
           verified_by: user.id,
-          verified_at: verifiedAt,
+          verified_at: processedAt,
         })
         .eq("id", payment.id)
         .select(`
@@ -760,18 +804,40 @@ function OrderDetailContent() {
       setPayment(updatedPayment);
 
       if (action === "verify") {
-        if (order.status === "waiting_dp") {
+        if (settlement) {
+          // Pelunasan yang terverifikasi menuntaskan pesanan.
           const { error: orderError } = await supabase
             .from("orders")
             .update({
-              status: "processing",
-              updated_at: verifiedAt,
+              status: "completed",
+              updated_at: processedAt,
             })
             .eq("id", order.id);
 
           if (orderError) {
             setError(
-              `Pembayaran berhasil diverifikasi, tetapi status pesanan gagal diubah: ${orderError.message}`
+              `Pelunasan terverifikasi, tetapi status pesanan gagal diubah: ${orderError.message}`
+            );
+            return;
+          }
+
+          setOrder((current) =>
+            current ? { ...current, status: "completed" } : current
+          );
+
+          setMessage("Pembayaran pelunasan berhasil diverifikasi. Pesanan sekarang Selesai.");
+        } else if (order.status === "waiting_dp") {
+          const { error: orderError } = await supabase
+            .from("orders")
+            .update({
+              status: "processing",
+              updated_at: processedAt,
+            })
+            .eq("id", order.id);
+
+          if (orderError) {
+            setError(
+              `DP berhasil diverifikasi, tetapi status pesanan gagal diubah: ${orderError.message}`
             );
             return;
           }
@@ -779,11 +845,17 @@ function OrderDetailContent() {
           setOrder((current) =>
             current ? { ...current, status: "processing" } : current
           );
-        }
 
-        setMessage("Pembayaran DP berhasil diverifikasi. Pesanan sekarang Diproses.");
+          setMessage("Pembayaran DP berhasil diverifikasi. Pesanan sekarang Diproses.");
+        } else {
+          setMessage(
+            `Pembayaran ${payment.payment_type || ""} berhasil diverifikasi.`
+          );
+        }
       } else {
-        setMessage("Pembayaran DP berhasil ditolak.");
+        setMessage(
+          `Pembayaran ${payment.payment_type || ""} berhasil ditolak. Status pesanan tidak diubah.`
+        );
       }
     } catch (err: any) {
       setError(err?.message || "Gagal memproses pembayaran.");
@@ -792,7 +864,9 @@ function OrderDetailContent() {
     }
   }
 
-  async function handleUploadFinalFile(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleUploadFinalFile(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
     if (!order) return;
 
     const file = event.target.files?.[0];
@@ -885,6 +959,10 @@ function OrderDetailContent() {
       </main>
     );
   }
+
+  const settlementPayment = isSettlement(payment);
+  const paymentTitle = settlementPayment ? "Pembayaran Pelunasan" : "Pembayaran DP";
+  const paymentAmountLabel = settlementPayment ? "Nominal Pelunasan" : "Nominal DP";
 
   return (
     <main className="min-h-screen bg-[#f7f4ee] px-4 py-6 text-[#292821] sm:px-6 sm:py-8">
@@ -1157,7 +1235,7 @@ function OrderDetailContent() {
             )}
           </section>
 
-          {/* PEMBAYARAN: HANYA PESANAN SATUAN */}
+          {/* PEMBAYARAN */}
           {isPackageOrder ? (
             <section className="rounded-3xl border border-[#d8e6dc] bg-white p-5 shadow-sm sm:p-6">
               <div className="flex items-start gap-4 rounded-2xl border border-[#d8e6dc] bg-[#edf5ef] p-5 sm:p-6">
@@ -1173,9 +1251,8 @@ function OrderDetailContent() {
                     tagihan tambahan per desain.
                   </p>
                   <p className="mt-2 text-xs leading-5 text-[#667066]">
-                    Harga, DP, dan verifikasi pembayaran per desain tidak
-                    berlaku untuk pesanan paket. Pembayaran paket dikelola
-                    melalui bagian Pembayaran Paket di halaman pesanan.
+                    Pembayaran paket dikelola melalui bagian Pembayaran Paket
+                    di halaman pesanan.
                   </p>
                 </div>
               </div>
@@ -1231,7 +1308,7 @@ function OrderDetailContent() {
                     </p>
                   </div>
                   <div className="rounded-2xl border border-[#e9e3d8] bg-white p-4">
-                    <p className="text-xs text-[#777166]">Sisa</p>
+                    <p className="text-xs text-[#777166]">Sisa Pelunasan</p>
                     <p className="mt-1 text-base font-bold">
                       {formatRupiah(order.remaining_amount)}
                     </p>
@@ -1242,9 +1319,13 @@ function OrderDetailContent() {
               <div className="mt-5 rounded-2xl border border-[#e9e3d8] bg-white p-4 sm:p-5">
                 <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-[#4c483f]">Pembayaran DP</h3>
+                    <h3 className="text-sm font-bold text-[#4c483f]">
+                      {paymentTitle}
+                    </h3>
                     <p className="mt-1 text-xs text-[#777166]">
-                      Detail pembayaran yang dikirim customer.
+                      {order.status === "waiting_payment"
+                        ? "Menampilkan pembayaran pelunasan untuk pesanan ini."
+                        : "Detail pembayaran yang dikirim customer."}
                     </p>
                   </div>
                   {payment && (
@@ -1264,11 +1345,22 @@ function OrderDetailContent() {
                       💳
                     </div>
                     <p className="text-sm font-semibold text-[#4c483f]">
-                      Belum ada pembayaran DP
+                      {order.status === "waiting_payment"
+                        ? "Belum ada pembayaran pelunasan"
+                        : "Belum ada pembayaran DP"}
                     </p>
                     <p className="mt-1 text-xs text-[#777166]">
-                      Customer belum membuat pembayaran DP.
+                      {order.status === "waiting_payment"
+                        ? "Pastikan customer sudah mengirim pembayaran pelunasan melalui Customer Web."
+                        : "Customer belum membuat pembayaran DP."}
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => loadPayment(order.id, order.status)}
+                      className="mt-4 rounded-xl border border-[#dcd5ca] bg-white px-4 py-2.5 text-sm font-semibold text-[#4c483f] hover:bg-[#f4f1eb]"
+                    >
+                      Muat Ulang Pembayaran
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-5">
@@ -1286,7 +1378,7 @@ function OrderDetailContent() {
                         </p>
                       </div>
                       <div className="rounded-2xl bg-[#faf8f4] p-4">
-                        <p className="text-xs text-[#777166]">Nominal Pembayaran</p>
+                        <p className="text-xs text-[#777166]">{paymentAmountLabel}</p>
                         <p className="mt-1 text-lg font-bold text-[#2f6b45]">
                           {formatRupiah(payment.amount)}
                         </p>
@@ -1328,6 +1420,13 @@ function OrderDetailContent() {
                           <p className="text-sm font-medium text-yellow-800">
                             Bukti pembayaran terhubung, tetapi file belum dapat ditampilkan.
                           </p>
+                          <button
+                            type="button"
+                            onClick={() => loadPayment(order.id, order.status)}
+                            className="mt-3 rounded-xl border border-yellow-300 bg-white px-4 py-2 text-sm font-semibold text-yellow-800"
+                          >
+                            Muat Ulang Bukti
+                          </button>
                         </div>
                       ) : (
                         <div className="overflow-hidden rounded-2xl border border-[#e9e3d8] bg-[#faf8f4]">
@@ -1394,10 +1493,11 @@ function OrderDetailContent() {
                       <div className="rounded-2xl border border-[#dfe9e1] bg-[#f4f8f5] p-4 sm:p-5">
                         <div className="mb-4">
                           <h4 className="text-sm font-bold text-[#2f6b45]">
-                            Verifikasi Pembayaran
+                            Verifikasi {settlementPayment ? "Pelunasan" : "DP"}
                           </h4>
                           <p className="mt-1 text-xs leading-5 text-[#667066]">
-                            Pastikan nominal dan bukti pembayaran sudah sesuai sebelum melakukan verifikasi.
+                            Pastikan nominal dan bukti pembayaran sudah sesuai
+                            sebelum melakukan verifikasi.
                           </p>
                         </div>
                         <div className="flex flex-col gap-3 sm:flex-row">
@@ -1407,7 +1507,9 @@ function OrderDetailContent() {
                             disabled={paymentAction !== null}
                             className="flex-1 rounded-xl bg-[#2f6b45] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245537] disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {paymentAction === "verify" ? "Memverifikasi..." : "✓ Verifikasi Pembayaran"}
+                            {paymentAction === "verify"
+                              ? "Memverifikasi..."
+                              : `✓ Verifikasi ${settlementPayment ? "Pelunasan" : "DP"}`}
                           </button>
                           <button
                             type="button"
@@ -1415,7 +1517,9 @@ function OrderDetailContent() {
                             disabled={paymentAction !== null}
                             className="flex-1 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {paymentAction === "reject" ? "Menolak..." : "✕ Tolak Pembayaran"}
+                            {paymentAction === "reject"
+                              ? "Menolak..."
+                              : `✕ Tolak ${settlementPayment ? "Pelunasan" : "DP"}`}
                           </button>
                         </div>
                       </div>
@@ -1424,7 +1528,7 @@ function OrderDetailContent() {
                     {payment.status === "verified" && (
                       <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
                         <p className="text-sm font-semibold text-green-800">
-                          ✓ Pembayaran DP sudah terverifikasi
+                          ✓ {settlementPayment ? "Pembayaran pelunasan" : "Pembayaran DP"} sudah terverifikasi
                         </p>
                         {payment.verified_at && (
                           <p className="mt-1 text-xs text-green-700">
@@ -1437,7 +1541,7 @@ function OrderDetailContent() {
                     {payment.status === "rejected" && (
                       <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
                         <p className="text-sm font-semibold text-red-800">
-                          Pembayaran DP ditolak
+                          Pembayaran {settlementPayment ? "pelunasan" : "DP"} ditolak
                         </p>
                         {payment.verified_at && (
                           <p className="mt-1 text-xs text-red-700">
