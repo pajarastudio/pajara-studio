@@ -16,12 +16,6 @@ type Order = {
   created_at: string | null;
 };
 
-type Subscription = {
-  id: string;
-  status: string | null;
-  created_at: string | null;
-};
-
 function formatRupiah(value: number | null) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -52,7 +46,6 @@ export default function PaymentsPage() {
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -74,48 +67,32 @@ export default function PaymentsPage() {
           return;
         }
 
-        const [ordersResult, subscriptionsResult] = await Promise.all([
-          supabase
-            .from("orders")
-            .select(
-              "id, order_code, service_name, total_amount, dp_amount, remaining_amount, status, created_at"
-            )
-            .eq("customer_id", user.id)
-            .order("created_at", { ascending: false }),
+        const { data, error: ordersError } = await supabase
+          .from("orders")
+          .select(
+            "id, order_code, service_name, total_amount, dp_amount, remaining_amount, status, created_at"
+          )
+          .eq("customer_id", user.id)
+          .order("created_at", { ascending: false });
 
-          supabase
-            .from("subscriptions")
-            .select("id, status, created_at")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false }),
-        ]);
-
-        if (!mounted) return;
-
-        if (ordersResult.error) {
+        if (ordersError) {
           throw new Error(
             "Data pembayaran pesanan gagal dimuat: " +
-              ordersResult.error.message
+              ordersError.message
           );
         }
 
-        if (subscriptionsResult.error) {
-          throw new Error(
-            "Data paket gagal dimuat: " +
-              subscriptionsResult.error.message
-          );
+        if (mounted) {
+          setOrders(data || []);
         }
-
-        setOrders(ordersResult.data || []);
-        setSubscriptions(subscriptionsResult.data || []);
       } catch (err) {
-        if (!mounted) return;
-
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Terjadi kesalahan saat memuat pembayaran."
-        );
+        if (mounted) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Terjadi kesalahan saat memuat pembayaran."
+          );
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -160,7 +137,7 @@ export default function PaymentsPage() {
         {error && (
           <div style={styles.error}>
             <strong>Belum dapat memuat data</strong>
-            <p style={{ marginBottom: 0 }}>{error}</p>
+            <p>{error}</p>
             <button
               onClick={() => window.location.reload()}
               style={styles.retryButton}
@@ -175,7 +152,7 @@ export default function PaymentsPage() {
             <div style={styles.spinner} />
             <p>Memuat data pembayaran...</p>
           </div>
-        ) : (
+        ) : !error ? (
           <>
             <section style={styles.summaryCard}>
               <div style={styles.summaryLabel}>
@@ -205,9 +182,7 @@ export default function PaymentsPage() {
               {orders.length === 0 ? (
                 <div style={styles.emptyCard}>
                   <div style={styles.emptyIcon}>◇</div>
-                  <h3 style={styles.cardTitle}>
-                    Belum ada pesanan
-                  </h3>
+                  <h3 style={styles.cardTitle}>Belum ada pesanan</h3>
                   <p style={styles.cardDescription}>
                     Pesanan desain yang kamu buat akan muncul di sini.
                   </p>
@@ -273,6 +248,7 @@ export default function PaymentsPage() {
                         <div style={styles.orderCode}>
                           {order.order_code}
                         </div>
+
                         <h3 style={styles.cardTitle}>
                           {order.service_name || "Layanan Pajara Studio"}
                         </h3>
@@ -317,13 +293,8 @@ export default function PaymentsPage() {
               <div style={styles.sectionHeader}>
                 <div>
                   <div style={styles.sectionEyebrow}>LANGGANAN</div>
-                  <h2 style={styles.sectionTitle}>
-                    Pembayaran Paket
-                  </h2>
+                  <h2 style={styles.sectionTitle}>Pembayaran Paket</h2>
                 </div>
-                <span style={styles.count}>
-                  {subscriptions.length}
-                </span>
               </div>
 
               <div style={styles.packageCard}>
@@ -350,11 +321,6 @@ export default function PaymentsPage() {
                     Lihat permintaan paket, status, dan proses pembayaran
                     paket mingguan atau bulanan.
                   </p>
-                  {subscriptions.length > 0 && (
-                    <p style={styles.packageStatus}>
-                      {subscriptions.length} langganan tercatat
-                    </p>
-                  )}
                 </div>
 
                 <button
@@ -372,25 +338,21 @@ export default function PaymentsPage() {
             </section>
 
             <footer style={styles.footer}>
-              <div style={styles.footerMark}>P.</div>
+              <div style={styles.footerMark} aria-label="Pajara Studio">
+                PS
+              </div>
               <div>
                 <strong style={styles.footerTitle}>Pajara Studio</strong>
-                <p style={styles.footerText}>Berakar di Tanah Pasundan.</p>
+                <p style={styles.footerText}>
+                  Berakar di Tanah Pasundan.
+                </p>
               </div>
             </footer>
           </>
-        )}
+        ) : null}
       </div>
 
       <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
-
-        .unused {
-          display: none;
-        }
-
         @keyframes fadeUp {
           from {
             opacity: 0;
@@ -418,12 +380,6 @@ export default function PaymentsPage() {
 
         button:active {
           transform: scale(0.985);
-        }
-
-        @media (max-width: 480px) {
-          .unused {
-            display: none;
-          }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -695,18 +651,6 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#edf3ec",
     color: "var(--green, #2f6b45)",
   },
-  packageStatus: {
-    fontSize: "12px",
-    fontWeight: 700,
-    color: "var(--green, #2f6b45)",
-    margin: "0 0 15px",
-  },
-  helper: {
-    fontSize: "12px",
-    color: "#85847b",
-    lineHeight: 1.7,
-    margin: "12px 2px 0",
-  },
   loading: {
     padding: "55px 20px",
     textAlign: "center",
@@ -741,6 +685,12 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#8a3d2f",
     fontWeight: 700,
   },
+  helper: {
+    fontSize: "12px",
+    color: "#85847b",
+    lineHeight: 1.7,
+    margin: "12px 2px 0",
+  },
   footer: {
     display: "flex",
     alignItems: "center",
@@ -758,7 +708,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: "var(--green-dark, #214d32)",
     color: "#fff",
     fontFamily: "Georgia, serif",
-    fontSize: "21px",
+    fontSize: "16px",
     fontWeight: 700,
   },
   footerTitle: {
