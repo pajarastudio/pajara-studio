@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -493,22 +494,42 @@ export default function CustomerDashboard() {
 
                         {subscriptionStatusLabel(currentSubscription) ===
                           "Aktif" && (
-                          <a
-                            href="/subscriptions"
-                            style={{
-                              display: "inline-block",
-                              marginTop: "18px",
-                              padding: "11px 15px",
-                              borderRadius: "10px",
-                              background: "#fff",
-                              color: "#214d32",
-                              fontWeight: 800,
-                              fontSize: "13px",
-                              textDecoration: "none",
-                            }}
-                          >
-                            Lihat Paket
-                          </a>
+                          <>
+                            <a
+                              href="/subscriptions"
+                              style={{
+                                display: "inline-block",
+                                marginTop: "18px",
+                                padding: "11px 15px",
+                                borderRadius: "10px",
+                                background: "#fff",
+                                color: "#214d32",
+                                fontWeight: 800,
+                                fontSize: "13px",
+                                textDecoration: "none",
+                              }}
+                            >
+                              Lihat Paket
+                            </a>
+
+                            <a
+                              href="/subscriptions/request"
+                              style={{
+                                display: "inline-block",
+                                marginTop: "18px",
+                                marginLeft: "8px",
+                                padding: "11px 15px",
+                                borderRadius: "10px",
+                                background: "#f7f4ee",
+                                color: "#214d32",
+                                fontWeight: 800,
+                                fontSize: "13px",
+                                textDecoration: "none",
+                              }}
+                            >
+                              Pesan Desain Paket
+                            </a>
+                          </>
                         )}
                       </>
                     )}
@@ -572,7 +593,9 @@ export default function CustomerDashboard() {
                             letterSpacing: "1px",
                           }}
                         >
-                          {isWeekly ? "FLEKSIBEL MINGGUAN" : "LANGGANAN DESAIN"}
+                          {isWeekly
+                            ? "FLEKSIBEL MINGGUAN"
+                            : "LANGGANAN DESAIN"}
                         </p>
 
                         <h3
