@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -446,16 +447,80 @@ function PaymentPageContent() {
           type="button"
           onClick={() => router.push("/subscriptions")}
           style={{
-            border: "none",
-            background: "transparent",
-            color: "#2f6b45",
-            fontWeight: 700,
-            padding: 0,
-            marginBottom: 18,
+            display: "flex",
+            alignItems: "center",
+            gap: 13,
+            width: "100%",
+            boxSizing: "border-box",
+            border: "1px solid rgba(47,107,69,0.12)",
+            borderRadius: 18,
+            background: "#ffffff",
+            color: "#214d32",
+            padding: "14px 16px",
+            marginBottom: 20,
+            textAlign: "left",
+            boxShadow: "0 5px 18px rgba(33,77,50,0.05)",
             cursor: "pointer",
+            fontFamily: "inherit",
           }}
         >
-          ← Kembali ke Paket
+          <span
+            aria-hidden="true"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              width: 42,
+              height: 42,
+              borderRadius: 14,
+              background: "#edf5ef",
+              color: "#2f6b45",
+              fontSize: 23,
+              fontWeight: 600,
+            }}
+          >
+            ←
+          </span>
+
+          <span
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              flex: 1,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 14,
+                fontWeight: 800,
+                color: "#214d32",
+              }}
+            >
+              Kembali ke Paket
+            </span>
+            <span
+              style={{
+                fontSize: 12,
+                color: "#7a837d",
+                fontWeight: 400,
+              }}
+            >
+              Lihat dan pilih paket desain lainnya
+            </span>
+          </span>
+
+          <span
+            aria-hidden="true"
+            style={{
+              color: "#8a6a4a",
+              fontSize: 20,
+              paddingRight: 3,
+            }}
+          >
+            ›
+          </span>
         </button>
 
         <section
