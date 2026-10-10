@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,19 +21,69 @@ type Transaction = {
 };
 
 export default function FinancePage() {
+  const router = useRouter();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [type, setType] = useState<"income" | "expense">("income");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [transactionDate, setTransactionDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toLocaleDateString("en-CA")
   );
-
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function verifyAdmin() {
+      setLoading(true);
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (cancelled) return;
+
+      if (authError || !user) {
+        router.replace("/");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles_v2")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (profileError || profile?.role !== "admin") {
+        await supabase.auth.signOut();
+
+        if (!cancelled) {
+          router.replace("/");
+        }
+
+        return;
+      }
+
+      setAuthorized(true);
+      await loadTransactions();
+    }
+
+    verifyAdmin();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function loadTransactions() {
     setLoading(true);
@@ -43,7 +95,7 @@ export default function FinancePage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error(error);
+      console.error("Gagal memuat transaksi:", error);
       setMessage("Gagal memuat data keuangan.");
       setLoading(false);
       return;
@@ -53,21 +105,21 @@ export default function FinancePage() {
     setLoading(false);
   }
 
-  useEffect(() => {
-    loadTransactions();
-  }, []);
+  const totalIncome = useMemo(
+    () =>
+      transactions
+        .filter((item) => item.type === "income")
+        .reduce((total, item) => total + Number(item.amount), 0),
+    [transactions]
+  );
 
-  const totalIncome = useMemo(() => {
-    return transactions
-      .filter((item) => item.type === "income")
-      .reduce((total, item) => total + Number(item.amount), 0);
-  }, [transactions]);
-
-  const totalExpense = useMemo(() => {
-    return transactions
-      .filter((item) => item.type === "expense")
-      .reduce((total, item) => total + Number(item.amount), 0);
-  }, [transactions]);
+  const totalExpense = useMemo(
+    () =>
+      transactions
+        .filter((item) => item.type === "expense")
+        .reduce((total, item) => total + Number(item.amount), 0),
+    [transactions]
+  );
 
   const balance = totalIncome - totalExpense;
 
@@ -79,14 +131,18 @@ export default function FinancePage() {
     }).format(value);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
     setMessage("");
+
+    if (!authorized) {
+      setMessage("Akses Admin belum terverifikasi.");
+      return;
+    }
 
     const numericAmount = Number(amount);
 
-    if (!numericAmount || numericAmount <= 0) {
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       setMessage("Masukkan nominal yang valid.");
       return;
     }
@@ -96,32 +152,37 @@ export default function FinancePage() {
       return;
     }
 
+    if (!transactionDate) {
+      setMessage("Tanggal transaksi wajib diisi.");
+      return;
+    }
+
     setSaving(true);
 
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      setMessage("Sesi admin tidak ditemukan.");
+    if (authError || !user) {
+      setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
       setSaving(false);
+      router.replace("/");
       return;
     }
 
-    const { error } = await supabase
-      .from("finance_transactions")
-      .insert({
-        type,
-        amount: numericAmount,
-        category: category.trim(),
-        description: description.trim() || null,
-        transaction_date: transactionDate,
-        created_by: user.id,
-      });
+    const { error } = await supabase.from("finance_transactions").insert({
+      type,
+      amount: numericAmount,
+      category: category.trim(),
+      description: description.trim() || null,
+      transaction_date: transactionDate,
+      created_by: user.id,
+    });
 
     if (error) {
-      console.error(error);
-      setMessage("Gagal menyimpan transaksi.");
+      console.error("Gagal menyimpan transaksi:", error);
+      setMessage("Gagal menyimpan transaksi. Periksa izin tabel Supabase.");
       setSaving(false);
       return;
     }
@@ -130,8 +191,7 @@ export default function FinancePage() {
     setCategory("");
     setDescription("");
     setType("income");
-    setTransactionDate(new Date().toISOString().split("T")[0]);
-
+    setTransactionDate(new Date().toLocaleDateString("en-CA"));
     setMessage("Transaksi berhasil ditambahkan.");
     setSaving(false);
 
@@ -139,11 +199,31 @@ export default function FinancePage() {
   }
 
   async function handleDelete(id: string) {
+    if (!authorized) {
+      setMessage("Akses Admin belum terverifikasi.");
+      return;
+    }
+
     const confirmed = window.confirm(
       "Yakin ingin menghapus transaksi ini?"
     );
 
     if (!confirmed) return;
+
+    setMessage("");
+    setDeletingId(id);
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
+      setDeletingId(null);
+      router.replace("/");
+      return;
+    }
 
     const { error } = await supabase
       .from("finance_transactions")
@@ -151,31 +231,43 @@ export default function FinancePage() {
       .eq("id", id);
 
     if (error) {
-      console.error(error);
-      setMessage("Gagal menghapus transaksi.");
+      console.error("Gagal menghapus transaksi:", error);
+      setMessage("Gagal menghapus transaksi. Periksa izin tabel Supabase.");
+      setDeletingId(null);
       return;
     }
 
     setMessage("Transaksi berhasil dihapus.");
+    setDeletingId(null);
+
     await loadTransactions();
   }
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    router.replace("/");
   }
 
+  if (loading && !authorized) {
+    return (
+      <main style={pageStyle}>
+        <div style={loadingScreenStyle}>
+          <div style={loadingMarkStyle}>PS</div>
+          <div style={{ fontWeight: 800, color: "#214d32" }}>
+            Memeriksa akses Admin...
+          </div>
+          <div style={{ fontSize: 12, color: "#727a74", marginTop: 6 }}>
+            Pajara Studio
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!authorized) return null;
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f7f4ee",
-        color: "#214d32",
-        paddingBottom: 90,
-        fontFamily:
-          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      }}
-    >
+    <main style={pageStyle}>
       {/* HEADER */}
       <header
         style={{
@@ -199,6 +291,7 @@ export default function FinancePage() {
             border: "1px solid rgba(255,255,255,0.12)",
             right: -70,
             top: -90,
+            pointerEvents: "none",
           }}
         />
 
@@ -212,6 +305,7 @@ export default function FinancePage() {
             bottom: -35,
             transform: "rotate(25deg)",
             borderRadius: 18,
+            pointerEvents: "none",
           }}
         />
 
@@ -279,6 +373,7 @@ export default function FinancePage() {
           </div>
 
           <div
+            aria-label="Pajara Studio"
             style={{
               width: 46,
               height: 46,
@@ -302,19 +397,11 @@ export default function FinancePage() {
         style={{
           maxWidth: 1100,
           margin: "0 auto",
-          padding: "22px 16px",
+          padding: "22px 16px calc(110px + env(safe-area-inset-bottom))",
         }}
       >
         {/* SUMMARY */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(190px, 1fr))",
-            gap: 14,
-            marginBottom: 22,
-          }}
-        >
+        <section style={summaryGridStyle}>
           <SummaryCard
             label="Total Pemasukan"
             value={formatRupiah(totalIncome)}
@@ -335,58 +422,27 @@ export default function FinancePage() {
         </section>
 
         {/* FORM */}
-        <section
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(33,77,50,0.08)",
-            borderRadius: 22,
-            padding: 20,
-            boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
-            marginBottom: 22,
-          }}
-        >
+        <section style={panelStyle}>
           <div style={{ marginBottom: 18 }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 19,
-                fontWeight: 800,
-              }}
-            >
-              Tambah Transaksi
-            </h2>
+            <h2 style={sectionTitleStyle}>Tambah Transaksi</h2>
 
-            <p
-              style={{
-                margin: "5px 0 0",
-                color: "#6d766f",
-                fontSize: 13,
-              }}
-            >
+            <p style={mutedTextStyle}>
               Catat pemasukan atau pengeluaran Pajara Studio.
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: 14,
-              }}
-            >
+            <div style={formGridStyle}>
               <label style={labelStyle}>
                 Jenis Transaksi
 
                 <select
                   value={type}
                   onChange={(e) =>
-                    setType(
-                      e.target.value as "income" | "expense"
-                    )
+                    setType(e.target.value as "income" | "expense")
                   }
                   style={inputStyle}
+                  disabled={saving}
                 >
                   <option value="income">Pemasukan</option>
                   <option value="expense">Pengeluaran</option>
@@ -399,10 +455,13 @@ export default function FinancePage() {
                 <input
                   type="number"
                   min="1"
+                  step="1"
                   placeholder="Contoh: 150000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   style={inputStyle}
+                  required
+                  disabled={saving}
                 />
               </label>
 
@@ -415,6 +474,8 @@ export default function FinancePage() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   style={inputStyle}
+                  required
+                  disabled={saving}
                 />
               </label>
 
@@ -424,20 +485,15 @@ export default function FinancePage() {
                 <input
                   type="date"
                   value={transactionDate}
-                  onChange={(e) =>
-                    setTransactionDate(e.target.value)
-                  }
+                  onChange={(e) => setTransactionDate(e.target.value)}
                   style={inputStyle}
+                  required
+                  disabled={saving}
                 />
               </label>
             </div>
 
-            <label
-              style={{
-                ...labelStyle,
-                marginTop: 14,
-              }}
-            >
+            <label style={{ ...labelStyle, marginTop: 14 }}>
               Keterangan
 
               <textarea
@@ -445,15 +501,14 @@ export default function FinancePage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                style={{
-                  ...inputStyle,
-                  resize: "vertical",
-                }}
+                style={{ ...inputStyle, resize: "vertical" }}
+                disabled={saving}
               />
             </label>
 
             {message && (
               <div
+                role="status"
                 style={{
                   marginTop: 14,
                   padding: "11px 13px",
@@ -462,6 +517,7 @@ export default function FinancePage() {
                   color: "#214d32",
                   fontSize: 13,
                   fontWeight: 700,
+                  overflowWrap: "anywhere",
                 }}
               >
                 {message}
@@ -472,16 +528,10 @@ export default function FinancePage() {
               type="submit"
               disabled={saving}
               style={{
+                ...primaryButtonStyle,
                 marginTop: 16,
-                width: "100%",
-                border: 0,
-                borderRadius: 13,
-                padding: "13px 16px",
                 background: saving ? "#8a9a8e" : "#214d32",
-                color: "#ffffff",
-                fontWeight: 800,
                 cursor: saving ? "not-allowed" : "pointer",
-                fontSize: 14,
               }}
             >
               {saving ? "Menyimpan..." : "+ Tambah Transaksi"}
@@ -489,98 +539,38 @@ export default function FinancePage() {
           </form>
         </section>
 
-        {/* TRANSACTIONS */}
-        <section
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(33,77,50,0.08)",
-            borderRadius: 22,
-            padding: 20,
-            boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 19,
-                  fontWeight: 800,
-                }}
-              >
-                Riwayat Transaksi
-              </h2>
+        {/* TRANSACTION HISTORY */}
+        <section style={panelStyle}>
+          <div style={{ marginBottom: 16 }}>
+            <h2 style={sectionTitleStyle}>Riwayat Transaksi</h2>
 
-              <p
-                style={{
-                  margin: "5px 0 0",
-                  color: "#6d766f",
-                  fontSize: 13,
-                }}
-              >
-                Semua pemasukan dan pengeluaran Pajara.
-              </p>
-            </div>
+            <p style={mutedTextStyle}>
+              Semua pemasukan dan pengeluaran Pajara.
+            </p>
           </div>
 
           {loading ? (
-            <div
-              style={{
-                padding: 30,
-                textAlign: "center",
-                color: "#6d766f",
-              }}
-            >
-              Memuat transaksi...
-            </div>
+            <div style={emptyStateStyle}>Memuat transaksi...</div>
           ) : transactions.length === 0 ? (
-            <div
-              style={{
-                padding: 35,
-                textAlign: "center",
-                background: "#f7f4ee",
-                borderRadius: 16,
-                color: "#6d766f",
-                fontSize: 14,
-              }}
-            >
-              Belum ada transaksi.
-            </div>
+            <div style={emptyStateStyle}>Belum ada transaksi.</div>
           ) : (
             <div style={{ display: "grid", gap: 10 }}>
               {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  style={{
-                    border: "1px solid #e8e5df",
-                    borderRadius: 15,
-                    padding: 14,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
+                <div key={transaction.id} style={transactionCardStyle}>
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: 12,
+                      minWidth: 0,
+                      flex: "1 1 220px",
                     }}
                   >
                     <div
                       style={{
                         width: 40,
                         height: 40,
+                        flex: "0 0 40px",
                         borderRadius: 12,
                         background:
                           transaction.type === "income"
@@ -599,11 +589,12 @@ export default function FinancePage() {
                       {transaction.type === "income" ? "↗" : "↘"}
                     </div>
 
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div
                         style={{
                           fontWeight: 800,
                           color: "#214d32",
+                          overflowWrap: "anywhere",
                         }}
                       >
                         {transaction.category}
@@ -614,10 +605,10 @@ export default function FinancePage() {
                           color: "#7b817d",
                           fontSize: 12,
                           marginTop: 3,
+                          overflowWrap: "anywhere",
                         }}
                       >
                         {transaction.transaction_date}
-
                         {transaction.description
                           ? ` • ${transaction.description}`
                           : ""}
@@ -629,7 +620,8 @@ export default function FinancePage() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 12,
+                      gap: 10,
+                      flexWrap: "wrap",
                     }}
                   >
                     <strong
@@ -642,28 +634,25 @@ export default function FinancePage() {
                       }}
                     >
                       {transaction.type === "income" ? "+" : "-"}
-                      {formatRupiah(
-                        Number(transaction.amount)
-                      )}
+                      {formatRupiah(Number(transaction.amount))}
                     </strong>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        handleDelete(transaction.id)
-                      }
+                      onClick={() => handleDelete(transaction.id)}
+                      disabled={deletingId === transaction.id}
                       style={{
-                        border: "1px solid #eadfda",
-                        background: "#fffaf7",
-                        color: "#8a6a4a",
-                        borderRadius: 9,
-                        padding: "7px 10px",
-                        cursor: "pointer",
-                        fontWeight: 700,
-                        fontSize: 12,
+                        ...deleteButtonStyle,
+                        opacity: deletingId === transaction.id ? 0.6 : 1,
+                        cursor:
+                          deletingId === transaction.id
+                            ? "not-allowed"
+                            : "pointer",
                       }}
                     >
-                      Hapus
+                      {deletingId === transaction.id
+                        ? "Menghapus..."
+                        : "Hapus"}
                     </button>
                   </div>
                 </div>
@@ -677,79 +666,16 @@ export default function FinancePage() {
           type="button"
           onClick={handleLogout}
           style={{
+            ...primaryButtonStyle,
             marginTop: 22,
-            width: "100%",
-            border: 0,
-            borderRadius: 13,
-            padding: "13px 16px",
             background: "#8a6a4a",
-            color: "#ffffff",
-            fontWeight: 800,
-            cursor: "pointer",
           }}
         >
           Keluar dari Admin
         </button>
       </div>
 
-      {/* BOTTOM NAV */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          background: "rgba(255,255,255,0.97)",
-          borderTop: "1px solid #e8e5df",
-          boxShadow: "0 -8px 25px rgba(33,77,50,0.08)",
-          padding:
-            "8px 10px calc(8px + env(safe-area-inset-bottom))",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 700,
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 5,
-          }}
-        >
-          <NavItem
-            label="Dashboard"
-            icon="⌂"
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-          />
-
-          <NavItem
-            label="Pesanan"
-            icon="▣"
-            onClick={() => {
-              window.location.href = "/orders";
-            }}
-          />
-
-          <NavItem
-            label="Notifikasi"
-            icon="●"
-            onClick={() => {
-              window.location.href = "/dashboard#notifikasi";
-            }}
-          />
-
-          <NavItem
-            label="Keuangan"
-            icon="Rp"
-            active
-            onClick={() => {
-              window.location.href = "/finance";
-            }}
-          />
-        </div>
-      </nav>
+      {/* Navbar bawah menggunakan BottomNavigation dari layout.tsx */}
     </main>
   );
 }
@@ -771,6 +697,7 @@ function SummaryCard({
         borderRadius: 20,
         padding: 18,
         boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
+        minWidth: 0,
       }}
     >
       <div
@@ -790,13 +717,7 @@ function SummaryCard({
         {icon}
       </div>
 
-      <div
-        style={{
-          fontSize: 12,
-          color: "#727a74",
-          marginBottom: 6,
-        }}
-      >
+      <div style={{ fontSize: 12, color: "#727a74", marginBottom: 6 }}>
         {label}
       </div>
 
@@ -805,7 +726,7 @@ function SummaryCard({
           fontSize: 19,
           fontWeight: 900,
           color: "#214d32",
-          wordBreak: "break-word",
+          overflowWrap: "anywhere",
         }}
       >
         {value}
@@ -814,45 +735,71 @@ function SummaryCard({
   );
 }
 
-function NavItem({
-  label,
-  icon,
-  active,
-  onClick,
-}: {
-  label: string;
-  icon: string;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        border: 0,
-        background: active ? "#f7f4ee" : "transparent",
-        color: active ? "#214d32" : "#737b76",
-        borderRadius: 12,
-        padding: "8px 5px",
-        cursor: "pointer",
-        fontWeight: active ? 800 : 600,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 17,
-          fontWeight: 900,
-          marginBottom: 2,
-        }}
-      >
-        {icon}
-      </div>
+const pageStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "#f7f4ee",
+  color: "#214d32",
+  paddingBottom: "calc(100px + env(safe-area-inset-bottom))",
+  fontFamily:
+    "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+};
 
-      <div style={{ fontSize: 10 }}>{label}</div>
-    </button>
-  );
-}
+const loadingScreenStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 24,
+};
+
+const loadingMarkStyle: React.CSSProperties = {
+  width: 52,
+  height: 52,
+  borderRadius: 16,
+  background: "#214d32",
+  color: "#ffffff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontWeight: 900,
+  marginBottom: 16,
+  boxShadow: "0 8px 24px rgba(33,77,50,0.18)",
+};
+
+const summaryGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+  gap: 14,
+  marginBottom: 22,
+};
+
+const panelStyle: React.CSSProperties = {
+  background: "#ffffff",
+  border: "1px solid rgba(33,77,50,0.08)",
+  borderRadius: 22,
+  padding: 20,
+  boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
+  marginBottom: 22,
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: 19,
+  fontWeight: 800,
+};
+
+const mutedTextStyle: React.CSSProperties = {
+  margin: "5px 0 0",
+  color: "#6d766f",
+  fontSize: 13,
+};
+
+const formGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gap: 14,
+};
 
 const labelStyle: React.CSSProperties = {
   display: "flex",
@@ -873,4 +820,45 @@ const inputStyle: React.CSSProperties = {
   color: "#214d32",
   outline: "none",
   fontSize: 13,
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+  width: "100%",
+  border: 0,
+  borderRadius: 13,
+  padding: "13px 16px",
+  color: "#ffffff",
+  fontWeight: 800,
+  cursor: "pointer",
+  fontSize: 14,
+};
+
+const deleteButtonStyle: React.CSSProperties = {
+  border: "1px solid #eadfda",
+  background: "#fffaf7",
+  color: "#8a6a4a",
+  borderRadius: 9,
+  padding: "7px 10px",
+  fontWeight: 700,
+  fontSize: 12,
+};
+
+const transactionCardStyle: React.CSSProperties = {
+  border: "1px solid #e8e5df",
+  borderRadius: 15,
+  padding: 14,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 12,
+  flexWrap: "wrap",
+};
+
+const emptyStateStyle: React.CSSProperties = {
+  padding: 30,
+  textAlign: "center",
+  color: "#6d766f",
+  background: "#f7f4ee",
+  borderRadius: 16,
+  fontSize: 14,
 };
