@@ -13,13 +13,7 @@ const menus = [
   { label: "Akun", href: "/account", icon: "account" },
 ];
 
-function MenuIcon({
-  name,
-  active,
-}: {
-  name: string;
-  active: boolean;
-}) {
+function MenuIcon({ name }: { name: string }) {
   const common = {
     width: 23,
     height: 23,
@@ -115,11 +109,13 @@ export default function CustomerBottomNav() {
               aria-current={active ? "page" : undefined}
             >
               <span className="pajara-bottom-nav-icon">
-                <MenuIcon name={menu.icon} active={active} />
+                <MenuIcon name={menu.icon} />
               </span>
+
               <span className="pajara-bottom-nav-label">
                 {menu.label}
               </span>
+
               <span className="pajara-bottom-nav-indicator" />
             </Link>
           );
@@ -140,10 +136,16 @@ export default function CustomerBottomNav() {
           padding: 9px 7px 7px;
           border: 1px solid rgba(33, 77, 50, 0.12);
           border-radius: 23px;
-          background: rgba(255, 255, 255, 0.96);
+          background: rgba(255, 255, 255, 0.97);
           box-shadow: 0 12px 40px rgba(25, 48, 32, 0.16);
           -webkit-backdrop-filter: blur(18px);
           backdrop-filter: blur(18px);
+          isolation: isolate;
+        }
+
+        .pajara-bottom-nav,
+        .pajara-bottom-nav * {
+          box-sizing: border-box;
         }
 
         .pajara-bottom-nav-item {
@@ -159,9 +161,7 @@ export default function CustomerBottomNav() {
           color: #7a817b;
           text-decoration: none;
           -webkit-tap-highlight-color: transparent;
-          transition:
-            color 180ms ease,
-            background 180ms ease;
+          transition: color 180ms ease, background 180ms ease;
         }
 
         .pajara-bottom-nav-item.is-active {
@@ -175,13 +175,13 @@ export default function CustomerBottomNav() {
           justify-content: center;
           width: 30px;
           height: 28px;
-          transform: translateY(0);
+          flex-shrink: 0;
           transition: transform 200ms ease;
         }
 
-        .pajara-bottom-nav-item.is-active .pajara-bottom-nav-icon {
+        .pajara-bottom-nav-item.is-active
+          .pajara-bottom-nav-icon {
           transform: translateY(-2px);
-          animation: pajara-nav-pop 260ms ease both;
         }
 
         .pajara-bottom-nav-label {
@@ -190,14 +190,15 @@ export default function CustomerBottomNav() {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          font-family: "DM Sans", sans-serif;
+          font-family: "DM Sans", Arial, sans-serif;
           font-size: 10px;
           line-height: 1.3;
           font-weight: 600;
           letter-spacing: -0.02em;
         }
 
-        .pajara-bottom-nav-item.is-active .pajara-bottom-nav-label {
+        .pajara-bottom-nav-item.is-active
+          .pajara-bottom-nav-label {
           font-weight: 800;
         }
 
@@ -216,20 +217,9 @@ export default function CustomerBottomNav() {
           width: 15px;
         }
 
-        .pajara-bottom-nav-item:active .pajara-bottom-nav-icon {
-          transform: scale(0.9);
-        }
-
-        @keyframes pajara-nav-pop {
-          0% {
-            transform: translateY(2px) scale(0.92);
-          }
-          65% {
-            transform: translateY(-3px) scale(1.06);
-          }
-          100% {
-            transform: translateY(-2px) scale(1);
-          }
+        .pajara-bottom-nav-item:active
+          .pajara-bottom-nav-icon {
+          transform: scale(0.92);
         }
 
         @media (max-width: 360px) {
