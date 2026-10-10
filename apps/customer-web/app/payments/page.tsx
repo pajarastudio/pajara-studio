@@ -128,18 +128,10 @@ export default function PaymentsPage() {
             onClick={() => router.push("/dashboard")}
             style={styles.backCard}
           >
-            <span style={styles.backIcon}>←</span>
-
-            <span style={styles.backContent}>
-              <span style={styles.backTitle}>
-                Kembali ke Beranda
-              </span>
-              <span style={styles.backDescription}>
-                Kembali ke dashboard Pajara Studio
-              </span>
+            <span style={styles.backIcon} aria-hidden="true">
+              ←
             </span>
-
-            <span style={styles.backArrow}>›</span>
+            <span style={styles.backTitle}>Kembali ke Beranda</span>
           </button>
 
           <div style={styles.eyebrow}>PAJARA STUDIO</div>
@@ -405,7 +397,7 @@ export default function PaymentsPage() {
         }
 
         button:active {
-          transform: scale(0.985);
+          transform: scale(0.98);
         }
 
         @media (hover: hover) {
@@ -431,10 +423,12 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
     background: "var(--cream, #f7f4ee)",
-    padding: "24px 18px 110px",
-    color: "var(--text, #1d2a22)",
+    padding: "24px 16px 110px",
+    color: "var(--text, #243329)",
+    fontFamily: '"DM Sans", Arial, sans-serif',
   },
   container: {
+    width: "100%",
     maxWidth: "760px",
     margin: "0 auto",
   },
@@ -443,84 +437,68 @@ const styles: Record<string, React.CSSProperties> = {
     animation: "fadeUp 350ms ease both",
   },
   backCard: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
-    gap: "10px",
-    width: "fit-content",
-    maxWidth: "100%",
-    minHeight: "54px",
-    padding: "9px 12px",
-    margin: "0 0 26px",
-    border: "1px solid #e5e8df",
-    borderRadius: "14px",
-    background: "#ffffff",
-    boxShadow: "0 4px 14px rgba(33, 77, 50, 0.06)",
+    gap: "11px",
+    padding: "10px 16px 10px 10px",
+    marginBottom: "26px",
     color: "#214d32",
-    textAlign: "left",
+    border: "1px solid rgba(33,77,50,.10)",
+    borderRadius: "16px",
+    background: "#ffffff",
+    boxShadow: "0 5px 18px rgba(33,77,50,.05)",
+    fontSize: "12px",
+    fontWeight: 700,
     cursor: "pointer",
     boxSizing: "border-box",
+    textAlign: "left",
   },
   backIcon: {
-    width: "34px",
-    height: "34px",
-    flexShrink: 0,
     display: "grid",
+    width: "32px",
+    height: "32px",
+    flexShrink: 0,
     placeItems: "center",
-    borderRadius: "10px",
-    background: "#edf3ec",
+    borderRadius: "11px",
+    background: "#edf4ee",
     color: "#2f6b45",
-    fontSize: "20px",
-    fontWeight: 700,
-  },
-  backContent: {
-    flex: "0 1 auto",
-    minWidth: 0,
-    textAlign: "left",
+    fontSize: "19px",
+    lineHeight: 1,
   },
   backTitle: {
     display: "block",
     color: "#214d32",
     fontSize: "12px",
-    fontWeight: 800,
+    fontWeight: 700,
     lineHeight: 1.4,
     whiteSpace: "nowrap",
   },
-  backDescription: {
-    display: "block",
-    marginTop: "3px",
-    color: "#85847b",
-    fontSize: "10px",
-    lineHeight: 1.4,
-  },
-  backArrow: {
-    flexShrink: 0,
-    color: "#2f6b45",
-    fontSize: "24px",
-    fontWeight: 500,
-  },
   eyebrow: {
-    fontSize: "11px",
+    fontSize: "10px",
     fontWeight: 800,
-    letterSpacing: "0.18em",
+    letterSpacing: "0.2em",
     color: "var(--brown, #8a6a4a)",
-    marginBottom: "8px",
+    marginBottom: "9px",
   },
   title: {
     fontFamily: "Georgia, serif",
-    fontSize: "clamp(30px, 7vw, 42px)",
+    fontSize: "clamp(32px, 7vw, 43px)",
     lineHeight: 1.15,
-    letterSpacing: "-0.04em",
+    letterSpacing: "-1.2px",
     color: "var(--green-dark, #214d32)",
-    margin: "0 0 10px",
+    fontWeight: 500,
+    margin: 0,
   },
   subtitle: {
-    fontSize: "14px",
-    lineHeight: 1.7,
-    color: "#73766f",
-    margin: 0,
-    maxWidth: "420px",
+    fontSize: "13px",
+    lineHeight: 1.8,
+    color: "#778078",
+    margin: "12px 0 25px",
+    maxWidth: "450px",
   },
   summaryCard: {
+    display: "grid",
+    gap: "9px",
     padding: "25px",
     borderRadius: "22px",
     background:
@@ -541,14 +519,13 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "clamp(28px, 7vw, 38px)",
     fontWeight: 700,
     letterSpacing: "-0.04em",
-    marginTop: "13px",
     overflowWrap: "anywhere",
   },
   summaryDescription: {
     color: "rgba(255,255,255,.8)",
     fontSize: "13px",
     lineHeight: 1.6,
-    margin: "10px 0 0",
+    margin: 0,
   },
   section: {
     marginBottom: "34px",
