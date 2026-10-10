@@ -149,32 +149,21 @@ export default function DashboardPage() {
     },
   ];
 
-  const cardStyle = {
-    background: COLORS.white,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 20,
-    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
-  } as const;
-
   if (loading) {
     return (
       <main className="pajara-loading">
         <div className="pajara-loading-inner">
-          <Image
-            src="/icon-512.png"
-            alt="Logo Pajara Studio"
-            width={66}
-            height={66}
-            priority
-            className="pajara-loading-logo"
-          />
           <div className="pajara-spinner" />
-          <p>Menyiapkan ruang kerja...</p>
+          <p>Menyiapkan dashboard...</p>
+          <span className="loading-caption">
+            PAJARA STUDIO · ADMINISTRATION
+          </span>
         </div>
 
         <style jsx>{`
           .pajara-loading {
             min-height: 100vh;
+            min-height: 100dvh;
             display: grid;
             place-items: center;
             background: ${COLORS.background};
@@ -186,19 +175,15 @@ export default function DashboardPage() {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
-          }
-
-          .pajara-loading-logo {
-            border-radius: 18px;
-            object-fit: cover;
+            gap: 15px;
           }
 
           .pajara-spinner {
-            width: 27px;
-            height: 27px;
-            border: 3px solid #d9e2d8;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #d9e2d8;
             border-top-color: ${COLORS.greenLight};
+            border-right-color: ${COLORS.brown};
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -207,11 +192,25 @@ export default function DashboardPage() {
             margin: 0;
             font-size: 12px;
             font-weight: 700;
+            letter-spacing: 0.2px;
+          }
+
+          .loading-caption {
+            color: ${COLORS.muted};
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
           }
 
           @keyframes spin {
             to {
               transform: rotate(360deg);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .pajara-spinner {
+              animation-duration: 2s;
             }
           }
         `}</style>
@@ -291,19 +290,25 @@ export default function DashboardPage() {
         <div className="pajara-content">
           {/* ADMIN PROFILE */}
           <section className="admin-greeting">
-            <div className="greeting-mark">
-              <span>H</span>
+            <div className="greeting-logo-wrap">
+              <Image
+                src="/icon-512.png"
+                alt="Pajara Studio"
+                width={44}
+                height={44}
+                className="greeting-logo"
+              />
             </div>
 
             <div className="greeting-copy">
-              <p className="section-eyebrow">SENANG MELIHATMU KEMBALI</p>
+              <p className="section-eyebrow">
+                SENANG MELIHATMU KEMBALI
+              </p>
               <h2>Halo, Admin Pajara.</h2>
               <p className="admin-email">{adminEmail}</p>
             </div>
 
-            <span className="greeting-leaf" aria-hidden="true">
-              ✳
-            </span>
+            <span className="greeting-accent" aria-hidden="true" />
           </section>
 
           {/* STATISTICS */}
@@ -356,7 +361,9 @@ export default function DashboardPage() {
 
               <div className="workspace-title-row">
                 <div>
-                  <p className="workspace-kicker">DARI BRIEF MENJADI KARYA</p>
+                  <p className="workspace-kicker">
+                    DARI BRIEF MENJADI KARYA
+                  </p>
                   <h2>
                     Setiap karya
                     <br />
@@ -364,7 +371,15 @@ export default function DashboardPage() {
                   </h2>
                 </div>
 
-                <div className="workspace-emblem">P.</div>
+                <div className="workspace-logo-wrap">
+                  <Image
+                    src="/icon-512.png"
+                    alt="Logo Pajara Studio"
+                    width={52}
+                    height={52}
+                    className="workspace-logo"
+                  />
+                </div>
               </div>
 
               <p className="workspace-description">
@@ -574,9 +589,11 @@ export default function DashboardPage() {
           height: 54px;
           flex-shrink: 0;
           padding: 3px;
-          border: 1px solid rgba(247, 244, 238, 0.32);
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(247, 244, 238, 0.3);
           border-radius: 17px;
-          background: rgba(247, 244, 238, 0.1);
+          background: rgba(247, 244, 238, 0.13);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -584,8 +601,8 @@ export default function DashboardPage() {
           width: 100%;
           height: 100%;
           display: block;
-          object-fit: cover;
-          border-radius: 13px;
+          object-fit: contain;
+          border-radius: 12px;
         }
 
         .brand-copy {
@@ -718,11 +735,12 @@ export default function DashboardPage() {
           padding: 20px 16px 0;
         }
 
+        /* Sapaan: logo asli dibingkai lembut, tanpa monogram tambahan */
         .admin-greeting {
           position: relative;
           display: flex;
           align-items: center;
-          gap: 13px;
+          gap: 14px;
           padding: 17px 16px;
           margin-bottom: 31px;
           overflow: hidden;
@@ -732,25 +750,31 @@ export default function DashboardPage() {
           box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
         }
 
-        .greeting-mark {
-          width: 46px;
-          height: 46px;
+        .greeting-logo-wrap {
+          position: relative;
+          z-index: 1;
+          width: 52px;
+          height: 52px;
           flex-shrink: 0;
           display: grid;
           place-items: center;
-          border-radius: 15px;
-          border: 1px solid #d6dfd2;
-          background: #e6ede3;
-          color: ${COLORS.green};
+          padding: 5px;
+          border: 1px solid #d9e1d5;
+          border-radius: 16px;
+          background: #edf1e9;
         }
 
-        .greeting-mark span {
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 25px;
-          font-style: italic;
+        .greeting-logo {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: contain;
+          border-radius: 10px;
         }
 
         .greeting-copy {
+          position: relative;
+          z-index: 1;
           min-width: 0;
           flex: 1;
         }
@@ -777,10 +801,23 @@ export default function DashboardPage() {
           font-size: 10px;
         }
 
-        .greeting-leaf {
-          align-self: flex-start;
-          color: #b6c6b0;
-          font-size: 25px;
+        .greeting-accent {
+          position: absolute;
+          right: -17px;
+          bottom: -36px;
+          width: 82px;
+          height: 82px;
+          border: 1px solid #e8e2d8;
+          border-radius: 50%;
+          pointer-events: none;
+        }
+
+        .greeting-accent::after {
+          position: absolute;
+          content: "";
+          inset: 12px;
+          border: 1px solid #e8e2d8;
+          border-radius: 50%;
         }
 
         .statistics-section {
@@ -980,10 +1017,14 @@ export default function DashboardPage() {
 
         .workspace-title-row {
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: 14px;
           margin-top: 25px;
+        }
+
+        .workspace-title-row > div:first-child {
+          min-width: 0;
         }
 
         .workspace-kicker {
@@ -1003,18 +1044,26 @@ export default function DashboardPage() {
           letter-spacing: -1px;
         }
 
-        .workspace-emblem {
+        /* Logo asli menggantikan huruf P. */
+        .workspace-logo-wrap {
+          width: 64px;
+          height: 64px;
+          flex-shrink: 0;
           display: grid;
           place-items: center;
-          width: 58px;
-          height: 58px;
-          flex-shrink: 0;
-          border: 1px solid rgba(247, 244, 238, 0.25);
+          padding: 6px;
+          border: 1px solid rgba(247, 244, 238, 0.3);
           border-radius: 19px;
-          color: #e4d5c2;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 34px;
-          font-style: italic;
+          background: rgba(247, 244, 238, 0.96);
+          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+        }
+
+        .workspace-logo {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: contain;
+          border-radius: 11px;
         }
 
         .workspace-description {
@@ -1321,6 +1370,11 @@ export default function DashboardPage() {
             padding: 29px;
           }
 
+          .workspace-logo-wrap {
+            width: 72px;
+            height: 72px;
+          }
+
           .workspace-description {
             max-width: 430px;
           }
@@ -1334,8 +1388,32 @@ export default function DashboardPage() {
           }
         }
 
+        @media (max-width: 360px) {
+          .admin-greeting {
+            gap: 10px;
+            padding: 14px 12px;
+          }
+
+          .greeting-logo-wrap {
+            width: 45px;
+            height: 45px;
+          }
+
+          .greeting-copy h2 {
+            font-size: 18px;
+          }
+
+          .workspace-logo-wrap {
+            width: 52px;
+            height: 52px;
+            padding: 5px;
+            border-radius: 16px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .workspace-button {
+          .workspace-button,
+          .nav-item {
             transition: none;
           }
         }
