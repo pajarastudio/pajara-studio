@@ -53,7 +53,9 @@ export default function NotificationsPage() {
       .limit(50);
 
     if (error) {
-      setErrorMessage("Notifikasi gagal dimuat. Coba muat ulang halaman.");
+      setErrorMessage(
+        "Notifikasi gagal dimuat. Coba muat ulang halaman."
+      );
       return;
     }
 
@@ -90,7 +92,9 @@ export default function NotificationsPage() {
       setUserId(user.id);
       await loadNotifications(user.id);
 
-      if (active) setLoading(false);
+      if (active) {
+        setLoading(false);
+      }
     }
 
     checkAdmin();
@@ -110,7 +114,9 @@ export default function NotificationsPage() {
       .eq("user_id", userId);
 
     if (error) {
-      setErrorMessage("Notifikasi belum berhasil ditandai dibaca.");
+      setErrorMessage(
+        "Notifikasi belum berhasil ditandai dibaca."
+      );
       return;
     }
 
@@ -136,7 +142,9 @@ export default function NotificationsPage() {
       .eq("is_read", false);
 
     if (error) {
-      setErrorMessage("Gagal menandai semua notifikasi sebagai dibaca.");
+      setErrorMessage(
+        "Gagal menandai semua notifikasi sebagai dibaca."
+      );
     } else {
       setNotifications((current) =>
         current.map((item) => ({ ...item, is_read: true }))
@@ -224,7 +232,7 @@ export default function NotificationsPage() {
       <main
         style={{
           minHeight: "100vh",
-          paddingBottom: "100px",
+          paddingBottom: "110px",
           background: COLORS.background,
           color: COLORS.green,
           fontFamily:
@@ -595,32 +603,14 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: "100%",
-              minHeight: 46,
-              marginTop: 20,
-              border: "1px solid #D9CFC3",
-              borderRadius: 13,
-              background: "rgba(255,255,255,0.55)",
-              color: COLORS.green,
-              fontSize: 12,
-              fontWeight: 800,
-              cursor: "pointer",
-            }}
-          >
-            ← Kembali ke Dashboard
-          </button>
-
+          {/* LOGOUT */}
           <button
             type="button"
             onClick={handleLogout}
             style={{
               width: "100%",
               minHeight: 43,
-              marginTop: 10,
+              marginTop: 20,
               border: "none",
               borderRadius: 13,
               background: "transparent",
@@ -633,6 +623,7 @@ export default function NotificationsPage() {
             Keluar dari Admin
           </button>
 
+          {/* FOOTER */}
           <footer
             style={{
               textAlign: "center",
@@ -662,126 +653,6 @@ export default function NotificationsPage() {
             </p>
           </footer>
         </div>
-
-        {/* BOTTOM NAVIGATION */}
-        <nav
-          aria-label="Navigasi utama"
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 100,
-            padding:
-              "9px 12px calc(9px + env(safe-area-inset-bottom))",
-            background: "rgba(255,255,255,0.96)",
-            borderTop: "1px solid #E4DED5",
-            boxShadow: "0 -8px 28px rgba(33,77,50,0.08)",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 620,
-              margin: "0 auto",
-              display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-              gap: 5,
-            }}
-          >
-            {[
-              { label: "Dashboard", icon: "⌂", action: "home" },
-              { label: "Pesanan", icon: "▤", action: "orders" },
-              {
-                label: "Notifikasi",
-                icon: "♧",
-                action: "notifications",
-              },
-              { label: "Keuangan", icon: "Rp", action: "finance" },
-            ].map((item) => {
-              const selected = item.action === "notifications";
-
-              return (
-                <button
-                  key={item.action}
-                  type="button"
-                  aria-label={item.label}
-                  onClick={() => {
-                    if (item.action === "home") {
-                      router.push("/dashboard");
-                    } else if (item.action === "orders") {
-                      router.push("/orders");
-                    } else if (item.action === "notifications") {
-                      router.push("/notifications");
-                    } else if (item.action === "finance") {
-                      router.push("/finance");
-                    }
-                  }}
-                  style={{
-                    position: "relative",
-                    minWidth: 0,
-                    minHeight: 55,
-                    padding: "7px 2px",
-                    border: "none",
-                    borderRadius: 13,
-                    background: selected ? "#EAF1E9" : "transparent",
-                    color: selected ? COLORS.green : "#777D75",
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 5,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: item.action === "finance" ? 14 : 20,
-                      lineHeight: 1,
-                      fontWeight: 800,
-                    }}
-                  >
-                    {item.icon}
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: 9,
-                      lineHeight: 1.2,
-                      fontWeight: selected ? 850 : 650,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.label}
-                  </span>
-
-                  {item.action === "notifications" &&
-                    unreadCount > 0 && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: 3,
-                          right: "calc(50% - 19px)",
-                          minWidth: 14,
-                          height: 14,
-                          padding: "0 3px",
-                          borderRadius: 99,
-                          display: "grid",
-                          placeItems: "center",
-                          background: "#B45E48",
-                          color: "#fff",
-                          fontSize: 8,
-                          fontWeight: 900,
-                        }}
-                      >
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
       </main>
     </>
   );
