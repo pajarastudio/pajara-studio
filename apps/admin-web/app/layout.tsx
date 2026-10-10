@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import ServiceWorkerRegister from "./service-worker-register";
 import "./globals.css";
