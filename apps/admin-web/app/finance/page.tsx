@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
@@ -20,6 +20,48 @@ type Transaction = {
   created_at: string;
 };
 
+const C = {
+  background: "#F7F4EE",
+  green: "#214D32",
+  greenLight: "#2F6B45",
+  brown: "#8A6A4A",
+  white: "#FFFFFF",
+  muted: "#777D75",
+  border: "#E7DFD5",
+  softGreen: "#EDF4EB",
+  softBrown: "#F4EEE6",
+  danger: "#A34D3E",
+  softDanger: "#FFF1ED",
+};
+
+function todayLocal() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatRupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatDate(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default function FinancePage() {
   const router = useRouter();
 
@@ -33,10 +75,29 @@ export default function FinancePage() {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [transactionDate, setTransactionDate] = useState(
-    new Date().toLocaleDateString("en-CA")
-  );
+  const [transactionDate, setTransactionDate] = useState(todayLocal());
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error">(
+    "success"
+  );
+
+  const loadTransactions = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("finance_transactions")
+      .select("*")
+      .order("transaction_date", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Gagal memuat transaksi:", error);
+      setMessageType("error");
+      setMessage("Gagal memuat data keuangan. Coba muat ulang halaman.");
+      return false;
+    }
+
+    setTransactions((data ?? []) as Transaction[]);
+    return true;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,15 +128,15 @@ export default function FinancePage() {
       if (profileError || profile?.role !== "admin") {
         await supabase.auth.signOut();
 
-        if (!cancelled) {
-          router.replace("/");
-        }
-
+        if (!cancelled) router.replace("/");
         return;
       }
 
       setAuthorized(true);
+
       await loadTransactions();
+
+      if (!cancelled) setLoading(false);
     }
 
     verifyAdmin();
@@ -83,27 +144,7 @@ export default function FinancePage() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
-
-  async function loadTransactions() {
-    setLoading(true);
-
-    const { data, error } = await supabase
-      .from("finance_transactions")
-      .select("*")
-      .order("transaction_date", { ascending: false })
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Gagal memuat transaksi:", error);
-      setMessage("Gagal memuat data keuangan.");
-      setLoading(false);
-      return;
-    }
-
-    setTransactions((data || []) as Transaction[]);
-    setLoading(false);
-  }
+  }, [router, loadTransactions]);
 
   const totalIncome = useMemo(
     () =>
@@ -123,89 +164,95 @@ export default function FinancePage() {
 
   const balance = totalIncome - totalExpense;
 
-  function formatRupiah(value: number) {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage("");
 
-    if (!authorized) {
+    if (!authorized || saving) {
+      setMessageType("error");
       setMessage("Akses Admin belum terverifikasi.");
       return;
     }
 
     const numericAmount = Number(amount);
 
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-      setMessage("Masukkan nominal yang valid.");
+    if (!Number.isSafeInteger(numericAmount) || numericAmount <= 0) {
+      setMessageType("error");
+      setMessage("Masukkan nominal rupiah berupa angka bulat yang valid.");
       return;
     }
 
     if (!category.trim()) {
+      setMessageType("error");
       setMessage("Kategori wajib diisi.");
       return;
     }
 
     if (!transactionDate) {
+      setMessageType("error");
       setMessage("Tanggal transaksi wajib diisi.");
       return;
     }
 
     setSaving(true);
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
+      if (authError || !user) {
+        setMessageType("error");
+        setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
+        router.replace("/");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("finance_transactions")
+        .insert({
+          type,
+          amount: numericAmount,
+          category: category.trim(),
+          description: description.trim() || null,
+          transaction_date: transactionDate,
+          created_by: user.id,
+        });
+
+      if (error) {
+        console.error("Gagal menyimpan transaksi:", error);
+        setMessageType("error");
+        setMessage(
+          "Gagal menyimpan transaksi. Periksa izin tabel Supabase."
+        );
+        return;
+      }
+
+      setAmount("");
+      setCategory("");
+      setDescription("");
+      setType("income");
+      setTransactionDate(todayLocal());
+
+      const refreshed = await loadTransactions();
+
+      setMessageType(refreshed ? "success" : "error");
+      setMessage(
+        refreshed
+          ? "Transaksi berhasil ditambahkan."
+          : "Transaksi tersimpan, tetapi riwayat gagal diperbarui. Muat ulang halaman."
+      );
+    } finally {
       setSaving(false);
-      router.replace("/");
-      return;
     }
-
-    const { error } = await supabase.from("finance_transactions").insert({
-      type,
-      amount: numericAmount,
-      category: category.trim(),
-      description: description.trim() || null,
-      transaction_date: transactionDate,
-      created_by: user.id,
-    });
-
-    if (error) {
-      console.error("Gagal menyimpan transaksi:", error);
-      setMessage("Gagal menyimpan transaksi. Periksa izin tabel Supabase.");
-      setSaving(false);
-      return;
-    }
-
-    setAmount("");
-    setCategory("");
-    setDescription("");
-    setType("income");
-    setTransactionDate(new Date().toLocaleDateString("en-CA"));
-    setMessage("Transaksi berhasil ditambahkan.");
-    setSaving(false);
-
-    await loadTransactions();
   }
 
   async function handleDelete(id: string) {
-    if (!authorized) {
-      setMessage("Akses Admin belum terverifikasi.");
-      return;
-    }
+    if (!authorized || deletingId) return;
 
     const confirmed = window.confirm(
-      "Yakin ingin menghapus transaksi ini?"
+      "Yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan."
     );
 
     if (!confirmed) return;
@@ -213,34 +260,42 @@ export default function FinancePage() {
     setMessage("");
     setDeletingId(id);
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
+      if (authError || !user) {
+        setMessageType("error");
+        setMessage("Sesi Admin tidak ditemukan. Silakan masuk kembali.");
+        router.replace("/");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("finance_transactions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Gagal menghapus transaksi:", error);
+        setMessageType("error");
+        setMessage(
+          "Gagal menghapus transaksi. Periksa izin tabel Supabase."
+        );
+        return;
+      }
+
+      setTransactions((current) =>
+        current.filter((transaction) => transaction.id !== id)
+      );
+
+      setMessageType("success");
+      setMessage("Transaksi berhasil dihapus.");
+    } finally {
       setDeletingId(null);
-      router.replace("/");
-      return;
     }
-
-    const { error } = await supabase
-      .from("finance_transactions")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("Gagal menghapus transaksi:", error);
-      setMessage("Gagal menghapus transaksi. Periksa izin tabel Supabase.");
-      setDeletingId(null);
-      return;
-    }
-
-    setMessage("Transaksi berhasil dihapus.");
-    setDeletingId(null);
-
-    await loadTransactions();
   }
 
   async function handleLogout() {
@@ -250,13 +305,13 @@ export default function FinancePage() {
 
   if (loading && !authorized) {
     return (
-      <main style={pageStyle}>
-        <div style={loadingScreenStyle}>
-          <div style={loadingMarkStyle}>PS</div>
-          <div style={{ fontWeight: 800, color: "#214d32" }}>
+      <main style={styles.page}>
+        <div style={styles.loadingScreen}>
+          <div style={styles.logoMark}>PS</div>
+          <div style={{ fontWeight: 800, color: C.green }}>
             Memeriksa akses Admin...
           </div>
-          <div style={{ fontSize: 12, color: "#727a74", marginTop: 6 }}>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>
             Pajara Studio
           </div>
         </div>
@@ -267,44 +322,235 @@ export default function FinancePage() {
   if (!authorized) return null;
 
   return (
-    <main style={pageStyle}>
-      {/* HEADER */}
+    <main style={styles.page}>
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        .finance-content {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 24px 16px calc(120px + env(safe-area-inset-bottom));
+        }
+
+        .finance-summary {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+          margin-bottom: 22px;
+        }
+
+        .finance-form-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 15px;
+        }
+
+        .finance-field {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          min-width: 0;
+          color: ${C.green};
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .finance-input {
+          width: 100%;
+          min-width: 0;
+          border: 1px solid #DDD9D1;
+          border-radius: 12px;
+          padding: 12px;
+          background: #FFFFFF;
+          color: ${C.green};
+          font-family: inherit;
+          font-size: 13px;
+          outline: none;
+          transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .finance-input:focus {
+          border-color: ${C.greenLight};
+          box-shadow: 0 0 0 3px rgba(47,107,69,.10);
+        }
+
+        .finance-input:disabled {
+          opacity: .65;
+        }
+
+        .finance-panel {
+          background: ${C.white};
+          border: 1px solid ${C.border};
+          border-radius: 22px;
+          padding: 22px;
+          margin-bottom: 22px;
+          box-shadow: 0 8px 28px rgba(33,77,50,.045);
+        }
+
+        .finance-transaction {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          padding: 15px;
+          border: 1px solid #EAE5DC;
+          border-radius: 16px;
+          background: #FFFFFF;
+        }
+
+        .finance-transaction-main {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+        }
+
+        .finance-transaction-end {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .finance-delete {
+          border: 1px solid #EADFD8;
+          border-radius: 10px;
+          padding: 8px 11px;
+          color: ${C.danger};
+          background: ${C.softDanger};
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .finance-primary {
+          width: 100%;
+          min-height: 46px;
+          border: 0;
+          border-radius: 13px;
+          padding: 13px 16px;
+          background: ${C.green};
+          color: #FFFFFF;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: opacity .18s ease, transform .18s ease;
+        }
+
+        .finance-primary:hover {
+          opacity: .92;
+        }
+
+        .finance-primary:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 700px) {
+          .finance-content {
+            padding: 19px 13px calc(120px + env(safe-area-inset-bottom));
+          }
+
+          .finance-summary {
+            grid-template-columns: 1fr;
+            gap: 11px;
+          }
+
+          .finance-summary-card {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 15px !important;
+          }
+
+          .finance-summary-icon {
+            margin-bottom: 0 !important;
+            flex-shrink: 0;
+          }
+
+          .finance-summary-info {
+            min-width: 0;
+            flex: 1;
+          }
+
+          .finance-summary-value {
+            font-size: 18px !important;
+          }
+
+          .finance-panel {
+            padding: 17px;
+            border-radius: 19px;
+          }
+
+          .finance-form-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+
+          .finance-transaction {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 13px;
+            padding: 14px;
+          }
+
+          .finance-transaction-end {
+            width: 100%;
+            justify-content: space-between;
+            padding-left: 52px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .finance-input,
+          .finance-primary {
+            transition: none;
+          }
+        }
+      `}</style>
+
       <header
         style={{
-          background:
-            "linear-gradient(135deg, #214d32 0%, #2f6b45 55%, #214d32 100%)",
-          color: "#ffffff",
-          padding: "22px 20px 24px",
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
+          position: "relative",
           overflow: "hidden",
+          background:
+            "linear-gradient(135deg, #183D27 0%, #214D32 55%, #2F6B45 100%)",
+          color: C.white,
+          padding: "28px 21px 31px",
+          borderRadius: "0 0 28px 28px",
+          boxShadow: "0 12px 28px rgba(33,77,50,0.14)",
         }}
       >
         <div
+          aria-hidden="true"
           style={{
             position: "absolute",
-            width: 170,
-            height: 170,
+            width: 220,
+            height: 220,
+            right: -90,
+            top: -125,
+            border: "1px solid rgba(255,255,255,0.11)",
             borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.12)",
-            right: -70,
-            top: -90,
             pointerEvents: "none",
           }}
         />
 
         <div
+          aria-hidden="true"
           style={{
             position: "absolute",
-            width: 70,
-            height: 70,
-            border: "1px solid rgba(255,255,255,0.10)",
-            right: 45,
-            bottom: -35,
-            transform: "rotate(25deg)",
-            borderRadius: 18,
+            width: 145,
+            height: 145,
+            right: -50,
+            top: -85,
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "50%",
             pointerEvents: "none",
           }}
         />
@@ -312,136 +558,121 @@ export default function FinancePage() {
         <div
           style={{
             position: "relative",
-            maxWidth: 1100,
+            zIndex: 1,
+            maxWidth: 1068,
             margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
           }}
         >
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 5,
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: "#8a6a4a",
-                  display: "inline-block",
-                }}
-              />
-
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: "2px",
-                }}
-              >
-                PAJARA STUDIO
-              </span>
-            </div>
-
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 25,
-                fontWeight: 800,
-                letterSpacing: "-0.5px",
-              }}
-            >
-              Keuangan
-            </h1>
-
-            <div
-              style={{
-                width: 42,
-                height: 3,
-                background: "#8a6a4a",
-                borderRadius: 10,
-                marginTop: 9,
-              }}
-            />
-          </div>
-
           <div
-            aria-label="Pajara Studio"
             style={{
-              width: 46,
-              height: 46,
-              borderRadius: 15,
-              background: "rgba(255,255,255,0.10)",
-              border: "1px solid rgba(255,255,255,0.20)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 900,
-              fontSize: 15,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+              color: "#D8C5AD",
+              fontSize: 10,
+              fontWeight: 850,
+              letterSpacing: 3,
+              marginBottom: 9,
             }}
           >
-            PS
+            PAJARA STUDIO
+          </div>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "clamp(27px, 5vw, 32px)",
+              fontWeight: 850,
+              letterSpacing: -0.9,
+            }}
+          >
+            Keuangan
+          </h1>
+
+          <p
+            style={{
+              maxWidth: 390,
+              margin: "9px 0 0",
+              color: "#D9E4DA",
+              fontSize: 12,
+              lineHeight: 1.8,
+            }}
+          >
+            Pantau pemasukan, pengeluaran, dan saldo Pajara Studio dalam
+            satu tempat.
+          </p>
+
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 18,
+              padding: "8px 11px",
+              border: "1px solid rgba(255,255,255,.16)",
+              borderRadius: 10,
+              background: "rgba(255,255,255,.08)",
+              color: "#FFFFFF",
+              fontSize: 10,
+              fontWeight: 700,
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "#B9D8B5",
+              }}
+            />
+            Ringkasan keuangan
           </div>
         </div>
       </header>
 
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          padding: "22px 16px calc(110px + env(safe-area-inset-bottom))",
-        }}
-      >
-        {/* SUMMARY */}
-        <section style={summaryGridStyle}>
+      <div className="finance-content">
+        <section className="finance-summary">
           <SummaryCard
             label="Total Pemasukan"
             value={formatRupiah(totalIncome)}
             icon="↗"
+            tone="income"
           />
 
           <SummaryCard
             label="Total Pengeluaran"
             value={formatRupiah(totalExpense)}
             icon="↘"
+            tone="expense"
           />
 
           <SummaryCard
             label="Saldo Bersih"
             value={formatRupiah(balance)}
             icon="Rp"
+            tone="balance"
           />
         </section>
 
-        {/* FORM */}
-        <section style={panelStyle}>
-          <div style={{ marginBottom: 18 }}>
-            <h2 style={sectionTitleStyle}>Tambah Transaksi</h2>
+        <section className="finance-panel">
+          <div style={{ marginBottom: 20 }}>
+            <p style={styles.eyebrow}>CATAT TRANSAKSI</p>
 
-            <p style={mutedTextStyle}>
-              Catat pemasukan atau pengeluaran Pajara Studio.
+            <h2 style={styles.sectionTitle}>Tambah Transaksi</h2>
+
+            <p style={styles.mutedText}>
+              Simpan setiap pemasukan dan pengeluaran agar catatan
+              keuangan tetap teratur.
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={formGridStyle}>
-              <label style={labelStyle}>
+            <div className="finance-form-grid">
+              <label className="finance-field">
                 Jenis Transaksi
-
                 <select
+                  className="finance-input"
                   value={type}
                   onChange={(e) =>
                     setType(e.target.value as "income" | "expense")
                   }
-                  style={inputStyle}
                   disabled={saving}
                 >
                   <option value="income">Pemasukan</option>
@@ -449,59 +680,62 @@ export default function FinancePage() {
                 </select>
               </label>
 
-              <label style={labelStyle}>
-                Nominal
-
+              <label className="finance-field">
+                Nominal (Rp)
                 <input
+                  className="finance-input"
                   type="number"
                   min="1"
                   step="1"
+                  inputMode="numeric"
                   placeholder="Contoh: 150000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  style={inputStyle}
                   required
                   disabled={saving}
                 />
               </label>
 
-              <label style={labelStyle}>
+              <label className="finance-field">
                 Kategori
-
                 <input
+                  className="finance-input"
                   type="text"
                   placeholder="Contoh: Desain Logo"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  style={inputStyle}
                   required
+                  maxLength={100}
                   disabled={saving}
                 />
               </label>
 
-              <label style={labelStyle}>
-                Tanggal
-
+              <label className="finance-field">
+                Tanggal Transaksi
                 <input
+                  className="finance-input"
                   type="date"
                   value={transactionDate}
                   onChange={(e) => setTransactionDate(e.target.value)}
-                  style={inputStyle}
                   required
                   disabled={saving}
                 />
               </label>
             </div>
 
-            <label style={{ ...labelStyle, marginTop: 14 }}>
+            <label
+              className="finance-field"
+              style={{ marginTop: 15 }}
+            >
               Keterangan
-
               <textarea
+                className="finance-input"
                 placeholder="Contoh: Pembayaran desain dari pelanggan"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                style={{ ...inputStyle, resize: "vertical" }}
+                maxLength={1000}
+                style={{ resize: "vertical", lineHeight: 1.65 }}
                 disabled={saving}
               />
             </label>
@@ -510,172 +744,288 @@ export default function FinancePage() {
               <div
                 role="status"
                 style={{
-                  marginTop: 14,
-                  padding: "11px 13px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 9,
+                  marginTop: 16,
+                  padding: "12px 13px",
                   borderRadius: 12,
-                  background: "#f7f4ee",
-                  color: "#214d32",
-                  fontSize: 13,
+                  border:
+                    messageType === "success"
+                      ? "1px solid #D5E5D2"
+                      : "1px solid #EACBC2",
+                  background:
+                    messageType === "success" ? C.softGreen : C.softDanger,
+                  color:
+                    messageType === "success" ? C.green : C.danger,
+                  fontSize: 12,
+                  lineHeight: 1.7,
                   fontWeight: 700,
                   overflowWrap: "anywhere",
                 }}
               >
-                {message}
+                <span aria-hidden="true">
+                  {messageType === "success" ? "✓" : "!"}
+                </span>
+                <span>{message}</span>
               </div>
             )}
 
             <button
               type="submit"
+              className="finance-primary"
               disabled={saving}
-              style={{
-                ...primaryButtonStyle,
-                marginTop: 16,
-                background: saving ? "#8a9a8e" : "#214d32",
-                cursor: saving ? "not-allowed" : "pointer",
-              }}
+              style={{ marginTop: 17 }}
             >
-              {saving ? "Menyimpan..." : "+ Tambah Transaksi"}
+              {saving ? "Menyimpan transaksi..." : "+ Tambah Transaksi"}
             </button>
           </form>
         </section>
 
-        {/* TRANSACTION HISTORY */}
-        <section style={panelStyle}>
-          <div style={{ marginBottom: 16 }}>
-            <h2 style={sectionTitleStyle}>Riwayat Transaksi</h2>
+        <section className="finance-panel">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: 12,
+              marginBottom: 19,
+            }}
+          >
+            <div>
+              <p style={styles.eyebrow}>CATATAN KEUANGAN</p>
 
-            <p style={mutedTextStyle}>
-              Semua pemasukan dan pengeluaran Pajara.
-            </p>
+              <h2 style={styles.sectionTitle}>Riwayat Transaksi</h2>
+
+              <p style={styles.mutedText}>
+                {transactions.length} transaksi tercatat
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                setMessage("");
+                await loadTransactions();
+                setLoading(false);
+              }}
+              disabled={loading}
+              style={{
+                border: `1px solid ${C.border}`,
+                borderRadius: 11,
+                padding: "9px 12px",
+                background: C.white,
+                color: C.green,
+                fontSize: 11,
+                fontWeight: 800,
+                cursor: loading ? "wait" : "pointer",
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading ? "Memuat..." : "↻ Muat Ulang"}
+            </button>
           </div>
 
           {loading ? (
-            <div style={emptyStateStyle}>Memuat transaksi...</div>
+            <div style={styles.emptyState}>
+              <div style={{ fontWeight: 800, color: C.green }}>
+                Memuat transaksi...
+              </div>
+              <p style={styles.mutedText}>
+                Mohon tunggu sebentar.
+              </p>
+            </div>
           ) : transactions.length === 0 ? (
-            <div style={emptyStateStyle}>Belum ada transaksi.</div>
+            <div style={styles.emptyState}>
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  margin: "0 auto 13px",
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 17,
+                  background: C.softGreen,
+                  color: C.green,
+                  fontSize: 23,
+                  fontWeight: 800,
+                }}
+              >
+                Rp
+              </div>
+
+              <h3
+                style={{
+                  margin: "0 0 7px",
+                  fontSize: 15,
+                  fontWeight: 850,
+                  color: C.green,
+                }}
+              >
+                Belum ada transaksi
+              </h3>
+
+              <p style={{ ...styles.mutedText, maxWidth: 270, margin: "0 auto" }}>
+                Transaksi yang kamu tambahkan akan muncul di bagian ini.
+              </p>
+            </div>
           ) : (
             <div style={{ display: "grid", gap: 10 }}>
-              {transactions.map((transaction) => (
-                <div key={transaction.id} style={transactionCardStyle}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      minWidth: 0,
-                      flex: "1 1 220px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        flex: "0 0 40px",
-                        borderRadius: 12,
-                        background:
-                          transaction.type === "income"
-                            ? "rgba(47,107,69,0.10)"
-                            : "rgba(138,106,74,0.12)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 900,
-                        color:
-                          transaction.type === "income"
-                            ? "#2f6b45"
-                            : "#8a6a4a",
-                      }}
-                    >
-                      {transaction.type === "income" ? "↗" : "↘"}
-                    </div>
+              {transactions.map((transaction) => {
+                const isIncome = transaction.type === "income";
 
-                    <div style={{ minWidth: 0 }}>
+                return (
+                  <article
+                    key={transaction.id}
+                    className="finance-transaction"
+                  >
+                    <div className="finance-transaction-main">
                       <div
                         style={{
-                          fontWeight: 800,
-                          color: "#214d32",
+                          width: 42,
+                          height: 42,
+                          flex: "0 0 42px",
+                          display: "grid",
+                          placeItems: "center",
+                          borderRadius: 14,
+                          background: isIncome ? C.softGreen : C.softBrown,
+                          color: isIncome ? C.greenLight : C.brown,
+                          fontSize: 19,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {isIncome ? "↗" : "↘"}
+                      </div>
+
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div
+                          style={{
+                            color: C.green,
+                            fontSize: 13,
+                            fontWeight: 850,
+                            lineHeight: 1.5,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {transaction.category}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: 7,
+                            marginTop: 5,
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "inline-block",
+                              padding: "4px 7px",
+                              borderRadius: 7,
+                              background: isIncome ? C.softGreen : C.softBrown,
+                              color: isIncome ? C.greenLight : C.brown,
+                              fontSize: 9,
+                              fontWeight: 850,
+                            }}
+                          >
+                            {isIncome ? "PEMASUKAN" : "PENGELUARAN"}
+                          </span>
+
+                          <span style={{ color: C.muted, fontSize: 10 }}>
+                            {formatDate(transaction.transaction_date)}
+                          </span>
+                        </div>
+
+                        {transaction.description && (
+                          <p
+                            style={{
+                              margin: "7px 0 0",
+                              color: "#737A73",
+                              fontSize: 11,
+                              lineHeight: 1.7,
+                              overflowWrap: "anywhere",
+                              whiteSpace: "pre-wrap",
+                            }}
+                          >
+                            {transaction.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="finance-transaction-end">
+                      <strong
+                        style={{
+                          color: isIncome ? C.greenLight : C.brown,
+                          fontSize: 13,
+                          fontWeight: 850,
                           overflowWrap: "anywhere",
                         }}
                       >
-                        {transaction.category}
-                      </div>
+                        {isIncome ? "+" : "−"}
+                        {formatRupiah(Number(transaction.amount))}
+                      </strong>
 
-                      <div
-                        style={{
-                          color: "#7b817d",
-                          fontSize: 12,
-                          marginTop: 3,
-                          overflowWrap: "anywhere",
-                        }}
+                      <button
+                        type="button"
+                        className="finance-delete"
+                        onClick={() => handleDelete(transaction.id)}
+                        disabled={deletingId !== null}
                       >
-                        {transaction.transaction_date}
-                        {transaction.description
-                          ? ` • ${transaction.description}`
-                          : ""}
-                      </div>
+                        {deletingId === transaction.id
+                          ? "Menghapus..."
+                          : "Hapus"}
+                      </button>
                     </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <strong
-                      style={{
-                        color:
-                          transaction.type === "income"
-                            ? "#2f6b45"
-                            : "#8a6a4a",
-                        fontSize: 14,
-                      }}
-                    >
-                      {transaction.type === "income" ? "+" : "-"}
-                      {formatRupiah(Number(transaction.amount))}
-                    </strong>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(transaction.id)}
-                      disabled={deletingId === transaction.id}
-                      style={{
-                        ...deleteButtonStyle,
-                        opacity: deletingId === transaction.id ? 0.6 : 1,
-                        cursor:
-                          deletingId === transaction.id
-                            ? "not-allowed"
-                            : "pointer",
-                      }}
-                    >
-                      {deletingId === transaction.id
-                        ? "Menghapus..."
-                        : "Hapus"}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
 
-        {/* LOGOUT */}
         <button
           type="button"
           onClick={handleLogout}
           style={{
-            ...primaryButtonStyle,
-            marginTop: 22,
-            background: "#8a6a4a",
+            width: "100%",
+            minHeight: 45,
+            border: `1px solid ${C.border}`,
+            borderRadius: 13,
+            background: "rgba(255,255,255,.55)",
+            color: C.brown,
+            fontSize: 12,
+            fontWeight: 800,
+            cursor: "pointer",
           }}
         >
           Keluar dari Admin
         </button>
+
+        <footer style={{ textAlign: "center", padding: "25px 8px 0" }}>
+          <p
+            style={{
+              margin: 0,
+              color: C.green,
+              fontSize: 10,
+              fontWeight: 850,
+              letterSpacing: 2,
+            }}
+          >
+            PAJARA STUDIO
+          </p>
+
+          <p style={{ margin: "7px 0 0", color: C.muted, fontSize: 10 }}>
+            Berakar di Tanah Pasundan.
+          </p>
+        </footer>
       </div>
 
-      {/* Navbar bawah menggunakan BottomNavigation dari layout.tsx */}
+      {/* Navigasi bawah menggunakan BottomNavigation global di layout.tsx */}
     </main>
   );
 }
@@ -684,181 +1034,137 @@ function SummaryCard({
   label,
   value,
   icon,
+  tone,
 }: {
   label: string;
   value: string;
   icon: string;
+  tone: "income" | "expense" | "balance";
 }) {
+  const accent =
+    tone === "expense" ? C.brown : C.greenLight;
+
+  const iconBackground =
+    tone === "expense" ? C.softBrown : C.softGreen;
+
   return (
     <div
+      className="finance-summary-card"
       style={{
-        background: "#ffffff",
-        border: "1px solid rgba(33,77,50,0.08)",
-        borderRadius: 20,
+        background: C.white,
+        border: `1px solid ${C.border}`,
+        borderRadius: 19,
         padding: 18,
-        boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
         minWidth: 0,
+        boxShadow: "0 7px 24px rgba(33,77,50,.045)",
       }}
     >
       <div
+        className="finance-summary-icon"
         style={{
-          width: 38,
-          height: 38,
-          borderRadius: 12,
-          background: "#f7f4ee",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          width: 40,
+          height: 40,
+          borderRadius: 13,
+          background: iconBackground,
+          color: accent,
+          display: "grid",
+          placeItems: "center",
+          fontSize: 18,
           fontWeight: 900,
-          color: "#2f6b45",
-          marginBottom: 13,
+          marginBottom: 15,
         }}
       >
         {icon}
       </div>
 
-      <div style={{ fontSize: 12, color: "#727a74", marginBottom: 6 }}>
-        {label}
-      </div>
+      <div className="finance-summary-info">
+        <div
+          style={{
+            fontSize: 11,
+            color: C.muted,
+            fontWeight: 700,
+            marginBottom: 6,
+          }}
+        >
+          {label}
+        </div>
 
-      <div
-        style={{
-          fontSize: 19,
-          fontWeight: 900,
-          color: "#214d32",
-          overflowWrap: "anywhere",
-        }}
-      >
-        {value}
+        <div
+          className="finance-summary-value"
+          style={{
+            fontSize: 18,
+            fontWeight: 900,
+            color: C.green,
+            letterSpacing: -0.5,
+            overflowWrap: "anywhere",
+            lineHeight: 1.45,
+          }}
+        >
+          {value}
+        </div>
       </div>
     </div>
   );
 }
 
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "#f7f4ee",
-  color: "#214d32",
-  paddingBottom: "calc(100px + env(safe-area-inset-bottom))",
-  fontFamily:
-    "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-};
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    background: C.background,
+    color: C.green,
+    fontFamily:
+      "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+  },
 
-const loadingScreenStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 24,
-};
+  loadingScreen: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
 
-const loadingMarkStyle: React.CSSProperties = {
-  width: 52,
-  height: 52,
-  borderRadius: 16,
-  background: "#214d32",
-  color: "#ffffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: 900,
-  marginBottom: 16,
-  boxShadow: "0 8px 24px rgba(33,77,50,0.18)",
-};
+  logoMark: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    background: C.green,
+    color: C.white,
+    display: "grid",
+    placeItems: "center",
+    fontWeight: 900,
+    marginBottom: 16,
+    boxShadow: "0 8px 24px rgba(33,77,50,0.18)",
+  },
 
-const summaryGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-  gap: 14,
-  marginBottom: 22,
-};
+  eyebrow: {
+    margin: "0 0 7px",
+    color: C.brown,
+    fontSize: 9,
+    fontWeight: 850,
+    letterSpacing: 1.8,
+  },
 
-const panelStyle: React.CSSProperties = {
-  background: "#ffffff",
-  border: "1px solid rgba(33,77,50,0.08)",
-  borderRadius: 22,
-  padding: 20,
-  boxShadow: "0 10px 30px rgba(33,77,50,0.06)",
-  marginBottom: 22,
-};
+  sectionTitle: {
+    margin: 0,
+    fontSize: 19,
+    fontWeight: 850,
+    letterSpacing: -0.45,
+  },
 
-const sectionTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: 19,
-  fontWeight: 800,
-};
+  mutedText: {
+    margin: "6px 0 0",
+    color: C.muted,
+    fontSize: 12,
+    lineHeight: 1.75,
+  },
 
-const mutedTextStyle: React.CSSProperties = {
-  margin: "5px 0 0",
-  color: "#6d766f",
-  fontSize: 13,
-};
-
-const formGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-  gap: 14,
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 7,
-  fontSize: 12,
-  fontWeight: 800,
-  color: "#214d32",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  border: "1px solid #ddd9d1",
-  borderRadius: 11,
-  padding: "11px 12px",
-  background: "#ffffff",
-  color: "#214d32",
-  outline: "none",
-  fontSize: 13,
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  width: "100%",
-  border: 0,
-  borderRadius: 13,
-  padding: "13px 16px",
-  color: "#ffffff",
-  fontWeight: 800,
-  cursor: "pointer",
-  fontSize: 14,
-};
-
-const deleteButtonStyle: React.CSSProperties = {
-  border: "1px solid #eadfda",
-  background: "#fffaf7",
-  color: "#8a6a4a",
-  borderRadius: 9,
-  padding: "7px 10px",
-  fontWeight: 700,
-  fontSize: 12,
-};
-
-const transactionCardStyle: React.CSSProperties = {
-  border: "1px solid #e8e5df",
-  borderRadius: 15,
-  padding: 14,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 12,
-  flexWrap: "wrap",
-};
-
-const emptyStateStyle: React.CSSProperties = {
-  padding: 30,
-  textAlign: "center",
-  color: "#6d766f",
-  background: "#f7f4ee",
-  borderRadius: 16,
-  fontSize: 14,
+  emptyState: {
+    padding: "30px 18px",
+    textAlign: "center",
+    borderRadius: 16,
+    background: C.background,
+    border: `1px dashed ${C.border}`,
+  },
 };
