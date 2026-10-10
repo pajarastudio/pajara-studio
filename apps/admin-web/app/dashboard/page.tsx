@@ -1,9 +1,9 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import PushNotification from "../push-notification";
 
 const supabase = createClient(
@@ -14,8 +14,9 @@ const supabase = createClient(
 type StatItem = {
   label: string;
   value: number;
-  icon: string;
   detail: string;
+  symbol: string;
+  tone: "green" | "brown" | "cream";
 };
 
 const COLORS = {
@@ -26,6 +27,7 @@ const COLORS = {
   white: "#FFFFFF",
   muted: "#777D75",
   border: "#E7DFD5",
+  cream: "#F7F4EE",
 };
 
 export default function DashboardPage() {
@@ -65,9 +67,7 @@ export default function DashboardPage() {
       .eq("user_id", userId)
       .eq("is_read", false);
 
-    if (!error) {
-      setUnreadCount(count ?? 0);
-    }
+    if (!error) setUnreadCount(count ?? 0);
   }, []);
 
   useEffect(() => {
@@ -103,9 +103,7 @@ export default function DashboardPage() {
         loadUnreadCount(user.id),
       ]);
 
-      if (active) {
-        setLoading(false);
-      }
+      if (active) setLoading(false);
     }
 
     checkAdmin();
@@ -124,26 +122,30 @@ export default function DashboardPage() {
     {
       label: "Total Pesanan",
       value: totalOrders,
-      icon: "▤",
-      detail: "Semua pesanan",
+      detail: "Seluruh pesanan masuk",
+      symbol: "01",
+      tone: "green",
     },
     {
       label: "Pesanan Baru",
       value: newOrders,
-      icon: "✳",
       detail: "Menunggu diproses",
+      symbol: "02",
+      tone: "brown",
     },
     {
       label: "Sedang Diproses",
       value: processingOrders,
-      icon: "◷",
       detail: "Dalam pengerjaan",
+      symbol: "03",
+      tone: "cream",
     },
     {
       label: "Pesanan Selesai",
       value: completedOrders,
-      icon: "✓",
       detail: "Berhasil diselesaikan",
+      symbol: "04",
+      tone: "green",
     },
   ];
 
@@ -156,37 +158,63 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: COLORS.background,
-          color: COLORS.green,
-          fontFamily: "Arial, Helvetica, sans-serif",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: "50%",
-              border: "3px solid #D9E2D8",
-              borderTopColor: COLORS.greenLight,
-              margin: "0 auto 14px",
-              animation: "pajara-spin 0.8s linear infinite",
-            }}
+      <main className="pajara-loading">
+        <div className="pajara-loading-inner">
+          <Image
+            src="/icon-512.png"
+            alt="Logo Pajara Studio"
+            width={66}
+            height={66}
+            priority
+            className="pajara-loading-logo"
           />
-          <p style={{ fontSize: 13, fontWeight: 700 }}>
-            Menyiapkan dashboard...
-          </p>
-          <style>{`
-            @keyframes pajara-spin {
-              to { transform: rotate(360deg); }
-            }
-          `}</style>
+          <div className="pajara-spinner" />
+          <p>Menyiapkan ruang kerja...</p>
         </div>
+
+        <style jsx>{`
+          .pajara-loading {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: ${COLORS.background};
+            color: ${COLORS.green};
+            font-family: Arial, Helvetica, sans-serif;
+          }
+
+          .pajara-loading-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+          }
+
+          .pajara-loading-logo {
+            border-radius: 18px;
+            object-fit: cover;
+          }
+
+          .pajara-spinner {
+            width: 27px;
+            height: 27px;
+            border: 3px solid #d9e2d8;
+            border-top-color: ${COLORS.greenLight};
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+
+          .pajara-loading p {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
       </main>
     );
   }
@@ -195,572 +223,225 @@ export default function DashboardPage() {
     <>
       <PushNotification />
 
-      <main
-        style={{
-          minHeight: "100vh",
-          paddingBottom: "100px",
-          background: COLORS.background,
-          color: COLORS.green,
-          fontFamily:
-            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        }}
-      >
-        {/* HEADER */}
-        <header
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            background:
-              "linear-gradient(135deg, #183D27 0%, #214D32 55%, #2F6B45 100%)",
-            color: COLORS.white,
-            padding: "26px 22px 34px",
-            borderRadius: "0 0 28px 28px",
-            boxShadow: "0 12px 28px rgba(33,77,50,0.15)",
-          }}
-        >
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              width: 190,
-              height: 190,
-              right: -65,
-              top: -100,
-              border: "1px solid rgba(255,255,255,0.10)",
-              borderRadius: "50%",
-            }}
-          />
+      <main className="pajara-page">
+        {/* HEADER BRAND */}
+        <header className="pajara-header">
+          <div className="header-decoration header-decoration-one" />
+          <div className="header-decoration header-decoration-two" />
+          <div className="header-decoration header-decoration-three" />
 
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              width: 125,
-              height: 125,
-              right: 15,
-              top: -45,
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "50%",
-            }}
-          />
+          <div className="header-content">
+            <div className="brand-row">
+              <div className="brand-logo-wrap">
+                <Image
+                  src="/icon-512.png"
+                  alt="Logo Pajara Studio"
+                  width={54}
+                  height={54}
+                  priority
+                  className="brand-logo"
+                />
+              </div>
 
-          <div
-            style={{
-              maxWidth: 1080,
-              margin: "0 auto",
-              position: "relative",
-              zIndex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  margin: "0 0 9px",
-                  color: "#D8C5AD",
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: 3,
-                }}
+              <div className="brand-copy">
+                <p className="brand-name">PAJARA STUDIO</p>
+                <p className="brand-caption">
+                  BERAKAR DI TANAH PASUNDAN
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="notification-shortcut"
+                aria-label={`Buka notifikasi, ${unreadCount} belum dibaca`}
+                onClick={() => router.push("/notifications")}
               >
-                PAJARA STUDIO
-              </p>
+                <span className="bell-symbol">♧</span>
+                {unreadCount > 0 && (
+                  <span className="notification-dot">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
 
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: "clamp(24px, 5vw, 32px)",
-                  lineHeight: 1.15,
-                  letterSpacing: -1,
-                  fontWeight: 800,
-                }}
-              >
-                Admin Dashboard
+            <div className="header-heading">
+              <p className="eyebrow">RUANG KENDALI</p>
+              <h1>
+                Selamat datang
+                <br />
+                <span>di ruang kerja.</span>
               </h1>
-
-              <p
-                style={{
-                  margin: "9px 0 0",
-                  color: "#D9E4DA",
-                  fontSize: 12,
-                }}
-              >
-                Ruang kendali operasional Pajara.
+              <p className="header-description">
+                Kelola setiap pesanan, jaga kualitas karya,
+                dan tumbuhkan perjalanan Pajara.
               </p>
             </div>
 
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                flexShrink: 0,
-                borderRadius: 17,
-                border: "1px solid rgba(255,255,255,0.22)",
-                background: "rgba(255,255,255,0.10)",
-                display: "grid",
-                placeItems: "center",
-                fontSize: 14,
-                fontWeight: 900,
-                letterSpacing: 1,
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              PS
+            <div className="header-bottom">
+              <span className="header-bottom-label">
+                ADMINISTRATION
+              </span>
+              <span className="header-bottom-line" />
+              <span className="header-bottom-number">PS — 01</span>
             </div>
           </div>
         </header>
 
-        <div
-          style={{
-            maxWidth: 1080,
-            margin: "0 auto",
-            padding: "22px 16px 28px",
-          }}
-        >
-          {/* WELCOME */}
-          <section
-            style={{
-              ...cardStyle,
-              padding: 21,
-              marginTop: -3,
-              marginBottom: 23,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 14,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <p
-                style={{
-                  margin: "0 0 8px",
-                  color: COLORS.brown,
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: 1.5,
-                  textTransform: "uppercase",
-                }}
-              >
-                Selamat datang kembali
-              </p>
-
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 23,
-                  letterSpacing: -0.7,
-                  lineHeight: 1.2,
-                }}
-              >
-                Admin Pajara
-              </h2>
-
-              <p
-                style={{
-                  margin: "8px 0 0",
-                  color: COLORS.muted,
-                  fontSize: 12,
-                  overflowWrap: "anywhere",
-                }}
-              >
-                {adminEmail}
-              </p>
+        <div className="pajara-content">
+          {/* ADMIN PROFILE */}
+          <section className="admin-greeting">
+            <div className="greeting-mark">
+              <span>H</span>
             </div>
 
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                flexShrink: 0,
-                borderRadius: 16,
-                background: "#E8EFE7",
-                color: COLORS.green,
-                display: "grid",
-                placeItems: "center",
-                fontSize: 17,
-                fontWeight: 900,
-                border: "1px solid #D8E4D7",
-              }}
-            >
-              A
+            <div className="greeting-copy">
+              <p className="section-eyebrow">SENANG MELIHATMU KEMBALI</p>
+              <h2>Halo, Admin Pajara.</h2>
+              <p className="admin-email">{adminEmail}</p>
             </div>
+
+            <span className="greeting-leaf" aria-hidden="true">
+              ✳
+            </span>
           </section>
 
-          {/* STATISTICS TITLE */}
-          <div style={{ marginBottom: 14 }}>
-            <p
-              style={{
-                margin: "0 0 5px",
-                color: COLORS.brown,
-                fontSize: 10,
-                fontWeight: 800,
-                letterSpacing: 2,
-                textTransform: "uppercase",
-              }}
-            >
-              Ringkasan
-            </p>
-
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 21,
-                letterSpacing: -0.5,
-              }}
-            >
-              Statistik Pesanan
-            </h2>
-          </div>
-
           {/* STATISTICS */}
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: 12,
-              marginBottom: 28,
-            }}
-          >
-            {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                style={{
-                  ...cardStyle,
-                  padding: "17px 15px",
-                  minWidth: 0,
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 8,
-                    marginBottom: 17,
-                  }}
-                >
-                  <span
-                    style={{
-                      color: COLORS.muted,
-                      fontSize: 11,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {stat.label}
-                  </span>
-
-                  <span
-                    style={{
-                      width: 33,
-                      height: 33,
-                      flexShrink: 0,
-                      display: "grid",
-                      placeItems: "center",
-                      borderRadius: 11,
-                      background: index === 1 ? "#F3E9DD" : "#EAF1E9",
-                      color: index === 1 ? COLORS.brown : COLORS.greenLight,
-                      fontSize: 18,
-                      fontWeight: 800,
-                    }}
-                  >
-                    {stat.icon}
-                  </span>
-                </div>
-
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontSize: 33,
-                    fontWeight: 850,
-                    lineHeight: 1,
-                    letterSpacing: -1.5,
-                    color: COLORS.green,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {stat.value}
-                </p>
-
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 10,
-                    lineHeight: 1.4,
-                    color: COLORS.muted,
-                  }}
-                >
-                  {stat.detail}
-                </p>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background:
-                      index === 1 ? COLORS.brown : COLORS.greenLight,
-                    opacity: 0.75,
-                  }}
-                />
+          <section className="statistics-section">
+            <div className="section-heading">
+              <div>
+                <p className="section-eyebrow">GAMBARAN HARI INI</p>
+                <h2>Ringkasan pesanan</h2>
               </div>
-            ))}
+
+              <span className="section-index">01 / 04</span>
+            </div>
+
+            <div className="statistics-grid">
+              {stats.map((stat) => (
+                <article
+                  key={stat.label}
+                  className={`stat-card stat-${stat.tone}`}
+                >
+                  <div className="stat-top">
+                    <span className="stat-symbol">{stat.symbol}</span>
+                    <span className="stat-arrow" aria-hidden="true">
+                      ↗
+                    </span>
+                  </div>
+
+                  <p className="stat-value">{stat.value}</p>
+                  <h3>{stat.label}</h3>
+                  <p className="stat-detail">{stat.detail}</p>
+
+                  <div className="stat-bottom-line" />
+                </article>
+              ))}
+            </div>
           </section>
 
           {/* ORDER WORKSPACE */}
-          <section
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              padding: 23,
-              borderRadius: 23,
-              marginBottom: 22,
-              background:
-                "linear-gradient(145deg, #183D27 0%, #214D32 65%, #2F6B45 100%)",
-              color: COLORS.white,
-              boxShadow: "0 12px 27px rgba(33,77,50,0.12)",
-            }}
-          >
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                right: -35,
-                top: -42,
-                width: 130,
-                height: 130,
-                borderRadius: "50%",
-                border: "1px solid rgba(255,255,255,0.12)",
-              }}
-            />
+          <section className="workspace-section">
+            <div className="workspace-pattern" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
 
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <p
-                style={{
-                  margin: "0 0 9px",
-                  color: "#D9C6AE",
-                  fontSize: 10,
-                  fontWeight: 800,
-                  letterSpacing: 2,
-                }}
-              >
-                WORKSPACE
-              </p>
+            <div className="workspace-content">
+              <div className="workspace-topline">
+                <span className="workspace-label">PAJARA WORKSPACE</span>
+                <span className="workspace-number">01</span>
+              </div>
 
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 24,
-                  letterSpacing: -0.6,
-                }}
-              >
-                Kelola Pesanan
-              </h2>
+              <div className="workspace-title-row">
+                <div>
+                  <p className="workspace-kicker">DARI BRIEF MENJADI KARYA</p>
+                  <h2>
+                    Setiap karya
+                    <br />
+                    punya cerita.
+                  </h2>
+                </div>
 
-              <p
-                style={{
-                  maxWidth: 280,
-                  margin: "9px 0 21px",
-                  color: "#DFE8DF",
-                  fontSize: 12,
-                  lineHeight: 1.7,
-                }}
-              >
-                Pantau permintaan desain, periksa detail, dan kelola
-                pekerjaan pelanggan dari satu tempat.
+                <div className="workspace-emblem">P.</div>
+              </div>
+
+              <p className="workspace-description">
+                Lihat permintaan desain, periksa brief pelanggan,
+                dan kelola proses pengerjaan dalam satu ruang.
               </p>
 
               <button
                 type="button"
+                className="workspace-button"
                 onClick={() => router.push("/orders")}
-                style={{
-                  width: "100%",
-                  minHeight: 48,
-                  padding: "12px 16px",
-                  border: "none",
-                  borderRadius: 13,
-                  background: "#F1ECE6",
-                  color: COLORS.green,
-                  fontSize: 13,
-                  fontWeight: 850,
-                  cursor: "pointer",
-                }}
               >
-                Buka Daftar Pesanan&nbsp; →
+                <span>Buka daftar pesanan</span>
+                <span className="button-arrow">↗</span>
               </button>
             </div>
           </section>
 
           {/* ACTIVITY */}
-          <section
-            style={{
-              ...cardStyle,
-              padding: 19,
-              marginBottom: 18,
-            }}
-          >
-            <p
-              style={{
-                margin: "0 0 7px",
-                color: COLORS.brown,
-                fontSize: 10,
-                fontWeight: 800,
-                letterSpacing: 1.8,
-                textTransform: "uppercase",
-              }}
-            >
-              Ruang kerja
-            </p>
-
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 19,
-                letterSpacing: -0.3,
-              }}
-            >
-              Aktivitas Terbaru
-            </h2>
-
-            <div
-              style={{
-                height: 1,
-                background: COLORS.border,
-                margin: "16px 0",
-              }}
-            />
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  flexShrink: 0,
-                  borderRadius: 12,
-                  display: "grid",
-                  placeItems: "center",
-                  background: "#F3EAE0",
-                  color: COLORS.brown,
-                  fontSize: 18,
-                }}
-              >
-                ◷
+          <section className="activity-section">
+            <div className="section-heading activity-heading">
+              <div>
+                <p className="section-eyebrow">RUANG KERJA</p>
+                <h2>Aktivitas terbaru</h2>
               </div>
 
-              <div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
-                >
-                  Ringkasan aktivitas
-                </p>
+              <span className="activity-clock">◷</span>
+            </div>
 
-                <p
-                  style={{
-                    margin: "5px 0 0",
-                    color: COLORS.muted,
-                    fontSize: 11,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Riwayat aktivitas terperinci belum ditampilkan di
-                  dashboard ini.
+            <div className="activity-content">
+              <div className="activity-icon">✳</div>
+              <div className="activity-copy">
+                <h3>Perjalanan Pajara berlanjut</h3>
+                <p>
+                  Pantau perubahan status dan perkembangan pesanan
+                  melalui halaman pesanan dan notifikasi.
                 </p>
               </div>
             </div>
+
+            <button
+              type="button"
+              className="activity-link"
+              onClick={() => router.push("/orders")}
+            >
+              Lihat pesanan <span>→</span>
+            </button>
           </section>
 
-          {/* LOGOUT */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              width: "100%",
-              minHeight: 47,
-              border: "1px solid #D9CFC3",
-              borderRadius: 13,
-              background: "rgba(255,255,255,0.42)",
-              color: COLORS.brown,
-              fontSize: 12,
-              fontWeight: 800,
-              cursor: "pointer",
-            }}
-          >
-            Keluar dari Admin
-          </button>
+          {/* ACCOUNT */}
+          <section className="account-section">
+            <div>
+              <p className="account-title">PAJARA STUDIO</p>
+              <p className="account-caption">
+                Desain yang punya arah.
+              </p>
+            </div>
 
-          <footer
-            style={{
-              textAlign: "center",
-              padding: "25px 8px 5px",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: COLORS.green,
-                fontSize: 10,
-                fontWeight: 850,
-                letterSpacing: 2,
-              }}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="logout-button"
             >
-              PAJARA STUDIO
-            </p>
+              <span>Keluar</span>
+              <span>↗</span>
+            </button>
+          </section>
 
-            <p
-              style={{
-                margin: "7px 0 0",
-                color: COLORS.muted,
-                fontSize: 10,
-                letterSpacing: 0.4,
-              }}
-            >
-              Berakar di Tanah Pasundan.
-            </p>
+          <footer className="pajara-footer">
+            <span>PAJARA STUDIO © 2026</span>
+            <span>BERAKAR DI TANAH PASUNDAN.</span>
           </footer>
         </div>
 
         {/* BOTTOM NAVIGATION */}
-        <nav
-          aria-label="Navigasi utama"
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 100,
-            padding:
-              "9px 12px calc(9px + env(safe-area-inset-bottom))",
-            background: "rgba(255,255,255,0.96)",
-            borderTop: "1px solid #E4DED5",
-            boxShadow: "0 -8px 28px rgba(33,77,50,0.08)",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 620,
-              margin: "0 auto",
-              display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-              gap: 5,
-            }}
-          >
+        <nav className="bottom-navigation" aria-label="Navigasi utama">
+          <div className="bottom-navigation-inner">
             {[
               { label: "Dashboard", icon: "⌂", action: "home" },
               { label: "Pesanan", icon: "▤", action: "orders" },
@@ -778,6 +459,7 @@ export default function DashboardPage() {
                   key={item.action}
                   type="button"
                   aria-label={item.label}
+                  aria-current={selected ? "page" : undefined}
                   onClick={() => {
                     if (item.action === "home") {
                       window.scrollTo({
@@ -788,67 +470,25 @@ export default function DashboardPage() {
                       router.push("/orders");
                     } else if (item.action === "notifications") {
                       router.push("/notifications");
-                    } else if (item.action === "finance") {
+                    } else {
                       router.push("/finance");
                     }
                   }}
-                  style={{
-                    position: "relative",
-                    minWidth: 0,
-                    minHeight: 55,
-                    padding: "7px 2px",
-                    border: "none",
-                    borderRadius: 13,
-                    background: selected ? "#EAF1E9" : "transparent",
-                    color: selected ? COLORS.green : "#777D75",
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 5,
-                  }}
+                  className={`nav-item ${selected ? "nav-item-active" : ""}`}
                 >
                   <span
-                    style={{
-                      fontSize: item.action === "finance" ? 14 : 20,
-                      lineHeight: 1,
-                      fontWeight: 800,
-                    }}
+                    className={`nav-icon ${
+                      item.action === "finance" ? "nav-icon-rp" : ""
+                    }`}
                   >
                     {item.icon}
                   </span>
 
-                  <span
-                    style={{
-                      fontSize: 9,
-                      lineHeight: 1.2,
-                      fontWeight: selected ? 850 : 650,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.label}
-                  </span>
+                  <span className="nav-label">{item.label}</span>
 
                   {item.action === "notifications" &&
                     unreadCount > 0 && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: 3,
-                          right: "calc(50% - 19px)",
-                          minWidth: 14,
-                          height: 14,
-                          padding: "0 3px",
-                          borderRadius: 99,
-                          display: "grid",
-                          placeItems: "center",
-                          background: "#B45E48",
-                          color: "#fff",
-                          fontSize: 8,
-                          fontWeight: 900,
-                        }}
-                      >
+                      <span className="nav-badge">
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
                     )}
@@ -858,6 +498,848 @@ export default function DashboardPage() {
           </div>
         </nav>
       </main>
+
+      <style jsx>{`
+        .pajara-page {
+          min-height: 100vh;
+          padding-bottom: calc(100px + env(safe-area-inset-bottom));
+          background: ${COLORS.background};
+          color: ${COLORS.green};
+          font-family:
+            "DM Sans", Inter, ui-sans-serif, system-ui, -apple-system,
+            BlinkMacSystemFont, sans-serif;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .pajara-header {
+          position: relative;
+          overflow: hidden;
+          color: ${COLORS.cream};
+          background:
+            radial-gradient(
+              circle at 100% 5%,
+              rgba(138, 106, 74, 0.24),
+              transparent 32%
+            ),
+            linear-gradient(145deg, #173923 0%, #214d32 58%, #2f6b45 100%);
+          border-radius: 0 0 30px 30px;
+          box-shadow: 0 12px 32px rgba(33, 77, 50, 0.12);
+        }
+
+        .header-content {
+          position: relative;
+          z-index: 2;
+          max-width: 1080px;
+          margin: 0 auto;
+          padding: 22px 22px 20px;
+        }
+
+        .header-decoration {
+          position: absolute;
+          pointer-events: none;
+          border: 1px solid rgba(247, 244, 238, 0.09);
+          border-radius: 50%;
+        }
+
+        .header-decoration-one {
+          width: 260px;
+          height: 260px;
+          right: -115px;
+          top: -100px;
+        }
+
+        .header-decoration-two {
+          width: 200px;
+          height: 200px;
+          right: -65px;
+          top: -70px;
+        }
+
+        .header-decoration-three {
+          width: 120px;
+          height: 120px;
+          right: -25px;
+          top: -30px;
+          border-color: rgba(247, 244, 238, 0.06);
+        }
+
+        .brand-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .brand-logo-wrap {
+          width: 54px;
+          height: 54px;
+          flex-shrink: 0;
+          padding: 3px;
+          border: 1px solid rgba(247, 244, 238, 0.32);
+          border-radius: 17px;
+          background: rgba(247, 244, 238, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-logo {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          border-radius: 13px;
+        }
+
+        .brand-copy {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .brand-name {
+          margin: 0;
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: 2.2px;
+        }
+
+        .brand-caption {
+          margin: 5px 0 0;
+          color: #d8c5ad;
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 1.15px;
+        }
+
+        .notification-shortcut {
+          position: relative;
+          display: grid;
+          place-items: center;
+          width: 42px;
+          height: 42px;
+          flex-shrink: 0;
+          border: 1px solid rgba(247, 244, 238, 0.2);
+          border-radius: 14px;
+          background: rgba(247, 244, 238, 0.08);
+          color: ${COLORS.cream};
+          cursor: pointer;
+        }
+
+        .bell-symbol {
+          font-size: 22px;
+          line-height: 1;
+        }
+
+        .notification-dot {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          min-width: 17px;
+          height: 17px;
+          display: grid;
+          place-items: center;
+          padding: 0 4px;
+          border: 2px solid #214d32;
+          border-radius: 99px;
+          background: #b45e48;
+          color: #fff;
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .header-heading {
+          padding: 36px 0 31px;
+          max-width: 540px;
+        }
+
+        .eyebrow,
+        .section-eyebrow {
+          margin: 0;
+          font-size: 9px;
+          font-weight: 850;
+          letter-spacing: 2px;
+        }
+
+        .eyebrow {
+          margin-bottom: 13px;
+          color: #d9c6ae;
+        }
+
+        .header-heading h1 {
+          margin: 0;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(35px, 8vw, 51px);
+          font-weight: 400;
+          line-height: 1.06;
+          letter-spacing: -1.6px;
+        }
+
+        .header-heading h1 span {
+          color: #d8c5ad;
+          font-style: italic;
+        }
+
+        .header-description {
+          max-width: 320px;
+          margin: 15px 0 0;
+          color: #e0e8df;
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .header-bottom {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding-top: 15px;
+          border-top: 1px solid rgba(247, 244, 238, 0.17);
+        }
+
+        .header-bottom-label,
+        .header-bottom-number {
+          color: #d8c5ad;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+          white-space: nowrap;
+        }
+
+        .header-bottom-line {
+          flex: 1;
+          height: 1px;
+          background: rgba(247, 244, 238, 0.25);
+        }
+
+        .header-bottom-number {
+          letter-spacing: 1px;
+        }
+
+        .pajara-content {
+          width: 100%;
+          max-width: 1080px;
+          margin: 0 auto;
+          padding: 20px 16px 0;
+        }
+
+        .admin-greeting {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          padding: 17px 16px;
+          margin-bottom: 31px;
+          overflow: hidden;
+          border: 1px solid ${COLORS.border};
+          border-radius: 19px;
+          background: ${COLORS.cream};
+          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
+        }
+
+        .greeting-mark {
+          width: 46px;
+          height: 46px;
+          flex-shrink: 0;
+          display: grid;
+          place-items: center;
+          border-radius: 15px;
+          border: 1px solid #d6dfd2;
+          background: #e6ede3;
+          color: ${COLORS.green};
+        }
+
+        .greeting-mark span {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 25px;
+          font-style: italic;
+        }
+
+        .greeting-copy {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .section-eyebrow {
+          color: ${COLORS.brown};
+          font-size: 8px;
+          letter-spacing: 1.5px;
+          line-height: 1.6;
+        }
+
+        .greeting-copy h2 {
+          margin: 4px 0 0;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 20px;
+          font-weight: 500;
+          letter-spacing: -0.5px;
+        }
+
+        .admin-email {
+          margin: 5px 0 0;
+          overflow-wrap: anywhere;
+          color: ${COLORS.muted};
+          font-size: 10px;
+        }
+
+        .greeting-leaf {
+          align-self: flex-start;
+          color: #b6c6b0;
+          font-size: 25px;
+        }
+
+        .statistics-section {
+          margin-bottom: 29px;
+        }
+
+        .section-heading {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 15px;
+        }
+
+        .section-heading h2 {
+          margin: 5px 0 0;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 25px;
+          font-weight: 500;
+          letter-spacing: -0.8px;
+        }
+
+        .section-index {
+          padding-bottom: 4px;
+          color: ${COLORS.muted};
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          white-space: nowrap;
+        }
+
+        .statistics-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 11px;
+        }
+
+        .stat-card {
+          position: relative;
+          min-width: 0;
+          min-height: 165px;
+          padding: 15px 14px 17px;
+          overflow: hidden;
+          border: 1px solid ${COLORS.border};
+          border-radius: 19px;
+          background: ${COLORS.white};
+          box-shadow: 0 4px 16px rgba(33, 77, 50, 0.025);
+        }
+
+        .stat-green {
+          background: #fff;
+        }
+
+        .stat-brown {
+          background: #f8f1e9;
+          border-color: #e7d8c7;
+        }
+
+        .stat-cream {
+          background: #f8f6f0;
+        }
+
+        .stat-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .stat-symbol {
+          color: ${COLORS.brown};
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .stat-arrow {
+          display: grid;
+          place-items: center;
+          width: 26px;
+          height: 26px;
+          border: 1px solid ${COLORS.border};
+          border-radius: 9px;
+          color: ${COLORS.greenLight};
+          font-size: 13px;
+        }
+
+        .stat-value {
+          margin: 16px 0 7px;
+          color: ${COLORS.green};
+          font-size: 36px;
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: -1.8px;
+          font-variant-numeric: tabular-nums;
+        }
+
+        .stat-card h3 {
+          margin: 0;
+          color: ${COLORS.green};
+          font-size: 11px;
+          font-weight: 800;
+          line-height: 1.4;
+        }
+
+        .stat-detail {
+          margin: 5px 0 0;
+          color: ${COLORS.muted};
+          font-size: 9px;
+          line-height: 1.5;
+        }
+
+        .stat-bottom-line {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 3px;
+          background: ${COLORS.greenLight};
+          opacity: 0.7;
+        }
+
+        .stat-brown .stat-bottom-line {
+          background: ${COLORS.brown};
+        }
+
+        .stat-cream .stat-bottom-line {
+          background: #b9c9b3;
+        }
+
+        .workspace-section {
+          position: relative;
+          overflow: hidden;
+          margin-bottom: 29px;
+          border-radius: 24px;
+          background:
+            radial-gradient(
+              circle at 100% 0%,
+              rgba(138, 106, 74, 0.24),
+              transparent 34%
+            ),
+            linear-gradient(145deg, #173923 0%, #214d32 70%, #2f6b45 100%);
+          color: ${COLORS.cream};
+          box-shadow: 0 12px 28px rgba(33, 77, 50, 0.12);
+        }
+
+        .workspace-pattern {
+          position: absolute;
+          right: -85px;
+          top: 70px;
+          width: 210px;
+          height: 210px;
+          pointer-events: none;
+        }
+
+        .workspace-pattern span {
+          position: absolute;
+          inset: 0;
+          border: 1px solid rgba(247, 244, 238, 0.12);
+          border-radius: 50%;
+        }
+
+        .workspace-pattern span:nth-child(2) {
+          inset: 22px;
+        }
+
+        .workspace-pattern span:nth-child(3) {
+          inset: 44px;
+        }
+
+        .workspace-content {
+          position: relative;
+          z-index: 1;
+          padding: 21px;
+        }
+
+        .workspace-topline {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid rgba(247, 244, 238, 0.18);
+        }
+
+        .workspace-label,
+        .workspace-number {
+          color: #d8c5ad;
+          font-size: 8px;
+          font-weight: 850;
+          letter-spacing: 1.7px;
+        }
+
+        .workspace-number {
+          font-size: 10px;
+        }
+
+        .workspace-title-row {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 10px;
+          margin-top: 25px;
+        }
+
+        .workspace-kicker {
+          margin: 0 0 9px;
+          color: #d8c5ad;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 1.2px;
+        }
+
+        .workspace-title-row h2 {
+          margin: 0;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(31px, 7vw, 40px);
+          font-weight: 400;
+          line-height: 1.07;
+          letter-spacing: -1px;
+        }
+
+        .workspace-emblem {
+          display: grid;
+          place-items: center;
+          width: 58px;
+          height: 58px;
+          flex-shrink: 0;
+          border: 1px solid rgba(247, 244, 238, 0.25);
+          border-radius: 19px;
+          color: #e4d5c2;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 34px;
+          font-style: italic;
+        }
+
+        .workspace-description {
+          max-width: 310px;
+          margin: 14px 0 22px;
+          color: #e0e8df;
+          font-size: 11px;
+          line-height: 1.8;
+        }
+
+        .workspace-button {
+          width: 100%;
+          min-height: 49px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 15px;
+          border: none;
+          border-radius: 13px;
+          background: ${COLORS.cream};
+          color: ${COLORS.green};
+          font-size: 11px;
+          font-weight: 850;
+          cursor: pointer;
+          transition:
+            transform 0.2s ease,
+            background 0.2s ease;
+        }
+
+        .workspace-button:active {
+          transform: scale(0.985);
+        }
+
+        .button-arrow {
+          display: grid;
+          place-items: center;
+          width: 27px;
+          height: 27px;
+          border-radius: 9px;
+          background: #e5e9df;
+          font-size: 15px;
+        }
+
+        .activity-section {
+          margin-bottom: 22px;
+          padding: 19px;
+          border: 1px solid ${COLORS.border};
+          border-radius: 20px;
+          background: ${COLORS.cream};
+        }
+
+        .activity-heading {
+          align-items: center;
+          margin-bottom: 18px;
+        }
+
+        .activity-heading h2 {
+          font-size: 23px;
+        }
+
+        .activity-clock {
+          display: grid;
+          place-items: center;
+          width: 37px;
+          height: 37px;
+          flex-shrink: 0;
+          border: 1px solid ${COLORS.border};
+          border-radius: 13px;
+          color: ${COLORS.brown};
+          font-size: 21px;
+        }
+
+        .activity-content {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 15px 0;
+          border-top: 1px solid ${COLORS.border};
+          border-bottom: 1px solid ${COLORS.border};
+        }
+
+        .activity-icon {
+          width: 38px;
+          height: 38px;
+          flex-shrink: 0;
+          display: grid;
+          place-items: center;
+          border-radius: 12px;
+          background: #e6ede3;
+          color: ${COLORS.greenLight};
+          font-size: 18px;
+        }
+
+        .activity-copy h3 {
+          margin: 1px 0 0;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .activity-copy p {
+          margin: 6px 0 0;
+          color: ${COLORS.muted};
+          font-size: 10px;
+          line-height: 1.8;
+        }
+
+        .activity-link {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          margin-top: 15px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${COLORS.green};
+          font-size: 11px;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .activity-link span {
+          font-size: 16px;
+        }
+
+        .account-section {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          padding: 18px 0;
+          border-top: 1px solid #ddd4c8;
+          border-bottom: 1px solid #ddd4c8;
+        }
+
+        .account-title {
+          margin: 0;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.8px;
+        }
+
+        .account-caption {
+          margin: 5px 0 0;
+          color: ${COLORS.muted};
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 12px;
+          font-style: italic;
+        }
+
+        .logout-button {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-height: 38px;
+          padding: 0 12px;
+          border: 1px solid #d8c9b8;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.35);
+          color: ${COLORS.brown};
+          font-size: 10px;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .logout-button span:last-child {
+          font-size: 14px;
+        }
+
+        .pajara-footer {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 20px 2px 5px;
+          color: ${COLORS.muted};
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+        }
+
+        .bottom-navigation {
+          position: fixed;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 100;
+          padding: 8px 12px
+            calc(8px + env(safe-area-inset-bottom));
+          border-top: 1px solid rgba(228, 222, 213, 0.95);
+          background: rgba(255, 255, 255, 0.96);
+          box-shadow: 0 -8px 28px rgba(33, 77, 50, 0.07);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+        }
+
+        .bottom-navigation-inner {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 5px;
+          width: 100%;
+          max-width: 620px;
+          margin: 0 auto;
+        }
+
+        .nav-item {
+          position: relative;
+          display: flex;
+          min-width: 0;
+          min-height: 54px;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          padding: 6px 2px;
+          border: none;
+          border-radius: 14px;
+          background: transparent;
+          color: ${COLORS.muted};
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+
+        .nav-item-active {
+          background: #eaf1e9;
+          color: ${COLORS.green};
+        }
+
+        .nav-icon {
+          font-size: 21px;
+          font-weight: 800;
+          line-height: 1;
+        }
+
+        .nav-icon-rp {
+          font-size: 13px;
+        }
+
+        .nav-label {
+          font-size: 9px;
+          font-weight: 700;
+          line-height: 1.2;
+          white-space: nowrap;
+        }
+
+        .nav-item-active .nav-label {
+          font-weight: 900;
+        }
+
+        .nav-badge {
+          position: absolute;
+          top: 2px;
+          right: calc(50% - 21px);
+          display: grid;
+          place-items: center;
+          min-width: 15px;
+          height: 15px;
+          padding: 0 3px;
+          border: 2px solid #fff;
+          border-radius: 99px;
+          background: #b45e48;
+          color: #fff;
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        button:focus-visible {
+          outline: 2px solid ${COLORS.brown};
+          outline-offset: 3px;
+        }
+
+        @media (min-width: 700px) {
+          .header-content {
+            padding: 28px 32px 23px;
+          }
+
+          .header-heading {
+            padding: 48px 0 38px;
+          }
+
+          .pajara-content {
+            padding: 25px 28px 0;
+          }
+
+          .admin-greeting {
+            padding: 20px 22px;
+          }
+
+          .statistics-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+          }
+
+          .stat-card {
+            min-height: 185px;
+            padding: 18px;
+          }
+
+          .stat-value {
+            font-size: 43px;
+          }
+
+          .workspace-content {
+            padding: 29px;
+          }
+
+          .workspace-description {
+            max-width: 430px;
+          }
+
+          .workspace-button {
+            max-width: 330px;
+          }
+
+          .activity-section {
+            padding: 23px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .workspace-button {
+            transition: none;
+          }
+        }
+      `}</style>
     </>
   );
 }
