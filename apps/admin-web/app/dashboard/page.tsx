@@ -232,14 +232,19 @@ export default function DashboardPage() {
           <div className="header-content">
             <div className="brand-row">
               <div className="brand-logo-wrap">
-                <Image
-                  src="/icon-512.png"
-                  alt="Logo Pajara Studio"
-                  width={54}
-                  height={54}
-                  priority
-                  className="brand-logo"
-                />
+                <span className="brand-logo-orbit" aria-hidden="true" />
+                <span className="brand-logo-side-accent" aria-hidden="true" />
+
+                <div className="brand-logo-inner">
+                  <Image
+                    src="/icon-512.png"
+                    alt="Logo Pajara Studio"
+                    width={54}
+                    height={54}
+                    priority
+                    className="brand-logo"
+                  />
+                </div>
               </div>
 
               <div className="brand-copy">
@@ -584,17 +589,84 @@ export default function DashboardPage() {
           gap: 12px;
         }
 
+        /* LOGO UTAMA: bingkai lengkung berlapis */
         .brand-logo-wrap {
-          width: 54px;
-          height: 54px;
+          position: relative;
+          isolation: isolate;
+          width: 58px;
+          height: 58px;
           flex-shrink: 0;
-          padding: 3px;
           display: grid;
           place-items: center;
-          border: 1px solid rgba(247, 244, 238, 0.3);
-          border-radius: 17px;
-          background: rgba(247, 244, 238, 0.13);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          padding: 4px;
+          border: 1px solid rgba(247, 244, 238, 0.42);
+          border-radius: 21px;
+          background: linear-gradient(
+            145deg,
+            rgba(247, 244, 238, 0.19),
+            rgba(247, 244, 238, 0.055)
+          );
+          box-shadow:
+            0 7px 18px rgba(0, 0, 0, 0.13),
+            inset 0 0 0 1px rgba(247, 244, 238, 0.045);
+        }
+
+        .brand-logo-wrap::before {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          inset: -5px;
+          border: 1px solid rgba(216, 197, 173, 0.56);
+          border-radius: 25px;
+          pointer-events: none;
+        }
+
+        .brand-logo-wrap::after {
+          content: "";
+          position: absolute;
+          z-index: 2;
+          top: 8px;
+          right: -5px;
+          width: 9px;
+          height: 25px;
+          border-right: 1px solid rgba(216, 197, 173, 0.9);
+          border-radius: 0 9px 9px 0;
+          pointer-events: none;
+        }
+
+        .brand-logo-orbit {
+          position: absolute;
+          z-index: 2;
+          left: -5px;
+          bottom: 8px;
+          width: 9px;
+          height: 25px;
+          border-left: 1px solid rgba(216, 197, 173, 0.78);
+          border-radius: 9px 0 0 9px;
+          pointer-events: none;
+        }
+
+        .brand-logo-side-accent {
+          position: absolute;
+          z-index: 2;
+          right: 9px;
+          bottom: -4px;
+          width: 21px;
+          height: 7px;
+          border-bottom: 1px solid rgba(216, 197, 173, 0.9);
+          border-radius: 0 0 10px 10px;
+          pointer-events: none;
+        }
+
+        .brand-logo-inner {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(247, 244, 238, 0.2);
+          border-radius: 16px;
+          background: rgba(247, 244, 238, 0.97);
         }
 
         .brand-logo {
@@ -602,7 +674,7 @@ export default function DashboardPage() {
           height: 100%;
           display: block;
           object-fit: contain;
-          border-radius: 12px;
+          border-radius: 15px;
         }
 
         .brand-copy {
@@ -735,7 +807,6 @@ export default function DashboardPage() {
           padding: 20px 16px 0;
         }
 
-        /* Sapaan: logo asli dibingkai lembut, tanpa monogram tambahan */
         .admin-greeting {
           position: relative;
           display: flex;
@@ -1044,7 +1115,6 @@ export default function DashboardPage() {
           letter-spacing: -1px;
         }
 
-        /* Logo asli menggantikan huruf P. */
         .workspace-logo-wrap {
           width: 64px;
           height: 64px;
