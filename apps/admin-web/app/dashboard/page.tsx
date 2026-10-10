@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import PushNotification from "../push-notification";
@@ -20,30 +21,81 @@ type NotificationItem = {
   created_at: string;
 };
 
+type StatItem = {
+  label: string;
+  value: number;
+  icon: string;
+  detail: string;
+};
+
+const COLORS = {
+  background: "#F1ECE6",
+  green: "#214D32",
+  greenLight: "#2F6B45",
+  brown: "#8A6A4A",
+  white: "#FFFFFF",
+  muted: "#777D75",
+  border: "#E7DFD5",
+};
+
 export default function DashboardPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
-
   const [totalOrders, setTotalOrders] = useState(0);
   const [newOrders, setNewOrders] = useState(0);
   const [processingOrders, setProcessingOrders] = useState(0);
   const [completedOrders, setCompletedOrders] = useState(0);
-
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationLoading, setNotificationLoading] = useState(true);
+  const [markingAll, setMarkingAll] = useState(false);
+
+  const loadNotifications = useCallback(async (userId: string) => {
+    setNotificationLoading(true);
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, order_id, type, title, message, is_read, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (!error && data) {
+      setNotifications(data as NotificationItem[]);
+    }
+
+    setNotificationLoading(false);
+  }, []);
+
+  const loadOrders = useCallback(async () => {
+    const { data, error } = await supabase.from("orders").select("status");
+
+    if (!error && data) {
+      setTotalOrders(data.length);
+      setNewOrders(
+        data.filter((order) => order.status === "pending").length
+      );
+      setProcessingOrders(
+        data.filter((order) => order.status === "processing").length
+      );
+      setCompletedOrders(
+        data.filter((order) => order.status === "completed").length
+      );
+    }
+  }, []);
 
   useEffect(() => {
+    let active = true;
+
     async function checkAdmin() {
       const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
 
-      if (!sessionData.session?.user) {
+      if (!user) {
         router.replace("/");
         return;
       }
-
-      const user = sessionData.session.user;
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles_v2")
@@ -57,53 +109,22 @@ export default function DashboardPage() {
         return;
       }
 
+      if (!active) return;
+
       setAdminEmail(user.email || "");
+      await Promise.all([loadOrders(), loadNotifications(user.id)]);
 
-      const { data: orders, error: ordersError } = await supabase
-        .from("orders")
-        .select("status");
-
-      if (!ordersError && orders) {
-        setTotalOrders(orders.length);
-
-        setNewOrders(
-          orders.filter((order) => order.status === "pending").length
-        );
-
-        setProcessingOrders(
-          orders.filter((order) => order.status === "processing").length
-        );
-
-        setCompletedOrders(
-          orders.filter((order) => order.status === "completed").length
-        );
+      if (active) {
+        setLoading(false);
       }
-
-      await loadNotifications(user.id);
-      setLoading(false);
     }
 
     checkAdmin();
-  }, [router]);
 
-  async function loadNotifications(userId: string) {
-    setNotificationLoading(true);
-
-    const { data, error } = await supabase
-      .from("notifications")
-      .select(
-        "id, order_id, type, title, message, is_read, created_at"
-      )
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(10);
-
-    if (!error && data) {
-      setNotifications(data);
-    }
-
-    setNotificationLoading(false);
-  }
+    return () => {
+      active = false;
+    };
+  }, [router, loadOrders, loadNotifications]);
 
   async function markAsRead(notificationId: string) {
     const { error } = await supabase
@@ -113,10 +134,8 @@ export default function DashboardPage() {
 
     if (!error) {
       setNotifications((current) =>
-        current.map((notification) =>
-          notification.id === notificationId
-            ? { ...notification, is_read: true }
-            : notification
+        current.map((item) =>
+          item.id === notificationId ? { ...item, is_read: true } : item
         )
       );
     }
@@ -124,12 +143,12 @@ export default function DashboardPage() {
 
   async function markAllAsRead() {
     const unreadIds = notifications
-      .filter((notification) => !notification.is_read)
-      .map((notification) => notification.id);
+      .filter((item) => !item.is_read)
+      .map((item) => item.id);
 
-    if (unreadIds.length === 0) {
-      return;
-    }
+    if (unreadIds.length === 0 || markingAll) return;
+
+    setMarkingAll(true);
 
     const { error } = await supabase
       .from("notifications")
@@ -138,12 +157,11 @@ export default function DashboardPage() {
 
     if (!error) {
       setNotifications((current) =>
-        current.map((notification) => ({
-          ...notification,
-          is_read: true,
-        }))
+        current.map((item) => ({ ...item, is_read: true }))
       );
     }
+
+    setMarkingAll(false);
   }
 
   async function handleLogout() {
@@ -153,77 +171,96 @@ export default function DashboardPage() {
 
   function formatNotificationDate(date: string) {
     return new Date(date).toLocaleString("id-ID", {
-      dateStyle: "short",
-      timeStyle: "short",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
+
+  const unreadCount = notifications.filter((item) => !item.is_read).length;
+
+  const stats: StatItem[] = [
+    {
+      label: "Total Pesanan",
+      value: totalOrders,
+      icon: "▤",
+      detail: "Semua pesanan",
+    },
+    {
+      label: "Pesanan Baru",
+      value: newOrders,
+      icon: "✳",
+      detail: "Menunggu diproses",
+    },
+    {
+      label: "Sedang Diproses",
+      value: processingOrders,
+      icon: "◷",
+      detail: "Dalam pengerjaan",
+    },
+    {
+      label: "Pesanan Selesai",
+      value: completedOrders,
+      icon: "✓",
+      detail: "Berhasil diselesaikan",
+    },
+  ];
 
   if (loading) {
     return (
       <main
         style={{
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f7f4ee",
-          color: "#214d32",
-          fontFamily:
-            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          display: "grid",
+          placeItems: "center",
+          background: COLORS.background,
+          color: COLORS.green,
+          fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
         <div style={{ textAlign: "center" }}>
           <div
             style={{
-              width: "38px",
-              height: "38px",
+              width: 38,
+              height: 38,
               borderRadius: "50%",
-              border: "3px solid #dfe8e1",
-              borderTopColor: "#2f6b45",
+              border: "3px solid #D9E2D8",
+              borderTopColor: COLORS.greenLight,
               margin: "0 auto 14px",
+              animation: "pajara-spin 0.8s linear infinite",
             }}
           />
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
-          >
-            Memuat Pajara Admin...
+          <p style={{ fontSize: 13, fontWeight: 700 }}>
+            Menyiapkan dashboard...
           </p>
+          <style>{`
+            @keyframes pajara-spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       </main>
     );
   }
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.is_read
-  ).length;
+  const cardStyle = {
+    background: COLORS.white,
+    border: `1px solid ${COLORS.border}`,
+    borderRadius: 20,
+    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
+  } as const;
 
-  const stats = [
-    {
-      label: "Total Pesanan",
-      value: totalOrders,
-      symbol: "01",
-    },
-    {
-      label: "Pesanan Baru",
-      value: newOrders,
-      symbol: "02",
-    },
-    {
-      label: "Diproses",
-      value: processingOrders,
-      symbol: "03",
-    },
-    {
-      label: "Selesai",
-      value: completedOrders,
-      symbol: "04",
-    },
-  ];
+  const smallButtonStyle = {
+    border: "1px solid #DCE6DC",
+    borderRadius: 10,
+    padding: "9px 12px",
+    background: "#EDF3ED",
+    color: COLORS.green,
+    fontSize: 11,
+    fontWeight: 800,
+    cursor: "pointer",
+  } as const;
 
   return (
     <>
@@ -232,145 +269,110 @@ export default function DashboardPage() {
       <main
         style={{
           minHeight: "100vh",
-          background: "#f7f4ee",
-          color: "#214d32",
+          paddingBottom: "100px",
+          background: COLORS.background,
+          color: COLORS.green,
           fontFamily:
             "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-          paddingBottom: "82px",
         }}
       >
         {/* HEADER */}
         <header
           style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 50,
+            position: "relative",
             overflow: "hidden",
             background:
-              "linear-gradient(135deg, #214d32 0%, #2f6b45 55%, #214d32 100%)",
-            color: "#ffffff",
-            padding: "20px 20px 19px",
-            boxShadow: "0 8px 30px rgba(33,77,50,0.18)",
+              "linear-gradient(135deg, #183D27 0%, #214D32 55%, #2F6B45 100%)",
+            color: COLORS.white,
+            padding: "26px 22px 34px",
+            borderRadius: "0 0 28px 28px",
+            boxShadow: "0 12px 28px rgba(33,77,50,0.15)",
           }}
         >
           <div
+            aria-hidden="true"
             style={{
               position: "absolute",
-              width: "180px",
-              height: "180px",
+              width: 190,
+              height: 190,
+              right: -65,
+              top: -100,
+              border: "1px solid rgba(255,255,255,0.10)",
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.045)",
-              right: "-55px",
-              top: "-85px",
             }}
           />
-
           <div
+            aria-hidden="true"
             style={{
               position: "absolute",
-              width: "95px",
-              height: "95px",
-              borderRadius: "28px",
-              border: "1px solid rgba(255,255,255,0.07)",
-              right: "85px",
-              bottom: "-48px",
-              transform: "rotate(24deg)",
-            }}
-          />
-
-          <div
-            style={{
-              position: "absolute",
-              width: "7px",
-              height: "7px",
+              width: 125,
+              height: 125,
+              right: 15,
+              top: -45,
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.28)",
-              right: "130px",
-              top: "22px",
             }}
           />
 
           <div
             style={{
-              maxWidth: "1080px",
+              maxWidth: 1080,
               margin: "0 auto",
               position: "relative",
-              zIndex: 2,
+              zIndex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "16px",
+              gap: 16,
             }}
           >
             <div>
-              <div
+              <p
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "5px",
+                  margin: "0 0 9px",
+                  color: "#D8C5AD",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: 3,
                 }}
               >
-                <span
-                  style={{
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    background: "#dcebdd",
-                    opacity: 0.9,
-                  }}
-                />
-
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "10px",
-                    letterSpacing: "2.2px",
-                    fontWeight: 800,
-                    opacity: 0.72,
-                  }}
-                >
-                  PAJARA STUDIO
-                </p>
-              </div>
-
+                PAJARA STUDIO
+              </p>
               <h1
                 style={{
                   margin: 0,
-                  fontSize: "21px",
+                  fontSize: "clamp(24px, 5vw, 32px)",
                   lineHeight: 1.15,
-                  letterSpacing: "-0.5px",
+                  letterSpacing: -1,
                   fontWeight: 800,
                 }}
               >
                 Admin Dashboard
               </h1>
-
-              <div
+              <p
                 style={{
-                  width: "34px",
-                  height: "2px",
-                  borderRadius: "999px",
-                  background: "#8a6a4a",
-                  marginTop: "11px",
+                  margin: "9px 0 0",
+                  color: "#D9E4DA",
+                  fontSize: 12,
                 }}
-              />
+              >
+                Ruang kendali operasional Pajara.
+              </p>
             </div>
 
             <div
               style={{
-                width: "46px",
-                height: "46px",
-                borderRadius: "15px",
+                width: 52,
+                height: 52,
+                flexShrink: 0,
+                borderRadius: 17,
+                border: "1px solid rgba(255,255,255,0.22)",
                 background: "rgba(255,255,255,0.10)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "13px",
+                display: "grid",
+                placeItems: "center",
+                fontSize: 14,
                 fontWeight: 900,
-                letterSpacing: "0.5px",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                letterSpacing: 1,
                 backdropFilter: "blur(8px)",
               }}
             >
@@ -379,162 +381,197 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* CONTENT */}
-        <section
+        <div
           style={{
-            maxWidth: "1080px",
+            maxWidth: 1080,
             margin: "0 auto",
-            padding: "28px 20px 40px",
+            padding: "22px 16px 28px",
           }}
         >
           {/* WELCOME */}
           <section
             style={{
-              background:
-                "linear-gradient(135deg, #ffffff 0%, #f4f7f2 100%)",
-              borderRadius: "22px",
-              padding: "24px",
-              marginBottom: "18px",
-              border: "1px solid #e6ebe5",
-              boxShadow: "0 12px 35px rgba(33,77,50,0.07)",
+              ...cardStyle,
+              padding: 21,
+              marginTop: -3,
+              marginBottom: 23,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 14,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "space-between",
-                gap: "18px",
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#8a6a4a",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    letterSpacing: "1.2px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Selamat datang kembali
-                </p>
-
-                <h2
-                  style={{
-                    margin: "7px 0 6px",
-                    color: "#214d32",
-                    fontSize: "25px",
-                    lineHeight: 1.15,
-                    letterSpacing: "-0.6px",
-                  }}
-                >
-                  Admin Pajara
-                </h2>
-
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#737973",
-                    fontSize: "13px",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {adminEmail}
-                </p>
-              </div>
-
-              <div
+            <div style={{ minWidth: 0 }}>
+              <p
                 style={{
-                  minWidth: "48px",
-                  height: "48px",
-                  borderRadius: "15px",
-                  background: "#e8f0e9",
-                  color: "#2f6b45",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  margin: "0 0 8px",
+                  color: COLORS.brown,
+                  fontSize: 10,
                   fontWeight: 800,
-                  fontSize: "15px",
+                  letterSpacing: 1.5,
+                  textTransform: "uppercase",
                 }}
               >
-                A
-              </div>
+                Selamat datang kembali
+              </p>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 23,
+                  letterSpacing: -0.7,
+                  lineHeight: 1.2,
+                }}
+              >
+                Admin Pajara
+              </h2>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  color: COLORS.muted,
+                  fontSize: 12,
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {adminEmail}
+              </p>
+            </div>
+
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                flexShrink: 0,
+                borderRadius: 16,
+                background: "#E8EFE7",
+                color: COLORS.green,
+                display: "grid",
+                placeItems: "center",
+                fontSize: 17,
+                fontWeight: 900,
+                border: "1px solid #D8E4D7",
+              }}
+            >
+              A
             </div>
           </section>
 
-          {/* STATS */}
+          {/* SECTION TITLE */}
+          <div style={{ marginBottom: 14 }}>
+            <p
+              style={{
+                margin: "0 0 5px",
+                color: COLORS.brown,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+              }}
+            >
+              Ringkasan
+            </p>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 21,
+                letterSpacing: -0.5,
+              }}
+            >
+              Statistik Pesanan
+            </h2>
+          </div>
+
+          {/* STATISTICS */}
           <section
             style={{
               display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "12px",
-              marginBottom: "18px",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: 12,
+              marginBottom: 28,
             }}
           >
-            {stats.map((stat) => (
+            {stats.map((stat, index) => (
               <div
                 key={stat.label}
                 style={{
-                  background: "#ffffff",
-                  borderRadius: "18px",
-                  padding: "18px",
-                  border: "1px solid #e8ebe7",
-                  boxShadow: "0 8px 24px rgba(33,77,50,0.05)",
+                  ...cardStyle,
+                  padding: "17px 15px",
+                  minWidth: 0,
+                  position: "relative",
+                  overflow: "hidden",
                 }}
               >
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    marginBottom: 17,
                   }}
                 >
                   <span
                     style={{
-                      color: "#8a6a4a",
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      letterSpacing: "1px",
+                      color: COLORS.muted,
+                      fontSize: 11,
+                      fontWeight: 700,
                     }}
                   >
-                    {stat.symbol}
+                    {stat.label}
                   </span>
-
                   <span
                     style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: "#2f6b45",
+                      width: 33,
+                      height: 33,
+                      flexShrink: 0,
+                      display: "grid",
+                      placeItems: "center",
+                      borderRadius: 11,
+                      background: index === 1 ? "#F3E9DD" : "#EAF1E9",
+                      color: index === 1 ? COLORS.brown : COLORS.greenLight,
+                      fontSize: 18,
+                      fontWeight: 800,
                     }}
-                  />
+                  >
+                    {stat.icon}
+                  </span>
                 </div>
 
                 <p
                   style={{
-                    margin: "15px 0 5px",
-                    color: "#747a75",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                  }}
-                >
-                  {stat.label}
-                </p>
-
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "#214d32",
-                    fontSize: "29px",
+                    margin: "0 0 8px",
+                    fontSize: 33,
+                    fontWeight: 850,
                     lineHeight: 1,
-                    letterSpacing: "-1px",
+                    letterSpacing: -1.5,
+                    color: COLORS.green,
+                    fontVariantNumeric: "tabular-nums",
                   }}
                 >
                   {stat.value}
-                </h3>
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 10,
+                    lineHeight: 1.4,
+                    color: COLORS.muted,
+                  }}
+                >
+                  {stat.detail}
+                </p>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    background:
+                      index === 1 ? COLORS.brown : COLORS.greenLight,
+                    opacity: 0.75,
+                  }}
+                />
               </div>
             ))}
           </section>
@@ -543,12 +580,10 @@ export default function DashboardPage() {
           <section
             id="notifikasi"
             style={{
-              background: "#ffffff",
-              borderRadius: "20px",
-              padding: "21px",
-              marginBottom: "18px",
-              border: "1px solid #e8ebe7",
-              boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
+              ...cardStyle,
+              padding: 19,
+              marginBottom: 22,
+              scrollMarginTop: 16,
             }}
           >
             <div
@@ -556,8 +591,8 @@ export default function DashboardPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: "12px",
-                marginBottom: "15px",
+                gap: 12,
+                marginBottom: 18,
               }}
             >
               <div>
@@ -565,108 +600,109 @@ export default function DashboardPage() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
+                    flexWrap: "wrap",
+                    gap: 8,
                   }}
                 >
-                  <h2
-                    style={{
-                      margin: 0,
-                      color: "#214d32",
-                      fontSize: "18px",
-                    }}
-                  >
+                  <h2 style={{ margin: 0, fontSize: 19 }}>
                     Notifikasi
                   </h2>
-
                   {unreadCount > 0 && (
                     <span
                       style={{
-                        minWidth: "22px",
-                        height: "22px",
-                        padding: "0 6px",
-                        borderRadius: "999px",
-                        background: "#2f6b45",
-                        color: "#ffffff",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "11px",
+                        padding: "4px 8px",
+                        borderRadius: 99,
+                        background: COLORS.green,
+                        color: "#fff",
+                        fontSize: 10,
                         fontWeight: 800,
                       }}
                     >
-                      {unreadCount}
+                      {unreadCount} baru
                     </span>
                   )}
                 </div>
-
                 <p
                   style={{
-                    margin: "5px 0 0",
-                    color: "#8a908b",
-                    fontSize: "12px",
+                    margin: "6px 0 0",
+                    color: COLORS.muted,
+                    fontSize: 12,
                   }}
                 >
-                  Pembaruan terbaru sistem
+                  Informasi terbaru pesanan dan sistem.
                 </p>
               </div>
 
               {unreadCount > 0 && (
                 <button
                   type="button"
+                  disabled={markingAll}
                   onClick={markAllAsRead}
                   style={{
-                    border: "none",
-                    background: "#eef4ef",
-                    color: "#2f6b45",
-                    borderRadius: "9px",
-                    padding: "9px 11px",
-                    fontSize: "11px",
-                    fontWeight: 800,
-                    cursor: "pointer",
+                    ...smallButtonStyle,
+                    flexShrink: 0,
+                    opacity: markingAll ? 0.6 : 1,
                   }}
                 >
-                  Tandai dibaca
+                  {markingAll ? "Memproses..." : "Baca semua"}
                 </button>
               )}
             </div>
 
             {notificationLoading ? (
-              <div
+              <p
                 style={{
+                  margin: 0,
                   padding: "20px 0",
-                  color: "#858b86",
-                  fontSize: "13px",
+                  color: COLORS.muted,
+                  fontSize: 13,
                 }}
               >
                 Memuat notifikasi...
-              </div>
+              </p>
             ) : notifications.length === 0 ? (
               <div
                 style={{
-                  padding: "25px 16px",
                   textAlign: "center",
-                  background: "#fafbf9",
-                  borderRadius: "14px",
-                  border: "1px dashed #dfe5df",
+                  padding: "27px 12px",
+                  borderRadius: 15,
+                  background: "#FAF8F5",
+                  border: `1px dashed ${COLORS.border}`,
                 }}
               >
                 <div
                   style={{
-                    fontSize: "22px",
-                    marginBottom: "7px",
+                    width: 44,
+                    height: 44,
+                    margin: "0 auto 12px",
+                    borderRadius: 15,
+                    display: "grid",
+                    placeItems: "center",
+                    background: "#EAF1E9",
+                    color: COLORS.green,
+                    fontSize: 22,
                   }}
                 >
-                  —
+                  ♧
                 </div>
-
                 <p
                   style={{
                     margin: 0,
-                    color: "#777d78",
-                    fontSize: "13px",
+                    color: COLORS.green,
+                    fontSize: 13,
+                    fontWeight: 700,
                   }}
                 >
-                  Belum ada notifikasi.
+                  Semua tenang untuk sekarang
+                </p>
+                <p
+                  style={{
+                    margin: "6px 0 0",
+                    color: COLORS.muted,
+                    fontSize: 11,
+                  }}
+                >
+                  Notifikasi baru akan muncul di sini.
                 </p>
               </div>
             ) : (
@@ -674,228 +710,263 @@ export default function DashboardPage() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "9px",
+                  gap: 9,
                 }}
               >
                 {notifications.map((notification) => (
-                  <div
+                  <button
                     key={notification.id}
+                    type="button"
                     onClick={() => {
                       if (!notification.is_read) {
                         markAsRead(notification.id);
                       }
+
+                      if (notification.order_id) {
+                        router.push(
+                          `/orders/detail?id=${encodeURIComponent(
+                            notification.order_id
+                          )}`
+                        );
+                      }
                     }}
                     style={{
-                      padding: "14px",
-                      borderRadius: "14px",
-                      background: notification.is_read
-                        ? "#fafbf9"
-                        : "#eef5ef",
+                      width: "100%",
+                      textAlign: "left",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 11,
+                      padding: 14,
+                      borderRadius: 14,
                       border: notification.is_read
-                        ? "1px solid #edf0ec"
-                        : "1px solid #cddfce",
-                      cursor: notification.is_read
-                        ? "default"
-                        : "pointer",
+                        ? "1px solid #EEE9E2"
+                        : "1px solid #D5E3D4",
+                      background: notification.is_read
+                        ? "#FCFBF9"
+                        : "#F0F5EF",
+                      cursor: "pointer",
+                      color: COLORS.green,
                     }}
                   >
-                    <div
+                    <span
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        gap: "12px",
+                        width: 34,
+                        height: 34,
+                        flexShrink: 0,
+                        borderRadius: 11,
+                        display: "grid",
+                        placeItems: "center",
+                        background: notification.is_read
+                          ? "#F0EBE4"
+                          : "#DDEADC",
+                        color: COLORS.green,
+                        fontSize: 16,
+                        fontWeight: 800,
                       }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <p
-                          style={{
-                            margin: 0,
-                            color: "#214d32",
-                            fontWeight: 800,
-                            fontSize: "13px",
-                          }}
-                        >
-                          {notification.title}
-                        </p>
+                      {notification.is_read ? "✓" : "•"}
+                    </span>
 
-                        <p
-                          style={{
-                            margin: "5px 0",
-                            color: "#5f665f",
-                            fontSize: "13px",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {notification.message}
-                        </p>
-
-                        <p
-                          style={{
-                            margin: 0,
-                            color: "#9a9e9a",
-                            fontSize: "11px",
-                          }}
-                        >
-                          {formatNotificationDate(
-                            notification.created_at
-                          )}
-                        </p>
-                      </div>
-
-                      {!notification.is_read && (
-                        <span
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            background: "#2f6b45",
-                            flexShrink: 0,
-                            marginTop: "4px",
-                            boxShadow: "0 0 0 4px #dcebdd",
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: 13,
+                          fontWeight: 800,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {notification.title}
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: 5,
+                          color: "#646B64",
+                          fontSize: 12,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {notification.message}
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: 8,
+                          color: "#92958F",
+                          fontSize: 10,
+                        }}
+                      >
+                        {formatNotificationDate(notification.created_at)}
+                      </span>
+                    </span>
+                  </button>
                 ))}
               </div>
             )}
           </section>
 
-          {/* ORDERS */}
+          {/* ORDER WORKSPACE */}
           <section
             style={{
-              background: "#214d32",
-              color: "#ffffff",
-              borderRadius: "20px",
-              padding: "22px",
-              marginBottom: "18px",
-              boxShadow: "0 10px 30px rgba(33,77,50,0.13)",
+              position: "relative",
+              overflow: "hidden",
+              padding: 23,
+              borderRadius: 23,
+              marginBottom: 22,
+              background:
+                "linear-gradient(145deg, #183D27 0%, #214D32 65%, #2F6B45 100%)",
+              color: COLORS.white,
+              boxShadow: "0 12px 27px rgba(33,77,50,0.12)",
             }}
           >
             <div
+              aria-hidden="true"
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "16px",
-                marginBottom: "18px",
+                position: "absolute",
+                right: -35,
+                top: -42,
+                width: 130,
+                height: 130,
+                borderRadius: "50%",
+                border: "1px solid rgba(255,255,255,0.12)",
               }}
-            >
-              <div>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#c9d9cc",
-                    fontSize: "11px",
-                    fontWeight: 800,
-                    letterSpacing: "1.2px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Workspace
-                </p>
-
-                <h2
-                  style={{
-                    margin: "6px 0 5px",
-                    fontSize: "20px",
-                  }}
-                >
-                  Pesanan
-                </h2>
-
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#d8e2d9",
-                    fontSize: "13px",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Kelola dan lihat semua pesanan pelanggan.
-                </p>
-              </div>
-
-              <span
+            />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <p
                 style={{
-                  fontSize: "22px",
-                  opacity: 0.7,
+                  margin: "0 0 9px",
+                  color: "#D9C6AE",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: 2,
                 }}
               >
-                →
-              </span>
+                WORKSPACE
+              </p>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 24,
+                  letterSpacing: -0.6,
+                }}
+              >
+                Kelola Pesanan
+              </h2>
+              <p
+                style={{
+                  maxWidth: 280,
+                  margin: "9px 0 21px",
+                  color: "#DFE8DF",
+                  fontSize: 12,
+                  lineHeight: 1.7,
+                }}
+              >
+                Pantau permintaan desain, periksa detail, dan kelola
+                pekerjaan pelanggan dari satu tempat.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                style={{
+                  width: "100%",
+                  minHeight: 48,
+                  padding: "12px 16px",
+                  border: "none",
+                  borderRadius: 13,
+                  background: "#F1ECE6",
+                  color: COLORS.green,
+                  fontSize: 13,
+                  fontWeight: 850,
+                  cursor: "pointer",
+                }}
+              >
+                Buka Daftar Pesanan&nbsp; →
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => router.push("/orders")}
-              style={{
-                width: "100%",
-                height: "48px",
-                border: "none",
-                borderRadius: "12px",
-                background: "#ffffff",
-                color: "#214d32",
-                fontSize: "14px",
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
-            >
-              Lihat Semua Pesanan
-            </button>
           </section>
 
           {/* ACTIVITY */}
           <section
             style={{
-              background: "#ffffff",
-              borderRadius: "20px",
-              padding: "21px",
-              marginBottom: "18px",
-              border: "1px solid #e8ebe7",
-              boxShadow: "0 8px 26px rgba(33,77,50,0.05)",
+              ...cardStyle,
+              padding: 19,
+              marginBottom: 18,
             }}
           >
+            <p
+              style={{
+                margin: "0 0 7px",
+                color: COLORS.brown,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 1.8,
+                textTransform: "uppercase",
+              }}
+            >
+              Ruang kerja
+            </p>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 19,
+                letterSpacing: -0.3,
+              }}
+            >
+              Aktivitas Terbaru
+            </h2>
+            <div
+              style={{
+                height: 1,
+                background: COLORS.border,
+                margin: "16px 0",
+              }}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                marginBottom: "8px",
+                gap: 12,
               }}
             >
-              <span
+              <div
                 style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#8a6a4a",
-                }}
-              />
-
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#214d32",
-                  fontSize: "18px",
+                  width: 38,
+                  height: 38,
+                  flexShrink: 0,
+                  borderRadius: 12,
+                  display: "grid",
+                  placeItems: "center",
+                  background: "#F3EAE0",
+                  color: COLORS.brown,
+                  fontSize: 18,
                 }}
               >
-                Aktivitas Terbaru
-              </h2>
+                ◷
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  Ringkasan aktivitas
+                </p>
+                <p
+                  style={{
+                    margin: "5px 0 0",
+                    color: COLORS.muted,
+                    fontSize: 11,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Riwayat aktivitas terperinci belum ditampilkan di
+                  dashboard ini.
+                </p>
+              </div>
             </div>
-
-            <p
-              style={{
-                margin: 0,
-                color: "#858b86",
-                fontSize: "13px",
-                lineHeight: 1.5,
-              }}
-            >
-              Belum ada aktivitas terbaru.
-            </p>
           </section>
 
           {/* LOGOUT */}
@@ -904,12 +975,12 @@ export default function DashboardPage() {
             onClick={handleLogout}
             style={{
               width: "100%",
-              height: "48px",
-              border: "1px solid #d8cfc6",
-              borderRadius: "12px",
-              background: "transparent",
-              color: "#8a6a4a",
-              fontSize: "13px",
+              minHeight: 47,
+              border: "1px solid #D9CFC3",
+              borderRadius: 13,
+              background: "rgba(255,255,255,0.42)",
+              color: COLORS.brown,
+              fontSize: 12,
               fontWeight: 800,
               cursor: "pointer",
             }}
@@ -917,186 +988,152 @@ export default function DashboardPage() {
             Keluar dari Admin
           </button>
 
-          <p
+          <footer
             style={{
-              margin: "22px 0 0",
               textAlign: "center",
-              color: "#9b9d99",
-              fontSize: "10px",
-              letterSpacing: "0.8px",
+              padding: "25px 8px 5px",
             }}
           >
-            PAJARA STUDIO • BERAKAR DI TANAH PASUNDAN
-          </p>
-        </section>
+            <p
+              style={{
+                margin: 0,
+                color: COLORS.green,
+                fontSize: 10,
+                fontWeight: 850,
+                letterSpacing: 2,
+              }}
+            >
+              PAJARA STUDIO
+            </p>
+            <p
+              style={{
+                margin: "7px 0 0",
+                color: COLORS.muted,
+                fontSize: 10,
+                letterSpacing: 0.4,
+              }}
+            >
+              Berakar di Tanah Pasundan.
+            </p>
+          </footer>
+        </div>
 
-        {/* BOTTOM NAVBAR */}
+        {/* BOTTOM NAVIGATION */}
         <nav
+          aria-label="Navigasi utama"
           style={{
             position: "fixed",
+            bottom: 0,
             left: 0,
             right: 0,
-            bottom: 0,
             zIndex: 100,
-            background: "rgba(255,255,255,0.97)",
-            borderTop: "1px solid #e4e8e3",
-            boxShadow: "0 -8px 30px rgba(33,77,50,0.10)",
             padding:
-              "8px 10px calc(8px + env(safe-area-inset-bottom))",
+              "9px 12px calc(9px + env(safe-area-inset-bottom))",
+            background: "rgba(255,255,255,0.96)",
+            borderTop: "1px solid #E4DED5",
+            boxShadow: "0 -8px 28px rgba(33,77,50,0.08)",
+            backdropFilter: "blur(16px)",
           }}
         >
           <div
             style={{
-              maxWidth: "620px",
+              maxWidth: 620,
               margin: "0 auto",
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "5px",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gap: 5,
             }}
           >
-            <button
-              type="button"
-              onClick={() =>
-                window.scrollTo({ top: 0, behavior: "smooth" })
-              }
-              style={{
-                border: "none",
-                background: "#eaf2eb",
-                color: "#214d32",
-                borderRadius: "12px",
-                padding: "8px 4px",
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ fontSize: "17px", lineHeight: 1 }}>
-                ⌂
-              </div>
+            {[
+              { label: "Dashboard", icon: "⌂", action: "home" },
+              { label: "Pesanan", icon: "▤", action: "orders" },
+              {
+                label: "Notifikasi",
+                icon: "♧",
+                action: "notifications",
+              },
+              { label: "Keuangan", icon: "Rp", action: "finance" },
+            ].map((item) => {
+              const selected = item.action === "home";
 
-              <div
-                style={{
-                  marginTop: "4px",
-                  fontSize: "10px",
-                  fontWeight: 800,
-                }}
-              >
-                Dashboard
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/orders")}
-              style={{
-                border: "none",
-                background: "transparent",
-                color: "#69716b",
-                borderRadius: "12px",
-                padding: "8px 4px",
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ fontSize: "17px", lineHeight: 1 }}>
-                ▣
-              </div>
-
-              <div
-                style={{
-                  marginTop: "4px",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                }}
-              >
-                Pesanan
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                document
-                  .getElementById("notifikasi")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              style={{
-                border: "none",
-                background: "transparent",
-                color: "#69716b",
-                borderRadius: "12px",
-                padding: "8px 4px",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                  fontSize: "17px",
-                  lineHeight: 1,
-                }}
-              >
-                ♢
-
-                {unreadCount > 0 && (
+              return (
+                <button
+                  key={item.action}
+                  type="button"
+                  aria-label={item.label}
+                  onClick={() => {
+                    if (item.action === "home") {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    } else if (item.action === "orders") {
+                      router.push("/orders");
+                    } else if (item.action === "notifications") {
+                      document
+                        .getElementById("notifikasi")
+                        ?.scrollIntoView({ behavior: "smooth" });
+                    } else if (item.action === "finance") {
+                      router.push("/finance");
+                    }
+                  }}
+                  style={{
+                    position: "relative",
+                    minWidth: 0,
+                    minHeight: 55,
+                    padding: "7px 2px",
+                    border: "none",
+                    borderRadius: 13,
+                    background: selected ? "#EAF1E9" : "transparent",
+                    color: selected ? COLORS.green : "#777D75",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 5,
+                  }}
+                >
                   <span
                     style={{
-                      position: "absolute",
-                      top: "-5px",
-                      right: "-8px",
-                      minWidth: "13px",
-                      height: "13px",
-                      padding: "0 3px",
-                      borderRadius: "999px",
-                      background: "#2f6b45",
-                      color: "#ffffff",
-                      fontSize: "8px",
+                      fontSize: item.action === "finance" ? 14 : 20,
+                      lineHeight: 1,
                       fontWeight: 800,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
                     }}
                   >
-                    {unreadCount}
+                    {item.icon}
                   </span>
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "4px",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                }}
-              >
-                Notifikasi
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/finance")}
-              style={{
-                border: "none",
-                background: "transparent",
-                color: "#69716b",
-                borderRadius: "12px",
-                padding: "8px 4px",
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ fontSize: "17px", lineHeight: 1 }}>
-                Rp
-              </div>
-
-              <div
-                style={{
-                  marginTop: "4px",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                }}
-              >
-                Keuangan
-              </div>
-            </button>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      lineHeight: 1.2,
+                      fontWeight: selected ? 850 : 650,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  {item.action === "notifications" && unreadCount > 0 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 3,
+                        right: "calc(50% - 19px)",
+                        minWidth: 14,
+                        height: 14,
+                        padding: "0 3px",
+                        borderRadius: 99,
+                        display: "grid",
+                        placeItems: "center",
+                        background: "#B45E48",
+                        color: "#fff",
+                        fontSize: 8,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </nav>
       </main>
