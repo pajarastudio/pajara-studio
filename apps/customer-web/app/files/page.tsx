@@ -213,13 +213,10 @@ export default function FilesPage() {
             onClick={() => router.push("/dashboard")}
             style={styles.backButton}
           >
-            <span
-              aria-hidden="true"
-              style={styles.backIcon}
-            >
+            <span aria-hidden="true" style={styles.backIcon}>
               ←
             </span>
-            <span>Kembali ke Home</span>
+            <span>Kembali ke Beranda</span>
           </button>
 
           <div style={styles.eyebrow}>PAJARA STUDIO</div>
