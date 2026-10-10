@@ -45,11 +45,9 @@ export default function OrdersPage() {
   const [subscriptionOrderIds, setSubscriptionOrderIds] = useState<string[]>(
     []
   );
-
   const [subscriptionPayments, setSubscriptionPayments] = useState<
     SubscriptionPayment[]
   >([]);
-
   const [loading, setLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [error, setError] = useState("");
@@ -110,21 +108,19 @@ export default function OrdersPage() {
 
     const { data, error: ordersError } = await supabase
       .from("orders")
-      .select(
-        `
-          id,
-          order_code,
-          service_name,
-          design_type,
-          quantity,
-          total_amount,
-          dp_amount,
-          remaining_amount,
-          status,
-          deadline,
-          created_at
-        `
-      )
+      .select(`
+        id,
+        order_code,
+        service_name,
+        design_type,
+        quantity,
+        total_amount,
+        dp_amount,
+        remaining_amount,
+        status,
+        deadline,
+        created_at
+      `)
       .order("created_at", { ascending: false });
 
     if (ordersError) {
@@ -174,18 +170,16 @@ export default function OrdersPage() {
     try {
       const { data: payments, error: paymentsError } = await supabase
         .from("subscription_payments")
-        .select(
-          `
-            id,
-            subscription_id,
-            customer_id,
-            amount,
-            payment_method,
-            transaction_id,
-            status,
-            created_at
-          `
-        )
+        .select(`
+          id,
+          subscription_id,
+          customer_id,
+          amount,
+          payment_method,
+          transaction_id,
+          status,
+          created_at
+        `)
         .order("created_at", { ascending: false });
 
       if (paymentsError) {
@@ -635,6 +629,7 @@ export default function OrdersPage() {
 
         <div className="mt-4">
           <button
+            type="button"
             onClick={() =>
               router.push(
                 `/orders/detail?id=${encodeURIComponent(order.id)}`
@@ -660,29 +655,21 @@ export default function OrdersPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#f7f4ee] px-4 py-6 md:px-8">
+    <main className="min-h-screen bg-[#f7f4ee] px-4 pt-6 pb-28 md:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-[#2f6b45]">
-              Pajara Admin
-            </p>
+        {/* HEADER */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-[#2f6b45]">
+            Pajara Admin
+          </p>
 
-            <h1 className="text-3xl font-bold text-[#214d32]">
-              Pesanan
-            </h1>
+          <h1 className="text-3xl font-bold text-[#214d32]">
+            Pesanan
+          </h1>
 
-            <p className="mt-1 text-sm text-gray-600">
-              Kelola pembayaran paket dan pesanan desain customer.
-            </p>
-          </div>
-
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="rounded-xl border border-[#2f6b45]/20 bg-white px-4 py-2 text-sm font-semibold text-[#2f6b45] shadow-sm transition hover:bg-[#2f6b45] hover:text-white"
-          >
-            Kembali ke Dashboard
-          </button>
+          <p className="mt-1 text-sm text-gray-600">
+            Kelola pembayaran paket dan pesanan desain customer.
+          </p>
         </div>
 
         {error && (
@@ -780,6 +767,7 @@ export default function OrdersPage() {
 
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
+                        type="button"
                         onClick={() => openPaymentProof(payment.id)}
                         disabled={actionLoading === payment.id}
                         className="rounded-xl border border-[#2f6b45]/20 bg-white px-4 py-3 text-sm font-semibold text-[#2f6b45] transition hover:bg-[#2f6b45] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -792,6 +780,7 @@ export default function OrdersPage() {
                       {payment.status === "pending" && (
                         <>
                           <button
+                            type="button"
                             onClick={() => rejectPayment(payment)}
                             disabled={actionLoading === payment.id}
                             className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -800,6 +789,7 @@ export default function OrdersPage() {
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => verifyPayment(payment)}
                             disabled={actionLoading === payment.id}
                             className="rounded-xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#214d32] disabled:cursor-not-allowed disabled:opacity-50"
