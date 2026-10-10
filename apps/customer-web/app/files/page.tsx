@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -64,10 +63,7 @@ function getFileType(file: OrderFile) {
     return "PDF";
   }
 
-  if (
-    type.includes("zip") ||
-    /\.(zip|rar|7z)$/.test(name)
-  ) {
+  if (type.includes("zip") || /\.(zip|rar|7z)$/.test(name)) {
     return "Arsip";
   }
 
@@ -213,11 +209,17 @@ export default function FilesPage() {
       <div style={styles.container}>
         <header style={styles.header}>
           <button
+            type="button"
             onClick={() => router.push("/dashboard")}
             style={styles.backButton}
           >
-            <span aria-hidden="true">←</span>
-            Kembali ke Home
+            <span
+              aria-hidden="true"
+              style={styles.backIcon}
+            >
+              ←
+            </span>
+            <span>Kembali ke Home</span>
           </button>
 
           <div style={styles.eyebrow}>PAJARA STUDIO</div>
@@ -365,14 +367,10 @@ export default function FilesPage() {
                       </svg>
                     </div>
 
-                    <span style={styles.finalBadge}>
-                      Final
-                    </span>
+                    <span style={styles.finalBadge}>Final</span>
                   </div>
 
-                  <h3 style={styles.fileName}>
-                    {file.file_name}
-                  </h3>
+                  <h3 style={styles.fileName}>{file.file_name}</h3>
 
                   <p style={styles.fileService}>
                     {file.service_name}
@@ -464,7 +462,8 @@ export default function FilesPage() {
           transition:
             transform 160ms ease,
             opacity 160ms ease,
-            background 160ms ease;
+            background 160ms ease,
+            box-shadow 160ms ease;
         }
 
         button:active:not(:disabled) {
@@ -473,6 +472,12 @@ export default function FilesPage() {
 
         button:disabled {
           cursor: not-allowed;
+        }
+
+        @media (hover: hover) {
+          button:hover:not(:disabled) {
+            opacity: 0.94;
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -506,15 +511,31 @@ const styles: Record<string, React.CSSProperties> = {
   backButton: {
     display: "inline-flex",
     alignItems: "center",
-    gap: "8px",
-    padding: "0",
+    gap: "11px",
+    padding: "10px 16px 10px 10px",
     marginBottom: "28px",
-    border: "none",
-    background: "transparent",
-    color: "var(--green, #2f6b45)",
-    fontSize: "13px",
+    color: "#214d32",
+    border: "1px solid rgba(33,77,50,.10)",
+    borderRadius: "16px",
+    background: "#ffffff",
+    boxShadow: "0 5px 18px rgba(33,77,50,.05)",
+    fontSize: "12px",
     fontWeight: 700,
     cursor: "pointer",
+    boxSizing: "border-box",
+    textAlign: "left",
+  },
+  backIcon: {
+    display: "grid",
+    width: "32px",
+    height: "32px",
+    flexShrink: 0,
+    placeItems: "center",
+    borderRadius: "11px",
+    background: "#edf4ee",
+    color: "#2f6b45",
+    fontSize: "19px",
+    lineHeight: 1,
   },
   eyebrow: {
     fontSize: "11px",
@@ -619,7 +640,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   fileList: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
     gap: "15px",
   },
   fileCard: {
