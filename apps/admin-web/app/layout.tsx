@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ServiceWorkerRegister from "./service-worker-register";
+import BottomNavigation from "./bottom-navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegister />
         {children}
+        <BottomNavigation />
       </body>
     </html>
   );
