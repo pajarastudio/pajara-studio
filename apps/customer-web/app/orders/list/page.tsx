@@ -213,15 +213,45 @@ export default function OrderListPage() {
         .back-button {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 0;
-          margin-bottom: 24px;
-          color: ${COLORS.green};
-          border: 0;
-          background: transparent;
-          font-size: 13px;
+          gap: 11px;
+          padding: 10px 16px 10px 10px;
+          margin-bottom: 26px;
+          color: ${COLORS.darkGreen};
+          border: 1px solid ${COLORS.border};
+          border-radius: 16px;
+          background: ${COLORS.white};
+          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.05);
+          font-size: 12px;
           font-weight: 700;
           cursor: pointer;
+          transition:
+            transform 160ms ease,
+            box-shadow 160ms ease,
+            border-color 160ms ease;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-button:hover {
+          border-color: rgba(47, 107, 69, 0.25);
+          box-shadow: 0 8px 22px rgba(33, 77, 50, 0.09);
+          transform: translateY(-1px);
+        }
+
+        .back-button:active {
+          transform: scale(0.98);
+        }
+
+        .back-icon {
+          display: grid;
+          width: 32px;
+          height: 32px;
+          flex-shrink: 0;
+          place-items: center;
+          border-radius: 11px;
+          background: #edf4ee;
+          color: ${COLORS.green};
+          font-size: 19px;
+          line-height: 1;
         }
 
         .eyebrow {
@@ -574,6 +604,7 @@ export default function OrderListPage() {
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .back-button,
           .order-card,
           .loading-line {
             animation: none;
@@ -588,7 +619,10 @@ export default function OrderListPage() {
           className="back-button"
           onClick={() => router.push("/dashboard")}
         >
-          <span aria-hidden="true">←</span> Kembali ke Beranda
+          <span className="back-icon" aria-hidden="true">
+            ←
+          </span>
+          <span>Kembali ke Beranda</span>
         </button>
 
         <header>
