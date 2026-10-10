@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -175,7 +174,10 @@ export default function AccountPage() {
             onClick={() => router.push("/dashboard")}
             style={styles.backButton}
           >
-            ← Kembali ke Home
+            <span aria-hidden="true" style={styles.backIcon}>
+              ←
+            </span>
+            <span>Kembali ke Beranda</span>
           </button>
 
           <div style={styles.eyebrow}>PAJARA STUDIO</div>
@@ -509,15 +511,33 @@ const styles: Record<string, React.CSSProperties> = {
     animation: "fadeUp 350ms ease both",
   },
   backButton: {
-    display: "block",
-    border: "none",
-    background: "transparent",
-    color: "var(--green, #2f6b45)",
-    fontSize: "13px",
-    fontWeight: 700,
-    padding: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "11px",
+    padding: "10px 16px 10px 10px",
     marginBottom: "27px",
+    color: "#214d32",
+    border: "1px solid rgba(33,77,50,.10)",
+    borderRadius: "16px",
+    background: "#ffffff",
+    boxShadow: "0 5px 18px rgba(33,77,50,.05)",
+    fontSize: "12px",
+    fontWeight: 700,
     cursor: "pointer",
+    boxSizing: "border-box",
+    textAlign: "left",
+  },
+  backIcon: {
+    display: "grid",
+    width: "32px",
+    height: "32px",
+    flexShrink: 0,
+    placeItems: "center",
+    borderRadius: "11px",
+    background: "#edf4ee",
+    color: "#2f6b45",
+    fontSize: "19px",
+    lineHeight: 1,
   },
   eyebrow: {
     fontSize: "11px",
