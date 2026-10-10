@@ -11,16 +11,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
 );
 
-type NotificationItem = {
-  id: string;
-  order_id: string | null;
-  type: string;
-  title: string;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-};
-
 type StatItem = {
   label: string;
   value: number;
@@ -47,41 +37,36 @@ export default function DashboardPage() {
   const [newOrders, setNewOrders] = useState(0);
   const [processingOrders, setProcessingOrders] = useState(0);
   const [completedOrders, setCompletedOrders] = useState(0);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [notificationLoading, setNotificationLoading] = useState(true);
-  const [markingAll, setMarkingAll] = useState(false);
-
-  const loadNotifications = useCallback(async (userId: string) => {
-    setNotificationLoading(true);
-
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("id, order_id, type, title, message, is_read, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(10);
-
-    if (!error && data) {
-      setNotifications(data as NotificationItem[]);
-    }
-
-    setNotificationLoading(false);
-  }, []);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const loadOrders = useCallback(async () => {
-    const { data, error } = await supabase.from("orders").select("status");
+    const { data, error } = await supabase
+      .from("orders")
+      .select("status");
 
-    if (!error && data) {
-      setTotalOrders(data.length);
-      setNewOrders(
-        data.filter((order) => order.status === "pending").length
-      );
-      setProcessingOrders(
-        data.filter((order) => order.status === "processing").length
-      );
-      setCompletedOrders(
-        data.filter((order) => order.status === "completed").length
-      );
+    if (error || !data) return;
+
+    setTotalOrders(data.length);
+    setNewOrders(
+      data.filter((order) => order.status === "pending").length
+    );
+    setProcessingOrders(
+      data.filter((order) => order.status === "processing").length
+    );
+    setCompletedOrders(
+      data.filter((order) => order.status === "completed").length
+    );
+  }, []);
+
+  const loadUnreadCount = useCallback(async (userId: string) => {
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("is_read", false);
+
+    if (!error) {
+      setUnreadCount(count ?? 0);
     }
   }, []);
 
@@ -112,7 +97,11 @@ export default function DashboardPage() {
       if (!active) return;
 
       setAdminEmail(user.email || "");
-      await Promise.all([loadOrders(), loadNotifications(user.id)]);
+
+      await Promise.all([
+        loadOrders(),
+        loadUnreadCount(user.id),
+      ]);
 
       if (active) {
         setLoading(false);
@@ -124,61 +113,12 @@ export default function DashboardPage() {
     return () => {
       active = false;
     };
-  }, [router, loadOrders, loadNotifications]);
-
-  async function markAsRead(notificationId: string) {
-    const { error } = await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .eq("id", notificationId);
-
-    if (!error) {
-      setNotifications((current) =>
-        current.map((item) =>
-          item.id === notificationId ? { ...item, is_read: true } : item
-        )
-      );
-    }
-  }
-
-  async function markAllAsRead() {
-    const unreadIds = notifications
-      .filter((item) => !item.is_read)
-      .map((item) => item.id);
-
-    if (unreadIds.length === 0 || markingAll) return;
-
-    setMarkingAll(true);
-
-    const { error } = await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .in("id", unreadIds);
-
-    if (!error) {
-      setNotifications((current) =>
-        current.map((item) => ({ ...item, is_read: true }))
-      );
-    }
-
-    setMarkingAll(false);
-  }
+  }, [router, loadOrders, loadUnreadCount]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/");
   }
-
-  function formatNotificationDate(date: string) {
-    return new Date(date).toLocaleString("id-ID", {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  const unreadCount = notifications.filter((item) => !item.is_read).length;
 
   const stats: StatItem[] = [
     {
@@ -206,6 +146,13 @@ export default function DashboardPage() {
       detail: "Berhasil diselesaikan",
     },
   ];
+
+  const cardStyle = {
+    background: COLORS.white,
+    border: `1px solid ${COLORS.border}`,
+    borderRadius: 20,
+    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
+  } as const;
 
   if (loading) {
     return (
@@ -243,24 +190,6 @@ export default function DashboardPage() {
       </main>
     );
   }
-
-  const cardStyle = {
-    background: COLORS.white,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 20,
-    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
-  } as const;
-
-  const smallButtonStyle = {
-    border: "1px solid #DCE6DC",
-    borderRadius: 10,
-    padding: "9px 12px",
-    background: "#EDF3ED",
-    color: COLORS.green,
-    fontSize: 11,
-    fontWeight: 800,
-    cursor: "pointer",
-  } as const;
 
   return (
     <>
@@ -301,6 +230,7 @@ export default function DashboardPage() {
               borderRadius: "50%",
             }}
           />
+
           <div
             aria-hidden="true"
             style={{
@@ -338,6 +268,7 @@ export default function DashboardPage() {
               >
                 PAJARA STUDIO
               </p>
+
               <h1
                 style={{
                   margin: 0,
@@ -349,6 +280,7 @@ export default function DashboardPage() {
               >
                 Admin Dashboard
               </h1>
+
               <p
                 style={{
                   margin: "9px 0 0",
@@ -414,6 +346,7 @@ export default function DashboardPage() {
               >
                 Selamat datang kembali
               </p>
+
               <h2
                 style={{
                   margin: 0,
@@ -424,6 +357,7 @@ export default function DashboardPage() {
               >
                 Admin Pajara
               </h2>
+
               <p
                 style={{
                   margin: "8px 0 0",
@@ -455,7 +389,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* SECTION TITLE */}
+          {/* STATISTICS TITLE */}
           <div style={{ marginBottom: 14 }}>
             <p
               style={{
@@ -469,6 +403,7 @@ export default function DashboardPage() {
             >
               Ringkasan
             </p>
+
             <h2
               style={{
                 margin: 0,
@@ -518,6 +453,7 @@ export default function DashboardPage() {
                   >
                     {stat.label}
                   </span>
+
                   <span
                     style={{
                       width: 33,
@@ -549,6 +485,7 @@ export default function DashboardPage() {
                 >
                   {stat.value}
                 </p>
+
                 <p
                   style={{
                     margin: 0,
@@ -574,236 +511,6 @@ export default function DashboardPage() {
                 />
               </div>
             ))}
-          </section>
-
-          {/* NOTIFICATIONS */}
-          <section
-            id="notifikasi"
-            style={{
-              ...cardStyle,
-              padding: 19,
-              marginBottom: 22,
-              scrollMarginTop: 16,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-                marginBottom: 18,
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: 8,
-                  }}
-                >
-                  <h2 style={{ margin: 0, fontSize: 19 }}>
-                    Notifikasi
-                  </h2>
-                  {unreadCount > 0 && (
-                    <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 99,
-                        background: COLORS.green,
-                        color: "#fff",
-                        fontSize: 10,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {unreadCount} baru
-                    </span>
-                  )}
-                </div>
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    color: COLORS.muted,
-                    fontSize: 12,
-                  }}
-                >
-                  Informasi terbaru pesanan dan sistem.
-                </p>
-              </div>
-
-              {unreadCount > 0 && (
-                <button
-                  type="button"
-                  disabled={markingAll}
-                  onClick={markAllAsRead}
-                  style={{
-                    ...smallButtonStyle,
-                    flexShrink: 0,
-                    opacity: markingAll ? 0.6 : 1,
-                  }}
-                >
-                  {markingAll ? "Memproses..." : "Baca semua"}
-                </button>
-              )}
-            </div>
-
-            {notificationLoading ? (
-              <p
-                style={{
-                  margin: 0,
-                  padding: "20px 0",
-                  color: COLORS.muted,
-                  fontSize: 13,
-                }}
-              >
-                Memuat notifikasi...
-              </p>
-            ) : notifications.length === 0 ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "27px 12px",
-                  borderRadius: 15,
-                  background: "#FAF8F5",
-                  border: `1px dashed ${COLORS.border}`,
-                }}
-              >
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    margin: "0 auto 12px",
-                    borderRadius: 15,
-                    display: "grid",
-                    placeItems: "center",
-                    background: "#EAF1E9",
-                    color: COLORS.green,
-                    fontSize: 22,
-                  }}
-                >
-                  ♧
-                </div>
-                <p
-                  style={{
-                    margin: 0,
-                    color: COLORS.green,
-                    fontSize: 13,
-                    fontWeight: 700,
-                  }}
-                >
-                  Semua tenang untuk sekarang
-                </p>
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    color: COLORS.muted,
-                    fontSize: 11,
-                  }}
-                >
-                  Notifikasi baru akan muncul di sini.
-                </p>
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 9,
-                }}
-              >
-                {notifications.map((notification) => (
-                  <button
-                    key={notification.id}
-                    type="button"
-                    onClick={() => {
-                      if (!notification.is_read) {
-                        markAsRead(notification.id);
-                      }
-
-                      if (notification.order_id) {
-                        router.push(
-                          `/orders/detail?id=${encodeURIComponent(
-                            notification.order_id
-                          )}`
-                        );
-                      }
-                    }}
-                    style={{
-                      width: "100%",
-                      textAlign: "left",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 11,
-                      padding: 14,
-                      borderRadius: 14,
-                      border: notification.is_read
-                        ? "1px solid #EEE9E2"
-                        : "1px solid #D5E3D4",
-                      background: notification.is_read
-                        ? "#FCFBF9"
-                        : "#F0F5EF",
-                      cursor: "pointer",
-                      color: COLORS.green,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 34,
-                        height: 34,
-                        flexShrink: 0,
-                        borderRadius: 11,
-                        display: "grid",
-                        placeItems: "center",
-                        background: notification.is_read
-                          ? "#F0EBE4"
-                          : "#DDEADC",
-                        color: COLORS.green,
-                        fontSize: 16,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {notification.is_read ? "✓" : "•"}
-                    </span>
-
-                    <span style={{ minWidth: 0, flex: 1 }}>
-                      <span
-                        style={{
-                          display: "block",
-                          fontSize: 13,
-                          fontWeight: 800,
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {notification.title}
-                      </span>
-                      <span
-                        style={{
-                          display: "block",
-                          marginTop: 5,
-                          color: "#646B64",
-                          fontSize: 12,
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {notification.message}
-                      </span>
-                      <span
-                        style={{
-                          display: "block",
-                          marginTop: 8,
-                          color: "#92958F",
-                          fontSize: 10,
-                        }}
-                      >
-                        {formatNotificationDate(notification.created_at)}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
           </section>
 
           {/* ORDER WORKSPACE */}
@@ -832,6 +539,7 @@ export default function DashboardPage() {
                 border: "1px solid rgba(255,255,255,0.12)",
               }}
             />
+
             <div style={{ position: "relative", zIndex: 1 }}>
               <p
                 style={{
@@ -844,6 +552,7 @@ export default function DashboardPage() {
               >
                 WORKSPACE
               </p>
+
               <h2
                 style={{
                   margin: 0,
@@ -853,6 +562,7 @@ export default function DashboardPage() {
               >
                 Kelola Pesanan
               </h2>
+
               <p
                 style={{
                   maxWidth: 280,
@@ -865,6 +575,7 @@ export default function DashboardPage() {
                 Pantau permintaan desain, periksa detail, dan kelola
                 pekerjaan pelanggan dari satu tempat.
               </p>
+
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
@@ -906,6 +617,7 @@ export default function DashboardPage() {
             >
               Ruang kerja
             </p>
+
             <h2
               style={{
                 margin: 0,
@@ -915,6 +627,7 @@ export default function DashboardPage() {
             >
               Aktivitas Terbaru
             </h2>
+
             <div
               style={{
                 height: 1,
@@ -922,6 +635,7 @@ export default function DashboardPage() {
                 margin: "16px 0",
               }}
             />
+
             <div
               style={{
                 display: "flex",
@@ -944,6 +658,7 @@ export default function DashboardPage() {
               >
                 ◷
               </div>
+
               <div>
                 <p
                   style={{
@@ -954,6 +669,7 @@ export default function DashboardPage() {
                 >
                   Ringkasan aktivitas
                 </p>
+
                 <p
                   style={{
                     margin: "5px 0 0",
@@ -1005,6 +721,7 @@ export default function DashboardPage() {
             >
               PAJARA STUDIO
             </p>
+
             <p
               style={{
                 margin: "7px 0 0",
@@ -1063,13 +780,14 @@ export default function DashboardPage() {
                   aria-label={item.label}
                   onClick={() => {
                     if (item.action === "home") {
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
                     } else if (item.action === "orders") {
                       router.push("/orders");
                     } else if (item.action === "notifications") {
-                      document
-                        .getElementById("notifikasi")
-                        ?.scrollIntoView({ behavior: "smooth" });
+                      router.push("/notifications");
                     } else if (item.action === "finance") {
                       router.push("/finance");
                     }
@@ -1100,6 +818,7 @@ export default function DashboardPage() {
                   >
                     {item.icon}
                   </span>
+
                   <span
                     style={{
                       fontSize: 9,
@@ -1110,27 +829,29 @@ export default function DashboardPage() {
                   >
                     {item.label}
                   </span>
-                  {item.action === "notifications" && unreadCount > 0 && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: 3,
-                        right: "calc(50% - 19px)",
-                        minWidth: 14,
-                        height: 14,
-                        padding: "0 3px",
-                        borderRadius: 99,
-                        display: "grid",
-                        placeItems: "center",
-                        background: "#B45E48",
-                        color: "#fff",
-                        fontSize: 8,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
+
+                  {item.action === "notifications" &&
+                    unreadCount > 0 && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: 3,
+                          right: "calc(50% - 19px)",
+                          minWidth: 14,
+                          height: 14,
+                          padding: "0 3px",
+                          borderRadius: 99,
+                          display: "grid",
+                          placeItems: "center",
+                          background: "#B45E48",
+                          color: "#fff",
+                          fontSize: 8,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                 </button>
               );
             })}
