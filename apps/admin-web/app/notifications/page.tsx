@@ -12,13 +12,15 @@ const supabase = createClient(
 );
 
 const COLORS = {
-  background: "#F1ECE6",
+  background: "#F7F4EE",
   green: "#214D32",
   greenLight: "#2F6B45",
   brown: "#8A6A4A",
   white: "#FFFFFF",
   muted: "#777D75",
   border: "#E7DFD5",
+  softGreen: "#EDF4EB",
+  softBrown: "#F4EEE6",
 };
 
 type NotificationItem = {
@@ -44,6 +46,13 @@ export default function NotificationsPage() {
     (item) => !item.is_read
   ).length;
 
+  const cardStyle = {
+    background: COLORS.white,
+    border: `1px solid ${COLORS.border}`,
+    borderRadius: 20,
+    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
+  } as const;
+
   const loadNotifications = useCallback(async (adminId: string) => {
     const { data, error } = await supabase
       .from("notifications")
@@ -67,33 +76,53 @@ export default function NotificationsPage() {
     let active = true;
 
     async function checkAdmin() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+      try {
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
 
-      if (!user) {
-        router.replace("/");
-        return;
-      }
+        if (sessionError) {
+          router.replace("/");
+          return;
+        }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles_v2")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+        const user = sessionData.session?.user;
 
-      if (profileError || !profile || profile.role !== "admin") {
-        await supabase.auth.signOut();
-        router.replace("/");
-        return;
-      }
+        if (!user) {
+          router.replace("/");
+          return;
+        }
 
-      if (!active) return;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles_v2")
+          .select("role")
+          .eq("id", user.id)
+          .single();
 
-      setUserId(user.id);
-      await loadNotifications(user.id);
+        if (
+          profileError ||
+          !profile ||
+          profile.role !== "admin"
+        ) {
+          await supabase.auth.signOut();
+          router.replace("/");
+          return;
+        }
 
-      if (active) {
-        setLoading(false);
+        if (!active) return;
+
+        setUserId(user.id);
+        await loadNotifications(user.id);
+
+        if (active) {
+          setLoading(false);
+        }
+      } catch {
+        if (active) {
+          setErrorMessage(
+            "Terjadi kendala saat memeriksa akun. Coba muat ulang halaman."
+          );
+          setLoading(false);
+        }
       }
     }
 
@@ -105,7 +134,7 @@ export default function NotificationsPage() {
   }, [router, loadNotifications]);
 
   async function markAsRead(notification: NotificationItem) {
-    if (notification.is_read) return;
+    if (notification.is_read || !userId) return;
 
     const { error } = await supabase
       .from("notifications")
@@ -127,6 +156,8 @@ export default function NotificationsPage() {
           : item
       )
     );
+
+    setErrorMessage("");
   }
 
   async function markAllAsRead() {
@@ -135,27 +166,36 @@ export default function NotificationsPage() {
     setSaving(true);
     setErrorMessage("");
 
-    const { error } = await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .eq("user_id", userId)
-      .eq("is_read", false);
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", userId)
+        .eq("is_read", false);
 
-    if (error) {
-      setErrorMessage(
-        "Gagal menandai semua notifikasi sebagai dibaca."
-      );
-    } else {
+      if (error) {
+        setErrorMessage(
+          "Gagal menandai semua notifikasi sebagai dibaca."
+        );
+        return;
+      }
+
       setNotifications((current) =>
         current.map((item) => ({ ...item, is_read: true }))
       );
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
   }
 
   function formatDate(date: string) {
-    return new Date(date).toLocaleString("id-ID", {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Waktu tidak tersedia";
+    }
+
+    return parsedDate.toLocaleString("id-ID", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -167,26 +207,22 @@ export default function NotificationsPage() {
   async function handleNotificationClick(
     notification: NotificationItem
   ) {
-    await markAsRead(notification);
-
     if (notification.order_id) {
+      await markAsRead(notification);
+
       router.push(
         `/orders/detail?id=${encodeURIComponent(notification.order_id)}`
       );
+      return;
     }
+
+    await markAsRead(notification);
   }
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/");
   }
-
-  const cardStyle = {
-    background: COLORS.white,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 20,
-    boxShadow: "0 5px 20px rgba(33,77,50,0.035)",
-  } as const;
 
   if (loading) {
     return (
@@ -197,10 +233,11 @@ export default function NotificationsPage() {
           placeItems: "center",
           background: COLORS.background,
           color: COLORS.green,
-          fontFamily: "Arial, Helvetica, sans-serif",
+          fontFamily:
+            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", padding: 24 }}>
           <div
             style={{
               width: 38,
@@ -209,14 +246,16 @@ export default function NotificationsPage() {
               border: "3px solid #D9E2D8",
               borderTopColor: COLORS.greenLight,
               margin: "0 auto 14px",
-              animation: "pajara-spin 0.8s linear infinite",
+              animation: "pajara-notification-spin 0.8s linear infinite",
             }}
           />
+
           <p style={{ fontSize: 13, fontWeight: 700 }}>
             Memuat notifikasi...
           </p>
+
           <style>{`
-            @keyframes pajara-spin {
+            @keyframes pajara-notification-spin {
               to { transform: rotate(360deg); }
             }
           `}</style>
@@ -232,14 +271,13 @@ export default function NotificationsPage() {
       <main
         style={{
           minHeight: "100vh",
-          paddingBottom: "110px",
+          paddingBottom: 112,
           background: COLORS.background,
           color: COLORS.green,
           fontFamily:
             "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
-        {/* HEADER */}
         <header
           style={{
             position: "relative",
@@ -247,7 +285,7 @@ export default function NotificationsPage() {
             background:
               "linear-gradient(135deg, #183D27 0%, #214D32 55%, #2F6B45 100%)",
             color: COLORS.white,
-            padding: "26px 22px 32px",
+            padding: "28px 22px 34px",
             borderRadius: "0 0 28px 28px",
             boxShadow: "0 12px 28px rgba(33,77,50,0.15)",
           }}
@@ -256,11 +294,24 @@ export default function NotificationsPage() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              width: 180,
-              height: 180,
-              right: -60,
-              top: -95,
-              border: "1px solid rgba(255,255,255,0.10)",
+              width: 210,
+              height: 210,
+              right: -90,
+              top: -115,
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "50%",
+            }}
+          />
+
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              width: 125,
+              height: 125,
+              right: -35,
+              top: -70,
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: "50%",
             }}
           />
@@ -281,7 +332,7 @@ export default function NotificationsPage() {
             <h1
               style={{
                 margin: 0,
-                fontSize: 30,
+                fontSize: "clamp(27px, 6vw, 32px)",
                 letterSpacing: -1,
                 fontWeight: 850,
               }}
@@ -291,44 +342,108 @@ export default function NotificationsPage() {
 
             <p
               style={{
+                maxWidth: 300,
                 margin: "9px 0 0",
                 color: "#D9E4DA",
                 fontSize: 12,
-                lineHeight: 1.7,
+                lineHeight: 1.8,
               }}
             >
-              Semua informasi penting dalam satu tempat.
+              Semua informasi penting dan pembaruan aktivitas Pajara
+              dalam satu tempat.
             </p>
+
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                marginTop: 20,
+                padding: "9px 12px",
+                border: "1px solid rgba(255,255,255,0.16)",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.08)",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: unreadCount > 0 ? "#E6C49A" : "#B8D5B7",
+                }}
+              />
+
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: COLORS.white,
+                }}
+              >
+                {unreadCount > 0
+                  ? `${unreadCount} belum dibaca`
+                  : "Semua sudah dibaca"}
+              </span>
+            </div>
           </div>
         </header>
 
         <div
           style={{
+            width: "100%",
             maxWidth: 760,
+            boxSizing: "border-box",
             margin: "0 auto",
             padding: "22px 16px 28px",
           }}
         >
-          {/* SUMMARY */}
           <section
             style={{
               ...cardStyle,
-              padding: 20,
-              marginBottom: 20,
+              padding: 19,
+              marginBottom: 25,
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
+              gap: 15,
             }}
           >
-            <div>
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                flexShrink: 0,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 17,
+                background: COLORS.softGreen,
+                color: COLORS.green,
+              }}
+            >
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                <path d="M10 21h4" />
+              </svg>
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
               <p
                 style={{
-                  margin: "0 0 7px",
+                  margin: "0 0 5px",
                   color: COLORS.brown,
                   fontSize: 10,
                   fontWeight: 800,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1.4,
                   textTransform: "uppercase",
                 }}
               >
@@ -338,8 +453,9 @@ export default function NotificationsPage() {
               <h2
                 style={{
                   margin: 0,
-                  fontSize: 20,
-                  letterSpacing: -0.5,
+                  fontSize: 18,
+                  letterSpacing: -0.4,
+                  fontWeight: 800,
                 }}
               >
                 Aktivitas terbaru
@@ -347,35 +463,36 @@ export default function NotificationsPage() {
 
               <p
                 style={{
-                  margin: "7px 0 0",
+                  margin: "6px 0 0",
                   color: COLORS.muted,
                   fontSize: 12,
+                  lineHeight: 1.6,
                 }}
               >
-                {unreadCount > 0
-                  ? `${unreadCount} notifikasi belum dibaca`
-                  : "Semua notifikasi sudah dibaca"}
+                {notifications.length} notifikasi tersimpan
               </p>
             </div>
 
             <div
               style={{
-                width: 48,
-                height: 48,
-                flexShrink: 0,
+                minWidth: 42,
+                height: 42,
+                padding: "0 8px",
+                boxSizing: "border-box",
                 display: "grid",
                 placeItems: "center",
-                borderRadius: 16,
-                background: "#EAF1E9",
-                color: COLORS.green,
-                fontSize: 23,
+                borderRadius: 14,
+                background:
+                  unreadCount > 0 ? COLORS.green : COLORS.softGreen,
+                color: unreadCount > 0 ? COLORS.white : COLORS.green,
+                fontSize: 16,
+                fontWeight: 850,
               }}
             >
-              ♧
+              {unreadCount}
             </div>
           </section>
 
-          {/* LIST HEADER */}
           <div
             style={{
               display: "flex",
@@ -385,9 +502,28 @@ export default function NotificationsPage() {
               marginBottom: 14,
             }}
           >
-            <h2 style={{ margin: 0, fontSize: 18 }}>
-              Semua notifikasi
-            </h2>
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 17,
+                  fontWeight: 850,
+                  letterSpacing: -0.4,
+                }}
+              >
+                Semua notifikasi
+              </h2>
+
+              <p
+                style={{
+                  margin: "5px 0 0",
+                  color: COLORS.muted,
+                  fontSize: 11,
+                }}
+              >
+                Maksimal 50 notifikasi terbaru
+              </p>
+            </div>
 
             {unreadCount > 0 && (
               <button
@@ -395,15 +531,16 @@ export default function NotificationsPage() {
                 disabled={saving}
                 onClick={markAllAsRead}
                 style={{
+                  flexShrink: 0,
                   border: "1px solid #DCE6DC",
-                  borderRadius: 10,
-                  padding: "9px 12px",
-                  background: "#EDF3ED",
+                  borderRadius: 11,
+                  padding: "10px 12px",
+                  background: COLORS.softGreen,
                   color: COLORS.green,
                   fontSize: 11,
                   fontWeight: 800,
                   cursor: saving ? "wait" : "pointer",
-                  opacity: saving ? 0.6 : 1,
+                  opacity: saving ? 0.65 : 1,
                 }}
               >
                 {saving ? "Memproses..." : "Baca Semua"}
@@ -417,47 +554,59 @@ export default function NotificationsPage() {
               style={{
                 marginBottom: 14,
                 padding: 13,
-                borderRadius: 12,
+                borderRadius: 13,
                 border: "1px solid #E5C8BC",
                 background: "#FFF3ED",
                 color: "#914B37",
                 fontSize: 12,
-                lineHeight: 1.6,
+                lineHeight: 1.7,
               }}
             >
               {errorMessage}
             </div>
           )}
 
-          {/* NOTIFICATION LIST */}
           {notifications.length === 0 ? (
             <section
               style={{
                 ...cardStyle,
-                padding: "38px 20px",
+                padding: "38px 22px",
                 textAlign: "center",
               }}
             >
               <div
                 style={{
-                  width: 58,
-                  height: 58,
-                  margin: "0 auto 16px",
-                  borderRadius: 19,
+                  width: 66,
+                  height: 66,
+                  margin: "0 auto 17px",
+                  borderRadius: 22,
                   display: "grid",
                   placeItems: "center",
-                  background: "#EAF1E9",
+                  background: COLORS.softGreen,
                   color: COLORS.green,
-                  fontSize: 27,
                 }}
               >
-                ♧
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                  <path d="M10 21h4" />
+                </svg>
               </div>
 
               <h3
                 style={{
                   margin: "0 0 8px",
                   fontSize: 16,
+                  fontWeight: 800,
                 }}
               >
                 Belum ada notifikasi
@@ -465,11 +614,11 @@ export default function NotificationsPage() {
 
               <p
                 style={{
-                  maxWidth: 270,
+                  maxWidth: 285,
                   margin: "0 auto",
                   color: COLORS.muted,
                   fontSize: 12,
-                  lineHeight: 1.7,
+                  lineHeight: 1.8,
                 }}
               >
                 Jika ada informasi pesanan atau pembaruan sistem,
@@ -481,7 +630,7 @@ export default function NotificationsPage() {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 10,
+                gap: 11,
               }}
             >
               {notifications.map((notification) => (
@@ -489,41 +638,88 @@ export default function NotificationsPage() {
                   key={notification.id}
                   type="button"
                   onClick={() => handleNotificationClick(notification)}
+                  aria-label={`Notifikasi: ${notification.title}`}
                   style={{
                     ...cardStyle,
+                    position: "relative",
                     width: "100%",
-                    padding: 16,
+                    boxSizing: "border-box",
+                    padding: "16px 15px",
                     display: "flex",
                     alignItems: "flex-start",
                     gap: 12,
                     textAlign: "left",
-                    cursor: notification.order_id ? "pointer" : "default",
+                    cursor: "pointer",
                     background: notification.is_read
                       ? COLORS.white
-                      : "#F0F5EF",
+                      : "#F1F6EF",
                     border: notification.is_read
                       ? `1px solid ${COLORS.border}`
-                      : "1px solid #D5E3D4",
+                      : "1px solid #D1E1CF",
                     color: COLORS.green,
+                    transition:
+                      "background 0.2s ease, border-color 0.2s ease",
                   }}
                 >
+                  {!notification.is_read && (
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 15,
+                        bottom: 15,
+                        width: 3,
+                        borderRadius: "0 4px 4px 0",
+                        background: COLORS.greenLight,
+                      }}
+                    />
+                  )}
+
                   <span
                     style={{
-                      width: 39,
-                      height: 39,
+                      width: 42,
+                      height: 42,
                       flexShrink: 0,
                       display: "grid",
                       placeItems: "center",
-                      borderRadius: 13,
+                      borderRadius: 14,
                       background: notification.is_read
-                        ? "#F0EBE4"
+                        ? COLORS.softBrown
                         : "#DDEADC",
                       color: COLORS.green,
-                      fontSize: 17,
-                      fontWeight: 800,
                     }}
                   >
-                    {notification.is_read ? "✓" : "•"}
+                    {notification.is_read ? (
+                      <svg
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                        <path d="M10 21h4" />
+                      </svg>
+                    )}
                   </span>
 
                   <span style={{ flex: 1, minWidth: 0 }}>
@@ -538,8 +734,8 @@ export default function NotificationsPage() {
                       <span
                         style={{
                           fontSize: 13,
-                          fontWeight: 800,
-                          lineHeight: 1.5,
+                          fontWeight: notification.is_read ? 700 : 850,
+                          lineHeight: 1.55,
                           overflowWrap: "anywhere",
                         }}
                       >
@@ -550,7 +746,7 @@ export default function NotificationsPage() {
                         <span
                           style={{
                             flexShrink: 0,
-                            marginTop: 4,
+                            marginTop: 6,
                             width: 7,
                             height: 7,
                             borderRadius: "50%",
@@ -566,8 +762,9 @@ export default function NotificationsPage() {
                         marginTop: 6,
                         color: "#646B64",
                         fontSize: 12,
-                        lineHeight: 1.7,
+                        lineHeight: 1.75,
                         overflowWrap: "anywhere",
+                        whiteSpace: "pre-wrap",
                       }}
                     >
                       {notification.message}
@@ -575,26 +772,47 @@ export default function NotificationsPage() {
 
                     <span
                       style={{
-                        display: "block",
-                        marginTop: 10,
+                        display: "flex",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 6,
+                        marginTop: 11,
                         color: "#92958F",
                         fontSize: 10,
                       }}
                     >
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 7v5l3 2" />
+                      </svg>
+
                       {formatDate(notification.created_at)}
                     </span>
 
                     {notification.order_id && (
                       <span
                         style={{
-                          display: "block",
-                          marginTop: 9,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 5,
+                          marginTop: 11,
                           color: COLORS.greenLight,
                           fontSize: 11,
-                          fontWeight: 800,
+                          fontWeight: 850,
                         }}
                       >
-                        Lihat detail pesanan →
+                        Lihat detail pesanan
+                        <span aria-hidden="true">→</span>
                       </span>
                     )}
                   </span>
@@ -603,17 +821,16 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {/* LOGOUT */}
           <button
             type="button"
             onClick={handleLogout}
             style={{
               width: "100%",
-              minHeight: 43,
-              marginTop: 20,
-              border: "none",
+              minHeight: 44,
+              marginTop: 22,
+              border: `1px solid ${COLORS.border}`,
               borderRadius: 13,
-              background: "transparent",
+              background: "rgba(255,255,255,0.55)",
               color: COLORS.brown,
               fontSize: 12,
               fontWeight: 800,
@@ -623,11 +840,10 @@ export default function NotificationsPage() {
             Keluar dari Admin
           </button>
 
-          {/* FOOTER */}
           <footer
             style={{
               textAlign: "center",
-              padding: "24px 8px 5px",
+              padding: "25px 8px 8px",
             }}
           >
             <p
