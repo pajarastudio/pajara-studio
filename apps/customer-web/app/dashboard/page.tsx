@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -254,6 +255,7 @@ export default function CustomerDashboard() {
 
         .dashboard-brand {
           display: inline-flex;
+          min-width: 0;
           align-items: center;
           gap: 10px;
           color: #214d32;
@@ -263,13 +265,20 @@ export default function CustomerDashboard() {
         }
 
         .dashboard-logo {
-          width: 39px;
-          height: 39px;
+          display: block !important;
+          width: 39px !important;
+          height: 39px !important;
+          min-width: 39px !important;
+          max-width: 39px !important;
+          min-height: 39px !important;
+          max-height: 39px !important;
+          flex: 0 0 39px !important;
           border-radius: 12px;
           object-fit: cover;
         }
 
         .dashboard-header-link {
+          flex-shrink: 0;
           color: #536457;
           font-size: 12px;
           font-weight: 700;
@@ -724,6 +733,20 @@ export default function CustomerDashboard() {
               src={logo}
               alt="Logo Pajara Studio"
               className="dashboard-logo"
+              width={39}
+              height={39}
+              style={{
+                display: "block",
+                width: "39px",
+                height: "39px",
+                minWidth: "39px",
+                maxWidth: "39px",
+                minHeight: "39px",
+                maxHeight: "39px",
+                objectFit: "cover",
+                borderRadius: "12px",
+                flexShrink: 0,
+              }}
             />
             <span>Pajara Studio</span>
           </a>
