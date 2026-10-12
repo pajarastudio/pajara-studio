@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -390,10 +389,6 @@ export default function CreateOrder() {
               <h2>Detail pesanan</h2>
               <p>Isi kebutuhan desain yang ingin Anda buat.</p>
             </div>
-
-            <div className="order-heading-symbol" aria-hidden="true">
-              P.
-            </div>
           </div>
 
           {error && (
@@ -744,7 +739,7 @@ export default function CreateOrder() {
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
+          gap: 12px;
         }
 
         .order-brand {
@@ -798,36 +793,51 @@ export default function CreateOrder() {
         }
 
         .order-dashboard-link {
-          display: flex;
+          display: inline-flex;
           flex-direction: row;
           align-items: center;
-          gap: 6px;
+          justify-content: center;
+          gap: 9px;
           flex: 0 0 auto;
-          min-height: 41px;
-          padding: 5px 7px;
-          background: #edf3e9;
-          border: 1px solid #dce7d7;
-          border-radius: 11px;
+          min-height: 44px;
+          padding: 7px 13px;
+          border: 1px solid #dce6dc;
+          border-radius: 12px;
+          background: #fff;
           color: var(--green-dark);
           text-decoration: none;
-          transition: background 0.2s ease, transform 0.2s ease;
+          white-space: nowrap;
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.07);
+          transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
         }
 
         .order-dashboard-link:hover {
-          background: #e3eddd;
+          background: var(--green);
+          color: #fff;
+          border-color: var(--green);
           transform: translateY(-1px);
         }
 
         .order-dashboard-icon {
           display: grid;
-          width: 27px;
-          height: 27px;
-          flex: 0 0 27px;
+          width: 28px;
+          height: 28px;
+          flex: 0 0 28px;
           place-items: center;
-          border-radius: 10px;
-          background: #fff;
+          border-radius: 9px;
+          background: #edf3e9;
           color: var(--green);
           font-size: 15px;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .order-dashboard-link:hover .order-dashboard-icon {
+          background: rgba(255, 255, 255, 0.18);
+          color: #fff;
         }
 
         .order-dashboard-copy {
@@ -837,19 +847,23 @@ export default function CreateOrder() {
         }
 
         .order-dashboard-copy small {
-          font-size: 6px;
-          letter-spacing: 0.3px;
+          font-size: 7px;
+          letter-spacing: 0.5px;
           font-weight: 700;
           color: #74846c;
         }
 
+        .order-dashboard-link:hover .order-dashboard-copy small {
+          color: #e1ecdf;
+        }
+
         .order-dashboard-copy strong {
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
         }
 
         .order-dashboard-arrow {
-          font-size: 12px;
+          font-size: 13px;
           margin-left: 2px;
         }
 
@@ -975,20 +989,6 @@ export default function CreateOrder() {
           line-height: 1.7;
         }
 
-        .order-heading-symbol {
-          display: grid;
-          width: 47px;
-          height: 47px;
-          flex: 0 0 47px;
-          place-items: center;
-          border: 1px solid #e2e8dc;
-          border-radius: 15px;
-          background: #f1f5ed;
-          color: var(--green);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 21px;
-        }
-
         .order-field {
           display: flex;
           flex-direction: column;
@@ -1021,7 +1021,9 @@ export default function CreateOrder() {
           font-size: 13px;
           line-height: 1.5;
           outline: none;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease,
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
             background 0.2s ease;
         }
 
@@ -1525,14 +1527,6 @@ export default function CreateOrder() {
 
           .order-form-heading p {
             font-size: 11px;
-          }
-
-          .order-heading-symbol {
-            width: 39px;
-            height: 39px;
-            flex-basis: 39px;
-            border-radius: 12px;
-            font-size: 18px;
           }
 
           .order-field-grid {
