@@ -266,32 +266,78 @@ export default function CreateOrder() {
     <main className="order-page">
       <header className="order-navbar">
         <div className="order-navbar-inner">
-          <Link href="/dashboard" className="order-brand">
+          <Link
+            href="/dashboard"
+            className="order-brand"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: "10px",
+              minWidth: 0,
+              flex: "1 1 auto",
+              color: "#214d32",
+              textDecoration: "none",
+            }}
+          >
             <img
               src={LOGO}
               alt="Logo Pajara Studio"
               className="order-brand-logo"
+              style={{
+                display: "block",
+                width: "40px",
+                height: "40px",
+                minWidth: "40px",
+                flex: "0 0 40px",
+                objectFit: "cover",
+                borderRadius: "11px",
+              }}
             />
 
-            <span className="order-brand-copy">
-              <strong>Pajara Studio</strong>
-              <span>Berakar di Tanah Pasundan.</span>
+            <span
+              className="order-brand-copy"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                minWidth: 0,
+                flex: "1 1 auto",
+                gap: "4px",
+                textAlign: "left",
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  margin: 0,
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                }}
+              >
+                Pajara Studio
+              </strong>
+
+              <span
+                style={{
+                  display: "block",
+                  fontSize: "9px",
+                  lineHeight: 1.4,
+                  color: "#85877c",
+                }}
+              >
+                Berakar di Tanah Pasundan.
+              </span>
             </span>
           </Link>
 
           <Link href="/dashboard" className="order-dashboard-link">
-            <span className="order-dashboard-icon" aria-hidden="true">
-              ↖
-            </span>
-
-            <span className="order-dashboard-copy">
-              <small>RUANG PELANGGAN</small>
-              <strong>Dashboard</strong>
-            </span>
-
-            <span className="order-dashboard-arrow" aria-hidden="true">
-              ↗
-            </span>
+            <span>Dashboard</span>
+            <span aria-hidden="true">↗</span>
           </Link>
         </div>
       </header>
@@ -683,7 +729,7 @@ export default function CreateOrder() {
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 14px;
+          gap: 8px;
         }
 
         .order-brand {
@@ -736,83 +782,35 @@ export default function CreateOrder() {
           line-height: 1.4;
         }
 
-        /* Card Dashboard saja; susunan logo dan nama brand tetap horizontal. */
+        /* Card khusus Dashboard. Logo dan tagline tidak diubah. */
         .order-dashboard-link {
           display: inline-flex;
           flex-direction: row;
           align-items: center;
           justify-content: center;
-          gap: 9px;
+          gap: 10px;
           flex: 0 0 auto;
-          min-height: 48px;
-          padding: 7px 11px;
+          min-height: 42px;
+          padding: 9px 14px;
           border: 1px solid #d5e2cf;
-          border-radius: 14px;
+          border-radius: 13px;
           background: #edf3e9;
           color: var(--green-dark);
+          font-size: 12px;
+          font-weight: 700;
           text-decoration: none;
           white-space: nowrap;
-          box-shadow: 0 4px 12px rgba(33, 77, 50, 0.09);
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
           transition:
             background 0.2s ease,
             border-color 0.2s ease,
-            box-shadow 0.2s ease,
             transform 0.2s ease;
         }
 
         .order-dashboard-link:hover {
           background: #e3eddd;
           border-color: #b9ceb0;
-          box-shadow: 0 6px 16px rgba(33, 77, 50, 0.12);
           transform: translateY(-1px);
-        }
-
-        .order-dashboard-icon {
-          display: grid;
-          width: 29px;
-          height: 29px;
-          flex: 0 0 29px;
-          place-items: center;
-          border: 1px solid #e0e9dc;
-          border-radius: 9px;
-          background: #fff;
-          color: var(--green);
-          font-size: 15px;
-        }
-
-        .order-dashboard-copy {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: center;
-          gap: 3px;
-        }
-
-        .order-dashboard-copy small {
-          color: #74846c;
-          font-size: 7px;
-          font-weight: 700;
-          letter-spacing: 0.6px;
-          line-height: 1.2;
-        }
-
-        .order-dashboard-copy strong {
-          color: var(--green-dark);
-          font-size: 11px;
-          font-weight: 700;
-          line-height: 1.3;
-        }
-
-        .order-dashboard-arrow {
-          display: grid;
-          width: 25px;
-          height: 25px;
-          flex: 0 0 25px;
-          place-items: center;
-          border-radius: 8px;
-          background: #dfeadb;
-          color: var(--green-dark);
-          font-size: 13px;
         }
 
         .order-container {
@@ -1411,32 +1409,11 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            gap: 7px;
-            min-height: 44px;
-            padding: 6px 8px;
-            border-radius: 12px;
-          }
-
-          .order-dashboard-icon {
-            width: 26px;
-            height: 26px;
-            flex-basis: 26px;
-          }
-
-          .order-dashboard-copy small {
-            font-size: 6px;
-            letter-spacing: 0.3px;
-          }
-
-          .order-dashboard-copy strong {
-            font-size: 10px;
-          }
-
-          .order-dashboard-arrow {
-            width: 22px;
-            height: 22px;
-            flex-basis: 22px;
-            font-size: 12px;
+            gap: 8px;
+            min-height: 40px;
+            padding: 8px 11px;
+            border-radius: 11px;
+            font-size: 11px;
           }
 
           .order-container {
@@ -1548,30 +1525,9 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            gap: 5px;
-            padding: 5px 6px;
-          }
-
-          .order-dashboard-icon {
-            width: 23px;
-            height: 23px;
-            flex-basis: 23px;
-          }
-
-          .order-dashboard-copy small {
-            font-size: 5px;
-            letter-spacing: 0.2px;
-          }
-
-          .order-dashboard-copy strong {
-            font-size: 9px;
-          }
-
-          .order-dashboard-arrow {
-            width: 19px;
-            height: 19px;
-            flex-basis: 19px;
-            font-size: 11px;
+            gap: 6px;
+            padding: 7px 9px;
+            font-size: 10px;
           }
 
           .order-container {
