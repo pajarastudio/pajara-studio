@@ -50,6 +50,40 @@ const DESIGN_TYPES: Record<string, string[]> = {
   ],
 };
 
+const PAYMENT_METHODS = [
+  {
+    value: "QRIS",
+    title: "QRIS",
+    description: "Pembayaran melalui kode QR.",
+  },
+  {
+    value: "DANA",
+    title: "DANA",
+    description: "Pembayaran melalui e-wallet.",
+  },
+  {
+    value: "GoPay",
+    title: "GoPay",
+    description: "Pembayaran melalui e-wallet.",
+  },
+  {
+    value: "SeaBank",
+    title: "SeaBank",
+    description: "Pembayaran melalui transfer bank.",
+  },
+];
+
+const ALLOWED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+];
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILES = 10;
+
 export default function CreateOrder() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -63,6 +97,32 @@ export default function CreateOrder() {
   const [brief, setBrief] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentType, setPaymentType] = useState("");
+
+  function handleFileSelection(files: File[]) {
+    setError("");
+    setSuccess("");
+
+    if (files.length > MAX_FILES) {
+      setError(`Maksimal ${MAX_FILES} file referensi untuk satu pesanan.`);
+      return;
+    }
+
+    for (const file of files) {
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        setError(
+          `Format file "${file.name}" tidak didukung. Gunakan JPG, PNG, WEBP, GIF, atau PDF.`
+        );
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`File "${file.name}" melebihi batas 10 MB.`);
+        return;
+      }
+    }
+
+    setSelectedFiles(files);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,23 +146,15 @@ export default function CreateOrder() {
       return;
     }
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-      "application/pdf",
-    ];
-
     for (const file of selectedFiles) {
-      if (!allowedTypes.includes(file.type)) {
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
         setError(
           `Format file "${file.name}" tidak didukung. Gunakan JPG, PNG, WEBP, GIF, atau PDF.`
         );
         return;
       }
 
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         setError(`File "${file.name}" melebihi batas 10 MB.`);
         return;
       }
@@ -164,7 +216,7 @@ export default function CreateOrder() {
 
         if (uploadError) {
           throw new Error(
-            `Pesanan sudah dibuat, tetapi file "${file.name}" gagal diunggah. Catat kode pesanan dan hubungi admin.`
+            `Pesanan ${order.order_code || order.id} sudah dibuat, tetapi file "${file.name}" gagal diunggah. Hubungi admin dengan kode pesanan tersebut.`
           );
         }
 
@@ -183,13 +235,15 @@ export default function CreateOrder() {
 
         if (fileRecordError) {
           throw new Error(
-            `Pesanan sudah dibuat, tetapi data file "${file.name}" belum tersimpan. Catat kode pesanan dan hubungi admin.`
+            `Pesanan ${order.order_code || order.id} sudah dibuat, tetapi pencatatan file "${file.name}" gagal. Hubungi admin dengan kode pesanan tersebut.`
           );
         }
       }
 
       setSuccess(
-        `Pesanan berhasil dibuat${order.order_code ? ` dengan kode ${order.order_code}` : ""}. Silakan cek halaman pesanan untuk informasi selanjutnya.`
+        `Pesanan berhasil dibuat${
+          order.order_code ? ` dengan kode ${order.order_code}` : ""
+        }. Silakan cek halaman pesanan untuk informasi selanjutnya.`
       );
 
       setService("");
@@ -200,6 +254,14 @@ export default function CreateOrder() {
       setNotes("");
       setPaymentType("");
       setSelectedFiles([]);
+
+      const fileInput = document.getElementById(
+        "reference"
+      ) as HTMLInputElement | null;
+
+      if (fileInput) {
+        fileInput.value = "";
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -232,10 +294,12 @@ export default function CreateOrder() {
             <span className="order-dashboard-icon" aria-hidden="true">
               ↖
             </span>
+
             <span className="order-dashboard-copy">
               <small>RUANG PELANGGAN</small>
               <strong>Dashboard</strong>
             </span>
+
             <span className="order-dashboard-arrow" aria-hidden="true">
               ↗
             </span>
@@ -296,9 +360,11 @@ export default function CreateOrder() {
           {success && (
             <div className="order-alert order-alert-success" role="status">
               <span className="order-alert-symbol">✓</span>
+
               <div>
                 <strong>Pesanan berhasil dikirim.</strong>
                 <p>{success}</p>
+
                 <Link href="/orders/list" className="order-success-link">
                   Lihat pesanan <span>↗</span>
                 </Link>
@@ -311,6 +377,7 @@ export default function CreateOrder() {
               <label htmlFor="service">
                 Layanan desain <span>*</span>
               </label>
+
               <select
                 id="service"
                 value={service}
@@ -321,6 +388,7 @@ export default function CreateOrder() {
                 required
               >
                 <option value="">Pilih layanan yang dibutuhkan</option>
+
                 {SERVICES.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -333,6 +401,7 @@ export default function CreateOrder() {
               <label htmlFor="designType">
                 Jenis desain <span>*</span>
               </label>
+
               <select
                 id="designType"
                 value={designType}
@@ -345,6 +414,7 @@ export default function CreateOrder() {
                     ? "Pilih jenis desain"
                     : "Pilih layanan terlebih dahulu"}
                 </option>
+
                 {(DESIGN_TYPES[service] || []).map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -358,6 +428,7 @@ export default function CreateOrder() {
                 <label htmlFor="quantity">
                   Jumlah output desain <span>*</span>
                 </label>
+
                 <input
                   id="quantity"
                   type="number"
@@ -367,11 +438,13 @@ export default function CreateOrder() {
                   onChange={(event) => setQuantity(event.target.value)}
                   required
                 />
+
                 <small>1 output dihitung sebagai 1 desain.</small>
               </div>
 
               <div className="order-field">
                 <label htmlFor="deadline">Target penyelesaian</label>
+
                 <input
                   id="deadline"
                   type="date"
@@ -379,6 +452,7 @@ export default function CreateOrder() {
                   onChange={(event) => setDeadline(event.target.value)}
                   min={new Date().toISOString().split("T")[0]}
                 />
+
                 <small>Jadwal akan dikonfirmasi oleh admin.</small>
               </div>
             </div>
@@ -389,7 +463,9 @@ export default function CreateOrder() {
               <div>
                 <span className="order-section-number">02 / BRIEF</span>
                 <h2>Ceritakan ide Anda</h2>
-                <p>Semakin jelas brief, semakin mudah kami memahami arahnya.</p>
+                <p>
+                  Semakin jelas brief, semakin mudah kami memahami arahnya.
+                </p>
               </div>
             </div>
 
@@ -397,6 +473,7 @@ export default function CreateOrder() {
               <label htmlFor="brief">
                 Brief desain <span>*</span>
               </label>
+
               <textarea
                 id="brief"
                 value={brief}
@@ -405,6 +482,7 @@ export default function CreateOrder() {
                 rows={6}
                 required
               />
+
               <small>
                 Tuliskan tujuan desain, informasi yang perlu dicantumkan, dan
                 gambaran hasil yang Anda inginkan.
@@ -413,6 +491,7 @@ export default function CreateOrder() {
 
             <div className="order-field">
               <label htmlFor="notes">Catatan tambahan</label>
+
               <textarea
                 id="notes"
                 value={notes}
@@ -440,11 +519,17 @@ export default function CreateOrder() {
                 <span className="order-upload-icon" aria-hidden="true">
                   ↑
                 </span>
+
                 <strong>Pilih file referensi</strong>
+
                 <span>
                   Tekan untuk memilih gambar atau PDF dari perangkat Anda.
                 </span>
-                <small>JPG, PNG, WEBP, GIF, atau PDF · Maks. 10 MB per file</small>
+
+                <small>
+                  JPG, PNG, WEBP, GIF, atau PDF · Maks. 10 MB per file ·
+                  Maks. {MAX_FILES} file
+                </small>
               </label>
 
               <input
@@ -453,24 +538,32 @@ export default function CreateOrder() {
                 accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,image/jpeg,image/png,image/webp,image/gif,application/pdf"
                 multiple
                 onChange={(event) => {
-                  const files = Array.from(event.target.files || []);
-                  setSelectedFiles(files);
+                  handleFileSelection(
+                    Array.from(event.target.files || [])
+                  );
+
+                  event.target.value = "";
                 }}
               />
 
               {selectedFiles.length > 0 && (
                 <div className="order-file-list">
                   {selectedFiles.map((file, index) => (
-                    <div className="order-file-item" key={`${file.name}-${index}`}>
+                    <div
+                      className="order-file-item"
+                      key={`${file.name}-${index}`}
+                    >
                       <span className="order-file-icon" aria-hidden="true">
                         ↗
                       </span>
+
                       <span className="order-file-info">
                         <strong>{file.name}</strong>
                         <small>
                           {(file.size / (1024 * 1024)).toFixed(2)} MB
                         </small>
                       </span>
+
                       <button
                         type="button"
                         className="order-file-remove"
@@ -502,28 +595,7 @@ export default function CreateOrder() {
             </div>
 
             <div className="order-payment-options">
-              {[
-                {
-                  value: "QRIS",
-                  title: "QRIS",
-                  description: "Pembayaran melalui kode QR.",
-                },
-                {
-                  value: "DANA",
-                  title: "DANA",
-                  description: "Pembayaran melalui e-wallet.",
-                },
-                {
-                  value: "GoPay",
-                  title: "GoPay",
-                  description: "Pembayaran melalui e-wallet.",
-                },
-                {
-                  value: "SeaBank",
-                  title: "SeaBank",
-                  description: "Pembayaran melalui transfer bank.",
-                },
-              ].map((method) => (
+              {PAYMENT_METHODS.map((method) => (
                 <label
                   key={method.value}
                   className={`order-payment-option ${
@@ -538,7 +610,9 @@ export default function CreateOrder() {
                     onChange={(event) => setPaymentType(event.target.value)}
                     required
                   />
+
                   <span className="order-payment-radio" />
+
                   <span className="order-payment-copy">
                     <strong>{method.title}</strong>
                     <small>{method.description}</small>
@@ -609,6 +683,7 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
+        /* NAVBAR: logo kiri, nama brand di kanan */
         .order-navbar {
           position: relative;
           z-index: 10;
@@ -623,40 +698,49 @@ export default function CreateOrder() {
           min-height: 88px;
           margin: 0 auto;
           display: flex;
+          flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 20px;
+          gap: 16px;
         }
 
         .order-brand {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 13px;
+          display: inline-flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          gap: 12px;
           min-width: 0;
+          flex-shrink: 1;
           color: var(--green-dark);
           text-decoration: none;
         }
 
         .order-brand-logo {
-          display: block;
-          width: 48px;
-          height: 48px;
-          flex: 0 0 48px;
+          display: block !important;
+          width: 46px;
+          height: 46px;
+          min-width: 46px;
+          flex: 0 0 46px;
           object-fit: cover;
-          border-radius: 15px;
+          border-radius: 13px;
           border: 1px solid #e6e8df;
           background: #fff;
         }
 
         .order-brand-copy {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          justify-content: center !important;
           min-width: 0;
-          display: flex;
-          flex-direction: column;
           gap: 5px;
+          text-align: left;
         }
 
         .order-brand-copy strong {
+          display: block;
+          margin: 0;
           font-family: Georgia, "Times New Roman", serif;
           font-size: 20px;
           font-weight: 700;
@@ -665,6 +749,7 @@ export default function CreateOrder() {
         }
 
         .order-brand-copy > span {
+          display: block;
           font-size: 11px;
           line-height: 1.4;
           letter-spacing: 0.1px;
@@ -673,14 +758,15 @@ export default function CreateOrder() {
 
         .order-dashboard-link {
           display: flex;
+          flex-direction: row;
           align-items: center;
-          gap: 11px;
+          gap: 9px;
           flex-shrink: 0;
-          min-height: 54px;
-          padding: 8px 13px;
+          min-height: 50px;
+          padding: 7px 11px;
           background: #edf3e9;
           border: 1px solid #dce7d7;
-          border-radius: 15px;
+          border-radius: 13px;
           color: var(--green-dark);
           text-decoration: none;
           transition:
@@ -697,14 +783,14 @@ export default function CreateOrder() {
 
         .order-dashboard-icon {
           display: grid;
-          width: 34px;
-          height: 34px;
-          flex: 0 0 34px;
+          width: 32px;
+          height: 32px;
+          flex: 0 0 32px;
           place-items: center;
-          border-radius: 11px;
+          border-radius: 10px;
           background: #fff;
           color: var(--green);
-          font-size: 19px;
+          font-size: 18px;
         }
 
         .order-dashboard-copy {
@@ -715,19 +801,19 @@ export default function CreateOrder() {
 
         .order-dashboard-copy small {
           font-size: 8px;
-          letter-spacing: 1px;
+          letter-spacing: 0.7px;
           font-weight: 700;
           color: #74846c;
         }
 
         .order-dashboard-copy strong {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
         }
 
         .order-dashboard-arrow {
-          font-size: 17px;
-          margin-left: 3px;
+          font-size: 15px;
+          margin-left: 2px;
         }
 
         .order-container {
@@ -1123,6 +1209,11 @@ export default function CreateOrder() {
           pointer-events: none;
         }
 
+        .order-payment-option:focus-within {
+          outline: 2px solid #80a68a;
+          outline-offset: 2px;
+        }
+
         .order-payment-radio {
           display: grid;
           width: 17px;
@@ -1309,20 +1400,21 @@ export default function CreateOrder() {
 
         @media (max-width: 600px) {
           .order-navbar-inner {
-            width: calc(100% - 28px);
-            min-height: 77px;
-            gap: 9px;
+            width: calc(100% - 24px);
+            min-height: 74px;
+            gap: 8px;
           }
 
           .order-brand {
-            gap: 9px;
+            gap: 8px;
           }
 
           .order-brand-logo {
-            width: 40px;
-            height: 40px;
-            flex-basis: 40px;
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            flex-basis: 38px;
+            border-radius: 11px;
           }
 
           .order-brand-copy {
@@ -1330,41 +1422,41 @@ export default function CreateOrder() {
           }
 
           .order-brand-copy strong {
-            font-size: 16px;
-            letter-spacing: -0.4px;
+            font-size: 15px;
+            letter-spacing: -0.3px;
           }
 
           .order-brand-copy > span {
             max-width: 150px;
-            font-size: 9px;
+            font-size: 8px;
+            line-height: 1.3;
           }
 
           .order-dashboard-link {
-            gap: 7px;
-            min-height: 43px;
-            padding: 6px 8px;
-            border-radius: 12px;
+            gap: 6px;
+            min-height: 41px;
+            padding: 5px 7px;
+            border-radius: 11px;
           }
 
           .order-dashboard-icon {
-            width: 29px;
-            height: 29px;
-            flex-basis: 29px;
-            border-radius: 9px;
-            font-size: 16px;
+            width: 27px;
+            height: 27px;
+            flex-basis: 27px;
+            font-size: 15px;
           }
 
           .order-dashboard-copy small {
-            font-size: 7px;
-            letter-spacing: 0.5px;
+            font-size: 6px;
+            letter-spacing: 0.3px;
           }
 
           .order-dashboard-copy strong {
-            font-size: 11px;
+            font-size: 10px;
           }
 
           .order-dashboard-arrow {
-            font-size: 14px;
+            font-size: 12px;
           }
 
           .order-container {
@@ -1458,51 +1550,44 @@ export default function CreateOrder() {
 
         @media (max-width: 360px) {
           .order-navbar-inner {
-            width: calc(100% - 20px);
-            gap: 6px;
+            width: calc(100% - 16px);
+            gap: 5px;
           }
 
           .order-brand {
-            gap: 7px;
+            gap: 6px;
           }
 
           .order-brand-logo {
-            width: 35px;
-            height: 35px;
-            flex-basis: 35px;
-            border-radius: 10px;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            flex-basis: 32px;
+            border-radius: 9px;
           }
 
           .order-brand-copy strong {
-            font-size: 14px;
+            font-size: 13px;
           }
 
           .order-brand-copy > span {
-            max-width: 125px;
-            font-size: 8px;
+            max-width: 112px;
+            font-size: 7px;
           }
 
           .order-dashboard-link {
-            gap: 5px;
-            padding: 5px 6px;
+            gap: 4px;
+            padding: 4px 5px;
           }
 
           .order-dashboard-icon {
-            width: 25px;
-            height: 25px;
-            flex-basis: 25px;
-          }
-
-          .order-dashboard-copy small {
-            font-size: 6px;
+            width: 23px;
+            height: 23px;
+            flex-basis: 23px;
           }
 
           .order-dashboard-copy strong {
-            font-size: 10px;
-          }
-
-          .order-dashboard-arrow {
-            font-size: 12px;
+            font-size: 9px;
           }
 
           .order-container {
