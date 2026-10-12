@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -16,12 +17,7 @@ const SERVICES = [
 ];
 
 const DESIGN_TYPES: Record<string, string[]> = {
-  "Logo & Branding": [
-    "Logo",
-    "Brand Identity",
-    "Rebranding",
-    "Lainnya",
-  ],
+  "Logo & Branding": ["Logo", "Brand Identity", "Rebranding", "Lainnya"],
   "Desain Promosi": [
     "Poster",
     "Flyer",
@@ -36,12 +32,7 @@ const DESIGN_TYPES: Record<string, string[]> = {
     "Konten Media Sosial",
     "Lainnya",
   ],
-  Banner: [
-    "Banner Digital",
-    "Banner Cetak",
-    "Spanduk",
-    "Lainnya",
-  ],
+  Banner: ["Banner Digital", "Banner Cetak", "Spanduk", "Lainnya"],
   "Kemasan & Menu": [
     "Kemasan Produk",
     "Menu Makanan",
@@ -126,7 +117,6 @@ export default function CreateOrder() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
     setSuccess("");
 
@@ -277,16 +267,72 @@ export default function CreateOrder() {
     <main className="order-page">
       <header className="order-navbar">
         <div className="order-navbar-inner">
-          <Link href="/dashboard" className="order-brand">
+          <Link
+            href="/dashboard"
+            className="order-brand"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: "10px",
+              minWidth: 0,
+              flex: "1 1 auto",
+              color: "#214d32",
+              textDecoration: "none",
+            }}
+          >
             <img
               src={LOGO}
               alt="Logo Pajara Studio"
               className="order-brand-logo"
+              style={{
+                display: "block",
+                width: "40px",
+                height: "40px",
+                minWidth: "40px",
+                flex: "0 0 40px",
+                objectFit: "cover",
+                borderRadius: "11px",
+              }}
             />
 
-            <span className="order-brand-copy">
-              <strong>Pajara Studio</strong>
-              <span>Berakar di Tanah Pasundan.</span>
+            <span
+              className="order-brand-copy"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                minWidth: 0,
+                flex: "1 1 auto",
+                gap: "4px",
+                textAlign: "left",
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  margin: 0,
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                }}
+              >
+                Pajara Studio
+              </strong>
+
+              <span
+                style={{
+                  display: "block",
+                  fontSize: "9px",
+                  lineHeight: 1.4,
+                  color: "#85877c",
+                }}
+              >
+                Berakar di Tanah Pasundan.
+              </span>
             </span>
           </Link>
 
@@ -388,7 +434,6 @@ export default function CreateOrder() {
                 required
               >
                 <option value="">Pilih layanan yang dibutuhkan</option>
-
                 {SERVICES.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -541,7 +586,6 @@ export default function CreateOrder() {
                   handleFileSelection(
                     Array.from(event.target.files || [])
                   );
-
                   event.target.value = "";
                 }}
               />
@@ -683,7 +727,6 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
-        /* NAVBAR: logo kiri, nama brand di kanan */
         .order-navbar {
           position: relative;
           z-index: 10;
@@ -694,47 +737,46 @@ export default function CreateOrder() {
         }
 
         .order-navbar-inner {
-          width: min(1120px, calc(100% - 48px));
-          min-height: 88px;
+          width: min(1120px, calc(100% - 24px));
+          min-height: 74px;
           margin: 0 auto;
           display: flex;
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 16px;
+          gap: 8px;
         }
 
         .order-brand {
-          display: inline-flex !important;
-          flex-direction: row !important;
-          align-items: center !important;
-          justify-content: flex-start !important;
-          gap: 12px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
           min-width: 0;
-          flex-shrink: 1;
+          flex: 1 1 auto;
           color: var(--green-dark);
           text-decoration: none;
         }
 
         .order-brand-logo {
-          display: block !important;
-          width: 46px;
-          height: 46px;
-          min-width: 46px;
-          flex: 0 0 46px;
+          display: block;
+          width: 40px;
+          height: 40px;
+          min-width: 40px;
+          flex: 0 0 40px;
           object-fit: cover;
-          border-radius: 13px;
+          border-radius: 11px;
           border: 1px solid #e6e8df;
           background: #fff;
         }
 
         .order-brand-copy {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: flex-start !important;
-          justify-content: center !important;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
           min-width: 0;
-          gap: 5px;
+          gap: 4px;
           text-align: left;
         }
 
@@ -742,55 +784,50 @@ export default function CreateOrder() {
           display: block;
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: 20px;
+          font-size: 16px;
           font-weight: 700;
-          line-height: 1.1;
-          letter-spacing: -0.55px;
+          line-height: 1.15;
+          letter-spacing: -0.3px;
         }
 
         .order-brand-copy > span {
           display: block;
-          font-size: 11px;
-          line-height: 1.4;
-          letter-spacing: 0.1px;
           color: #85877c;
+          font-size: 9px;
+          line-height: 1.4;
         }
 
         .order-dashboard-link {
           display: flex;
           flex-direction: row;
           align-items: center;
-          gap: 9px;
-          flex-shrink: 0;
-          min-height: 50px;
-          padding: 7px 11px;
+          gap: 6px;
+          flex: 0 0 auto;
+          min-height: 41px;
+          padding: 5px 7px;
           background: #edf3e9;
           border: 1px solid #dce7d7;
-          border-radius: 13px;
+          border-radius: 11px;
           color: var(--green-dark);
           text-decoration: none;
-          transition:
-            background 0.2s ease,
-            border-color 0.2s ease,
-            transform 0.2s ease;
+          transition: background 0.2s ease, transform 0.2s ease;
         }
 
         .order-dashboard-link:hover {
           background: #e3eddd;
-          border-color: #c8dac0;
           transform: translateY(-1px);
         }
 
         .order-dashboard-icon {
           display: grid;
-          width: 32px;
-          height: 32px;
-          flex: 0 0 32px;
+          width: 27px;
+          height: 27px;
+          flex: 0 0 27px;
           place-items: center;
           border-radius: 10px;
           background: #fff;
           color: var(--green);
-          font-size: 18px;
+          font-size: 15px;
         }
 
         .order-dashboard-copy {
@@ -800,19 +837,19 @@ export default function CreateOrder() {
         }
 
         .order-dashboard-copy small {
-          font-size: 8px;
-          letter-spacing: 0.7px;
+          font-size: 6px;
+          letter-spacing: 0.3px;
           font-weight: 700;
           color: #74846c;
         }
 
         .order-dashboard-copy strong {
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 700;
         }
 
         .order-dashboard-arrow {
-          font-size: 15px;
+          font-size: 12px;
           margin-left: 2px;
         }
 
@@ -984,9 +1021,7 @@ export default function CreateOrder() {
           font-size: 13px;
           line-height: 1.5;
           outline: none;
-          transition:
-            border-color 0.2s ease,
-            box-shadow 0.2s ease,
+          transition: border-color 0.2s ease, box-shadow 0.2s ease,
             background 0.2s ease;
         }
 
@@ -1064,9 +1099,7 @@ export default function CreateOrder() {
           background: #f8faf6;
           text-align: center;
           cursor: pointer;
-          transition:
-            border-color 0.2s ease,
-            background 0.2s ease;
+          transition: border-color 0.2s ease, background 0.2s ease;
         }
 
         .order-upload-area:hover {
@@ -1191,9 +1224,7 @@ export default function CreateOrder() {
           border-radius: 13px;
           background: #fff;
           cursor: pointer;
-          transition:
-            border-color 0.2s ease,
-            background 0.2s ease;
+          transition: border-color 0.2s ease, background 0.2s ease;
         }
 
         .order-payment-option.is-selected {
@@ -1288,9 +1319,7 @@ export default function CreateOrder() {
           font-size: 13px;
           font-weight: 700;
           cursor: pointer;
-          transition:
-            background 0.2s ease,
-            transform 0.2s ease;
+          transition: background 0.2s ease, transform 0.2s ease;
         }
 
         .order-submit-button:hover:not(:disabled) {
@@ -1414,7 +1443,6 @@ export default function CreateOrder() {
             height: 38px;
             min-width: 38px;
             flex-basis: 38px;
-            border-radius: 11px;
           }
 
           .order-brand-copy {
