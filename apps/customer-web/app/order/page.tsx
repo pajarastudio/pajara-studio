@@ -336,18 +336,8 @@ export default function CreateOrder() {
           </Link>
 
           <Link href="/dashboard" className="order-dashboard-link">
-            <span className="order-dashboard-icon" aria-hidden="true">
-              ↖
-            </span>
-
-            <span className="order-dashboard-copy">
-              <small>RUANG PELANGGAN</small>
-              <strong>Dashboard</strong>
-            </span>
-
-            <span className="order-dashboard-arrow" aria-hidden="true">
-              ↗
-            </span>
+            <span>Dashboard</span>
+            <span aria-hidden="true">↗</span>
           </Link>
         </div>
       </header>
@@ -797,74 +787,29 @@ export default function CreateOrder() {
           flex-direction: row;
           align-items: center;
           justify-content: center;
-          gap: 9px;
+          gap: 10px;
           flex: 0 0 auto;
-          min-height: 44px;
-          padding: 7px 13px;
+          min-height: 42px;
+          padding: 0 16px;
           border: 1px solid #dce6dc;
           border-radius: 12px;
           background: #fff;
-          color: var(--green-dark);
+          color: #214d32;
+          font-size: 12px;
+          font-weight: 700;
           text-decoration: none;
           white-space: nowrap;
           box-shadow: 0 3px 10px rgba(33, 77, 50, 0.07);
           transition:
             background 0.2s ease,
             color 0.2s ease,
-            border-color 0.2s ease,
-            transform 0.2s ease;
+            border-color 0.2s ease;
         }
 
         .order-dashboard-link:hover {
-          background: var(--green);
+          background: #2f6b45;
           color: #fff;
-          border-color: var(--green);
-          transform: translateY(-1px);
-        }
-
-        .order-dashboard-icon {
-          display: grid;
-          width: 28px;
-          height: 28px;
-          flex: 0 0 28px;
-          place-items: center;
-          border-radius: 9px;
-          background: #edf3e9;
-          color: var(--green);
-          font-size: 15px;
-          transition: background 0.2s ease, color 0.2s ease;
-        }
-
-        .order-dashboard-link:hover .order-dashboard-icon {
-          background: rgba(255, 255, 255, 0.18);
-          color: #fff;
-        }
-
-        .order-dashboard-copy {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .order-dashboard-copy small {
-          font-size: 7px;
-          letter-spacing: 0.5px;
-          font-weight: 700;
-          color: #74846c;
-        }
-
-        .order-dashboard-link:hover .order-dashboard-copy small {
-          color: #e1ecdf;
-        }
-
-        .order-dashboard-copy strong {
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .order-dashboard-arrow {
-          font-size: 13px;
-          margin-left: 2px;
+          border-color: #2f6b45;
         }
 
         .order-container {
@@ -1463,30 +1408,11 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            gap: 6px;
-            min-height: 41px;
-            padding: 5px 7px;
+            gap: 8px;
+            min-height: 40px;
+            padding: 0 12px;
             border-radius: 11px;
-          }
-
-          .order-dashboard-icon {
-            width: 27px;
-            height: 27px;
-            flex-basis: 27px;
-            font-size: 15px;
-          }
-
-          .order-dashboard-copy small {
-            font-size: 6px;
-            letter-spacing: 0.3px;
-          }
-
-          .order-dashboard-copy strong {
-            font-size: 10px;
-          }
-
-          .order-dashboard-arrow {
-            font-size: 12px;
+            font-size: 11px;
           }
 
           .order-container {
@@ -1598,18 +1524,9 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            gap: 4px;
-            padding: 4px 5px;
-          }
-
-          .order-dashboard-icon {
-            width: 23px;
-            height: 23px;
-            flex-basis: 23px;
-          }
-
-          .order-dashboard-copy strong {
-            font-size: 9px;
+            gap: 6px;
+            padding: 0 9px;
+            font-size: 10px;
           }
 
           .order-container {
