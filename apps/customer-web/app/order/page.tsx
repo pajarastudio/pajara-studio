@@ -736,7 +736,7 @@ export default function CreateOrder() {
           line-height: 1.4;
         }
 
-        /* Satu card utuh untuk ikon, label, Dashboard, dan panah. */
+        /* Card Dashboard saja; susunan logo dan nama brand tetap horizontal. */
         .order-dashboard-link {
           display: inline-flex;
           flex-direction: row;
