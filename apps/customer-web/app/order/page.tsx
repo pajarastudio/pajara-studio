@@ -32,7 +32,6 @@ export default function CreateOrder() {
       }
 
       const formData = new FormData(form);
-
       const service = String(formData.get("service") || "");
       const designType = String(formData.get("design-type") || "").trim();
       const quantity = Number(formData.get("quantity") || 1);
@@ -150,10 +149,7 @@ export default function CreateOrder() {
       let uploadedCount = 0;
 
       for (const file of referenceFiles) {
-        const safeFileName = file.name.replace(
-          /[^a-zA-Z0-9._-]/g,
-          "_"
-        );
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
         const filePath =
           `orders/${order.id}/reference/` +
@@ -303,12 +299,7 @@ export default function CreateOrder() {
               <div className="order-grid">
                 <div className="order-field">
                   <label htmlFor="service">Layanan desain</label>
-                  <select
-                    id="service"
-                    name="service"
-                    defaultValue=""
-                    required
-                  >
+                  <select id="service" name="service" defaultValue="" required>
                     <option value="" disabled>
                       Pilih layanan
                     </option>
@@ -614,7 +605,7 @@ export default function CreateOrder() {
           position: sticky;
           top: 0;
           z-index: 20;
-          background: rgba(255, 255, 255, 0.94);
+          background: rgba(255, 255, 255, 0.96);
           border-bottom: 1px solid #e8e4da;
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
@@ -632,6 +623,7 @@ export default function CreateOrder() {
 
         .order-brand {
           display: inline-flex;
+          flex-direction: row;
           align-items: center;
           gap: 12px;
           min-width: 0;
@@ -641,66 +633,85 @@ export default function CreateOrder() {
 
         .order-brand-logo {
           display: block;
+          flex: 0 0 45px;
           width: 45px;
           height: 45px;
-          min-width: 45px;
           object-fit: cover;
-          border-radius: 14px;
+          border-radius: 13px;
           border: 1px solid #e8e4da;
           background: #f7f4ee;
-          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.07);
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
         }
 
         .order-brand-copy {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
           min-width: 0;
-        }
-
-        .order-brand-copy strong,
-        .order-brand-copy small {
-          display: block;
+          gap: 4px;
         }
 
         .order-brand-copy strong {
+          display: block;
+          color: #214d32;
           font-family: Georgia, "Times New Roman", serif;
           font-size: 17px;
           font-weight: 600;
           letter-spacing: -0.4px;
-          line-height: 1.3;
+          line-height: 1.2;
         }
 
         .order-brand-copy small {
-          margin-top: 4px;
+          display: block;
+          margin: 0;
           color: #85877f;
           font-size: 10px;
-          letter-spacing: 0.15px;
+          letter-spacing: 0.1px;
           line-height: 1.4;
         }
 
         .order-dashboard-link {
           display: inline-flex;
+          flex: 0 0 auto;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          min-height: 42px;
+          gap: 12px;
+          min-height: 43px;
           box-sizing: border-box;
           padding: 0 16px;
-          border: 1px solid #d9e1d7;
-          border-radius: 12px;
-          background: #f7f9f4;
+          border: 1px solid #dce6d8;
+          border-radius: 13px;
+          background: #edf3e9;
           color: #2f6b45;
           text-decoration: none;
           font-size: 11px;
           font-weight: 700;
           white-space: nowrap;
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.04);
           transition:
             background 0.2s ease,
             border-color 0.2s ease,
+            box-shadow 0.2s ease,
             transform 0.2s ease;
         }
 
+        .order-dashboard-link span {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 23px;
+          height: 23px;
+          border-radius: 8px;
+          background: #fff;
+          color: #2f6b45;
+          font-size: 13px;
+        }
+
         .order-dashboard-link:hover {
-          background: #edf2e9;
+          background: #e3eddf;
           border-color: #b9cbb9;
+          box-shadow: 0 5px 14px rgba(33, 77, 50, 0.08);
           transform: translateY(-1px);
         }
 
@@ -1407,14 +1418,19 @@ export default function CreateOrder() {
           }
 
           .order-brand {
+            flex-direction: row;
             gap: 9px;
           }
 
           .order-brand-logo {
+            flex-basis: 40px;
             width: 40px;
             height: 40px;
-            min-width: 40px;
             border-radius: 12px;
+          }
+
+          .order-brand-copy {
+            gap: 4px;
           }
 
           .order-brand-copy strong {
@@ -1426,11 +1442,17 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            min-height: 39px;
+            min-height: 40px;
             gap: 7px;
-            padding: 0 11px;
+            padding: 0 10px;
             border-radius: 11px;
             font-size: 10px;
+          }
+
+          .order-dashboard-link span {
+            width: 21px;
+            height: 21px;
+            border-radius: 7px;
           }
 
           .order-main {
@@ -1598,6 +1620,7 @@ export default function CreateOrder() {
 
           .order-topbar-inner {
             width: calc(100% - 22px);
+            gap: 7px;
           }
 
           .order-brand {
@@ -1605,9 +1628,9 @@ export default function CreateOrder() {
           }
 
           .order-brand-logo {
+            flex-basis: 36px;
             width: 36px;
             height: 36px;
-            min-width: 36px;
           }
 
           .order-brand-copy strong {
@@ -1621,7 +1644,7 @@ export default function CreateOrder() {
 
           .order-dashboard-link {
             gap: 5px;
-            padding: 0 9px;
+            padding: 0 8px;
             font-size: 9px;
           }
 
