@@ -782,7 +782,7 @@ export default function CreateOrder() {
           line-height: 1.4;
         }
 
-        /* Card khusus Dashboard. Logo dan tagline tidak diubah. */
+        /* Card Dashboard */
         .order-dashboard-link {
           display: inline-flex;
           flex-direction: row;
