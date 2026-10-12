@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -237,11 +238,6 @@ export default function CreateOrder() {
 
       <section className="order-main">
         <div className="order-container">
-          <Link href="/dashboard" className="order-back-link">
-            <span aria-hidden="true">←</span>
-            <span>Kembali ke Home</span>
-          </Link>
-
           <div className="order-intro">
             <div className="order-eyebrow">
               <span className="order-eyebrow-dot" />
@@ -265,7 +261,9 @@ export default function CreateOrder() {
               <span className="order-note-icon" aria-hidden="true">
                 ✳
               </span>
-              <span>Luangkan waktu untuk mengisi detail pesanan dengan teliti.</span>
+              <span>
+                Luangkan waktu untuk mengisi detail pesanan dengan teliti.
+              </span>
             </div>
 
             <div className="order-progress" aria-label="Empat bagian formulir">
@@ -613,10 +611,13 @@ export default function CreateOrder() {
         }
 
         .order-topbar {
-          position: relative;
-          z-index: 2;
+          position: sticky;
+          top: 0;
+          z-index: 20;
           background: rgba(255, 255, 255, 0.94);
           border-bottom: 1px solid #e8e4da;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
         }
 
         .order-topbar-inner {
@@ -632,20 +633,26 @@ export default function CreateOrder() {
         .order-brand {
           display: inline-flex;
           align-items: center;
-          gap: 11px;
+          gap: 12px;
+          min-width: 0;
           color: #214d32;
           text-decoration: none;
-          min-width: 0;
         }
 
         .order-brand-logo {
-          width: 44px;
-          height: 44px;
-          min-width: 44px;
+          display: block;
+          width: 45px;
+          height: 45px;
+          min-width: 45px;
           object-fit: cover;
-          border-radius: 13px;
+          border-radius: 14px;
           border: 1px solid #e8e4da;
           background: #f7f4ee;
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.07);
+        }
+
+        .order-brand-copy {
+          min-width: 0;
         }
 
         .order-brand-copy strong,
@@ -655,33 +662,53 @@ export default function CreateOrder() {
 
         .order-brand-copy strong {
           font-family: Georgia, "Times New Roman", serif;
-          font-size: 16px;
-          letter-spacing: -0.3px;
+          font-size: 17px;
+          font-weight: 600;
+          letter-spacing: -0.4px;
+          line-height: 1.3;
         }
 
         .order-brand-copy small {
           margin-top: 4px;
           color: #85877f;
           font-size: 10px;
+          letter-spacing: 0.15px;
+          line-height: 1.4;
         }
 
         .order-dashboard-link {
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 10px;
-          color: #2f6b45;
-          text-decoration: none;
-          font-size: 12px;
-          font-weight: 700;
-          padding: 11px 15px;
+          min-height: 42px;
+          box-sizing: border-box;
+          padding: 0 16px;
           border: 1px solid #d9e1d7;
           border-radius: 12px;
+          background: #f7f9f4;
+          color: #2f6b45;
+          text-decoration: none;
+          font-size: 11px;
+          font-weight: 700;
           white-space: nowrap;
-          transition: background 0.2s ease;
+          transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
         }
 
         .order-dashboard-link:hover {
           background: #edf2e9;
+          border-color: #b9cbb9;
+          transform: translateY(-1px);
+        }
+
+        .order-dashboard-link:focus-visible,
+        .order-brand:focus-visible {
+          outline: 2px solid #2f6b45;
+          outline-offset: 4px;
+          border-radius: 10px;
         }
 
         .order-main {
@@ -691,37 +718,6 @@ export default function CreateOrder() {
         .order-container {
           width: min(100% - 40px, 760px);
           margin: 0 auto;
-        }
-
-        .order-back-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          color: #4c604e;
-          text-decoration: none;
-          font-size: 12px;
-          font-weight: 700;
-          padding: 10px 14px;
-          border: 1px solid #e2dfd4;
-          border-radius: 11px;
-          background: rgba(255, 255, 255, 0.72);
-          transition:
-            color 0.2s ease,
-            background 0.2s ease,
-            border-color 0.2s ease,
-            transform 0.2s ease;
-        }
-
-        .order-back-link span:first-child {
-          font-size: 18px;
-          line-height: 1;
-        }
-
-        .order-back-link:hover {
-          color: #214d32;
-          background: #fff;
-          border-color: #b8cbb8;
-          transform: translateX(-2px);
         }
 
         .order-intro {
@@ -1406,7 +1402,8 @@ export default function CreateOrder() {
         @media (max-width: 600px) {
           .order-topbar-inner {
             width: calc(100% - 30px);
-            min-height: 69px;
+            min-height: 70px;
+            gap: 10px;
           }
 
           .order-brand {
@@ -1414,14 +1411,14 @@ export default function CreateOrder() {
           }
 
           .order-brand-logo {
-            width: 39px;
-            height: 39px;
-            min-width: 39px;
-            border-radius: 11px;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 12px;
           }
 
           .order-brand-copy strong {
-            font-size: 14px;
+            font-size: 15px;
           }
 
           .order-brand-copy small {
@@ -1429,8 +1426,10 @@ export default function CreateOrder() {
           }
 
           .order-dashboard-link {
-            gap: 6px;
-            padding: 9px 10px;
+            min-height: 39px;
+            gap: 7px;
+            padding: 0 11px;
+            border-radius: 11px;
             font-size: 10px;
           }
 
@@ -1601,13 +1600,29 @@ export default function CreateOrder() {
             width: calc(100% - 22px);
           }
 
+          .order-brand {
+            gap: 7px;
+          }
+
+          .order-brand-logo {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+          }
+
+          .order-brand-copy strong {
+            font-size: 13px;
+          }
+
           .order-brand-copy small {
             max-width: 125px;
             font-size: 8px;
           }
 
           .order-dashboard-link {
-            padding: 8px;
+            gap: 5px;
+            padding: 0 9px;
+            font-size: 9px;
           }
 
           .order-form-topline {
