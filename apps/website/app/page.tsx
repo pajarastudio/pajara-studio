@@ -63,7 +63,7 @@ type PortfolioItem = {
 
 type TestimonialItem = {
   id: string;
-  customer_name: string;
+  customer_nam: string;
   content: string;
   rating: number | null;
   created_at: string;
@@ -131,7 +131,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("testimonials")
-          .select("id, customer_name, content, rating, created_at")
+          .select("id, customer_nam, content, rating, created_at")
           .eq("is_published", true)
           .order("created_at", { ascending: false })
           .limit(3);
@@ -473,6 +473,7 @@ export default function Home() {
                   >
                     “
                   </span>
+
                   <p
                     style={{
                       color: "#1f2a23",
@@ -487,6 +488,24 @@ export default function Home() {
                       ? `${item.content.slice(0, 170).trimEnd()}…`
                       : item.content}
                   </p>
+
+                  {item.rating !== null && (
+                    <div
+                      aria-label={`Rating ${item.rating} dari 5`}
+                      style={{
+                        color: "#8a6a4a",
+                        fontSize: 14,
+                        letterSpacing: 3,
+                        marginBottom: 18,
+                      }}
+                    >
+                      {"★".repeat(Math.max(0, Math.min(5, item.rating)))}
+                      {"☆".repeat(
+                        5 - Math.max(0, Math.min(5, item.rating))
+                      )}
+                    </div>
+                  )}
+
                   <div
                     style={{
                       marginTop: "auto",
@@ -503,7 +522,7 @@ export default function Home() {
                         marginBottom: 5,
                       }}
                     >
-                      {item.customer_name}
+                      {item.customer_nam}
                     </strong>
                     <span
                       style={{
