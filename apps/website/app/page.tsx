@@ -5,8 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import "./globals.css";
 
-const customerWeb =
-"https://pajara-customer.pajarastd.workers.dev/";
+const customerWeb = "https://pajara-customer.pajarastd.workers.dev/";
 
 const logo =
 "/755809946_17926162029385149_3739923509439876817_n.jpg";
@@ -81,6 +80,11 @@ return (
 src={logo}
 alt={alt}
 className={"pajara-logo ${className}"}
+style={{
+display: "block",
+objectFit: "contain",
+maxWidth: "100%",
+}}
 />
 );
 }
@@ -117,10 +121,7 @@ async function loadPortfolio() {
       setPortfolio((data || []) as PortfolioItem[]);
     }
   } catch (error) {
-    console.error(
-      "Terjadi kesalahan saat memuat portfolio:",
-      error
-    );
+    console.error("Terjadi kesalahan saat memuat portfolio:", error);
   } finally {
     if (!cancelled) {
       setPortfolioLoading(false);
@@ -138,10 +139,7 @@ async function loadTestimonials() {
       .limit(3);
 
     if (error) {
-      console.error(
-        "Gagal memuat testimoni:",
-        error.message
-      );
+      console.error("Gagal memuat testimoni:", error.message);
       return;
     }
 
@@ -175,16 +173,16 @@ return (
 <div className="pajara-container pajara-navbar-inner">
 <a href="#home" className="pajara-brand">
 <Logo className="pajara-navbar-logo-mark" />
-<span className="pajara-brand-name">
-Pajara Studio
-</span>
+<span className="pajara-brand-name">Pajara Studio</span>
 </a>
 
       <div className="pajara-nav">
         <a href="#layanan">Layanan</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#tentang">Tentang</a>
-        <a href="#testimoni">Testimoni</a>
+        { !testimonialsLoading && testimonials.length > 0 && (
+          <a href="#testimoni">Testimoni</a>
+        )}
         <a href="#kontak">Kontak</a>
         <a href={customerWeb} className="pajara-nav-button">
           Pesan Desain
@@ -197,9 +195,7 @@ Pajara Studio
   <section id="home" className="pajara-hero">
     <div className="pajara-container pajara-hero-inner">
       <div className="pajara-hero-copy">
-        <span className="pajara-eyebrow">
-          PAJARA STUDIO
-        </span>
+        <span className="pajara-eyebrow">PAJARA STUDIO</span>
 
         <h1>
           Desain yang
@@ -463,51 +459,114 @@ Pajara Studio
     </div>
   </section>
 
-  {/* TESTIMONI */}
-  <section id="testimoni" className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-section-heading">
-        <span className="pajara-eyebrow">
-          TESTIMONI PELANGGAN
-        </span>
+  {/* TESTIMONI: HANYA MUNCUL JIKA ADA DATA TERPUBLIKASI */}
+  {!testimonialsLoading && testimonials.length > 0 && (
+    <section id="testimoni" className="pajara-section">
+      <div className="pajara-container">
+        <div className="pajara-section-heading">
+          <span className="pajara-eyebrow">
+            TESTIMONI PELANGGAN
+          </span>
 
-        <h2>
-          Cerita dari
-          <br />
-          perjalanan kita.
-        </h2>
+          <h2>
+            Cerita dari
+            <br />
+            perjalanan kita.
+          </h2>
 
-        <p>
-          Setiap kepercayaan dan pengalaman pelanggan
-          menjadi bagian dari perjalanan Pajara Studio.
-        </p>
-      </div>
+          <p>
+            Setiap kepercayaan dan pengalaman pelanggan
+            menjadi bagian dari perjalanan Pajara Studio.
+          </p>
+        </div>
 
-      {testimonialsLoading ? (
-        <p>Memuat testimoni pelanggan...</p>
-      ) : testimonials.length === 0 ? (
         <div
           style={{
-            maxWidth: 620,
-            margin: "0 auto",
-            padding: "32px 24px",
-            textAlign: "center",
-            background: "#ffffff",
-            border: "1px solid #e5e0d7",
-            borderRadius: 18,
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+            gap: 20,
+            alignItems: "stretch",
           }}
         >
-          <p
-            style={{
-              color: "#6f766f",
-              lineHeight: 1.8,
-              margin: "0 0 18px",
-            }}
-          >
-            Cerita pelanggan sedang dipersiapkan.
-            Nantikan perjalanan kita berikutnya.
-          </p>
+          {testimonials.map((item) => (
+            <article
+              key={item.id}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                padding: "26px 24px",
+                background: "#ffffff",
+                border: "1px solid #e5e0d7",
+                borderRadius: 18,
+                boxShadow:
+                  "0 8px 24px rgba(33, 77, 50, 0.05)",
+                minWidth: 0,
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  color: "#2f6b45",
+                  fontFamily: "Georgia, serif",
+                  fontSize: 42,
+                  lineHeight: 1,
+                  marginBottom: 14,
+                }}
+              >
+                “
+              </span>
 
+              <p
+                style={{
+                  color: "#1f2a23",
+                  fontSize: 15,
+                  lineHeight: 1.8,
+                  margin: "0 0 24px",
+                  overflowWrap: "anywhere",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {item.content.length > 170
+                  ? `${item.content.slice(0, 170).trimEnd()}…`
+                  : item.content}
+              </p>
+
+              <div
+                style={{
+                  marginTop: "auto",
+                  paddingTop: 16,
+                  borderTop: "1px solid #e5e0d7",
+                  width: "100%",
+                }}
+              >
+                <strong
+                  style={{
+                    display: "block",
+                    color: "#214d32",
+                    fontSize: 15,
+                    marginBottom: 5,
+                  }}
+                >
+                  {item.customer_name}
+                </strong>
+
+                <span
+                  style={{
+                    display: "block",
+                    color: "#6f766f",
+                    fontSize: 12,
+                  }}
+                >
+                  Pelanggan Pajara Studio
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: 32 }}>
           <Link
             href="/testimonials"
             className="pajara-button pajara-button-secondary"
@@ -515,111 +574,9 @@ Pajara Studio
             Lihat Semua Testimoni →
           </Link>
         </div>
-      ) : (
-        <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
-              gap: 20,
-              alignItems: "stretch",
-            }}
-          >
-            {testimonials.map((item) => (
-              <article
-                key={item.id}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  padding: "26px 24px",
-                  background: "#ffffff",
-                  border: "1px solid #e5e0d7",
-                  borderRadius: 18,
-                  boxShadow:
-                    "0 8px 24px rgba(33, 77, 50, 0.05)",
-                  minWidth: 0,
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  style={{
-                    color: "#2f6b45",
-                    fontFamily: "Georgia, serif",
-                    fontSize: 42,
-                    lineHeight: 1,
-                    marginBottom: 14,
-                  }}
-                >
-                  “
-                </span>
-
-                <p
-                  style={{
-                    color: "#1f2a23",
-                    fontSize: 15,
-                    lineHeight: 1.8,
-                    margin: "0 0 24px",
-                    overflowWrap: "anywhere",
-                    whiteSpace: "pre-line",
-                  }}
-                >
-                  {item.content.length > 170
-                    ? `${item.content.slice(0, 170).trimEnd()}…`
-                    : item.content}
-                </p>
-
-                <div
-                  style={{
-                    marginTop: "auto",
-                    paddingTop: 16,
-                    borderTop: "1px solid #e5e0d7",
-                    width: "100%",
-                  }}
-                >
-                  <strong
-                    style={{
-                      display: "block",
-                      color: "#214d32",
-                      fontSize: 15,
-                      marginBottom: 5,
-                    }}
-                  >
-                    {item.customer_name}
-                  </strong>
-
-                  <span
-                    style={{
-                      display: "block",
-                      color: "#6f766f",
-                      fontSize: 12,
-                    }}
-                  >
-                    Pelanggan Pajara Studio
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: 32,
-            }}
-          >
-            <Link
-              href="/testimonials"
-              className="pajara-button pajara-button-secondary"
-            >
-              Lihat Semua Testimoni →
-            </Link>
-          </div>
-        </>
-      )}
-    </div>
-  </section>
+      </div>
+    </section>
+  )}
 
   {/* CTA */}
   <section id="kontak" className="pajara-cta">
@@ -664,7 +621,9 @@ Pajara Studio
           <a href="#layanan">Layanan</a>
           <a href="#portfolio">Portfolio</a>
           <a href="#tentang">Tentang</a>
-          <a href="#testimoni">Testimoni</a>
+          {!testimonialsLoading && testimonials.length > 0 && (
+            <a href="#testimoni">Testimoni</a>
+          )}
           <a href="#kontak">Kontak</a>
 
           <a
