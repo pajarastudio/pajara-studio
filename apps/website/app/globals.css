@@ -56,11 +56,8 @@ width: min(1180px, calc(100% - 48px));
 margin: 0 auto;
 }
 
-/* =========================
-LOGO
-========================= */
-
-.pajara-logo {
+/* LOGO DASAR */
+.pajara-site img.pajara-logo {
 display: block;
 width: 100%;
 max-width: 100%;
@@ -72,11 +69,8 @@ border: 1px solid var(--line);
 border-radius: 16px;
 }
 
-/* =========================
-NAVBAR
-========================= */
-
-.pajara-nav {
+/* NAVBAR */
+.pajara-site .pajara-nav {
 position: sticky;
 top: 0;
 z-index: 50;
@@ -100,14 +94,16 @@ gap: 12px;
 flex-shrink: 0;
 }
 
-.pajara-navbar-logo-mark {
-display: block;
-width: 38px;
-height: 38px;
-max-width: 38px;
+.pajara-site img.pajara-navbar-logo-mark {
+width: 38px !important;
+height: 38px !important;
+min-width: 38px;
+max-width: 38px !important;
+max-height: 38px;
 flex: 0 0 38px;
 padding: 3px;
 object-fit: contain;
+aspect-ratio: 1 / 1;
 border-radius: 10px;
 }
 
@@ -147,10 +143,7 @@ font-weight: 600 !important;
 background: var(--green-dark);
 }
 
-/* =========================
-HERO
-========================= */
-
+/* HERO */
 .pajara-hero {
 padding: 110px 0 90px;
 }
@@ -246,7 +239,6 @@ font-weight: 600;
 }
 
 /* HERO CARD */
-
 .pajara-hero-visual {
 display: flex;
 justify-content: center;
@@ -285,10 +277,9 @@ padding-top: 18px;
 color: var(--green-dark);
 }
 
-.pajara-hero-logo {
-display: block;
-width: 100%;
-max-width: 100%;
+.pajara-site img.pajara-hero-logo {
+width: 100% !important;
+max-width: 100% !important;
 height: auto;
 aspect-ratio: 1 / 1;
 margin: 22px 0;
@@ -297,10 +288,7 @@ object-fit: contain;
 border-radius: 22px;
 }
 
-/* =========================
-TRUST
-========================= */
-
+/* TRUST */
 .pajara-trust {
 padding: 24px 0;
 border-top: 1px solid var(--line);
@@ -322,10 +310,7 @@ letter-spacing: 1px;
 text-transform: uppercase;
 }
 
-/* =========================
-SECTION
-========================= */
-
+/* SECTION */
 .pajara-section {
 padding: 100px 0;
 }
@@ -353,10 +338,7 @@ font-size: 15px;
 line-height: 1.8;
 }
 
-/* =========================
-SERVICES
-========================= */
-
+/* SERVICES */
 .pajara-services-grid {
 display: grid;
 grid-template-columns: repeat(3, 1fr);
@@ -388,7 +370,6 @@ font-weight: 700;
 .pajara-service-card h3 {
 margin: 60px 0 10px;
 color: var(--text);
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 19px;
 font-weight: 600;
 letter-spacing: -0.3px;
@@ -398,7 +379,6 @@ letter-spacing: -0.3px;
 max-width: 290px;
 margin: 0;
 color: var(--muted);
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 13px;
 line-height: 1.7;
 }
@@ -412,10 +392,7 @@ font-size: 20px;
 font-weight: 500;
 }
 
-/* =========================
-PORTFOLIO
-========================= */
-
+/* PORTFOLIO */
 .pajara-portfolio-grid {
 display: grid;
 grid-template-columns: repeat(3, 1fr);
@@ -459,7 +436,6 @@ font-weight: 700;
 .pajara-portfolio-info h3 {
 margin: 0 0 5px;
 color: var(--text);
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 17px;
 line-height: 1.25;
 font-weight: 600;
@@ -468,14 +444,10 @@ font-weight: 600;
 .pajara-portfolio-info p {
 margin: 0;
 color: var(--muted);
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 12px;
 }
 
-/* =========================
-ABOUT
-========================= */
-
+/* ABOUT */
 .pajara-about-grid {
 display: grid;
 grid-template-columns: 0.7fr 1.3fr;
@@ -490,10 +462,9 @@ justify-content: center;
 min-width: 0;
 }
 
-.pajara-about-mark .pajara-logo {
-display: block;
-width: min(300px, 100%);
-max-width: 300px;
+.pajara-site .pajara-about-mark img.pajara-logo {
+width: min(300px, 100%) !important;
+max-width: 300px !important;
 height: auto;
 padding: 14px;
 border-radius: 26px;
@@ -530,7 +501,6 @@ max-width: 650px;
 .pajara-about-content p {
 margin: 0 0 18px;
 color: var(--muted);
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 15px;
 line-height: 1.8;
 }
@@ -543,10 +513,7 @@ font-size: 18px;
 font-weight: 600;
 }
 
-/* =========================
-FOUNDER
-========================= */
-
+/* FOUNDER */
 .pajara-founder-card {
 padding: 50px;
 background: var(--green-dark);
@@ -578,7 +545,6 @@ font-weight: 600;
 .pajara-founder-role {
 margin: 0;
 color: #d7e0d8;
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 13px;
 }
 
@@ -617,11 +583,7 @@ font-size: 18px;
 font-style: italic;
 }
 
-/* =========================
-TESTIMONIAL
-GAYA ASLI DIPERTAHANKAN
-========================= */
-
+/* TESTIMONIAL */
 .pajara-testimonial {
 max-width: 1000px;
 margin: 0 auto;
@@ -683,10 +645,7 @@ color: var(--muted);
 font-size: 11px;
 }
 
-/* =========================
-CTA
-========================= */
-
+/* CTA */
 .pajara-cta {
 padding: 100px 0;
 background: var(--green);
@@ -728,7 +687,6 @@ font-weight: 600;
 max-width: 480px;
 margin: 22px 0 0;
 color: #dce8df;
-font-family: "DM Sans", Arial, Helvetica, sans-serif;
 font-size: 14px;
 line-height: 1.7;
 }
@@ -753,10 +711,7 @@ transition: 0.2s ease;
 transform: translateY(-2px);
 }
 
-/* =========================
-FOOTER
-========================= */
-
+/* FOOTER */
 .pajara-footer {
 padding: 42px 0 30px;
 background: var(--green-dark);
@@ -776,11 +731,11 @@ border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 flex-shrink: 0;
 }
 
-.pajara-footer-logo {
-display: block;
-width: 48px;
-height: 48px;
-max-width: 48px;
+.pajara-site img.pajara-footer-logo {
+width: 48px !important;
+height: 48px !important;
+max-width: 48px !important;
+max-height: 48px;
 padding: 4px;
 object-fit: contain;
 border-radius: 12px;
@@ -821,10 +776,7 @@ color: #8fa294;
 font-size: 10px;
 }
 
-/* =========================
-RESPONSIVE
-========================= */
-
+/* RESPONSIVE */
 @media (max-width: 900px) {
 .pajara-navbar-inner > .pajara-nav > a:not(.pajara-nav-button) {
 display: none;
@@ -879,10 +831,12 @@ width: min(100% - 32px, 1180px);
 min-height: 70px;
 }
 
-.pajara-navbar-logo-mark {
-width: 36px;
-height: 36px;
-max-width: 36px;
+.pajara-site img.pajara-navbar-logo-mark {
+width: 36px !important;
+height: 36px !important;
+min-width: 36px;
+max-width: 36px !important;
+max-height: 36px;
 flex-basis: 36px;
 }
 
@@ -918,7 +872,7 @@ padding: 18px;
 border-radius: 22px;
 }
 
-.pajara-hero-logo {
+.pajara-site img.pajara-hero-logo {
 margin: 18px 0;
 padding: 9px;
 border-radius: 18px;
@@ -967,9 +921,9 @@ gap: 35px;
 justify-content: flex-start;
 }
 
-.pajara-about-mark .pajara-logo {
-width: 180px;
-max-width: 180px;
+.pajara-site .pajara-about-mark img.pajara-logo {
+width: 180px !important;
+max-width: 180px !important;
 }
 
 .pajara-founder-card {
