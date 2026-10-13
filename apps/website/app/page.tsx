@@ -131,7 +131,9 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("testimonials")
-          .select("id, customer_name, content, rating, created_at")
+          .select(
+            "id, customer_name:customer_nam, content, rating, created_at"
+          )
           .eq("is_published", true)
           .order("created_at", { ascending: false })
           .limit(3);
