@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,538 +7,519 @@ import Link from "next/link";
 import "./globals.css";
 
 const customerWeb =
-"https://pajara-customer.pajarastd.workers.dev/";
+  "https://pajara-customer.pajarastd.workers.dev/";
 
 const logo =
-"/755809946_17926162029385149_3739923509439876817_n.jpg";
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 const supabase = createClient(
-process.env.NEXT_PUBLIC_SUPABASE_URL!,
-process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
 );
 
 const services = [
-{
-number: "01",
-title: "Logo & Branding",
-description:
-"Membangun identitas visual yang kuat, jelas, dan mudah dikenali.",
-},
-{
-number: "02",
-title: "Desain Promosi",
-description:
-"Materi promosi yang menarik perhatian dan tetap punya arah.",
-},
-{
-number: "03",
-title: "Social Media",
-description:
-"Visual social media yang konsisten, rapi, dan sesuai karakter brand.",
-},
-{
-number: "04",
-title: "Banner",
-description:
-"Banner informatif dengan hierarki visual yang jelas dan profesional.",
-},
-{
-number: "05",
-title: "Kemasan & Menu",
-description:
-"Desain kemasan dan menu yang membantu produk tampil lebih meyakinkan.",
-},
+  {
+    number: "01",
+    title: "Logo & Branding",
+    description:
+      "Membangun identitas visual yang kuat, jelas, dan mudah dikenali.",
+  },
+  {
+    number: "02",
+    title: "Desain Promosi",
+    description:
+      "Materi promosi yang menarik perhatian dan tetap punya arah.",
+  },
+  {
+    number: "03",
+    title: "Social Media",
+    description:
+      "Visual social media yang konsisten, rapi, dan sesuai karakter brand.",
+  },
+  {
+    number: "04",
+    title: "Banner",
+    description:
+      "Banner informatif dengan hierarki visual yang jelas dan profesional.",
+  },
+  {
+    number: "05",
+    title: "Kemasan & Menu",
+    description:
+      "Desain kemasan dan menu yang membantu produk tampil lebih meyakinkan.",
+  },
 ];
 
 type PortfolioItem = {
-id: string;
-title: string;
-category: string | null;
-description: string | null;
-image_path: string;
-project_url: string | null;
-is_featured: boolean;
-is_active: boolean;
-sort_order: number;
+  id: string;
+  title: string;
+  category: string | null;
+  description: string | null;
+  image_path: string;
+  project_url: string | null;
+  is_featured: boolean;
+  is_active: boolean;
+  sort_order: number;
 };
 
 function Logo({
-className = "",
-alt = "Logo Pajara Studio",
+  className = "",
+  alt = "Logo Pajara Studio",
 }: {
-className?: string;
-alt?: string;
+  className?: string;
+  alt?: string;
 }) {
-return (
-<img
-src={logo}
-alt={alt}
-className={"pajara-logo ${className}"}
-/>
-);
+  return (
+    <img
+      src={logo}
+      alt={alt}
+      className={`pajara-logo ${className}`}
+    />
+  );
 }
 
 export default function Home() {
-const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
-const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
 
-useEffect(() => {
-let cancelled = false;
+  useEffect(() => {
+    let cancelled = false;
 
-async function loadPortfolio() {
-  try {
-    const { data, error } = await supabase
-      .from("portfolios")
-      .select(
-        "id, title, category, description, image_path, project_url, is_featured, is_active, sort_order, created_at"
-      )
-      .eq("is_active", true)
-      .eq("is_featured", true)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false })
-      .limit(3);
+    async function loadPortfolio() {
+      try {
+        const { data, error } = await supabase
+          .from("portfolios")
+          .select(
+            "id, title, category, description, image_path, project_url, is_featured, is_active, sort_order, created_at"
+          )
+          .eq("is_active", true)
+          .eq("is_featured", true)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: false })
+          .limit(3);
 
-    if (error) {
-      console.error("Gagal memuat portfolio:", error.message);
-      return;
+        if (error) {
+          console.error("Gagal memuat portfolio:", error.message);
+          return;
+        }
+
+        if (!cancelled) {
+          setPortfolio((data || []) as PortfolioItem[]);
+        }
+      } catch (error) {
+        console.error(
+          "Terjadi kesalahan saat memuat portfolio:",
+          error
+        );
+      } finally {
+        if (!cancelled) {
+          setPortfolioLoading(false);
+        }
+      }
     }
 
-    if (!cancelled) {
-      setPortfolio((data || []) as PortfolioItem[]);
-    }
-  } catch (error) {
-    console.error("Terjadi kesalahan saat memuat portfolio:", error);
-  } finally {
-    if (!cancelled) {
-      setPortfolioLoading(false);
-    }
-  }
-}
+    void loadPortfolio();
 
-void loadPortfolio();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-return () => {
-  cancelled = true;
-};
-
-}, []);
-
-return (
-<main className="pajara-site">
-<nav
-className="pajara-nav"
-aria-label="Navigasi utama"
->
-<div className="pajara-container pajara-navbar-inner">
-<a href="#home" className="pajara-brand">
-<Logo className="pajara-navbar-logo-mark" />
-
-        <span className="pajara-brand-name">
-          Pajara Studio
-        </span>
-      </a>
-
-      <div className="pajara-nav">
-        <a href="#layanan">Layanan</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#tentang">Tentang</a>
-        <a href="#testimoni">Testimoni</a>
-        <a href="#kontak">Kontak</a>
-
-        <a
-          href={customerWeb}
-          className="pajara-nav-button"
-        >
-          Pesan Desain
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  {/* HERO */}
-  <section id="home" className="pajara-hero">
-    <div className="pajara-container pajara-hero-inner">
-      <div className="pajara-hero-copy">
-        <span className="pajara-eyebrow">
-          PAJARA STUDIO
-        </span>
-
-        <h1>
-          Desain yang
-          <br />
-          <span>punya arah.</span>
-        </h1>
-
-        <p className="pajara-hero-description">
-          Pajara Studio membantu brand dan usaha
-          membangun visual yang kuat, rapi, dan
-          memiliki karakter.
-        </p>
-
-        <div className="pajara-hero-actions">
-          <a
-            href={customerWeb}
-            className="pajara-button pajara-button-primary"
-          >
-            Mulai Pesanan
+  return (
+    <main className="pajara-site">
+      <nav className="pajara-nav" aria-label="Navigasi utama">
+        <div className="pajara-container pajara-navbar-inner">
+          <a href="#home" className="pajara-brand">
+            <Logo className="pajara-navbar-logo-mark" />
+            <span className="pajara-brand-name">
+              Pajara Studio
+            </span>
           </a>
 
-          <a
-            href="#portfolio"
-            className="pajara-button pajara-button-secondary"
-          >
-            Lihat Portfolio
-          </a>
-        </div>
-
-        <p className="pajara-hero-note">
-          Berakar di Tanah Pasundan.
-        </p>
-      </div>
-
-      <div className="pajara-hero-visual">
-        <div className="pajara-hero-card">
-          <div className="pajara-hero-card-top">
-            <span>01</span>
-            <span>DESIGN STUDIO</span>
-          </div>
-
-          <Logo
-            className="pajara-hero-logo"
-            alt="Pajara Studio"
-          />
-
-          <div className="pajara-hero-card-bottom">
-            <span>PAJARA STUDIO</span>
-            <span>EST. 2026</span>
+          <div className="pajara-nav">
+            <a href="#layanan">Layanan</a>
+            <a href="#portfolio">Portfolio</a>
+            <a href="#tentang">Tentang</a>
+            <a href="#testimoni">Testimoni</a>
+            <a href="#kontak">Kontak</a>
+            <a href={customerWeb} className="pajara-nav-button">
+              Pesan Desain
+            </a>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+      </nav>
 
-  {/* TRUST */}
-  <section className="pajara-trust">
-    <div className="pajara-container pajara-trust-inner">
-      <span className="pajara-trust-item">IDENTITAS</span>
-      <span className="pajara-trust-item">VISUAL</span>
-      <span className="pajara-trust-item">STRATEGI</span>
-      <span className="pajara-trust-item">KONSISTENSI</span>
-    </div>
-  </section>
-
-  {/* LAYANAN */}
-  <section id="layanan" className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-section-heading">
-        <span className="pajara-eyebrow">LAYANAN</span>
-
-        <h2>
-          Visual yang bekerja
-          <br />
-          untuk brand.
-        </h2>
-
-        <p>
-          Setiap desain dibuat dengan tujuan,
-          bukan sekadar terlihat bagus.
-        </p>
-      </div>
-
-      <div className="pajara-services-grid">
-        {services.map((service) => (
-          <article
-            key={service.number}
-            className="pajara-service-card"
-          >
-            <span className="pajara-service-number">
-              {service.number}
+      {/* HERO */}
+      <section id="home" className="pajara-hero">
+        <div className="pajara-container pajara-hero-inner">
+          <div className="pajara-hero-copy">
+            <span className="pajara-eyebrow">
+              PAJARA STUDIO
             </span>
 
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
+            <h1>
+              Desain yang
+              <br />
+              <span>punya arah.</span>
+            </h1>
 
-            <span className="pajara-service-arrow">→</span>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
+            <p className="pajara-hero-description">
+              Pajara Studio membantu brand dan usaha membangun
+              visual yang kuat, rapi, dan memiliki karakter.
+            </p>
 
-  {/* PORTFOLIO */}
-  <section id="portfolio" className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-section-heading">
-        <span className="pajara-eyebrow">PORTFOLIO</span>
+            <div className="pajara-hero-actions">
+              <a
+                href={customerWeb}
+                className="pajara-button pajara-button-primary"
+              >
+                Mulai Pesanan
+              </a>
 
-        <h2>
-          Beberapa karya
-          <br />
-          yang sudah dibuat.
-        </h2>
+              <a
+                href="#portfolio"
+                className="pajara-button pajara-button-secondary"
+              >
+                Lihat Portfolio
+              </a>
+            </div>
 
-        <p>
-          Pilihan karya yang dikelola langsung melalui
-          Pajara Admin.
-        </p>
-      </div>
+            <p className="pajara-hero-note">
+              Berakar di Tanah Pasundan.
+            </p>
+          </div>
 
-      {portfolioLoading ? (
-        <p>Memuat karya Pajara Studio...</p>
-      ) : portfolio.length === 0 ? (
-        <p>
-          Karya pilihan sedang dipersiapkan.
-          Nantikan perjalanan kita berikutnya.
-        </p>
-      ) : (
-        <div className="pajara-portfolio-grid">
-          {portfolio.map((item, index) => (
-            <article
-              key={item.id}
-              className="pajara-portfolio-card"
-            >
-              <div className="pajara-portfolio-image">
-                <img
-                  src={item.image_path}
-                  alt={item.title}
-                  loading="lazy"
-                />
+          <div className="pajara-hero-visual">
+            <div className="pajara-hero-card">
+              <div className="pajara-hero-card-top">
+                <span>01</span>
+                <span>DESIGN STUDIO</span>
               </div>
 
-              <div className="pajara-portfolio-info">
-                <span className="pajara-portfolio-number">
-                  {String(index + 1).padStart(2, "0")}
+              <Logo
+                className="pajara-hero-logo"
+                alt="Pajara Studio"
+              />
+
+              <div className="pajara-hero-card-bottom">
+                <span>PAJARA STUDIO</span>
+                <span>EST. 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST */}
+      <section className="pajara-trust">
+        <div className="pajara-container pajara-trust-inner">
+          <span className="pajara-trust-item">IDENTITAS</span>
+          <span className="pajara-trust-item">VISUAL</span>
+          <span className="pajara-trust-item">STRATEGI</span>
+          <span className="pajara-trust-item">KONSISTENSI</span>
+        </div>
+      </section>
+
+      {/* LAYANAN */}
+      <section id="layanan" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <span className="pajara-eyebrow">LAYANAN</span>
+            <h2>
+              Visual yang bekerja
+              <br />
+              untuk brand.
+            </h2>
+            <p>
+              Setiap desain dibuat dengan tujuan, bukan sekadar
+              terlihat bagus.
+            </p>
+          </div>
+
+          <div className="pajara-services-grid">
+            {services.map((service) => (
+              <article
+                key={service.number}
+                className="pajara-service-card"
+              >
+                <span className="pajara-service-number">
+                  {service.number}
                 </span>
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+                <span className="pajara-service-arrow">→</span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.category || "Karya Pajara Studio"}</p>
-                </div>
+      {/* PORTFOLIO */}
+      <section id="portfolio" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <span className="pajara-eyebrow">PORTFOLIO</span>
+            <h2>
+              Beberapa karya
+              <br />
+              yang sudah dibuat.
+            </h2>
+            <p>
+              Pilihan karya yang dikelola langsung melalui
+              Pajara Admin.
+            </p>
+          </div>
+
+          {portfolioLoading ? (
+            <p>Memuat karya Pajara Studio...</p>
+          ) : portfolio.length === 0 ? (
+            <p>
+              Karya pilihan sedang dipersiapkan. Nantikan
+              perjalanan kita berikutnya.
+            </p>
+          ) : (
+            <div className="pajara-portfolio-grid">
+              {portfolio.map((item, index) => (
+                <article
+                  key={item.id}
+                  className="pajara-portfolio-card"
+                >
+                  <div className="pajara-portfolio-image">
+                    <img
+                      src={item.image_path}
+                      alt={item.title}
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="pajara-portfolio-info">
+                    <span className="pajara-portfolio-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <div>
+                      <h3>{item.title}</h3>
+                      <p>
+                        {item.category || "Karya Pajara Studio"}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <Link
+              href="/portfolio"
+              className="pajara-button pajara-button-secondary"
+            >
+              Lihat Semua Karya →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TENTANG */}
+      <section id="tentang" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-about-grid">
+            <div className="pajara-about-mark">
+              <Logo alt="Logo Pajara Studio" />
+            </div>
+
+            <div className="pajara-about-content">
+              <span className="pajara-about-label">
+                TENTANG PAJARA
+              </span>
+
+              <h2>Berakar di Tanah Pasundan.</h2>
+
+              <div className="pajara-about-text">
+                <p>
+                  Pajara Studio adalah studio desain grafis
+                  yang dibangun dengan satu prinsip sederhana:
+                  setiap visual harus memiliki arah.
+                </p>
+
+                <p>
+                  Kami menggabungkan estetika, fungsi, dan
+                  karakter brand untuk menghasilkan desain
+                  yang bukan hanya menarik, tetapi juga
+                  memiliki tujuan.
+                </p>
               </div>
-            </article>
-          ))}
+
+              <div className="pajara-about-signature">
+                Pajara Studio
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </section>
 
-      <div style={{ textAlign: "center", marginTop: 32 }}>
-        <Link
-          href="/portfolio"
-          className="pajara-button pajara-button-secondary"
-        >
-          Lihat Semua Karya →
-        </Link>
-      </div>
-    </div>
-  </section>
+      {/* FOUNDER */}
+      <section className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-founder-card">
+            <div className="pajara-founder-heading">
+              <span className="pajara-founder-label">
+                THE FOUNDER
+              </span>
 
-  {/* TENTANG */}
-  <section id="tentang" className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-about-grid">
-        <div className="pajara-about-mark">
-          <Logo alt="Logo Pajara Studio" />
+              <h3>Muhamad Rijik Rifa&apos;i</h3>
+
+              <p className="pajara-founder-role">
+                Founder &amp; Designer Pajara Studio
+              </p>
+            </div>
+
+            <div className="pajara-founder-info">
+              <div>
+                <span>Tanggal Lahir</span>
+                <strong>04-03</strong>
+              </div>
+
+              <div>
+                <span>Pendidikan</span>
+                <strong>SMK Pertiwi Cibungbulang</strong>
+              </div>
+
+              <div>
+                <span>Bidang</span>
+                <strong>Graphic Design &amp; Branding</strong>
+              </div>
+
+              <div>
+                <span>Keahlian</span>
+                <strong>
+                  Photoshop, Illustrator, Branding, Layout,
+                  Tipografi
+                </strong>
+              </div>
+
+              <div>
+                <span>Domisili</span>
+                <strong>Kab. Bogor, Kec. Leuwiliang</strong>
+              </div>
+
+              <div>
+                <span>Fokus</span>
+                <strong>
+                  Membangun desain yang memiliki karakter,
+                  fungsi, dan arah.
+                </strong>
+              </div>
+            </div>
+
+            <div className="pajara-founder-signature">
+              “Desain yang punya arah.”
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="pajara-about-content">
-          <span className="pajara-about-label">
-            TENTANG PAJARA
-          </span>
+      {/* TESTIMONI — TETAP DIPERTAHANKAN */}
+      <section id="testimoni" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-testimonial">
+            <div className="pajara-testimonial-content">
+              <span className="pajara-testimonial-label">
+                TESTIMONI
+              </span>
 
-          <h2>Berakar di Tanah Pasundan.</h2>
+              <span className="pajara-quote-mark">“</span>
 
-          <div className="pajara-about-text">
+              <p>Tidak ada revisi.</p>
+
+              <div className="pajara-testimonial-person">
+                <strong>Natsu</strong>
+                <span>Client — Pajara Studio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section id="kontak" className="pajara-cta">
+        <div className="pajara-container pajara-cta-inner">
+          <div className="pajara-cta-copy">
+            <span className="pajara-cta-label">PUNYA PROYEK?</span>
+
+            <h2>
+              Mari buat sesuatu
+              <br />
+              yang punya arah.
+            </h2>
+
             <p>
-              Pajara Studio adalah studio desain
-              grafis yang dibangun dengan satu
-              prinsip sederhana: setiap visual
-              harus memiliki arah.
-            </p>
-
-            <p>
-              Kami menggabungkan estetika, fungsi,
-              dan karakter brand untuk menghasilkan
-              desain yang bukan hanya menarik,
-              tetapi juga memiliki tujuan.
+              Ceritakan kebutuhan desainmu dan mari kita
+              bangun visual yang tepat untuk brand-mu.
             </p>
           </div>
-
-          <div className="pajara-about-signature">
-            Pajara Studio
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {/* FOUNDER */}
-  <section className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-founder-card">
-        <div className="pajara-founder-heading">
-          <span className="pajara-founder-label">
-            THE FOUNDER
-          </span>
-
-          <h3>Muhamad Rijik Rifa'i</h3>
-
-          <p className="pajara-founder-role">
-            Founder & Designer Pajara Studio
-          </p>
-        </div>
-
-        <div className="pajara-founder-info">
-          <div>
-            <span>Tanggal Lahir</span>
-            <strong>04-03</strong>
-          </div>
-
-          <div>
-            <span>Pendidikan</span>
-            <strong>SMK Pertiwi Cibungbulang</strong>
-          </div>
-
-          <div>
-            <span>Bidang</span>
-            <strong>Graphic Design & Branding</strong>
-          </div>
-
-          <div>
-            <span>Keahlian</span>
-            <strong>
-              Photoshop, Illustrator, Branding,
-              Layout, Tipografi
-            </strong>
-          </div>
-
-          <div>
-            <span>Domisili</span>
-            <strong>Kab. Bogor, Kec. Leuwiliang</strong>
-          </div>
-
-          <div>
-            <span>Fokus</span>
-            <strong>
-              Membangun desain yang memiliki
-              karakter, fungsi, dan arah.
-            </strong>
-          </div>
-        </div>
-
-        <div className="pajara-founder-signature">
-          “Desain yang punya arah.”
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {/* TESTIMONI — TETAP DIPERTAHANKAN */}
-  <section id="testimoni" className="pajara-section">
-    <div className="pajara-container">
-      <div className="pajara-testimonial">
-        <div className="pajara-testimonial-content">
-          <span className="pajara-testimonial-label">
-            TESTIMONI
-          </span>
-
-          <span className="pajara-quote-mark">“</span>
-
-          <p>Tidak ada revisi.</p>
-
-          <div className="pajara-testimonial-person">
-            <strong>Natsu</strong>
-            <span>Client — Pajara Studio</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {/* CTA */}
-  <section id="kontak" className="pajara-cta">
-    <div className="pajara-container pajara-cta-inner">
-      <div className="pajara-cta-copy">
-        <span className="pajara-cta-label">PUNYA PROYEK?</span>
-
-        <h2>
-          Mari buat sesuatu
-          <br />
-          yang punya arah.
-        </h2>
-
-        <p>
-          Ceritakan kebutuhan desainmu dan
-          mari kita bangun visual yang tepat
-          untuk brand-mu.
-        </p>
-      </div>
-
-      <a
-        href={customerWeb}
-        className="pajara-cta-button"
-      >
-        Pesan Desain
-      </a>
-    </div>
-  </section>
-
-  {/* FOOTER */}
-  <footer className="pajara-footer">
-    <div className="pajara-container">
-      <div className="pajara-footer-top">
-        <div className="pajara-footer-brand">
-          <Logo
-            className="pajara-footer-logo"
-            alt="Pajara Studio"
-          />
-
-          <p>Berakar di Tanah Pasundan.</p>
-        </div>
-
-        <div className="pajara-footer-links">
-          <a href="#layanan">Layanan</a>
-          <a href="#portfolio">Portfolio</a>
-          <a href="#tentang">Tentang</a>
-          <a href="#testimoni">Testimoni</a>
-          <a href="#kontak">Kontak</a>
 
           <a
-            href="https://instagram.com/"
-            target="_blank"
-            rel="noreferrer"
+            href={customerWeb}
+            className="pajara-cta-button"
           >
-            Instagram
+            Pesan Desain
           </a>
-
-          <a
-            href="https://tiktok.com/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            TikTok
-          </a>
-
-          <a href={customerWeb}>Pesan Desain</a>
-
-          <Link href="/portfolio">Semua Portfolio</Link>
-
-          <Link href="/privacy-policy">
-            Kebijakan Privasi
-          </Link>
-
-          <Link href="/terms">Ketentuan Layanan</Link>
         </div>
-      </div>
+      </section>
 
-      <div className="pajara-footer-bottom">
-        <span>
-          © 2026 Pajara Studio. All rights reserved.
-        </span>
+      {/* FOOTER */}
+      <footer className="pajara-footer">
+        <div className="pajara-container">
+          <div className="pajara-footer-top">
+            <div className="pajara-footer-brand">
+              <Logo
+                className="pajara-footer-logo"
+                alt="Pajara Studio"
+              />
+              <p>Berakar di Tanah Pasundan.</p>
+            </div>
 
-        <span>Berakar di Tanah Pasundan.</span>
-      </div>
-    </div>
-  </footer>
-</main>
+            <div className="pajara-footer-links">
+              <a href="#layanan">Layanan</a>
+              <a href="#portfolio">Portfolio</a>
+              <a href="#tentang">Tentang</a>
+              <a href="#testimoni">Testimoni</a>
+              <a href="#kontak">Kontak</a>
 
-);
+              <a
+                href="https://instagram.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Instagram
+              </a>
+
+              <a
+                href="https://tiktok.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                TikTok
+              </a>
+
+              <a href={customerWeb}>Pesan Desain</a>
+              <Link href="/portfolio">Semua Portfolio</Link>
+              <Link href="/privacy-policy">
+                Kebijakan Privasi
+              </Link>
+              <Link href="/terms">Ketentuan Layanan</Link>
+            </div>
+          </div>
+
+          <div className="pajara-footer-bottom">
+            <span>
+              © 2026 Pajara Studio. All rights reserved.
+            </span>
+            <span>Berakar di Tanah Pasundan.</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
 }
