@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -27,13 +26,17 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [category, setCategory] = useState("Semua");
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadPortfolio() {
+      setLoading(true);
+      setError("");
+
       try {
-        const { data, error } = await supabase
+        const { data, error: queryError } = await supabase
           .from("portfolios")
           .select(
             "id, title, category, description, image_path, project_url, sort_order, created_at"
@@ -42,20 +45,30 @@ export default function PortfolioPage() {
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
+        if (queryError) {
+          console.error("Gagal memuat portfolio:", queryError);
+          throw new Error(
+            `${queryError.message} (kode: ${queryError.code || "tidak tersedia"})`
+          );
+        }
 
         if (!cancelled) {
           setItems((data || []) as PortfolioItem[]);
         }
       } catch (err) {
-        console.error("Gagal memuat portfolio:", err);
+        console.error("Kesalahan halaman portfolio:", err);
+
         if (!cancelled) {
           setError(
-            "Karya belum dapat dimuat. Silakan coba lagi beberapa saat."
+            err instanceof Error
+              ? `Portofolio belum dapat dimuat: ${err.message}`
+              : "Portofolio belum dapat dimuat. Periksa koneksi dan konfigurasi Supabase."
           );
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
@@ -64,7 +77,7 @@ export default function PortfolioPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retry]);
 
   const categories = [
     "Semua",
@@ -92,9 +105,7 @@ export default function PortfolioPage() {
               alt="Logo Pajara Studio"
               className="pajara-logo pajara-navbar-logo-mark"
             />
-            <span className="pajara-brand-name">
-              Pajara Studio
-            </span>
+            <span className="pajara-brand-name">Pajara Studio</span>
           </Link>
 
           <div className="pajara-nav">
@@ -121,44 +132,88 @@ export default function PortfolioPage() {
             </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-              marginBottom: 32,
-            }}
-          >
-            {categories.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setCategory(item)}
-                aria-pressed={category === item}
-                style={{
-                  border: "1px solid #214d32",
-                  borderRadius: 999,
-                  padding: "10px 18px",
-                  cursor: "pointer",
-                  background:
-                    category === item ? "#214d32" : "transparent",
-                  color: category === item ? "#ffffff" : "#214d32",
-                  font: "inherit",
-                }}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+          {!loading && !error && items.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                marginBottom: 32,
+              }}
+            >
+              {categories.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                  aria-pressed={category === item}
+                  style={{
+                    border: "1px solid #214d32",
+                    borderRadius: 999,
+                    padding: "10px 18px",
+                    cursor: "pointer",
+                    background:
+                      category === item ? "#214d32" : "transparent",
+                    color: category === item ? "#ffffff" : "#214d32",
+                    font: "inherit",
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          )}
 
           {loading ? (
-            <p>Memuat hasil desain...</p>
+            <div
+              role="status"
+              style={{ padding: "36px 0", color: "#777d75" }}
+            >
+              Memuat hasil desain...
+            </div>
           ) : error ? (
-            <p role="alert">{error}</p>
+            <div
+              role="alert"
+              style={{
+                padding: 22,
+                border: "1px solid #e7dfd5",
+                borderRadius: 16,
+                background: "#ffffff",
+              }}
+            >
+              <h2 style={{ color: "#214d32", marginTop: 0 }}>
+                Portofolio belum dapat dimuat
+              </h2>
+              <p
+                style={{
+                  color: "#777d75",
+                  lineHeight: 1.7,
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {error}
+              </p>
+              <button
+                type="button"
+                onClick={() => setRetry((value) => value + 1)}
+                style={{
+                  border: 0,
+                  borderRadius: 10,
+                  padding: "12px 18px",
+                  background: "#214d32",
+                  color: "#ffffff",
+                  font: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                Coba Lagi
+              </button>
+            </div>
           ) : filteredItems.length === 0 ? (
             <p>
-              Belum ada karya pada kategori ini. Nantikan
-              perjalanan kita berikutnya.
+              {items.length === 0
+                ? "Belum ada karya yang ditampilkan. Nantikan perjalanan kita berikutnya."
+                : "Belum ada karya pada kategori ini."}
             </p>
           ) : (
             <div className="pajara-portfolio-grid">
@@ -183,9 +238,8 @@ export default function PortfolioPage() {
                     <div>
                       <h3>{item.title}</h3>
                       <p>{item.category || "Karya Pajara Studio"}</p>
-                      {item.description && (
-                        <p>{item.description}</p>
-                      )}
+
+                      {item.description && <p>{item.description}</p>}
 
                       {item.project_url && (
                         <a
@@ -217,9 +271,7 @@ export default function PortfolioPage() {
       <footer className="pajara-footer">
         <div className="pajara-container">
           <div className="pajara-footer-bottom">
-            <span>
-              © 2026 Pajara Studio. All rights reserved.
-            </span>
+            <span>© 2026 Pajara Studio. All rights reserved.</span>
             <span>Berakar di Tanah Pasundan.</span>
           </div>
         </div>
