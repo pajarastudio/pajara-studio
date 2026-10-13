@@ -66,7 +66,6 @@ if (index >= 0) {
 return decodeURIComponent(value.slice(index + marker.length));
 }
 
-// Mendukung path relatif yang tersimpan di database.
 if (!value.startsWith("/") && !value.includes("://")) {
 return value;
 }
@@ -296,6 +295,7 @@ setMessage(
     ? "Portofolio berhasil diperbarui."
     : "Portofolio baru berhasil ditambahkan."
 );
+
 setEditorOpen(false);
 setSelectedFile(null);
 setSaving(false);
@@ -379,7 +379,6 @@ if (deleteError) {
   return;
 }
 
-// Hapus file hanya jika gambar memang berasal dari bucket portofolio.
 const path = getStoragePath(item.image_path);
 
 if (path) {
@@ -980,7 +979,12 @@ background: "#FFFEFC",
 color: C.text,
 fontSize: 13,
 },
-hint: { margin: "6px 0 0", color: C.muted, fontSize: 11, lineHeight: 1.6 },
+hint: {
+margin: "6px 0 0",
+color: C.muted,
+fontSize: 11,
+lineHeight: 1.6,
+},
 previewBox: {
 display: "flex",
 alignItems: "center",
