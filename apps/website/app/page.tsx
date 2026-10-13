@@ -131,9 +131,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("testimonials")
-          .select(
-            "id, customer_name:customer_nam, content, rating, created_at"
-          )
+          .select("id, customer_nam, content, rating, created_at")
           .eq("is_published", true)
           .order("created_at", { ascending: false })
           .limit(3);
@@ -144,7 +142,15 @@ export default function Home() {
         }
 
         if (!cancelled) {
-          setTestimonials((data || []) as TestimonialItem[]);
+          const items: TestimonialItem[] = (data || []).map((item) => ({
+            id: item.id,
+            customer_name: item.customer_nam || null,
+            content: item.content || "",
+            rating: item.rating ?? null,
+            created_at: item.created_at,
+          }));
+
+          setTestimonials(items);
         }
       } catch (error) {
         console.error("Terjadi kesalahan saat memuat testimoni:", error);
@@ -174,9 +180,7 @@ export default function Home() {
             <a href="#layanan">Layanan</a>
             <a href="#portfolio">Portfolio</a>
             <a href="#tentang">Tentang</a>
-            {!testimonialsLoading && testimonials.length > 0 && (
-              <a href="#testimoni">Testimoni</a>
-            )}
+            <a href="#testimoni">Testimoni</a>
             <a href="#kontak">Kontak</a>
             <a href={customerWeb} className="pajara-nav-button">
               Pesan Desain
@@ -223,10 +227,7 @@ export default function Home() {
                 <span>01</span>
                 <span>DESIGN STUDIO</span>
               </div>
-              <Logo
-                className="pajara-hero-logo"
-                alt="Logo Pajara Studio"
-              />
+              <Logo className="pajara-hero-logo" />
               <div className="pajara-hero-card-bottom">
                 <span>PAJARA STUDIO</span>
                 <span>EST. 2026</span>
@@ -421,24 +422,31 @@ export default function Home() {
         </div>
       </section>
 
-      {!testimonialsLoading && testimonials.length > 0 && (
-        <section id="testimoni" className="pajara-section">
-          <div className="pajara-container">
-            <div className="pajara-section-heading">
-              <span className="pajara-eyebrow">
-                TESTIMONI PELANGGAN
-              </span>
-              <h2>
-                Cerita dari
-                <br />
-                perjalanan kita.
-              </h2>
-              <p>
-                Setiap kepercayaan dan pengalaman pelanggan
-                menjadi bagian dari perjalanan Pajara Studio.
-              </p>
-            </div>
+      <section id="testimoni" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <span className="pajara-eyebrow">
+              TESTIMONI PELANGGAN
+            </span>
+            <h2>
+              Cerita dari
+              <br />
+              perjalanan kita.
+            </h2>
+            <p>
+              Setiap kepercayaan dan pengalaman pelanggan
+              menjadi bagian dari perjalanan Pajara Studio.
+            </p>
+          </div>
 
+          {testimonialsLoading ? (
+            <p>Memuat testimoni pelanggan...</p>
+          ) : testimonials.length === 0 ? (
+            <p>
+              Testimoni pelanggan akan ditampilkan di sini
+              setelah tersedia.
+            </p>
+          ) : (
             <div
               style={{
                 display: "grid",
@@ -539,18 +547,18 @@ export default function Home() {
                 </article>
               ))}
             </div>
+          )}
 
-            <div style={{ textAlign: "center", marginTop: 32 }}>
-              <Link
-                href="/testimonials"
-                className="pajara-button pajara-button-secondary"
-              >
-                Lihat Semua Testimoni →
-              </Link>
-            </div>
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <Link
+              href="/testimonials"
+              className="pajara-button pajara-button-secondary"
+            >
+              Lihat Semua Testimoni →
+            </Link>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <section id="kontak" className="pajara-cta">
         <div className="pajara-container pajara-cta-inner">
@@ -587,9 +595,7 @@ export default function Home() {
               <a href="#layanan">Layanan</a>
               <a href="#portfolio">Portfolio</a>
               <a href="#tentang">Tentang</a>
-              {!testimonialsLoading && testimonials.length > 0 && (
-                <a href="#testimoni">Testimoni</a>
-              )}
+              <a href="#testimoni">Testimoni</a>
               <a href="#kontak">Kontak</a>
               <a
                 href="https://instagram.com/"
