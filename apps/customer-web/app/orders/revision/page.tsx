@@ -145,19 +145,77 @@ function RevisionContent() {
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [purchases, setPurchases] = useState<QuotaPurchase[]>([]);
 
+  const [freeQuota, setFreeQuota] = useState(2);
+  const [planLabel, setPlanLabel] = useState("Pesanan biasa");
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [purchaseSubmitting, setPurchaseSubmitting] = useState(false);
 
   const [customerNote, setCustomerNote] = useState("");
-  const [useExtraQuota, setUseExtraQuota] = useState(false);
   const [revisionDesignNumber, setRevisionDesignNumber] = useState("1");
-
   const [purchaseDesignNumber, setPurchaseDesignNumber] = useState("1");
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  async function loadPlan(customerId: string) {
+    // Default untuk pesanan biasa dan paket mingguan.
+    let quota = 2;
+    let label = "Pesanan biasa";
+
+    try {
+      const { data: subscription, error: subscriptionError } =
+        await supabase
+          .from("subscriptions")
+          .select("id, plan_id, status, expires_at")
+          .eq("customer_id", customerId)
+          .eq("status", "active")
+          .gt("expires_at", new Date().toISOString())
+          .order("expires_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+      if (subscriptionError) {
+        console.error("Gagal memeriksa paket langganan:", subscriptionError);
+      } else if (subscription?.plan_id) {
+        const { data: plan, error: planError } = await supabase
+          .from("subscription_plans")
+          .select("*")
+          .eq("id", subscription.plan_id)
+          .maybeSingle();
+
+        if (planError) {
+          console.error("Gagal mengambil detail paket:", planError);
+        } else if (plan) {
+          const planName = String(
+            plan.name ?? plan.plan_name ?? plan.title ?? ""
+          ).toLowerCase();
+
+          if (planName.includes("bulanan") || planName.includes("monthly")) {
+            quota = 3;
+            label = "Paket bulanan";
+          } else if (
+            planName.includes("mingguan") ||
+            planName.includes("weekly")
+          ) {
+            quota = 2;
+            label = "Paket mingguan";
+          } else {
+            label = String(
+              plan.name ?? plan.plan_name ?? plan.title ?? "Paket langganan"
+            );
+          }
+        }
+      }
+    } catch (planError) {
+      console.error("Gagal menentukan kuota revisi:", planError);
+    }
+
+    setFreeQuota(quota);
+    setPlanLabel(label);
+  }
 
   async function loadPurchases(orderId: string) {
     const { data, error: purchaseError } = await supabase
@@ -202,10 +260,7 @@ function RevisionContent() {
       }
 
       paymentStatusById = Object.fromEntries(
-        (paymentRows || []).map((payment) => [
-          payment.id,
-          payment.status,
-        ])
+        (paymentRows || []).map((payment) => [payment.id, payment.status])
       );
     }
 
@@ -235,9 +290,10 @@ function RevisionContent() {
 
       if (!user) {
         setError("Sesi login tidak ditemukan. Silakan login kembali.");
-        setLoading(false);
         return;
       }
+
+      await loadPlan(user.id);
 
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
@@ -249,13 +305,11 @@ function RevisionContent() {
       if (orderError) {
         console.error("Gagal mengambil pesanan:", orderError);
         setError("Pesanan gagal dimuat.");
-        setLoading(false);
         return;
       }
 
       if (!orderData) {
         setOrder(null);
-        setLoading(false);
         return;
       }
 
@@ -290,29 +344,40 @@ function RevisionContent() {
 
   useEffect(() => {
     loadData();
-    // loadData dijalankan saat ID pesanan berubah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  function getQuotaForDesign(designNumber: number) {
-    const verifiedQuota = purchases
+  function getCompletedCount(designNumber: number) {
+    return revisions.filter(
+      (revision) =>
+        revision.design_number === designNumber &&
+        revision.status === "completed"
+    ).length;
+  }
+
+  function getFreeQuotaRemaining(designNumber: number) {
+    return Math.max(0, freeQuota - getCompletedCount(designNumber));
+  }
+
+  function getExtraQuotaUsed(designNumber: number) {
+    return Math.max(0, getCompletedCount(designNumber) - freeQuota);
+  }
+
+  function getVerifiedExtraQuota(designNumber: number) {
+    return purchases
       .filter(
         (purchase) =>
           purchase.design_number === designNumber &&
           purchase.paymentStatus === "verified"
       )
-      .reduce(
-        (total, purchase) => total + purchase.extra_revisions,
-        0
-      );
+      .reduce((total, purchase) => total + purchase.extra_revisions, 0);
+  }
 
-    const usedQuota = revisions.filter(
-      (revision) =>
-        revision.design_number === designNumber &&
-        revision.status !== "rejected"
-    ).length;
-
-    return Math.max(0, verifiedQuota - usedQuota);
+  function getQuotaForDesign(designNumber: number) {
+    return Math.max(
+      0,
+      getVerifiedExtraQuota(designNumber) - getExtraQuotaUsed(designNumber)
+    );
   }
 
   function getPendingPurchases(designNumber: number) {
@@ -321,6 +386,12 @@ function RevisionContent() {
         purchase.design_number === designNumber &&
         purchase.paymentStatus !== "verified"
     ).length;
+  }
+
+  function getRevisionSource(designNumber: number) {
+    if (getFreeQuotaRemaining(designNumber) > 0) return "free";
+    if (getQuotaForDesign(designNumber) > 0) return "extra";
+    return "none";
   }
 
   async function handlePurchaseQuota() {
@@ -333,9 +404,7 @@ function RevisionContent() {
     }
 
     if (order.status !== "completed") {
-      setError(
-        "Kuota revisi tambahan bisa dibeli setelah pesanan selesai."
-      );
+      setError("Kuota revisi tambahan bisa dibeli setelah pesanan selesai.");
       return;
     }
 
@@ -384,10 +453,7 @@ function RevisionContent() {
         return;
       }
 
-      const safeFileName = paymentProof.name.replace(
-        /[^\w.-]+/g,
-        "-"
-      );
+      const safeFileName = paymentProof.name.replace(/[^\w.-]+/g, "-");
       const filePath =
         `orders/${order.id}/payment-proof/` +
         `${crypto.randomUUID()}-${safeFileName}`;
@@ -402,9 +468,7 @@ function RevisionContent() {
 
       if (uploadError) {
         console.error("Gagal mengunggah bukti pembayaran:", uploadError);
-        setError(
-          "Bukti pembayaran gagal diunggah. Periksa koneksi lalu coba lagi."
-        );
+        setError("Bukti pembayaran gagal diunggah. Silakan coba lagi.");
         return;
       }
 
@@ -424,7 +488,7 @@ function RevisionContent() {
       if (fileError || !fileRecord) {
         console.error("Gagal menyimpan data bukti:", fileError);
         setError(
-          "File sudah diunggah, tetapi data buktinya gagal disimpan. Silakan hubungi admin sebelum mengulangi pembayaran."
+          "File sudah diunggah, tetapi data buktinya gagal disimpan. Hubungi admin sebelum mengulangi pembayaran."
         );
         return;
       }
@@ -448,7 +512,7 @@ function RevisionContent() {
       if (paymentError || !payment) {
         console.error("Gagal mencatat pembayaran:", paymentError);
         setError(
-          "Bukti pembayaran tersimpan, tetapi transaksi gagal dicatat. Hubungi admin agar tidak terjadi pembayaran ganda."
+          "Bukti pembayaran tersimpan, tetapi transaksi gagal dicatat. Hubungi admin sebelum membayar ulang."
         );
         return;
       }
@@ -465,7 +529,7 @@ function RevisionContent() {
       if (quotaError) {
         console.error("Gagal mencatat pembelian kuota:", quotaError);
         setError(
-          "Pembayaran sudah tercatat, tetapi pengaitan kuota gagal. Jangan membayar ulang; hubungi admin dengan kode pesanan ini."
+          "Pembayaran tercatat, tetapi pengaitan kuota gagal. Jangan membayar ulang; hubungi admin."
         );
         return;
       }
@@ -481,7 +545,7 @@ function RevisionContent() {
       await loadPurchases(order.id);
 
       setSuccess(
-        `Bukti pembayaran kuota revisi untuk desain #${designNumber} berhasil dikirim. Kuota ${EXTRA_REVISIONS} revisi akan aktif setelah admin memverifikasi pembayaran.`
+        `Bukti pembayaran untuk desain #${designNumber} berhasil dikirim. Kuota tambahan aktif setelah diverifikasi admin.`
       );
     } catch (purchaseError) {
       console.error("Kesalahan pembelian kuota:", purchaseError);
@@ -498,19 +562,15 @@ function RevisionContent() {
     setSuccess(null);
 
     const trimmedNote = customerNote.trim();
-
-    if (!trimmedNote) {
-      setError("Tuliskan detail revisi terlebih dahulu.");
-      return;
-    }
-
-    if (trimmedNote.length < 5) {
-      setError("Detail revisi terlalu singkat.");
-      return;
-    }
+    const selectedDesign = Number(revisionDesignNumber);
 
     if (!order) {
       setError("Pesanan tidak ditemukan.");
+      return;
+    }
+
+    if (!trimmedNote || trimmedNote.length < 5) {
+      setError("Tuliskan detail revisi minimal 5 karakter.");
       return;
     }
 
@@ -519,10 +579,18 @@ function RevisionContent() {
       return;
     }
 
+    if (
+      !Number.isInteger(selectedDesign) ||
+      selectedDesign < 1 ||
+      selectedDesign > order.quantity
+    ) {
+      setError("Pilih nomor desain yang valid.");
+      return;
+    }
+
     const activeRevision = revisions.find(
       (revision) =>
-        revision.status === "pending" ||
-        revision.status === "processing"
+        revision.status === "pending" || revision.status === "processing"
     );
 
     if (activeRevision) {
@@ -532,21 +600,11 @@ function RevisionContent() {
       return;
     }
 
-    const selectedDesign = Number(revisionDesignNumber);
+    const source = getRevisionSource(selectedDesign);
 
-    if (
-      useExtraQuota &&
-      (!Number.isInteger(selectedDesign) ||
-        selectedDesign < 1 ||
-        selectedDesign > order.quantity)
-    ) {
-      setError("Pilih nomor desain yang valid.");
-      return;
-    }
-
-    if (useExtraQuota && getQuotaForDesign(selectedDesign) < 1) {
+    if (source === "none") {
       setError(
-        "Kuota revisi tambahan untuk desain ini tidak tersedia. Pastikan pembayaran sudah diverifikasi admin."
+        `Kuota revisi desain #${selectedDesign} sudah habis. Kamu bisa berhenti atau membeli 2 revisi tambahan seharga ${formatRupiah(REVISION_PRICE)}.`
       );
       return;
     }
@@ -566,44 +624,26 @@ function RevisionContent() {
       const nextRevisionNumber =
         revisions.length > 0
           ? Math.max(
-              ...revisions.map(
-                (revision) => revision.revision_number || 0
-              )
+              ...revisions.map((revision) => revision.revision_number || 0)
             ) + 1
           : 1;
 
-      const revisionPayload: {
-        order_id: string;
-        revision_number: number;
-        customer_note: string;
-        admin_note: null;
-        status: string;
-        created_by: string;
-        design_number?: number;
-      } = {
+      // Setiap revisi baru wajib mencatat nomor desain.
+      // Kuota hanya dihitung setelah status revisi menjadi completed.
+      const { error: insertError } = await supabase.from("revisions").insert({
         order_id: order.id,
         revision_number: nextRevisionNumber,
         customer_note: trimmedNote,
         admin_note: null,
         status: "pending",
         created_by: user.id,
-      };
-
-      // Nomor desain hanya dicatat saat pelanggan memilih
-      // menggunakan kuota tambahan yang sudah terverifikasi.
-      if (useExtraQuota) {
-        revisionPayload.design_number = selectedDesign;
-      }
-
-      const { error: insertError } = await supabase
-        .from("revisions")
-        .insert(revisionPayload);
+        design_number: selectedDesign,
+      });
 
       if (insertError) {
         console.error("Gagal mengajukan revisi:", insertError);
         setError(
-          insertError.message ||
-            "Revisi gagal diajukan. Silakan coba lagi."
+          insertError.message || "Revisi gagal diajukan. Silakan coba lagi."
         );
         return;
       }
@@ -625,24 +665,17 @@ function RevisionContent() {
       }
 
       setCustomerNote("");
-      setUseExtraQuota(false);
-
-      setOrder((current) =>
-        current ? { ...current, status: "revision" } : current
-      );
 
       setSuccess(
-        useExtraQuota
-          ? `Revisi #${nextRevisionNumber} untuk desain #${selectedDesign} berhasil diajukan menggunakan kuota tambahan.`
-          : `Revisi #${nextRevisionNumber} berhasil diajukan. Pajara Studio akan segera memprosesnya.`
+        source === "free"
+          ? `Revisi #${nextRevisionNumber} untuk desain #${selectedDesign} berhasil diajukan menggunakan kuota gratis.`
+          : `Revisi #${nextRevisionNumber} untuk desain #${selectedDesign} berhasil diajukan menggunakan kuota tambahan.`
       );
 
       await loadData();
     } catch (submitError) {
       console.error("Kesalahan saat mengajukan revisi:", submitError);
-      setError(
-        "Terjadi kesalahan saat mengajukan revisi. Silakan coba lagi."
-      );
+      setError("Terjadi kesalahan saat mengajukan revisi. Silakan coba lagi.");
     } finally {
       setSubmitting(false);
     }
@@ -678,11 +711,15 @@ function RevisionContent() {
 
   const activeRevision = revisions.find(
     (revision) =>
-      revision.status === "pending" ||
-      revision.status === "processing"
+      revision.status === "pending" || revision.status === "processing"
   );
 
   const canSubmit = order.status === "completed" && !activeRevision;
+  const selectedDesign = Number(revisionDesignNumber);
+  const selectedSource = getRevisionSource(selectedDesign);
+  const selectedFreeRemaining = getFreeQuotaRemaining(selectedDesign);
+  const selectedExtraRemaining = getQuotaForDesign(selectedDesign);
+  const revisionLocked = !canSubmit || selectedSource === "none";
 
   return (
     <main style={pageStyle}>
@@ -720,34 +757,18 @@ function RevisionContent() {
           </p>
         </div>
 
-        {error && (
-          <div style={alertErrorStyle}>
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div style={alertSuccessStyle}>
-            {success}
-          </div>
-        )}
+        {error && <div style={alertErrorStyle}>{error}</div>}
+        {success && <div style={alertSuccessStyle}>{success}</div>}
 
         <section style={cardStyle}>
-          <h2 style={headingStyle}>Kuota Revisi Tambahan</h2>
+          <h2 style={headingStyle}>Kuota Revisi Gratis</h2>
 
           <p style={mutedTextStyle}>
-            Butuh revisi tambahan? Beli kuota khusus untuk desain yang
-            dipilih. Setiap pembelian berisi{" "}
-            <strong>{EXTRA_REVISIONS} revisi tambahan</strong> dengan harga{" "}
-            <strong>{formatRupiah(REVISION_PRICE)}</strong> per desain.
-            Kuota aktif setelah pembayaran diverifikasi admin.
+            Paket saat ini: <strong>{planLabel}</strong>. Kuota gratis
+            digunakan terlebih dahulu untuk setiap desain. Revisi yang
+            masih menunggu atau sedang diproses belum dihitung sebagai
+            revisi selesai.
           </p>
-
-          {order.status !== "completed" && (
-            <div style={noticeStyle}>
-              Pembelian kuota tersedia setelah pesanan berstatus selesai.
-            </div>
-          )}
 
           <div
             style={{
@@ -759,7 +780,8 @@ function RevisionContent() {
           >
             {Array.from({ length: order.quantity }, (_, index) => {
               const designNumber = index + 1;
-              const available = getQuotaForDesign(designNumber);
+              const freeRemaining = getFreeQuotaRemaining(designNumber);
+              const extraRemaining = getQuotaForDesign(designNumber);
               const pending = getPendingPurchases(designNumber);
 
               return (
@@ -783,15 +805,50 @@ function RevisionContent() {
                       margin: "9px 0",
                     }}
                   >
-                    Kuota tersedia: <strong>{available}</strong>
+                    Revisi gratis tersisa: <strong>{freeRemaining}</strong>
                   </p>
+
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#555",
+                      margin: "6px 0",
+                    }}
+                  >
+                    Revisi tambahan tersisa: <strong>{extraRemaining}</strong>
+                  </p>
+
+                  <span
+                    style={{
+                      display: "inline-block",
+                      marginTop: "6px",
+                      padding: "6px 9px",
+                      borderRadius: "999px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      background:
+                        freeRemaining > 0 || extraRemaining > 0
+                          ? "#e8f2ec"
+                          : "#fbe9e9",
+                      color:
+                        freeRemaining > 0 || extraRemaining > 0
+                          ? "var(--green-dark)"
+                          : "#a33a3a",
+                    }}
+                  >
+                    {freeRemaining > 0
+                      ? "Kuota gratis aktif"
+                      : extraRemaining > 0
+                        ? "Kuota tambahan aktif"
+                        : "Kuota habis"}
+                  </span>
 
                   {pending > 0 && (
                     <p
                       style={{
                         fontSize: "12px",
                         color: "#8a6a4a",
-                        margin: 0,
+                        marginBottom: 0,
                         lineHeight: 1.5,
                       }}
                     >
@@ -802,13 +859,200 @@ function RevisionContent() {
               );
             })}
           </div>
+        </section>
+
+        <section style={cardStyle}>
+          <h2 style={headingStyle}>Ajukan Revisi</h2>
+
+          <p style={mutedTextStyle}>
+            Pilih desain dan jelaskan perubahan yang diinginkan. Kuota gratis
+            akan digunakan otomatis terlebih dahulu.
+          </p>
+
+          {!canSubmit && (
+            <div style={noticeStyle}>
+              {activeRevision
+                ? "Masih ada revisi yang sedang berjalan. Tunggu sampai selesai sebelum mengajukan revisi berikutnya."
+                : "Pengajuan revisi tersedia setelah pesanan berstatus selesai."}
+            </div>
+          )}
+
+          <div style={{ marginTop: "20px" }}>
+            <label htmlFor="revision-design" style={labelStyle}>
+              Desain yang Direvisi
+            </label>
+
+            <select
+              id="revision-design"
+              value={revisionDesignNumber}
+              onChange={(event) =>
+                setRevisionDesignNumber(event.target.value)
+              }
+              style={inputStyle}
+              disabled={submitting || !canSubmit}
+            >
+              {Array.from({ length: order.quantity }, (_, index) => {
+                const number = index + 1;
+                const free = getFreeQuotaRemaining(number);
+                const extra = getQuotaForDesign(number);
+
+                return (
+                  <option key={number} value={String(number)}>
+                    Desain #{number} —{" "}
+                    {free > 0
+                      ? `${free} revisi gratis tersisa`
+                      : extra > 0
+                        ? `${extra} revisi tambahan tersisa`
+                        : "Kuota habis"}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div
+            style={{
+              marginTop: "16px",
+              marginBottom: "20px",
+              padding: "15px",
+              borderRadius: "12px",
+              background:
+                selectedSource === "none" ? "#fbe9e9" : "var(--cream)",
+              border:
+                selectedSource === "none"
+                  ? "1px solid #edcaca"
+                  : "1px solid #e8e2d8",
+              color: selectedSource === "none" ? "#9a3333" : "#555",
+              lineHeight: 1.7,
+            }}
+          >
+            {selectedSource === "free" ? (
+              <>
+                <strong style={{ color: "var(--green-dark)" }}>
+                  Menggunakan revisi gratis
+                </strong>
+                <p style={{ margin: "5px 0 0" }}>
+                  Desain #{selectedDesign} masih memiliki{" "}
+                  <strong>{selectedFreeRemaining} revisi gratis</strong>.
+                  Kamu tidak perlu melakukan pembayaran tambahan.
+                </p>
+              </>
+            ) : selectedSource === "extra" ? (
+              <>
+                <strong style={{ color: "var(--green-dark)" }}>
+                  Menggunakan revisi tambahan
+                </strong>
+                <p style={{ margin: "5px 0 0" }}>
+                  Kuota gratis desain ini sudah habis. Tersedia{" "}
+                  <strong>{selectedExtraRemaining} revisi tambahan</strong>{" "}
+                  yang sudah diverifikasi admin.
+                </p>
+              </>
+            ) : (
+              <>
+                <strong>Kuota revisi desain ini habis.</strong>
+                <p style={{ margin: "5px 0 0" }}>
+                  Kolom revisi dikunci. Kamu boleh berhenti tanpa membeli
+                  tambahan, atau membeli 2 revisi tambahan seharga{" "}
+                  <strong>{formatRupiah(REVISION_PRICE)}</strong>.
+                </p>
+              </>
+            )}
+          </div>
+
+          <label htmlFor="revision-note" style={labelStyle}>
+            Detail Revisi
+          </label>
+
+          <textarea
+            id="revision-note"
+            value={customerNote}
+            onChange={(event) => setCustomerNote(event.target.value)}
+            placeholder={
+              revisionLocked
+                ? "Kolom revisi terkunci karena kuota habis atau pesanan belum siap."
+                : "Contoh: Tolong ubah warna background menjadi lebih terang dan ganti teks judul..."
+            }
+            rows={7}
+            disabled={submitting || revisionLocked}
+            style={{
+              ...inputStyle,
+              resize: "vertical",
+              lineHeight: 1.6,
+              background: revisionLocked ? "#f3f0eb" : "#fff",
+              cursor: revisionLocked ? "not-allowed" : "text",
+            }}
+          />
+
+          <p
+            style={{
+              color: "#888",
+              fontSize: "13px",
+              lineHeight: 1.5,
+              marginTop: "8px",
+            }}
+          >
+            Jelaskan perubahan yang diinginkan secara spesifik.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleSubmitRevision}
+            disabled={
+              submitting ||
+              revisionLocked ||
+              !customerNote.trim() ||
+              customerNote.trim().length < 5
+            }
+            style={{
+              ...primaryButtonStyle,
+              marginTop: "8px",
+              opacity:
+                submitting ||
+                revisionLocked ||
+                !customerNote.trim() ||
+                customerNote.trim().length < 5
+                  ? 0.55
+                  : 1,
+              cursor:
+                submitting ||
+                revisionLocked ||
+                !customerNote.trim() ||
+                customerNote.trim().length < 5
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+          >
+            {submitting
+              ? "Mengajukan..."
+              : revisionLocked
+                ? "Kuota Revisi Tidak Tersedia"
+                : "Ajukan Revisi"}
+          </button>
+        </section>
+
+        <section style={cardStyle}>
+          <h2 style={headingStyle}>Kuota Revisi Tambahan</h2>
+
+          <p style={mutedTextStyle}>
+            Pembelian bersifat opsional. Setiap paket berisi{" "}
+            <strong>{EXTRA_REVISIONS} revisi tambahan per desain</strong>{" "}
+            seharga <strong>{formatRupiah(REVISION_PRICE)}</strong>. Kuota
+            baru aktif setelah pembayaran diverifikasi admin.
+          </p>
+
+          {order.status !== "completed" && (
+            <div style={noticeStyle}>
+              Pembelian kuota tersedia setelah pesanan berstatus selesai.
+            </div>
+          )}
 
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr",
               gap: "18px",
-              marginTop: "26px",
+              marginTop: "20px",
             }}
           >
             <div>
@@ -865,9 +1109,9 @@ function RevisionContent() {
               </div>
 
               <p style={{ ...mutedTextStyle, fontSize: "13px" }}>
-                Bayar tepat sebesar {formatRupiah(REVISION_PRICE)} untuk
-                satu paket kuota revisi tambahan. Simpan bukti pembayaran
-                sebelum melanjutkan.
+                Bayar tepat sebesar {formatRupiah(REVISION_PRICE)} untuk satu
+                paket kuota revisi tambahan. Simpan bukti pembayaran sebelum
+                melanjutkan.
               </p>
             </div>
 
@@ -886,10 +1130,7 @@ function RevisionContent() {
                 onChange={(event) =>
                   setPaymentProof(event.target.files?.[0] || null)
                 }
-                style={{
-                  ...inputStyle,
-                  padding: "11px",
-                }}
+                style={{ ...inputStyle, padding: "11px" }}
               />
 
               <p
@@ -900,9 +1141,7 @@ function RevisionContent() {
                 }}
               >
                 JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
-                {paymentProof
-                  ? ` File dipilih: ${paymentProof.name}`
-                  : ""}
+                {paymentProof ? ` File dipilih: ${paymentProof.name}` : ""}
               </p>
             </div>
 
@@ -965,165 +1204,6 @@ function RevisionContent() {
           </div>
         </section>
 
-        {canSubmit && (
-          <section style={cardStyle}>
-            <h2 style={headingStyle}>Ajukan Revisi</h2>
-
-            <p style={mutedTextStyle}>
-              Jelaskan bagian desain yang ingin diperbaiki dengan jelas
-              agar tim Pajara Studio dapat memproses revisi dengan tepat.
-            </p>
-
-            <div
-              style={{
-                padding: "14px",
-                borderRadius: "12px",
-                background: "var(--cream)",
-                marginBottom: "18px",
-              }}
-            >
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                  color: "var(--green-dark)",
-                  fontWeight: 700,
-                  lineHeight: 1.6,
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={useExtraQuota}
-                  onChange={(event) =>
-                    setUseExtraQuota(event.target.checked)
-                  }
-                  style={{ marginTop: "4px" }}
-                  disabled={submitting}
-                />
-                Gunakan kuota revisi tambahan yang sudah diverifikasi
-              </label>
-
-              {useExtraQuota && (
-                <div style={{ marginTop: "14px" }}>
-                  <label htmlFor="revision-design" style={labelStyle}>
-                    Desain yang direvisi
-                  </label>
-
-                  <select
-                    id="revision-design"
-                    value={revisionDesignNumber}
-                    onChange={(event) =>
-                      setRevisionDesignNumber(event.target.value)
-                    }
-                    style={inputStyle}
-                    disabled={submitting}
-                  >
-                    {Array.from({ length: order.quantity }, (_, index) => (
-                      <option key={index + 1} value={String(index + 1)}>
-                        Desain #{index + 1} —{" "}
-                        {getQuotaForDesign(index + 1)} kuota tersedia
-                      </option>
-                    ))}
-                  </select>
-
-                  <p style={{ ...mutedTextStyle, fontSize: "13px" }}>
-                    Sisa kuota untuk desain ini:{" "}
-                    <strong>
-                      {getQuotaForDesign(Number(revisionDesignNumber))}
-                    </strong>
-                    . Kuota hanya tersedia setelah pembayaran diverifikasi.
-                  </p>
-                </div>
-              )}
-
-              {!useExtraQuota && (
-                <p
-                  style={{
-                    color: "#777",
-                    fontSize: "13px",
-                    lineHeight: 1.6,
-                    marginBottom: 0,
-                  }}
-                >
-                  Jika tidak dicentang, pengajuan akan mengikuti alur
-                  revisi pesanan yang sudah ada.
-                </p>
-              )}
-            </div>
-
-            <label htmlFor="revision-note" style={labelStyle}>
-              Detail Revisi
-            </label>
-
-            <textarea
-              id="revision-note"
-              value={customerNote}
-              onChange={(event) => setCustomerNote(event.target.value)}
-              placeholder="Contoh: Tolong ubah warna background menjadi lebih terang dan ganti teks judul..."
-              rows={7}
-              disabled={submitting}
-              style={{
-                ...inputStyle,
-                resize: "vertical",
-                lineHeight: 1.6,
-              }}
-            />
-
-            <p
-              style={{
-                color: "#888",
-                fontSize: "13px",
-                lineHeight: 1.5,
-                marginTop: "8px",
-              }}
-            >
-              Jelaskan perubahan yang diinginkan secara spesifik.
-            </p>
-
-            <button
-              type="button"
-              onClick={handleSubmitRevision}
-              disabled={
-                submitting ||
-                !customerNote.trim() ||
-                (useExtraQuota &&
-                  getQuotaForDesign(Number(revisionDesignNumber)) < 1)
-              }
-              style={{
-                ...primaryButtonStyle,
-                marginTop: "8px",
-                opacity:
-                  submitting ||
-                  !customerNote.trim() ||
-                  (useExtraQuota &&
-                    getQuotaForDesign(Number(revisionDesignNumber)) < 1)
-                    ? 0.65
-                    : 1,
-                cursor:
-                  submitting ||
-                  !customerNote.trim() ||
-                  (useExtraQuota &&
-                    getQuotaForDesign(Number(revisionDesignNumber)) < 1)
-                    ? "not-allowed"
-                    : "pointer",
-              }}
-            >
-              {submitting ? "Mengajukan..." : "Ajukan Revisi"}
-            </button>
-          </section>
-        )}
-
-        {order.status !== "completed" && !activeRevision && (
-          <section style={cardStyle}>
-            <h2 style={headingStyle}>Revisi Belum Tersedia</h2>
-            <p style={{ ...mutedTextStyle, marginBottom: 0 }}>
-              Pengajuan revisi dapat dilakukan setelah pesanan selesai dan
-              file final tersedia.
-            </p>
-          </section>
-        )}
-
         {activeRevision && (
           <section style={cardStyle}>
             <h2 style={headingStyle}>Revisi Sedang Diproses</h2>
@@ -1165,9 +1245,7 @@ function RevisionContent() {
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {revisions.map((revision) => {
-                const statusStyle = getRevisionStatusStyle(
-                  revision.status
-                );
+                const statusStyle = getRevisionStatusStyle(revision.status);
 
                 return (
                   <article
@@ -1230,8 +1308,7 @@ function RevisionContent() {
                     <div style={{ marginTop: "18px" }}>
                       <p style={noteHeadingStyle}>Permintaan Revisi</p>
                       <div style={noteBoxStyle}>
-                        {revision.customer_note ||
-                          "Tidak ada catatan revisi."}
+                        {revision.customer_note || "Tidak ada catatan revisi."}
                       </div>
                     </div>
 
