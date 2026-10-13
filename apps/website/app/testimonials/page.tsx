@@ -13,7 +13,7 @@ const supabase = createClient(
 
 type Testimonial = {
   id: string;
-  customer_nam: string | null;
+  customer_name: string | null;
   content: string;
   rating: number | null;
   created_at: string;
@@ -31,36 +31,23 @@ export default function TestimonialsPage() {
     try {
       const { data, error: queryError } = await supabase
         .from("testimonials")
-        .select("id, customer_nam, content, rating, created_at")
+        .select("id, customer_name, content, rating, created_at")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
 
       if (queryError) {
-        console.error(
-          "Gagal memuat testimoni:",
-          queryError.message,
-          queryError.code,
-          queryError.details
-        );
+        console.error("Gagal memuat testimoni:", queryError);
         setError(queryError.message);
         return;
       }
 
-      setItems(
-        (data || []).map((item) => ({
-          id: item.id,
-          customer_nam: item.customer_nam || null,
-          content: item.content || "",
-          rating: item.rating ?? null,
-          created_at: item.created_at,
-        }))
-      );
+      setItems((data || []) as Testimonial[]);
     } catch (err) {
       console.error("Kesalahan memuat testimoni:", err);
       setError(
         err instanceof Error
           ? err.message
-          : "Terjadi kesalahan yang tidak diketahui."
+          : "Terjadi kesalahan saat memuat testimoni."
       );
     } finally {
       setLoading(false);
@@ -93,13 +80,11 @@ export default function TestimonialsPage() {
         <div className="pajara-container">
           <div className="pajara-section-heading">
             <span className="pajara-eyebrow">CERITA PELANGGAN</span>
-
             <h1 className="testimonial-page-title">
               Perjalanan kita,
               <br />
               dari sudut pandang mereka.
             </h1>
-
             <p>
               Setiap proyek memiliki cerita. Berikut pengalaman
               pelanggan yang telah bekerja bersama Pajara Studio.
@@ -113,9 +98,7 @@ export default function TestimonialsPage() {
           ) : error ? (
             <div className="testimonial-empty">
               <h2>Testimoni belum dapat dimuat.</h2>
-              <p>
-                {error}
-              </p>
+              <p>{error}</p>
               <button
                 type="button"
                 className="pajara-button pajara-button-secondary"
@@ -144,10 +127,7 @@ export default function TestimonialsPage() {
                     <span className="testimonial-page-number">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span
-                      className="testimonial-page-quote"
-                      aria-hidden="true"
-                    >
+                    <span className="testimonial-page-quote">
                       “
                     </span>
                   </div>
@@ -178,7 +158,7 @@ export default function TestimonialsPage() {
 
                   <div className="testimonial-page-person">
                     <span className="testimonial-page-avatar">
-                      {(item.customer_nam || "P")
+                      {(item.customer_name || "P")
                         .trim()
                         .charAt(0)
                         .toUpperCase()}
@@ -186,7 +166,7 @@ export default function TestimonialsPage() {
 
                     <div>
                       <h2>
-                        {item.customer_nam || "Pelanggan Pajara"}
+                        {item.customer_name || "Pelanggan Pajara"}
                       </h2>
                       <span>Client Pajara Studio</span>
                     </div>
