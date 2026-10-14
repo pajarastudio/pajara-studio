@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -90,12 +89,76 @@ function Logo({
   );
 }
 
+function ArrowIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M5 12h14M12 5l7 7-7 7"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      width="23"
+      height="23"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      {open ? (
+        <path
+          d="m6 6 12 12M18 6 6 18"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      ) : (
+        <>
+          <path
+            d="M4 7h16"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M4 12h16"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M4 17h16"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function Home() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
 
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,22 +230,44 @@ export default function Home() {
     };
   }, []);
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
   return (
     <main className="pajara-site">
       <nav className="pajara-nav" aria-label="Navigasi utama">
         <div className="pajara-container pajara-navbar-inner">
-          <a href="#home" className="pajara-brand">
+          <a href="#home" className="pajara-brand" onClick={closeMenu}>
             <Logo className="pajara-navbar-logo-mark" />
             <span className="pajara-brand-name">Pajara Studio</span>
           </a>
 
-          <div className="pajara-nav">
-            <a href="#layanan">Layanan</a>
-            <a href="#portfolio">Portfolio</a>
-            <a href="#tentang">Tentang</a>
-            <a href="#testimoni">Testimoni</a>
-            <a href="#kontak">Kontak</a>
-            <a href={customerWeb} className="pajara-nav-button">
+          <button
+            type="button"
+            className="pajara-menu-toggle"
+            aria-label={menuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+            aria-expanded={menuOpen}
+            aria-controls="pajara-main-menu"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            <MenuIcon open={menuOpen} />
+          </button>
+
+          <div
+            id="pajara-main-menu"
+            className={`pajara-nav pajara-nav-menu${menuOpen ? " is-open" : ""}`}
+          >
+            <a href="#layanan" onClick={closeMenu}>Layanan</a>
+            <a href="#portfolio" onClick={closeMenu}>Portfolio</a>
+            <a href="#tentang" onClick={closeMenu}>Tentang</a>
+            <a href="#testimoni" onClick={closeMenu}>Testimoni</a>
+            <a href="#kontak" onClick={closeMenu}>Kontak</a>
+            <a
+              href={customerWeb}
+              className="pajara-nav-button"
+              onClick={closeMenu}
+            >
               Pesan Desain
             </a>
           </div>
@@ -329,14 +414,144 @@ export default function Home() {
             </div>
           )}
 
-          <div style={{ textAlign: "center", marginTop: 32 }}>
-            <Link
-              href="/portfolio"
-              className="pajara-button pajara-button-secondary"
-            >
-              Lihat Semua Karya →
-            </Link>
+          <Link
+            href="/portfolio"
+            className="pajara-discovery-card"
+          >
+            <span className="pajara-discovery-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3.5"
+                  y="3.5"
+                  width="17"
+                  height="17"
+                  rx="3"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M7.5 15.5 11 12l2.5 2.5 3-4 2 2.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="9" cy="8.5" r="1.3" fill="currentColor" />
+              </svg>
+            </span>
+            <span className="pajara-discovery-copy">
+              <span className="pajara-discovery-kicker">JELAJAHI KARYA</span>
+              <strong>Lihat lebih banyak hasil desain</strong>
+              <span className="pajara-discovery-description">
+                Temukan karya dan eksplorasi visual lainnya dari Pajara Studio.
+              </span>
+            </span>
+            <span className="pajara-discovery-arrow" aria-hidden="true">
+              <ArrowIcon />
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <section id="testimoni" className="pajara-section">
+        <div className="pajara-container">
+          <div className="pajara-section-heading">
+            <span className="pajara-eyebrow">
+              TESTIMONI PELANGGAN
+            </span>
+            <h2>
+              Cerita dari
+              <br />
+              perjalanan kita.
+            </h2>
+            <p>
+              Setiap kepercayaan dan pengalaman pelanggan
+              menjadi bagian dari perjalanan Pajara Studio.
+            </p>
           </div>
+
+          {testimonialsLoading ? (
+            <p>Memuat testimoni pelanggan...</p>
+          ) : testimonials.length === 0 ? (
+            <p>
+              Testimoni pelanggan akan ditampilkan di sini
+              setelah tersedia.
+            </p>
+          ) : (
+            <div className="pajara-testimonials-grid">
+              {testimonials.map((item) => (
+                <article
+                  key={item.id}
+                  className="pajara-testimonial-card"
+                >
+                  <span
+                    className="pajara-testimonial-quote"
+                    aria-hidden="true"
+                  >
+                    “
+                  </span>
+
+                  <p className="pajara-testimonial-content">
+                    {item.content.length > 170
+                      ? `${item.content.slice(0, 170).trimEnd()}…`
+                      : item.content}
+                  </p>
+
+                  {item.rating !== null && (
+                    <div
+                      className="pajara-testimonial-rating"
+                      aria-label={`Rating ${item.rating} dari 5`}
+                    >
+                      {"★".repeat(Math.max(0, Math.min(5, item.rating)))}
+                      {"☆".repeat(
+                        5 - Math.max(0, Math.min(5, item.rating))
+                      )}
+                    </div>
+                  )}
+
+                  <div className="pajara-testimonial-customer">
+                    <strong>
+                      {item.customer_name || "Pelanggan Pajara Studio"}
+                    </strong>
+                    <span>Pelanggan Pajara Studio</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          <Link
+            href="/testimonials"
+            className="pajara-discovery-card pajara-discovery-card-testimonial"
+          >
+            <span className="pajara-discovery-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-3.5 2v-5.2A7.5 7.5 0 1 1 20 11.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8 10h8M8 13.5h5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            <span className="pajara-discovery-copy">
+              <span className="pajara-discovery-kicker">CERITA PELANGGAN</span>
+              <strong>Lihat lebih banyak testimoni</strong>
+              <span className="pajara-discovery-description">
+                Simak pengalaman pelanggan yang menjadi bagian dari perjalanan kami.
+              </span>
+            </span>
+            <span className="pajara-discovery-arrow" aria-hidden="true">
+              <ArrowIcon />
+            </span>
+          </Link>
         </div>
       </section>
 
@@ -347,9 +562,7 @@ export default function Home() {
               <Logo alt="Logo Pajara Studio" />
             </div>
             <div className="pajara-about-content">
-              <span className="pajara-about-label">
-                TENTANG PAJARA
-              </span>
+              <span className="pajara-about-label">TENTANG PAJARA</span>
               <h2>Berakar di Tanah Pasundan.</h2>
               <div className="pajara-about-text">
                 <p>
@@ -364,15 +577,13 @@ export default function Home() {
                   memiliki tujuan.
                 </p>
               </div>
-              <div className="pajara-about-signature">
-                Pajara Studio
-              </div>
+              <div className="pajara-about-signature">Pajara Studio</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="pajara-section">
+      <section id="founder" className="pajara-section">
         <div className="pajara-container">
           <div className="pajara-founder-card">
             <div className="pajara-founder-heading">
@@ -422,144 +633,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="testimoni" className="pajara-section">
-        <div className="pajara-container">
-          <div className="pajara-section-heading">
-            <span className="pajara-eyebrow">
-              TESTIMONI PELANGGAN
-            </span>
-            <h2>
-              Cerita dari
-              <br />
-              perjalanan kita.
-            </h2>
-            <p>
-              Setiap kepercayaan dan pengalaman pelanggan
-              menjadi bagian dari perjalanan Pajara Studio.
-            </p>
-          </div>
-
-          {testimonialsLoading ? (
-            <p>Memuat testimoni pelanggan...</p>
-          ) : testimonials.length === 0 ? (
-            <p>
-              Testimoni pelanggan akan ditampilkan di sini
-              setelah tersedia.
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
-                gap: 20,
-                alignItems: "stretch",
-              }}
-            >
-              {testimonials.map((item) => (
-                <article
-                  key={item.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    padding: "26px 24px",
-                    background: "#ffffff",
-                    border: "1px solid #e5e0d7",
-                    borderRadius: 18,
-                    boxShadow: "0 8px 24px rgba(33, 77, 50, 0.05)",
-                    minWidth: 0,
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      color: "#2f6b45",
-                      fontFamily: "Georgia, serif",
-                      fontSize: 42,
-                      lineHeight: 1,
-                      marginBottom: 14,
-                    }}
-                  >
-                    “
-                  </span>
-
-                  <p
-                    style={{
-                      color: "#1f2a23",
-                      fontSize: 15,
-                      lineHeight: 1.8,
-                      margin: "0 0 24px",
-                      overflowWrap: "anywhere",
-                      whiteSpace: "pre-line",
-                    }}
-                  >
-                    {item.content.length > 170
-                      ? `${item.content.slice(0, 170).trimEnd()}…`
-                      : item.content}
-                  </p>
-
-                  {item.rating !== null && (
-                    <div
-                      aria-label={`Rating ${item.rating} dari 5`}
-                      style={{
-                        color: "#8a6a4a",
-                        fontSize: 14,
-                        letterSpacing: 3,
-                        marginBottom: 18,
-                      }}
-                    >
-                      {"★".repeat(Math.max(0, Math.min(5, item.rating)))}
-                      {"☆".repeat(
-                        5 - Math.max(0, Math.min(5, item.rating))
-                      )}
-                    </div>
-                  )}
-
-                  <div
-                    style={{
-                      marginTop: "auto",
-                      paddingTop: 16,
-                      borderTop: "1px solid #e5e0d7",
-                      width: "100%",
-                    }}
-                  >
-                    <strong
-                      style={{
-                        display: "block",
-                        color: "#214d32",
-                        fontSize: 15,
-                        marginBottom: 5,
-                      }}
-                    >
-                      {item.customer_name || "Pelanggan Pajara Studio"}
-                    </strong>
-                    <span
-                      style={{
-                        display: "block",
-                        color: "#6f766f",
-                        fontSize: 12,
-                      }}
-                    >
-                      Pelanggan Pajara Studio
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <div style={{ textAlign: "center", marginTop: 32 }}>
-            <Link
-              href="/testimonials"
-              className="pajara-button pajara-button-secondary"
-            >
-              Lihat Semua Testimoni →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <section id="kontak" className="pajara-cta">
         <div className="pajara-container pajara-cta-inner">
           <div className="pajara-cta-copy">
@@ -596,6 +669,7 @@ export default function Home() {
               <a href="#portfolio">Portfolio</a>
               <a href="#tentang">Tentang</a>
               <a href="#testimoni">Testimoni</a>
+              <a href="#founder">The Founder</a>
               <a href="#kontak">Kontak</a>
               <a
                 href="https://instagram.com/"
