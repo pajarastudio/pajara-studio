@@ -706,23 +706,6 @@ function OrderDetailContent() {
               )}
             </div>
           </div>
-
-          <div style={{ marginTop: 28, paddingBottom: 24 }}>
-            <a
-              href="/dashboard"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                color: "var(--green)",
-                fontSize: 14,
-                fontWeight: 700,
-                textDecoration: "none",
-              }}
-            >
-              ← Kembali ke Dashboard
-            </a>
-          </div>
         </div>
       </section>
 
