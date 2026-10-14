@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -40,6 +39,10 @@ function formatFileSize(size: number | null) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatRupiah(amount: number | null) {
+  return `Rp ${(amount || 0).toLocaleString("id-ID")}`;
+}
+
 function getStatusLabel(status: string | null) {
   switch (status) {
     case "pending":
@@ -71,6 +74,7 @@ function PajaraLoading() {
         padding: "24px",
         background: "#F7F4EE",
         fontFamily: '"DM Sans", sans-serif',
+        boxSizing: "border-box",
       }}
     >
       <style>{`
@@ -78,8 +82,8 @@ function PajaraLoading() {
           to { transform: rotate(360deg); }
         }
         @keyframes pajara-pulse {
-          0%, 100% { opacity: .65; transform: scale(.96); }
-          50% { opacity: 1; transform: scale(1); }
+          0%, 100% { opacity: 1; }
+          50% { opacity: .65; }
         }
       `}</style>
 
@@ -88,10 +92,11 @@ function PajaraLoading() {
           width: "100%",
           maxWidth: "340px",
           padding: "38px 24px",
+          boxSizing: "border-box",
           textAlign: "center",
           border: "1px solid rgba(33,77,50,.12)",
           borderRadius: "24px",
-          background: "rgba(255,255,255,.8)",
+          background: "rgba(255,255,255,.85)",
           boxShadow: "0 20px 55px rgba(33,77,50,.07)",
         }}
       >
@@ -131,6 +136,8 @@ function PajaraLoading() {
         </p>
 
         <div
+          role="status"
+          aria-label="Memuat"
           style={{
             width: "30px",
             height: "30px",
@@ -169,12 +176,96 @@ function OrderDetailContent() {
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [error, setError] = useState("");
   const [fileMessage, setFileMessage] = useState("");
-  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(
+    null
+  );
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [activeAccess, setActiveAccess] = useState<AccessType>(null);
 
   useEffect(() => {
     let mounted = true;
+
+    const loadFinalFiles = async (orderId: string) => {
+      if (!mounted) return;
+
+      setLoadingFiles(true);
+      setFileMessage("");
+      setDownloadError(null);
+
+      const { data, error: filesError } = await supabase
+        .from("order_files")
+        .select(
+          `
+            id,
+            file_name,
+            file_path,
+            file_type,
+            file_size,
+            created_at
+          `
+        )
+        .eq("order_id", orderId)
+        .eq("file_category", "final")
+        .order("created_at", { ascending: false });
+
+      if (!mounted) return;
+
+      if (filesError) {
+        console.error("Gagal mengambil order_files:", filesError);
+        setFinalFiles([]);
+        setFileMessage("File final belum dapat dimuat. Silakan coba lagi.");
+        setLoadingFiles(false);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setFinalFiles([]);
+        setFileMessage("Belum ada file final dari Pajara Studio.");
+        setLoadingFiles(false);
+        return;
+      }
+
+      const filesWithUrls: FinalFile[] = [];
+
+      for (const file of data) {
+        const { data: signedData, error: signedError } =
+          await supabase.storage
+            .from("pajara-files")
+            .createSignedUrl(file.file_path, 60 * 60);
+
+        if (!mounted) return;
+
+        if (signedError || !signedData?.signedUrl) {
+          console.error(
+            "Gagal membuat signed URL:",
+            file.file_path,
+            signedError
+          );
+          filesWithUrls.push({ ...file, url: null });
+          continue;
+        }
+
+        filesWithUrls.push({ ...file, url: signedData.signedUrl });
+      }
+
+      if (!mounted) return;
+
+      setFinalFiles(filesWithUrls);
+
+      const accessibleFiles = filesWithUrls.filter((file) => !!file.url);
+
+      if (accessibleFiles.length === 0) {
+        setFileMessage(
+          "File final tersedia, tetapi belum dapat dibuka. Silakan coba lagi."
+        );
+      } else if (accessibleFiles.length < filesWithUrls.length) {
+        setFileMessage(
+          `${accessibleFiles.length} file final dapat dibuka. Beberapa file lainnya belum dapat diakses.`
+        );
+      }
+
+      setLoadingFiles(false);
+    };
 
     const loadOrder = async () => {
       if (!id) {
@@ -200,21 +291,23 @@ function OrderDetailContent() {
 
       const { data, error: orderError } = await supabase
         .from("orders")
-        .select(`
-          id,
-          order_code,
-          service_name,
-          design_type,
-          quantity,
-          brief,
-          notes,
-          total_amount,
-          dp_amount,
-          remaining_amount,
-          status,
-          deadline,
-          created_at
-        `)
+        .select(
+          `
+            id,
+            order_code,
+            service_name,
+            design_type,
+            quantity,
+            brief,
+            notes,
+            total_amount,
+            dp_amount,
+            remaining_amount,
+            status,
+            deadline,
+            created_at
+          `
+        )
         .eq("id", id)
         .eq("customer_id", user.id)
         .maybeSingle();
@@ -222,7 +315,8 @@ function OrderDetailContent() {
       if (!mounted) return;
 
       if (orderError) {
-        setError(orderError.message);
+        console.error("Gagal mengambil pesanan:", orderError);
+        setError("Pesanan belum dapat dimuat. Silakan coba lagi.");
         setLoading(false);
         return;
       }
@@ -257,10 +351,10 @@ function OrderDetailContent() {
       }
 
       setIsSubscriptionOrder(!!subscriptionRequest);
-      setOrder(data);
+      setOrder(data as Order);
       setLoading(false);
 
-      await loadFinalFiles(data.id, () => mounted);
+      await loadFinalFiles(data.id);
     };
 
     loadOrder();
@@ -269,87 +363,6 @@ function OrderDetailContent() {
       mounted = false;
     };
   }, [id]);
-
-  const loadFinalFiles = async (
-    orderId: string,
-    isMounted: () => boolean
-  ) => {
-    setLoadingFiles(true);
-    setFileMessage("");
-    setDownloadError(null);
-
-    const { data, error: filesError } = await supabase
-      .from("order_files")
-      .select(`
-        id,
-        file_name,
-        file_path,
-        file_type,
-        file_size,
-        created_at
-      `)
-      .eq("order_id", orderId)
-      .eq("file_category", "final")
-      .order("created_at", { ascending: false });
-
-    if (!isMounted()) return;
-
-    if (filesError) {
-      console.error("Gagal mengambil order_files:", filesError);
-      setFinalFiles([]);
-      setFileMessage(`File final belum dapat dimuat. ${filesError.message}`);
-      setLoadingFiles(false);
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      setFinalFiles([]);
-      setFileMessage("Belum ada file final dari Pajara Studio.");
-      setLoadingFiles(false);
-      return;
-    }
-
-    const filesWithUrls: FinalFile[] = [];
-
-    for (const file of data) {
-      const { data: signedData, error: signedError } =
-        await supabase.storage
-          .from("pajara-files")
-          .createSignedUrl(file.file_path, 60 * 60);
-
-      if (!isMounted()) return;
-
-      if (signedError || !signedData?.signedUrl) {
-        console.error(
-          "Gagal membuat signed URL:",
-          file.file_path,
-          signedError
-        );
-        filesWithUrls.push({ ...file, url: null });
-        continue;
-      }
-
-      filesWithUrls.push({ ...file, url: signedData.signedUrl });
-    }
-
-    if (!isMounted()) return;
-
-    setFinalFiles(filesWithUrls);
-
-    const accessibleFiles = filesWithUrls.filter((file) => !!file.url);
-
-    if (accessibleFiles.length === 0) {
-      setFileMessage(
-        "File final tersedia, tetapi belum dapat dibuka. Silakan coba lagi."
-      );
-    } else if (accessibleFiles.length < filesWithUrls.length) {
-      setFileMessage(
-        `${accessibleFiles.length} file final dapat dibuka. Beberapa file lainnya belum dapat diakses.`
-      );
-    }
-
-    setLoadingFiles(false);
-  };
 
   const handleDownload = async (file: FinalFile) => {
     if (!file.url) {
@@ -401,35 +414,138 @@ function OrderDetailContent() {
 
   if (error || !order) {
     return (
-      <main>
-        <section className="pajara-order-detail">
-          <div className="pajara-container">
-            <div className="pajara-order-detail-card">
-              <p className="pajara-eyebrow">PESANAN</p>
-              <h2>Pesanan tidak dapat ditemukan</h2>
-              <p>{error || "Pesanan tidak tersedia."}</p>
-              <a
-                href="/dashboard"
-                className="pajara-button pajara-button-primary"
-              >
-                Kembali ke Dashboard
-              </a>
-            </div>
-          </div>
-        </section>
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          padding: "24px",
+          background: "#F7F4EE",
+          fontFamily: '"DM Sans", sans-serif',
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          className="pajara-order-detail-card"
+          style={{
+            width: "100%",
+            maxWidth: "460px",
+            boxSizing: "border-box",
+            textAlign: "center",
+          }}
+        >
+          <p className="pajara-eyebrow">PAJARA STUDIO</p>
+          <h1 style={{ color: "var(--green)" }}>
+            Pesanan tidak dapat ditemukan
+          </h1>
+          <p
+            style={{
+              color: "var(--muted)",
+              fontSize: "14px",
+              lineHeight: 1.8,
+            }}
+          >
+            {error || "Pesanan tidak tersedia."}
+          </p>
+          <a
+            href="/dashboard"
+            className="pajara-button pajara-button-primary"
+            style={{ marginTop: "16px" }}
+          >
+            Kembali ke Dashboard
+          </a>
+        </div>
       </main>
     );
   }
 
+  const accessButtonStyle: React.CSSProperties = {
+    width: "100%",
+    minHeight: "50px",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "14px",
+    padding: "14px 16px",
+    border: "1px solid var(--line)",
+    borderRadius: "12px",
+    background: "#fff",
+    color: "var(--green)",
+    fontFamily: "inherit",
+    fontSize: "14px",
+    fontWeight: 600,
+    lineHeight: 1.5,
+    textAlign: "left",
+    textDecoration: "none",
+    cursor: "pointer",
+  };
+
+  const accessArrowStyle: React.CSSProperties = {
+    flexShrink: 0,
+    color: "var(--brown)",
+    fontSize: "18px",
+    fontWeight: 500,
+  };
+
   return (
     <main>
-      <header className="pajara-navbar">
-        <div className="pajara-container pajara-navbar-inner">
-          <a href="/" className="pajara-brand">
+      <style>{`
+        .pajara-access-button:hover {
+          background: var(--soft) !important;
+          border-color: var(--green) !important;
+        }
+        .pajara-access-button:focus-visible {
+          outline: 2px solid var(--green);
+          outline-offset: 3px;
+        }
+        .pajara-consistent-text {
+          font-size: 14px;
+          line-height: 1.8;
+          color: var(--muted);
+        }
+        .pajara-file-action {
+          min-height: 44px;
+          box-sizing: border-box;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 11px 16px;
+          border-radius: 10px;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 700;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        @media (max-width: 640px) {
+          .pajara-order-detail-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+        }
+      `}</style>
+
+      <header className="pajara-header">
+        <div className="pajara-container pajara-header-inner">
+          <a
+            href="/dashboard"
+            className="pajara-brand"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              textDecoration: "none",
+            }}
+          >
             <img
               src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-              alt="Pajara Studio"
-              className="pajara-brand-logo"
+              alt="Logo Pajara Studio"
+              style={{
+                width: "42px",
+                height: "42px",
+                objectFit: "contain",
+                borderRadius: "10px",
+              }}
             />
             <span>Pajara Studio</span>
           </a>
@@ -451,12 +567,21 @@ function OrderDetailContent() {
               Pesanan <span>Pajara.</span>
             </h1>
             <p>
-              Pantau status project, revisi, dan file desain Anda dari satu tempat.
+              Pantau status project, revisi, dan file desain Anda dari satu
+              tempat.
             </p>
           </div>
 
-          <div className="pajara-order-detail-grid">
-            <div style={{ display: "grid", gap: "20px" }}>
+          <div
+            className="pajara-order-detail-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.5fr) minmax(280px, 1fr)",
+              gap: "24px",
+              alignItems: "start",
+            }}
+          >
+            <div style={{ display: "grid", gap: "20px", minWidth: 0 }}>
               <div className="pajara-order-detail-card">
                 <div
                   style={{
@@ -468,22 +593,12 @@ function OrderDetailContent() {
                   }}
                 >
                   <div>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "var(--brown)",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      ID Pesanan
-                    </p>
+                    <p className="pajara-eyebrow">ID PESANAN</p>
                     <h2 style={{ marginTop: "8px", marginBottom: 0 }}>
                       #{order.order_code}
                     </h2>
                   </div>
+
                   <span className="pajara-order-status">
                     {getStatusLabel(order.status)}
                   </span>
@@ -503,7 +618,7 @@ function OrderDetailContent() {
                       background: "var(--soft)",
                       color: "var(--green)",
                       fontSize: "14px",
-                      lineHeight: 1.6,
+                      lineHeight: 1.7,
                     }}
                   >
                     Pesanan ini menggunakan kuota paket Anda. Tidak ada
@@ -519,31 +634,63 @@ function OrderDetailContent() {
                   }}
                 >
                   <div>
-                    <p>Layanan</p>
+                    <p className="pajara-eyebrow">LAYANAN</p>
                     <strong>{order.service_name || "Belum ditentukan"}</strong>
                   </div>
+
                   <div>
-                    <p>Jenis Desain</p>
+                    <p className="pajara-eyebrow">JENIS DESAIN</p>
                     <strong>{order.design_type || "Belum ditentukan"}</strong>
                   </div>
+
                   <div>
-                    <p>Jumlah Desain</p>
+                    <p className="pajara-eyebrow">JUMLAH DESAIN</p>
                     <strong>{order.quantity || 1} desain</strong>
                   </div>
+
                   <div>
-                    <p>Status Project</p>
+                    <p className="pajara-eyebrow">STATUS PROJECT</p>
                     <strong>{getStatusLabel(order.status)}</strong>
                   </div>
+
+                  {order.deadline && (
+                    <div>
+                      <p className="pajara-eyebrow">DEADLINE</p>
+                      <strong>
+                        {new Date(`${order.deadline}T00:00:00`).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
+                      </strong>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {activeAccess === "brief" && (
                 <div className="pajara-order-detail-card">
-                  <p className="pajara-eyebrow">BRIEF</p>
+                  <p className="pajara-eyebrow">INFORMASI PROJECT</p>
                   <h2>Brief Desain</h2>
-                  <p style={{ marginTop: "16px", whiteSpace: "pre-wrap" }}>
-                    {order.brief || "Belum ada brief."}
-                  </p>
+
+                  <div
+                    style={{
+                      marginTop: "18px",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      background: "var(--soft)",
+                      color: "var(--green)",
+                      fontSize: "14px",
+                      lineHeight: 1.8,
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {order.brief || "Belum ada brief desain."}
+                  </div>
 
                   {order.notes && (
                     <div
@@ -553,8 +700,18 @@ function OrderDetailContent() {
                         borderTop: "1px solid var(--line)",
                       }}
                     >
-                      <p>Catatan Tambahan</p>
-                      <p style={{ whiteSpace: "pre-wrap" }}>{order.notes}</p>
+                      <p className="pajara-eyebrow">CATATAN TAMBAHAN</p>
+                      <p
+                        style={{
+                          marginTop: "10px",
+                          fontSize: "14px",
+                          lineHeight: 1.8,
+                          whiteSpace: "pre-wrap",
+                          overflowWrap: "anywhere",
+                        }}
+                      >
+                        {order.notes}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -562,15 +719,12 @@ function OrderDetailContent() {
 
               {activeAccess === "files" && (
                 <div className="pajara-order-detail-card">
-                  <p className="pajara-eyebrow">FILE FINAL</p>
+                  <p className="pajara-eyebrow">HASIL DESAIN</p>
                   <h2>File Desain Final</h2>
+
                   <p
-                    style={{
-                      marginTop: "10px",
-                      color: "var(--muted)",
-                      fontSize: "14px",
-                      lineHeight: 1.6,
-                    }}
+                    className="pajara-consistent-text"
+                    style={{ marginTop: "10px" }}
                   >
                     File hasil desain akan tersedia setelah tim Pajara Studio
                     mengunggah file final pesanan Anda.
@@ -578,11 +732,14 @@ function OrderDetailContent() {
 
                   {loadingFiles ? (
                     <div
+                      role="status"
                       style={{
                         marginTop: "18px",
                         padding: "16px",
                         borderRadius: "12px",
                         background: "var(--soft)",
+                        color: "var(--green)",
+                        fontSize: "14px",
                       }}
                     >
                       Memuat file final...
@@ -594,8 +751,9 @@ function OrderDetailContent() {
                         padding: "16px",
                         borderRadius: "12px",
                         background: "var(--soft)",
+                        color: "var(--muted)",
                         fontSize: "14px",
-                        lineHeight: 1.6,
+                        lineHeight: 1.8,
                       }}
                     >
                       {fileMessage || "Belum ada file final."}
@@ -621,39 +779,30 @@ function OrderDetailContent() {
                               borderRadius: "14px",
                               padding: "16px",
                               background: "#fff",
+                              minWidth: 0,
                             }}
                           >
-                            <div
+                            <p
                               style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                justifyContent: "space-between",
-                                gap: "14px",
-                                flexWrap: "wrap",
+                                margin: 0,
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                color: "var(--green)",
+                                overflowWrap: "anywhere",
                               }}
                             >
-                              <div style={{ minWidth: 0, flex: "1 1 220px" }}>
-                                <p
-                                  style={{
-                                    margin: 0,
-                                    fontWeight: 700,
-                                    color: "var(--green)",
-                                    wordBreak: "break-word",
-                                  }}
-                                >
-                                  {file.file_name}
-                                </p>
-                                <p
-                                  style={{
-                                    margin: "6px 0 0",
-                                    fontSize: "12px",
-                                    color: "var(--muted)",
-                                  }}
-                                >
-                                  {formatFileSize(file.file_size)}
-                                </p>
-                              </div>
-                            </div>
+                              {file.file_name}
+                            </p>
+
+                            <p
+                              style={{
+                                margin: "6px 0 0",
+                                fontSize: "12px",
+                                color: "var(--muted)",
+                              }}
+                            >
+                              {formatFileSize(file.file_size)}
+                            </p>
 
                             {isImage && file.url && (
                               <div
@@ -661,12 +810,13 @@ function OrderDetailContent() {
                                   marginTop: "16px",
                                   borderRadius: "10px",
                                   overflow: "hidden",
-                                  background: "#f5f5f5",
+                                  background: "#F7F4EE",
                                 }}
                               >
                                 <img
                                   src={file.url}
                                   alt={file.file_name}
+                                  loading="lazy"
                                   style={{
                                     display: "block",
                                     width: "100%",
@@ -690,19 +840,25 @@ function OrderDetailContent() {
                                   href={file.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="pajara-button pajara-button-primary"
+                                  className="pajara-file-action"
+                                  style={{
+                                    background: "var(--green)",
+                                    color: "#fff",
+                                  }}
                                 >
                                   {isPdf ? "Buka PDF" : "Buka File"}
                                 </a>
+
                                 <button
                                   type="button"
                                   onClick={() => handleDownload(file)}
                                   disabled={isDownloading}
-                                  className="pajara-button pajara-button-secondary"
+                                  className="pajara-file-action"
                                   style={{
-                                    border: "none",
-                                    cursor: isDownloading ? "wait" : "pointer",
-                                    opacity: isDownloading ? 0.7 : 1,
+                                    border: "1px solid var(--line)",
+                                    background: "#fff",
+                                    color: "var(--green)",
+                                    opacity: isDownloading ? 0.65 : 1,
                                   }}
                                 >
                                   {isDownloading ? "Mengunduh..." : "Download"}
@@ -715,8 +871,9 @@ function OrderDetailContent() {
                                   padding: "12px",
                                   borderRadius: "10px",
                                   background: "var(--soft)",
+                                  color: "var(--muted)",
                                   fontSize: "13px",
-                                  lineHeight: 1.5,
+                                  lineHeight: 1.7,
                                 }}
                               >
                                 File tercatat di sistem, tetapi link file belum
@@ -728,34 +885,31 @@ function OrderDetailContent() {
                       })}
 
                       {fileMessage && (
-                        <div
-                          style={{
-                            padding: "12px 14px",
-                            borderRadius: "10px",
-                            background: "var(--soft)",
-                            fontSize: "13px",
-                            lineHeight: 1.5,
-                          }}
+                        <p
+                          className="pajara-consistent-text"
+                          style={{ margin: 0 }}
                         >
                           {fileMessage}
-                        </div>
+                        </p>
                       )}
                     </div>
                   )}
 
                   {downloadError && (
-                    <div
+                    <p
+                      role="alert"
                       style={{
-                        marginTop: "12px",
+                        marginTop: "14px",
                         padding: "12px 14px",
                         borderRadius: "10px",
                         background: "var(--soft)",
+                        color: "var(--green)",
                         fontSize: "13px",
-                        lineHeight: 1.5,
+                        lineHeight: 1.7,
                       }}
                     >
                       {downloadError}
-                    </div>
+                    </p>
                   )}
                 </div>
               )}
@@ -766,18 +920,16 @@ function OrderDetailContent() {
                 display: "grid",
                 gap: "20px",
                 alignContent: "start",
+                minWidth: 0,
               }}
             >
               <div className="pajara-order-detail-card">
                 <p className="pajara-eyebrow">AKSES PESANAN</p>
                 <h2>Kelola Project</h2>
+
                 <p
-                  style={{
-                    marginTop: "10px",
-                    color: "var(--muted)",
-                    fontSize: "13px",
-                    lineHeight: 1.8,
-                  }}
+                  className="pajara-consistent-text"
+                  style={{ marginTop: "10px" }}
                 >
                   Buka informasi project dan file desainmu saat diperlukan.
                 </p>
@@ -792,17 +944,21 @@ function OrderDetailContent() {
                   {!isSubscriptionOrder && (
                     <a
                       href={`/orders/payment?id=${order.id}`}
-                      className="pajara-button pajara-button-primary"
+                      className="pajara-access-button"
+                      style={accessButtonStyle}
                     >
-                      Pembayaran
+                      <span>Pembayaran</span>
+                      <span style={accessArrowStyle}>→</span>
                     </a>
                   )}
 
                   <a
                     href={`/orders/revision?id=${order.id}`}
-                    className="pajara-button pajara-button-secondary"
+                    className="pajara-access-button"
+                    style={accessButtonStyle}
                   >
-                    Revisi
+                    <span>Revisi</span>
+                    <span style={accessArrowStyle}>→</span>
                   </a>
 
                   <button
@@ -813,15 +969,13 @@ function OrderDetailContent() {
                       )
                     }
                     aria-expanded={activeAccess === "brief"}
-                    className="pajara-button pajara-button-secondary"
-                    style={{
-                      width: "100%",
-                      cursor: "pointer",
-                      justifyContent: "space-between",
-                    }}
+                    className="pajara-access-button"
+                    style={accessButtonStyle}
                   >
                     <span>Lihat Brief Desain</span>
-                    <span>{activeAccess === "brief" ? "−" : "+"}</span>
+                    <span style={accessArrowStyle}>
+                      {activeAccess === "brief" ? "−" : "+"}
+                    </span>
                   </button>
 
                   <button
@@ -832,22 +986,22 @@ function OrderDetailContent() {
                       )
                     }
                     aria-expanded={activeAccess === "files"}
-                    className="pajara-button pajara-button-secondary"
-                    style={{
-                      width: "100%",
-                      cursor: "pointer",
-                      justifyContent: "space-between",
-                    }}
+                    className="pajara-access-button"
+                    style={accessButtonStyle}
                   >
                     <span>Lihat File Final Anda</span>
-                    <span>{activeAccess === "files" ? "−" : "+"}</span>
+                    <span style={accessArrowStyle}>
+                      {activeAccess === "files" ? "−" : "+"}
+                    </span>
                   </button>
 
                   <a
                     href={`/orders/files?id=${order.id}`}
-                    className="pajara-button pajara-button-secondary"
+                    className="pajara-access-button"
+                    style={accessButtonStyle}
                   >
-                    File Referensi Pesanan
+                    <span>File Referensi Pesanan</span>
+                    <span style={accessArrowStyle}>→</span>
                   </a>
                 </div>
               </div>
@@ -860,21 +1014,49 @@ function OrderDetailContent() {
                   <div
                     style={{
                       display: "grid",
-                      gap: "12px",
-                      marginTop: "18px",
+                      gap: "14px",
+                      marginTop: "20px",
                     }}
                   >
-                    <div>
-                      Total: Rp{" "}
-                      {(order.total_amount || 0).toLocaleString("id-ID")}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span className="pajara-consistent-text">Total</span>
+                      <strong>{formatRupiah(order.total_amount)}</strong>
                     </div>
-                    <div>
-                      DP: Rp{" "}
-                      {(order.dp_amount || 0).toLocaleString("id-ID")}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span className="pajara-consistent-text">DP</span>
+                      <strong>{formatRupiah(order.dp_amount)}</strong>
                     </div>
-                    <div>
-                      Sisa: Rp{" "}
-                      {(order.remaining_amount || 0).toLocaleString("id-ID")}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: "12px",
+                        paddingTop: "14px",
+                        borderTop: "1px solid var(--line)",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span className="pajara-consistent-text">Sisa</span>
+                      <strong style={{ color: "var(--green)" }}>
+                        {formatRupiah(order.remaining_amount)}
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -882,13 +1064,14 @@ function OrderDetailContent() {
             </div>
           </div>
 
-          <div style={{ marginTop: "28px" }}>
+          <div style={{ marginTop: "28px", paddingBottom: "24px" }}>
             <a
               href="/dashboard"
               style={{
                 color: "var(--green)",
                 fontSize: "14px",
                 fontWeight: 700,
+                textDecoration: "none",
               }}
             >
               ← Kembali ke Dashboard
