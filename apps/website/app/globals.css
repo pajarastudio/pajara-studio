@@ -1682,3 +1682,19 @@ img {
     transition: none;
   }
 }
+
+/* FIX: HAMBURGER MENU PAJARA STUDIO */
+@media (max-width: 640px) {
+.pajara-site .pajara-navbar-inner > .pajara-nav-menu {
+display: none !important;
+}
+
+.pajara-site .pajara-navbar-inner > .pajara-nav-menu.is-open {
+display: flex !important;
+}
+}
+
+.pajara-site .pajara-menu-toggle {
+position: relative;
+z-index: 110;
+}
