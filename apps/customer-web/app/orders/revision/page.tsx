@@ -70,6 +70,7 @@ function getRevisionStatusLabel(status: string) {
     completed: "Selesai",
     rejected: "Ditolak",
   };
+
   return labels[status] || status;
 }
 
@@ -80,6 +81,7 @@ function getRevisionStatusStyle(status: string): CSSProperties {
     completed: { background: "#e0efe5", color: "#2f6b45" },
     rejected: { background: "#fbe9e9", color: "#a33a3a" },
   };
+
   return styles[status] || { background: "#f0f0f0", color: "#666" };
 }
 
@@ -117,7 +119,6 @@ const inputStyle: CSSProperties = {
   color: "#303630",
   background: "#fff",
   fontFamily: "inherit",
-  outlineColor: "#2f6b45",
 };
 
 const primaryButtonStyle: CSSProperties = {
@@ -130,7 +131,6 @@ const primaryButtonStyle: CSSProperties = {
   fontSize: 14,
   cursor: "pointer",
   fontFamily: "inherit",
-  transition: "background .2s ease, opacity .2s ease",
 };
 
 const labelStyle: CSSProperties = {
@@ -151,26 +151,6 @@ const noticeStyle: CSSProperties = {
   fontSize: 13,
 };
 
-function RevisionLoading() {
-  return (
-    <main className="revision-page loading-page">
-      <section className="loading-card">
-        <div className="loading-logo">
-          <img src={LOGO_IMAGE} alt="Pajara Studio" />
-        </div>
-        <p className="loading-eyebrow">PAJARA STUDIO</p>
-        <h1>Menyiapkan revisi</h1>
-        <p className="loading-description">
-          Kami sedang menyiapkan data pesananmu. Mohon tunggu sebentar.
-        </p>
-        <div className="loading-spinner" aria-label="Memuat" />
-        <p className="loading-footer">Berakar di Tanah Pasundan.</p>
-      </section>
-      <RevisionStyles />
-    </main>
-  );
-}
-
 function RevisionStyles() {
   return (
     <style jsx global>{`
@@ -182,49 +162,75 @@ function RevisionStyles() {
         color: #333b34;
         font-family: "DM Sans", Arial, sans-serif;
       }
+
+      .revision-page * {
+        box-sizing: border-box;
+      }
+
       .revision-container {
         width: 100%;
         max-width: 900px;
         margin: 0 auto;
       }
-      .revision-page * {
-        box-sizing: border-box;
-      }
+
       .revision-back {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
-        color: #2f6b45;
+        gap: 13px;
+        width: 100%;
+        min-height: 68px;
+        padding: 13px 17px;
+        color: #214d32;
+        background: #fff;
+        border: 1px solid #e8e2d8;
+        border-radius: 16px;
+        box-shadow: 0 5px 18px rgba(33,77,50,.04);
         font-size: 13px;
         font-weight: 700;
         text-decoration: none;
-        padding: 10px 14px;
-        border: 1px solid #e4ddd1;
-        border-radius: 11px;
-        background: rgba(255,255,255,.75);
-        transition: background .2s ease;
+        transition: border-color .2s ease, background .2s ease;
       }
+
       .revision-back:hover {
-        background: #fff;
+        background: #faf8f3;
+        border-color: #c9d8ca;
       }
-      .revision-page button:disabled {
-        opacity: .55;
-        cursor: not-allowed;
+
+      .revision-back-icon {
+        display: flex;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #e8f2ec;
+        color: #2f6b45;
+        font-size: 20px;
       }
-      .revision-page input:focus,
-      .revision-page textarea:focus,
-      .revision-page select:focus {
-        outline: 2px solid rgba(47,107,69,.18);
-        border-color: #2f6b45;
+
+      .revision-back-text {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 4px;
       }
+
+      .revision-back-text small {
+        color: #85877f;
+        font-size: 11px;
+        font-weight: 400;
+      }
+
       .revision-hero {
-        margin-top: 24px;
+        margin-top: 22px;
         padding: 26px;
         border-radius: 20px;
         color: #fff;
         background: linear-gradient(135deg, #214d32, #34734b);
         box-shadow: 0 12px 30px rgba(33,77,50,.13);
       }
+
       .revision-hero-label {
         margin: 0 0 10px;
         color: #e5c9a8;
@@ -232,6 +238,7 @@ function RevisionStyles() {
         letter-spacing: 2px;
         font-weight: 700;
       }
+
       .revision-hero h1 {
         margin: 0;
         font-family: Georgia, serif;
@@ -239,29 +246,34 @@ function RevisionStyles() {
         font-weight: 500;
         overflow-wrap: anywhere;
       }
+
       .revision-hero p {
         margin: 9px 0 0;
         color: rgba(255,255,255,.8);
         font-size: 13px;
         line-height: 1.7;
       }
+
       .revision-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 13px;
         margin-top: 20px;
       }
+
       .revision-quota-card {
         padding: 16px;
         border: 1px solid #e8e2d8;
         border-radius: 15px;
         background: #faf8f3;
       }
+
       .revision-quota-card p {
         font-size: 13px;
         color: #656962;
         line-height: 1.6;
       }
+
       .revision-alert {
         margin-top: 20px;
         padding: 15px 17px;
@@ -270,50 +282,80 @@ function RevisionStyles() {
         font-size: 13px;
         overflow-wrap: anywhere;
       }
+
       .revision-history-card {
         border: 1px solid #e8e2d8;
         border-radius: 15px;
         padding: 18px;
         background: #fff;
       }
-      .revision-page .revision-small-label {
+
+      .revision-small-label {
         margin: 0 0 7px;
         color: #73766f;
-        font-size: 12px;
+        font-size: 11px;
+        letter-spacing: 1px;
         font-weight: 700;
       }
+
+      .revision-page button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+      }
+
+      .revision-page input:focus,
+      .revision-page textarea:focus,
+      .revision-page select:focus {
+        outline: 2px solid rgba(47,107,69,.18);
+        border-color: #2f6b45;
+      }
+
+      .revision-empty {
+        padding: 22px;
+        border: 1px dashed #d7cfc1;
+        border-radius: 14px;
+        background: #faf8f3;
+      }
+
       .loading-page {
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 24px;
       }
+
       .loading-card {
         width: 100%;
         max-width: 370px;
-        padding: 36px 25px;
+        margin: 0 auto;
+        padding: 32px 24px;
         text-align: center;
         background: #fff;
         border: 1px solid #e8e2d8;
-        border-radius: 24px;
+        border-radius: 22px;
         box-shadow: 0 18px 50px rgba(33,77,50,.08);
       }
+
       .loading-logo {
         display: flex;
-        width: 78px;
-        height: 78px;
+        width: 68px;
+        height: 68px;
+        flex: 0 0 68px;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 18px;
+        margin: 0 auto 16px;
         overflow: hidden;
-        border-radius: 18px;
+        border-radius: 16px;
         background: #f7f4ee;
       }
+
       .loading-logo img {
+        display: block;
         width: 100%;
         height: 100%;
         object-fit: contain;
       }
+
       .loading-eyebrow {
         margin: 0 0 9px;
         color: #8a6a4a;
@@ -321,55 +363,187 @@ function RevisionStyles() {
         letter-spacing: 2px;
         font-weight: 700;
       }
+
       .loading-card h1 {
         margin: 0;
         color: #214d32;
         font-family: Georgia, serif;
-        font-size: 25px;
+        font-size: 24px;
+        line-height: 1.3;
         font-weight: 500;
       }
+
       .loading-description {
         margin: 12px 0 23px;
         color: #777b74;
         font-size: 13px;
         line-height: 1.8;
       }
+
       .loading-spinner {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         margin: 0 auto;
         border: 3px solid #e3eadf;
         border-top-color: #2f6b45;
         border-radius: 50%;
         animation: pajaraRevisionSpin .8s linear infinite;
       }
+
       .loading-footer {
         margin: 22px 0 0;
         color: #969188;
         font-size: 11px;
       }
-      .revision-empty {
-        padding: 22px;
-        border: 1px dashed #d7cfc1;
-        border-radius: 14px;
-        background: #faf8f3;
-      }
+
       @keyframes pajaraRevisionSpin {
         to { transform: rotate(360deg); }
       }
+
       @media (max-width: 600px) {
         .revision-page {
           padding: 20px 14px;
         }
+
         .revision-hero {
           padding: 22px 19px;
           border-radius: 17px;
         }
+
         .revision-grid {
           grid-template-columns: 1fr;
         }
       }
     `}</style>
+  );
+}
+
+function RevisionLoading() {
+  return (
+    <main
+      className="revision-page loading-page"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        background: "#f7f4ee",
+        fontFamily: "'DM Sans', Arial, sans-serif",
+      }}
+    >
+      <section
+        className="loading-card"
+        style={{
+          width: "100%",
+          maxWidth: 370,
+          margin: "0 auto",
+          padding: "32px 24px",
+          textAlign: "center",
+          background: "#fff",
+          border: "1px solid #e8e2d8",
+          borderRadius: 22,
+          boxShadow: "0 18px 50px rgba(33,77,50,.08)",
+        }}
+      >
+        <div
+          className="loading-logo"
+          style={{
+            display: "flex",
+            width: 68,
+            height: 68,
+            flex: "0 0 68px",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px",
+            overflow: "hidden",
+            borderRadius: 16,
+            background: "#f7f4ee",
+          }}
+        >
+          <img
+            src={LOGO_IMAGE}
+            alt="Pajara Studio"
+            width={68}
+            height={68}
+            style={{
+              display: "block",
+              width: 68,
+              height: 68,
+              maxWidth: 68,
+              maxHeight: 68,
+              objectFit: "contain",
+            }}
+          />
+        </div>
+
+        <p
+          className="loading-eyebrow"
+          style={{
+            margin: "0 0 9px",
+            color: "#8a6a4a",
+            fontSize: 10,
+            lineHeight: 1.5,
+            letterSpacing: 2,
+            fontWeight: 700,
+          }}
+        >
+          PAJARA STUDIO
+        </p>
+
+        <h1
+          style={{
+            margin: 0,
+            color: "#214d32",
+            fontFamily: "Georgia, serif",
+            fontSize: 24,
+            lineHeight: 1.3,
+            fontWeight: 500,
+          }}
+        >
+          Menyiapkan revisi
+        </h1>
+
+        <p
+          className="loading-description"
+          style={{
+            margin: "12px 0 23px",
+            color: "#777b74",
+            fontSize: 13,
+            lineHeight: 1.8,
+          }}
+        >
+          Kami sedang menyiapkan data pesananmu. Mohon tunggu sebentar.
+        </p>
+
+        <div
+          className="loading-spinner"
+          role="status"
+          aria-label="Memuat"
+          style={{
+            width: 30,
+            height: 30,
+            margin: "0 auto",
+            border: "3px solid #e3eadf",
+            borderTopColor: "#2f6b45",
+            borderRadius: "50%",
+            animation: "pajaraRevisionSpin .8s linear infinite",
+          }}
+        />
+
+        <p
+          className="loading-footer"
+          style={{
+            margin: "22px 0 0",
+            color: "#969188",
+            fontSize: 11,
+          }}
+        >
+          Berakar di Tanah Pasundan.
+        </p>
+      </section>
+      <RevisionStyles />
+    </main>
   );
 }
 
@@ -492,7 +666,9 @@ function RevisionContent() {
 
       if (paymentError) {
         console.error("Gagal memeriksa pembayaran kuota:", paymentError);
-        setError("Status pembayaran kuota belum bisa diperiksa. Silakan muat ulang halaman.");
+        setError(
+          "Status pembayaran kuota belum bisa diperiksa. Silakan muat ulang halaman."
+        );
         return;
       }
 
@@ -941,27 +1117,24 @@ function RevisionContent() {
     return (
       <main className="revision-page">
         <div className="revision-container">
-          <div className="revision-empty">
-            <p
-              style={{
-                color: "#8a6a4a",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: 2,
-              }}
-            >
-              PAJARA STUDIO
-            </p>
+          <a href="/orders" className="revision-back">
+            <span className="revision-back-icon" aria-hidden="true">←</span>
+            <span className="revision-back-text">
+              Kembali ke Pesanan
+              <small>Lihat daftar pesananmu</small>
+            </span>
+            <span aria-hidden="true" style={{ color: "#8a6a4a", fontSize: 20 }}>›</span>
+          </a>
+
+          <section style={cardStyle}>
+            <p className="revision-small-label">PAJARA STUDIO</p>
             <h1 style={{ color: "#214d32", fontFamily: "Georgia, serif" }}>
               Pesanan tidak ditemukan
             </h1>
             <p style={mutedTextStyle}>
               Pesanan yang kamu cari tidak tersedia atau bukan milik akun ini.
             </p>
-            <a href="/orders" className="revision-back">
-              ← Kembali ke Pesanan
-            </a>
-          </div>
+          </section>
         </div>
         <RevisionStyles />
       </main>
@@ -984,15 +1157,18 @@ function RevisionContent() {
     <main className="revision-page">
       <div className="revision-container">
         <a href={`/orders?id=${order.id}`} className="revision-back">
-          <span aria-hidden="true">←</span> Kembali ke Pesanan
+          <span className="revision-back-icon" aria-hidden="true">←</span>
+          <span className="revision-back-text">
+            Kembali ke Pesanan
+            <small>Lihat detail dan status pesananmu</small>
+          </span>
+          <span aria-hidden="true" style={{ color: "#8a6a4a", fontSize: 20 }}>›</span>
         </a>
 
         <header className="revision-hero">
           <p className="revision-hero-label">PAJARA STUDIO · LAYANAN</p>
           <h1>Pengajuan Revisi</h1>
-          <p>
-            {order.order_code} · {order.service_name || "Layanan Pajara Studio"}
-          </p>
+          <p>{order.order_code} · {order.service_name || "Layanan Pajara Studio"}</p>
           <p>Jumlah desain: {order.quantity}</p>
         </header>
 
@@ -1028,9 +1204,9 @@ function RevisionContent() {
           <p className="revision-small-label">RINGKASAN KUOTA</p>
           <h2 style={headingStyle}>Kuota Revisi Gratis</h2>
           <p style={mutedTextStyle}>
-            Paket saat ini: <strong>{planLabel}</strong>. Kuota gratis
-            digunakan terlebih dahulu untuk setiap desain. Revisi yang masih
-            menunggu atau sedang diproses belum dihitung sebagai revisi selesai.
+            Paket saat ini: <strong>{planLabel}</strong>. Kuota gratis digunakan
+            terlebih dahulu untuk setiap desain. Revisi yang masih menunggu
+            atau sedang diproses belum dihitung sebagai revisi selesai.
           </p>
 
           <div className="revision-grid">
@@ -1070,13 +1246,7 @@ function RevisionContent() {
                         : "Kuota habis"}
                   </span>
                   {pending > 0 && (
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: "#8a6a4a",
-                        marginBottom: 0,
-                      }}
-                    >
+                    <p style={{ fontSize: 11, color: "#8a6a4a", marginBottom: 0 }}>
                       {pending} pembayaran menunggu verifikasi
                     </p>
                   )}
@@ -1139,9 +1309,7 @@ function RevisionContent() {
               padding: 16,
               borderRadius: 13,
               background: selectedSource === "none" ? "#fbe9e9" : "#f7f4ee",
-              border: `1px solid ${
-                selectedSource === "none" ? "#edcaca" : "#e8e2d8"
-              }`,
+              border: `1px solid ${selectedSource === "none" ? "#edcaca" : "#e8e2d8"}`,
               color: selectedSource === "none" ? "#9a3333" : "#555",
               lineHeight: 1.7,
               fontSize: 13,
@@ -1149,9 +1317,7 @@ function RevisionContent() {
           >
             {selectedSource === "free" ? (
               <>
-                <strong style={{ color: "#214d32" }}>
-                  Menggunakan revisi gratis
-                </strong>
+                <strong style={{ color: "#214d32" }}>Menggunakan revisi gratis</strong>
                 <p style={{ margin: "5px 0 0" }}>
                   Desain #{selectedDesign} masih memiliki{" "}
                   <strong>{selectedFreeRemaining} revisi gratis</strong>. Kamu
@@ -1160,12 +1326,9 @@ function RevisionContent() {
               </>
             ) : selectedSource === "extra" ? (
               <>
-                <strong style={{ color: "#214d32" }}>
-                  Menggunakan revisi tambahan
-                </strong>
+                <strong style={{ color: "#214d32" }}>Menggunakan revisi tambahan</strong>
                 <p style={{ margin: "5px 0 0" }}>
-                  Tersedia{" "}
-                  <strong>{selectedExtraRemaining} revisi tambahan</strong>{" "}
+                  Tersedia <strong>{selectedExtraRemaining} revisi tambahan</strong>{" "}
                   yang sudah diverifikasi admin.
                 </p>
               </>
@@ -1174,16 +1337,13 @@ function RevisionContent() {
                 <strong>Kuota revisi desain ini habis.</strong>
                 <p style={{ margin: "5px 0 0" }}>
                   Kamu boleh berhenti tanpa membeli tambahan, atau membeli 2
-                  revisi tambahan seharga{" "}
-                  <strong>{formatRupiah(REVISION_PRICE)}</strong>.
+                  revisi tambahan seharga <strong>{formatRupiah(REVISION_PRICE)}</strong>.
                 </p>
               </>
             )}
           </div>
 
-          <label htmlFor="revision-note" style={labelStyle}>
-            Detail Revisi
-          </label>
+          <label htmlFor="revision-note" style={labelStyle}>Detail Revisi</label>
           <textarea
             id="revision-note"
             value={customerNote}
@@ -1203,8 +1363,7 @@ function RevisionContent() {
             }}
           />
           <p style={{ color: "#8b887f", fontSize: 12, lineHeight: 1.6 }}>
-            Jelaskan perubahan yang diinginkan secara spesifik. Minimal 5
-            karakter.
+            Jelaskan perubahan yang diinginkan secara spesifik. Minimal 5 karakter.
           </p>
 
           <button
@@ -1216,11 +1375,7 @@ function RevisionContent() {
               !customerNote.trim() ||
               customerNote.trim().length < 5
             }
-            style={{
-              ...primaryButtonStyle,
-              width: "100%",
-              marginTop: 8,
-            }}
+            style={{ ...primaryButtonStyle, width: "100%", marginTop: 8 }}
           >
             {submitting
               ? "Mengajukan revisi..."
@@ -1235,9 +1390,8 @@ function RevisionContent() {
           <h2 style={headingStyle}>Kuota Revisi Tambahan</h2>
           <p style={mutedTextStyle}>
             Setiap paket berisi <strong>{EXTRA_REVISIONS} revisi tambahan</strong>{" "}
-            untuk satu desain, seharga{" "}
-            <strong>{formatRupiah(REVISION_PRICE)}</strong>. Kuota aktif setelah
-            pembayaran diverifikasi admin.
+            untuk satu desain, seharga <strong>{formatRupiah(REVISION_PRICE)}</strong>.
+            Kuota aktif setelah pembayaran diverifikasi admin.
           </p>
 
           {order.status !== "completed" && (
@@ -1247,16 +1401,12 @@ function RevisionContent() {
           )}
 
           <div style={{ marginTop: 22 }}>
-            <label htmlFor="purchase-design" style={labelStyle}>
-              Pilih Desain
-            </label>
+            <label htmlFor="purchase-design" style={labelStyle}>Pilih Desain</label>
             <select
               id="purchase-design"
               value={purchaseDesignNumber}
               onChange={(event) => setPurchaseDesignNumber(event.target.value)}
-              disabled={
-                purchaseSubmitting || order.status !== "completed"
-              }
+              disabled={purchaseSubmitting || order.status !== "completed"}
               style={inputStyle}
             >
               {Array.from({ length: order.quantity }, (_, index) => (
@@ -1268,14 +1418,7 @@ function RevisionContent() {
           </div>
 
           <div style={{ marginTop: 24 }}>
-            <p
-              style={{
-                color: "#214d32",
-                fontWeight: 700,
-                fontSize: 14,
-                marginBottom: 12,
-              }}
-            >
+            <p style={{ color: "#214d32", fontWeight: 700, fontSize: 14, marginBottom: 12 }}>
               Pembayaran melalui QRIS
             </p>
             <div
@@ -1291,12 +1434,7 @@ function RevisionContent() {
               <img
                 src={QRIS_IMAGE}
                 alt="QRIS Pajara Studio"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "auto",
-                  borderRadius: 9,
-                }}
+                style={{ display: "block", width: "100%", height: "auto", borderRadius: 9 }}
               />
             </div>
             <p style={{ ...mutedTextStyle, fontSize: 13 }}>
@@ -1313,21 +1451,11 @@ function RevisionContent() {
               id="revision-payment-proof"
               type="file"
               accept="image/jpeg,image/png,image/webp,application/pdf"
-              disabled={
-                purchaseSubmitting || order.status !== "completed"
-              }
-              onChange={(event) =>
-                setPaymentProof(event.target.files?.[0] || null)
-              }
+              disabled={purchaseSubmitting || order.status !== "completed"}
+              onChange={(event) => setPaymentProof(event.target.files?.[0] || null)}
               style={{ ...inputStyle, padding: 10 }}
             />
-            <p
-              style={{
-                color: "#8b887f",
-                fontSize: 12,
-                lineHeight: 1.7,
-              }}
-            >
+            <p style={{ color: "#8b887f", fontSize: 12, lineHeight: 1.7 }}>
               Format JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
               {paymentProof ? ` File dipilih: ${paymentProof.name}` : ""}
             </p>
@@ -1346,36 +1474,18 @@ function RevisionContent() {
             }}
           >
             <div>
-              <p style={{ margin: 0, color: "#888", fontSize: 12 }}>
-                Total pembayaran
-              </p>
-              <strong
-                style={{
-                  display: "block",
-                  marginTop: 5,
-                  color: "#214d32",
-                  fontSize: 22,
-                }}
-              >
+              <p style={{ margin: 0, color: "#888", fontSize: 12 }}>Total pembayaran</p>
+              <strong style={{ display: "block", marginTop: 5, color: "#214d32", fontSize: 22 }}>
                 {formatRupiah(REVISION_PRICE)}
               </strong>
             </div>
             <button
               type="button"
               onClick={handlePurchaseQuota}
-              disabled={
-                purchaseSubmitting ||
-                !paymentProof ||
-                order.status !== "completed"
-              }
-              style={{
-                ...primaryButtonStyle,
-                flex: "1 1 200px",
-              }}
+              disabled={purchaseSubmitting || !paymentProof || order.status !== "completed"}
+              style={{ ...primaryButtonStyle, flex: "1 1 200px" }}
             >
-              {purchaseSubmitting
-                ? "Mengirim pembayaran..."
-                : "Kirim Bukti Pembayaran"}
+              {purchaseSubmitting ? "Mengirim pembayaran..." : "Kirim Bukti Pembayaran"}
             </button>
           </div>
         </section>
@@ -1399,14 +1509,7 @@ function RevisionContent() {
           {revisions.length === 0 ? (
             <div className="revision-empty">
               <strong style={{ color: "#214d32" }}>Belum ada revisi</strong>
-              <p
-                style={{
-                  color: "#777",
-                  marginBottom: 0,
-                  fontSize: 13,
-                  lineHeight: 1.7,
-                }}
-              >
+              <p style={{ color: "#777", marginBottom: 0, fontSize: 13, lineHeight: 1.7 }}>
                 Riwayat pengajuan revisi akan muncul di sini.
               </p>
             </div>
@@ -1416,10 +1519,7 @@ function RevisionContent() {
                 const statusStyle = getRevisionStatusStyle(revision.status);
 
                 return (
-                  <article
-                    key={revision.id}
-                    className="revision-history-card"
-                  >
+                  <article key={revision.id} className="revision-history-card">
                     <div
                       style={{
                         display: "flex",
@@ -1430,24 +1530,11 @@ function RevisionContent() {
                       }}
                     >
                       <div>
-                        <strong
-                          style={{
-                            color: "#214d32",
-                            fontSize: 15,
-                          }}
-                        >
+                        <strong style={{ color: "#214d32", fontSize: 15 }}>
                           Revisi #{revision.revision_number}
-                          {revision.design_number
-                            ? ` · Desain #${revision.design_number}`
-                            : ""}
+                          {revision.design_number ? ` · Desain #${revision.design_number}` : ""}
                         </strong>
-                        <p
-                          style={{
-                            color: "#888",
-                            fontSize: 12,
-                            margin: "7px 0 0",
-                          }}
-                        >
+                        <p style={{ color: "#888", fontSize: 12, margin: "7px 0 0" }}>
                           {formatDate(revision.created_at)}
                         </p>
                       </div>
@@ -1485,10 +1572,7 @@ function RevisionContent() {
 
                     {revision.admin_note && (
                       <div style={{ marginTop: 15 }}>
-                        <p
-                          className="revision-small-label"
-                          style={{ color: "#214d32" }}
-                        >
+                        <p className="revision-small-label" style={{ color: "#214d32" }}>
                           CATATAN PAJARA STUDIO
                         </p>
                         <div
@@ -1514,17 +1598,8 @@ function RevisionContent() {
           )}
         </section>
 
-        <footer
-          style={{
-            color: "#8b887f",
-            fontSize: 12,
-            textAlign: "center",
-            padding: "28px 0 6px",
-          }}
-        >
-          <span style={{ color: "#2f6b45", fontWeight: 700 }}>
-            PAJARA STUDIO
-          </span>
+        <footer style={{ color: "#8b887f", fontSize: 12, textAlign: "center", padding: "28px 0 6px" }}>
+          <span style={{ color: "#2f6b45", fontWeight: 700 }}>PAJARA STUDIO</span>
           <p style={{ margin: "7px 0 0" }}>Desain yang punya arah.</p>
         </footer>
       </div>
