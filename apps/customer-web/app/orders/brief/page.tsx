@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -19,6 +18,142 @@ type Order = {
   created_at: string;
 };
 
+const LOGO =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+
+function formatDeadline(deadline: string | null) {
+  if (!deadline) return "Belum ditentukan";
+
+  const date = new Date(`${deadline.slice(0, 10)}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return "Belum ditentukan";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getStatusLabel(status: string | null) {
+  switch (status) {
+    case "pending":
+      return "Menunggu Diproses";
+    case "waiting_dp":
+      return "Menunggu DP";
+    case "processing":
+      return "Sedang Diproses";
+    case "revision":
+      return "Dalam Revisi";
+    case "waiting_payment":
+      return "Menunggu Pelunasan";
+    case "completed":
+      return "Selesai";
+    case "cancelled":
+      return "Dibatalkan";
+    default:
+      return status || "Dalam proses";
+  }
+}
+
+function PajaraLoading({ message = "Menyiapkan brief desainmu..." }: {
+  message?: string;
+}) {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background: "#F7F4EE",
+        fontFamily: '"DM Sans", sans-serif',
+        boxSizing: "border-box",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 340,
+          padding: "38px 24px",
+          boxSizing: "border-box",
+          textAlign: "center",
+          border: "1px solid rgba(33,77,50,.12)",
+          borderRadius: 24,
+          background: "rgba(255,255,255,.9)",
+          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
+        }}
+      >
+        <img
+          src={LOGO}
+          alt="Pajara Studio"
+          style={{
+            width: 66,
+            height: 66,
+            objectFit: "contain",
+            borderRadius: 16,
+            marginBottom: 18,
+          }}
+        />
+
+        <p
+          style={{
+            margin: 0,
+            color: "#214D32",
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: 25,
+          }}
+        >
+          Pajara Studio
+        </p>
+
+        <p
+          style={{
+            margin: "10px 0 24px",
+            color: "#70766F",
+            fontSize: 13,
+            lineHeight: 1.8,
+          }}
+        >
+          {message}
+        </p>
+
+        <div
+          role="status"
+          aria-label="Memuat"
+          style={{
+            width: 30,
+            height: 30,
+            margin: "0 auto",
+            border: "3px solid #DCE5DC",
+            borderTopColor: "#2F6B45",
+            borderRadius: "50%",
+            animation: "pajara-brief-spin .8s linear infinite",
+          }}
+        />
+
+        <p
+          style={{
+            margin: "22px 0 0",
+            color: "#8A6A4A",
+            fontSize: 10,
+            letterSpacing: 2,
+            fontWeight: 700,
+          }}
+        >
+          DESAIN YANG PUNYA ARAH
+        </p>
+      </div>
+
+      <style>{`
+        @keyframes pajara-brief-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </main>
+  );
+}
+
 function BriefContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -35,18 +170,20 @@ function BriefContent() {
       setError("");
 
       try {
+        if (!id) {
+          if (active) setError("ID pesanan tidak ditemukan.");
+          return;
+        }
+
         const {
           data: { user },
           error: authError,
         } = await supabase.auth.getUser();
 
+        if (!active) return;
+
         if (authError || !user) {
           window.location.href = "/login";
-          return;
-        }
-
-        if (!id) {
-          setError("ID pesanan tidak ditemukan.");
           return;
         }
 
@@ -59,16 +196,26 @@ function BriefContent() {
           .eq("customer_id", user.id)
           .maybeSingle();
 
-        if (orderError) throw orderError;
+        if (!active) return;
+
+        if (orderError) {
+          console.error("Gagal mengambil brief:", orderError);
+          setError("Brief pesanan gagal dimuat. Silakan coba lagi.");
+          return;
+        }
 
         if (!data) {
           setError("Pesanan tidak ditemukan atau tidak dapat diakses.");
           return;
         }
 
-        if (active) setOrder(data as Order);
-      } catch {
-        if (active) setError("Brief pesanan gagal dimuat. Silakan coba lagi.");
+        setOrder(data as Order);
+      } catch (err) {
+        console.error("Kesalahan memuat brief:", err);
+
+        if (active) {
+          setError("Brief pesanan gagal dimuat. Silakan coba lagi.");
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -81,291 +228,547 @@ function BriefContent() {
     };
   }, [id]);
 
-  const pageStyle = {
-    minHeight: "100vh",
-    background: "#f7f4ee",
-    color: "#26352a",
-    padding: "32px 16px 56px",
-  } as const;
+  const backHref = id
+    ? `/orders?id=${encodeURIComponent(id)}`
+    : "/orders";
 
-  const cardStyle = {
-    background: "#ffffff",
-    border: "1px solid #e8e4dc",
+  const cardStyle: React.CSSProperties = {
+    background: "#FFFFFF",
+    border: "1px solid rgba(33,77,50,.11)",
     borderRadius: 22,
-    padding: "clamp(20px, 5vw, 32px)",
-    boxShadow: "0 12px 35px rgba(33,77,50,0.05)",
-  } as const;
+    padding: "clamp(20px, 5vw, 30px)",
+    boxShadow: "0 12px 35px rgba(33,77,50,.045)",
+    boxSizing: "border-box",
+    minWidth: 0,
+  };
 
-  const labelStyle = {
-    fontSize: 12,
+  const eyebrowStyle: React.CSSProperties = {
+    color: "#8A6A4A",
+    fontSize: 10,
     fontWeight: 700,
-    color: "#718075",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-    marginBottom: 8,
+    letterSpacing: 1.8,
+    lineHeight: 1.7,
+    margin: "0 0 8px",
   };
 
-  const valueStyle = {
-    fontSize: 15,
-    lineHeight: 1.8,
-    color: "#26352a",
-    whiteSpace: "pre-wrap" as const,
-    overflowWrap: "anywhere" as const,
+  const valueStyle: React.CSSProperties = {
+    fontSize: 14,
+    lineHeight: 1.85,
+    color: "#34443A",
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
+    margin: 0,
   };
 
-  const buttonStyle = {
-    display: "inline-flex",
+  const backStyle: React.CSSProperties = {
+    display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: "12px 17px",
-    background: "#2f6b45",
-    color: "#ffffff",
-    borderRadius: 12,
+    justifyContent: "space-between",
+    gap: 14,
+    width: "100%",
+    minHeight: 58,
+    padding: "15px 18px",
+    marginBottom: 28,
+    boxSizing: "border-box",
+    background: "#FFFFFF",
+    color: "#214D32",
+    border: "1px solid rgba(33,77,50,.12)",
+    borderRadius: 15,
+    boxShadow: "0 6px 20px rgba(33,77,50,.035)",
     textDecoration: "none",
     fontSize: 14,
     fontWeight: 700,
-  } as const;
+    lineHeight: 1.6,
+  };
+
+  const primaryButtonStyle: React.CSSProperties = {
+    display: "inline-flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 48,
+    padding: "12px 18px",
+    boxSizing: "border-box",
+    borderRadius: 12,
+    border: "none",
+    background: "#2F6B45",
+    color: "#FFFFFF",
+    textDecoration: "none",
+    fontFamily: "inherit",
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+  };
+
+  if (loading) return <PajaraLoading />;
 
   return (
-    <main style={pageStyle}>
-      <div style={{ maxWidth: 820, margin: "0 auto" }}>
-        <Link
-          href={id ? `/orders?id=${encodeURIComponent(id)}` : "/orders"}
+    <main
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        overflowX: "clip",
+        boxSizing: "border-box",
+        background: "#F7F4EE",
+        color: "#26352A",
+        fontFamily: '"DM Sans", sans-serif',
+      }}
+    >
+      <header
+        style={{
+          width: "100%",
+          background: "rgba(255,255,255,.92)",
+          borderBottom: "1px solid rgba(33,77,50,.10)",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
           style={{
-            display: "inline-flex",
+            maxWidth: 1160,
+            minHeight: 76,
+            margin: "0 auto",
+            padding: "14px clamp(18px, 4vw, 28px)",
+            boxSizing: "border-box",
+            display: "flex",
             alignItems: "center",
-            gap: 9,
-            color: "#2f6b45",
-            textDecoration: "none",
-            fontWeight: 700,
-            fontSize: 14,
-            marginBottom: 24,
-            padding: "11px 15px",
-            background: "#ffffff",
-            border: "1px solid #e8e4dc",
-            borderRadius: 12,
+            justifyContent: "space-between",
+            gap: 16,
           }}
         >
-          <span aria-hidden="true">←</span>
-          Kembali ke Pesanan
-        </Link>
-
-        <header style={{ marginBottom: 24 }}>
-          <p
+          <Link
+            href="/dashboard"
             style={{
-              color: "#8a6a4a",
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: "0.14em",
-              margin: "0 0 10px",
+              display: "flex",
+              alignItems: "center",
+              gap: 11,
+              minWidth: 0,
+              color: "#214D32",
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: 15,
             }}
           >
-            DETAIL PROJECT
-          </p>
-          <h1
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: "clamp(28px, 6vw, 38px)",
-              lineHeight: 1.2,
-              margin: "0 0 10px",
-              color: "#214d32",
-            }}
-          >
-            Brief Desain
-          </h1>
-          <p style={{ color: "#718075", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-            Lihat kembali arahan dan informasi yang dikirim untuk pesanan desain Anda.
-          </p>
-        </header>
-
-        {loading ? (
-          <div style={cardStyle} aria-live="polite">
-            <div
+            <img
+              src={LOGO}
+              alt="Logo Pajara Studio"
               style={{
-                width: 34,
-                height: 34,
-                border: "3px solid #e4eadf",
-                borderTopColor: "#2f6b45",
-                borderRadius: "50%",
-                animation: "pajaraBriefSpin 0.8s linear infinite",
-                marginBottom: 16,
+                width: 42,
+                height: 42,
+                objectFit: "contain",
+                borderRadius: 10,
+                flexShrink: 0,
               }}
             />
-            <p style={{ margin: 0, color: "#718075", fontSize: 14 }}>
-              Memuat brief desain...
-            </p>
-            <style>{`@keyframes pajaraBriefSpin { to { transform: rotate(360deg); } }`}</style>
-          </div>
-        ) : error ? (
-          <div style={cardStyle}>
-            <p style={{ color: "#a13b32", lineHeight: 1.7, marginTop: 0 }}>{error}</p>
-            <button
-              onClick={() => window.location.reload()}
+            <span>Pajara Studio</span>
+          </Link>
+
+          <Link
+            href="/order"
+            style={{
+              display: "inline-flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 42,
+              padding: "10px 15px",
+              boxSizing: "border-box",
+              borderRadius: 11,
+              background: "#2F6B45",
+              color: "#FFFFFF",
+              textDecoration: "none",
+              fontSize: 12,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            Pesan Desain
+          </Link>
+        </div>
+      </header>
+
+      <section
+        style={{
+          width: "100%",
+          maxWidth: 1160,
+          margin: "0 auto",
+          padding: "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
+          boxSizing: "border-box",
+        }}
+      >
+        <Link href={backHref} style={backStyle}>
+          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span
+              aria-hidden="true"
               style={{
-                ...buttonStyle,
-                border: 0,
-                cursor: "pointer",
+                display: "grid",
+                placeItems: "center",
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+                background: "#F0F4EE",
+                color: "#2F6B45",
+                fontSize: 19,
+                flexShrink: 0,
               }}
             >
-              Coba Lagi
-            </button>
-          </div>
+              ←
+            </span>
+            <span>Kembali ke Pesanan</span>
+          </span>
+          <span
+            aria-hidden="true"
+            style={{ color: "#8A6A4A", fontSize: 18, flexShrink: 0 }}
+          >
+            →
+          </span>
+        </Link>
+
+        <div style={{ marginBottom: 28 }}>
+          <p style={eyebrowStyle}>RUANG PROJECT PAJARA</p>
+
+          <h1
+            style={{
+              margin: "0 0 12px",
+              color: "#214D32",
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontSize: "clamp(32px, 6vw, 46px)",
+              fontWeight: 600,
+              lineHeight: 1.18,
+              letterSpacing: "-.7px",
+              overflowWrap: "break-word",
+            }}
+          >
+            Brief <span style={{ color: "#8A6A4A" }}>Desain.</span>
+          </h1>
+
+          <p
+            style={{
+              maxWidth: 590,
+              margin: 0,
+              color: "#70766F",
+              fontSize: 14,
+              lineHeight: 1.9,
+            }}
+          >
+            Semua arahan dan informasi desain tersimpan di satu tempat agar
+            perjalanan kita dalam mengerjakan project tetap terarah.
+          </p>
+        </div>
+
+        {error ? (
+          <section style={cardStyle} aria-live="polite">
+            <div
+              style={{
+                display: "grid",
+                placeItems: "center",
+                width: 48,
+                height: 48,
+                marginBottom: 18,
+                borderRadius: 15,
+                background: "#F9EFEB",
+                color: "#A13B32",
+                fontSize: 22,
+              }}
+            >
+              !
+            </div>
+
+            <h2
+              style={{
+                margin: "0 0 10px",
+                color: "#214D32",
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: 24,
+              }}
+            >
+              Brief belum tersedia
+            </h2>
+
+            <p
+              style={{
+                margin: "0 0 20px",
+                color: "#70766F",
+                fontSize: 14,
+                lineHeight: 1.8,
+              }}
+            >
+              {error}
+            </p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={primaryButtonStyle}
+              >
+                Coba Lagi
+              </button>
+
+              <Link href={backHref} style={backStyleForError}>
+                Kembali ke Pesanan
+              </Link>
+            </div>
+          </section>
         ) : order ? (
-          <div style={{ display: "grid", gap: 18 }}>
+          <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
             <section style={cardStyle}>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  gap: 12,
+                  gap: 14,
                   flexWrap: "wrap",
-                  paddingBottom: 20,
-                  borderBottom: "1px solid #eeeae3",
-                  marginBottom: 22,
+                  paddingBottom: 22,
+                  borderBottom: "1px solid #EEEAE3",
+                  marginBottom: 24,
                 }}
               >
-                <div>
-                  <p style={{ ...labelStyle, marginTop: 0 }}>Kode Pesanan</p>
+                <div style={{ minWidth: 0 }}>
+                  <p style={eyebrowStyle}>KODE PESANAN</p>
                   <h2
                     style={{
-                      fontSize: 20,
-                      color: "#214d32",
                       margin: 0,
+                      color: "#214D32",
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontSize: "clamp(21px, 4vw, 27px)",
+                      lineHeight: 1.4,
                       overflowWrap: "anywhere",
                     }}
                   >
-                    {order.order_code}
+                    #{order.order_code}
                   </h2>
                 </div>
+
                 <span
                   style={{
-                    background: "#edf4eb",
-                    color: "#2f6b45",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    maxWidth: "100%",
+                    padding: "8px 13px",
                     borderRadius: 999,
-                    padding: "7px 12px",
-                    fontSize: 12,
+                    background: "#EDF4EB",
+                    color: "#2F6B45",
+                    fontSize: 11,
+                    lineHeight: 1.5,
                     fontWeight: 700,
+                    overflowWrap: "anywhere",
                   }}
                 >
-                  {order.status || "Dalam proses"}
+                  {getStatusLabel(order.status)}
                 </span>
               </div>
+
+              <p style={eyebrowStyle}>RINGKASAN PROJECT</p>
+              <h2
+                style={{
+                  margin: "0 0 22px",
+                  color: "#214D32",
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 24,
+                  lineHeight: 1.35,
+                }}
+              >
+                Informasi Desain
+              </h2>
 
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: 22,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
+                  gap: 12,
                 }}
               >
-                <div>
-                  <p style={labelStyle}>Layanan</p>
-                  <p style={valueStyle}>{order.service_name || "—"}</p>
-                </div>
-                <div>
-                  <p style={labelStyle}>Jenis Desain</p>
-                  <p style={valueStyle}>{order.design_type || "—"}</p>
-                </div>
-                <div>
-                  <p style={labelStyle}>Jumlah Desain</p>
-                  <p style={valueStyle}>{order.quantity ?? "—"}</p>
-                </div>
-                <div>
-                  <p style={labelStyle}>Deadline</p>
-                  <p style={valueStyle}>
-                    {order.deadline
-                      ? new Date(`${order.deadline}T00:00:00`).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          }
-                        )
-                      : "Belum ditentukan"}
-                  </p>
-                </div>
+                {[
+                  {
+                    label: "Layanan",
+                    value: order.service_name || "Belum ditentukan",
+                  },
+                  {
+                    label: "Jenis Desain",
+                    value: order.design_type || "Belum ditentukan",
+                  },
+                  {
+                    label: "Jumlah Desain",
+                    value: `${order.quantity ?? "—"} desain`,
+                  },
+                  {
+                    label: "Deadline",
+                    value: formatDeadline(order.deadline),
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      padding: 17,
+                      minWidth: 0,
+                      border: "1px solid #EEEAE3",
+                      borderRadius: 14,
+                      background: "#FCFBF8",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <p style={eyebrowStyle}>{item.label}</p>
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#34443A",
+                        fontSize: 14,
+                        lineHeight: 1.8,
+                        fontWeight: 600,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </section>
 
             <section style={cardStyle}>
-              <p style={{ ...labelStyle, marginTop: 0 }}>Arahan Desain</p>
+              <p style={eyebrowStyle}>ARAHAN DESAIN</p>
+
               <h2
                 style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: 22,
-                  color: "#214d32",
-                  margin: "0 0 14px",
+                  margin: "0 0 10px",
+                  color: "#214D32",
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 27,
+                  lineHeight: 1.35,
                 }}
               >
                 Brief Utama
               </h2>
-              <div
+
+              <p
                 style={{
-                  ...valueStyle,
-                  background: "#faf9f6",
-                  border: "1px solid #eeeae3",
-                  borderRadius: 14,
-                  padding: 18,
-                  minHeight: 100,
+                  margin: "0 0 20px",
+                  color: "#70766F",
+                  fontSize: 13,
+                  lineHeight: 1.8,
                 }}
               >
-                {order.brief?.trim() || "Belum ada brief utama yang tercatat."}
-              </div>
+                Arahan utama sebagai acuan pengerjaan desain Anda.
+              </p>
 
-              <p style={{ ...labelStyle, marginTop: 24 }}>Catatan Tambahan</p>
               <div
                 style={{
                   ...valueStyle,
-                  background: "#faf9f6",
-                  border: "1px solid #eeeae3",
-                  borderRadius: 14,
-                  padding: 18,
-                  minHeight: 72,
+                  padding: "20px",
+                  minHeight: 110,
+                  boxSizing: "border-box",
+                  border: "1px solid #EAE7DF",
+                  borderRadius: 15,
+                  background: "#FAF9F6",
+                }}
+              >
+                {order.brief?.trim() ||
+                  "Belum ada brief utama yang tercatat."}
+              </div>
+
+              <div
+                style={{
+                  height: 1,
+                  margin: "26px 0",
+                  background: "#EEEAE3",
+                }}
+              />
+
+              <p style={eyebrowStyle}>INFORMASI TAMBAHAN</p>
+
+              <h2
+                style={{
+                  margin: "0 0 16px",
+                  color: "#214D32",
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 23,
+                  lineHeight: 1.4,
+                }}
+              >
+                Catatan Tambahan
+              </h2>
+
+              <div
+                style={{
+                  ...valueStyle,
+                  padding: 20,
+                  minHeight: 76,
+                  boxSizing: "border-box",
+                  border: "1px solid #EAE7DF",
+                  borderRadius: 15,
+                  background: "#FAF9F6",
                 }}
               >
                 {order.notes?.trim() || "Tidak ada catatan tambahan."}
               </div>
             </section>
 
-            <p
+            <div
               style={{
-                color: "#718075",
-                fontSize: 12,
-                lineHeight: 1.8,
+                padding: "8px 0 10px",
                 textAlign: "center",
-                margin: 0,
               }}
             >
-              Pajara Studio · Desain yang punya arah.
-            </p>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#8A6A4A",
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: 700,
+                }}
+              >
+                PAJARA STUDIO
+              </p>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  color: "#70766F",
+                  fontSize: 12,
+                  lineHeight: 1.8,
+                }}
+              >
+                Desain yang punya arah.
+              </p>
+            </div>
           </div>
         ) : null}
-      </div>
+      </section>
+
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 480px) {
+          .pajara-brief-content {
+            padding: 20px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
+const backStyleForError: React.CSSProperties = {
+  display: "inline-flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: 48,
+  padding: "12px 16px",
+  boxSizing: "border-box",
+  border: "1px solid rgba(33,77,50,.14)",
+  borderRadius: 12,
+  background: "#FFFFFF",
+  color: "#214D32",
+  textDecoration: "none",
+  fontSize: 14,
+  fontWeight: 700,
+};
+
 export default function BriefPage() {
   return (
-    <Suspense
-      fallback={
-        <main
-          style={{
-            minHeight: "100vh",
-            display: "grid",
-            placeItems: "center",
-            background: "#f7f4ee",
-            color: "#718075",
-            fontSize: 14,
-          }}
-        >
-          Memuat halaman...
-        </main>
-      }
-    >
+    <Suspense fallback={<PajaraLoading message="Memuat halaman brief..." />}>
       <BriefContent />
     </Suspense>
   );
