@@ -179,23 +179,21 @@ function OrderDetailContent() {
 
         const { data, error: orderError } = await supabase
           .from("orders")
-          .select(
-            `
-              id,
-              order_code,
-              service_name,
-              design_type,
-              quantity,
-              brief,
-              notes,
-              total_amount,
-              dp_amount,
-              remaining_amount,
-              status,
-              deadline,
-              created_at
-            `
-          )
+          .select(`
+            id,
+            order_code,
+            service_name,
+            design_type,
+            quantity,
+            brief,
+            notes,
+            total_amount,
+            dp_amount,
+            remaining_amount,
+            status,
+            deadline,
+            created_at
+          `)
           .eq("id", id)
           .eq("customer_id", user.id)
           .maybeSingle();
@@ -236,10 +234,11 @@ function OrderDetailContent() {
           return;
         }
 
-        setIsSubscriptionOrder(!!subscriptionRequest);
+        setIsSubscriptionOrder(Boolean(subscriptionRequest));
         setOrder(data as Order);
       } catch (err) {
         console.error("Kesalahan memuat pesanan:", err);
+
         if (mounted) {
           setError("Pesanan belum dapat dimuat. Silakan coba lagi.");
         }
@@ -360,6 +359,7 @@ function OrderDetailContent() {
                 height: 42,
                 objectFit: "contain",
                 borderRadius: 10,
+                flexShrink: 0,
               }}
             />
             <span>Pajara Studio</span>
@@ -374,14 +374,71 @@ function OrderDetailContent() {
         </div>
       </header>
 
-      <section className="pajara-order-detail">
+      <section
+        className="pajara-order-detail"
+        style={{
+          width: "100%",
+          boxSizing: "border-box",
+          overflowX: "clip",
+        }}
+      >
         <div className="pajara-container">
-          <div className="pajara-order-detail-header">
-            <p className="pajara-eyebrow">DETAIL PESANAN</p>
-            <h1>
+          <div
+            className="pajara-order-detail-header"
+            style={{
+              display: "block",
+              width: "100%",
+              maxWidth: "100%",
+              minWidth: 0,
+              height: "auto",
+              boxSizing: "border-box",
+              margin: "0 0 28px",
+              padding: "0",
+              textAlign: "left",
+              overflowWrap: "break-word",
+            }}
+          >
+            <p
+              className="pajara-eyebrow"
+              style={{
+                display: "block",
+                margin: "0 0 12px",
+                fontSize: 11,
+                lineHeight: 1.6,
+                letterSpacing: 2,
+              }}
+            >
+              DETAIL PESANAN
+            </p>
+
+            <h1
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: "100%",
+                margin: "0 0 12px",
+                padding: 0,
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: "clamp(30px, 5vw, 46px)",
+                lineHeight: 1.2,
+                fontWeight: 600,
+                overflowWrap: "break-word",
+              }}
+            >
               Pesanan <span>Pajara.</span>
             </h1>
-            <p>
+
+            <p
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: 560,
+                margin: 0,
+                fontSize: 14,
+                lineHeight: 1.8,
+                overflowWrap: "break-word",
+              }}
+            >
               Pantau status project, revisi, dan file desain Anda dari satu
               tempat.
             </p>
@@ -392,12 +449,21 @@ function OrderDetailContent() {
             style={{
               display: "grid",
               gridTemplateColumns:
-                "minmax(0, 1.5fr) minmax(280px, 1fr)",
+                "minmax(0, 1.5fr) minmax(0, 1fr)",
               gap: 24,
               alignItems: "start",
+              width: "100%",
+              minWidth: 0,
+              boxSizing: "border-box",
             }}
           >
-            <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 20,
+                minWidth: 0,
+              }}
+            >
               <div className="pajara-order-detail-card">
                 <div
                   style={{
@@ -408,7 +474,7 @@ function OrderDetailContent() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <div>
+                  <div style={{ minWidth: 0, overflowWrap: "anywhere" }}>
                     <p className="pajara-eyebrow">ID PESANAN</p>
                     <h2 style={{ marginTop: 8, marginBottom: 0 }}>
                       #{order.order_code}
@@ -473,13 +539,14 @@ function OrderDetailContent() {
                     <div>
                       <p className="pajara-eyebrow">DEADLINE</p>
                       <strong>
-                        {new Date(
-                          `${order.deadline}T00:00:00`
-                        ).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {new Date(`${order.deadline}T00:00:00`).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
                       </strong>
                     </div>
                   )}
@@ -624,6 +691,9 @@ function OrderDetailContent() {
             <a
               href="/dashboard"
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
                 color: "var(--green)",
                 fontSize: 14,
                 fontWeight: 700,
