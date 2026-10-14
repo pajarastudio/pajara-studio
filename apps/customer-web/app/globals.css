@@ -9,6 +9,7 @@
   --text: #1d2a22;
   --muted: #6d756f;
   --line: rgba(33, 77, 50, 0.14);
+  --soft: #f1f5f0;
 
   --radius-sm: 10px;
   --radius-md: 18px;
@@ -18,9 +19,7 @@
   --shadow-md: 0 16px 40px rgba(33, 77, 50, 0.1);
 }
 
-/* =========================
-   RESET
-========================= */
+/* RESET */
 
 * {
   box-sizing: border-box;
@@ -28,6 +27,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -36,6 +36,7 @@ body {
   color: var(--text);
   font-family: "DM Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -54,19 +55,30 @@ button {
   cursor: pointer;
 }
 
-/* =========================
-   LAYOUT
-========================= */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+img {
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(47, 107, 69, 0.18);
+  color: var(--green-dark);
+}
+
+/* LAYOUT */
 
 .pajara-container {
   width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
+  margin-inline: auto;
 }
 
-/* =========================
-   NAVBAR
-========================= */
+/* NAVBAR */
 
+.pajara-header,
 .pajara-navbar {
   position: sticky;
   top: 0;
@@ -74,8 +86,10 @@ button {
   border-bottom: 1px solid var(--line);
   background: rgba(247, 244, 238, 0.94);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
+.pajara-header-inner,
 .pajara-navbar-inner {
   min-height: 76px;
   display: flex;
@@ -91,6 +105,10 @@ button {
   color: var(--green-dark);
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.pajara-brand img {
+  flex-shrink: 0;
 }
 
 .pajara-brand-mark {
@@ -129,7 +147,7 @@ button {
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
-  transition: color 180ms ease;
+  transition: color 180ms ease, background 180ms ease;
 }
 
 .pajara-nav a:hover {
@@ -137,6 +155,10 @@ button {
 }
 
 .pajara-nav .pajara-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
   padding: 10px 16px;
   border-radius: 10px;
   background: var(--green);
@@ -144,13 +166,11 @@ button {
 }
 
 .pajara-nav .pajara-nav-cta:hover {
-  color: var(--white);
   background: var(--green-dark);
+  color: var(--white);
 }
 
-/* =========================
-   TYPOGRAPHY
-========================= */
+/* TYPOGRAPHY */
 
 .pajara-eyebrow {
   margin: 0 0 14px;
@@ -158,6 +178,7 @@ button {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
@@ -177,7 +198,7 @@ button {
   font-size: clamp(42px, 6vw, 72px);
   font-weight: 600;
   letter-spacing: -0.045em;
-  line-height: 1.05;
+  line-height: 1.08;
 }
 
 .pajara-hero h1 span,
@@ -194,9 +215,7 @@ button {
   line-height: 1.75;
 }
 
-/* =========================
-   HERO ACTIONS
-========================= */
+/* BUTTONS */
 
 .pajara-hero-actions {
   display: flex;
@@ -206,27 +225,38 @@ button {
   margin-top: 32px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
-
 .pajara-button {
   min-height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 20px;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
   border-radius: 12px;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
   transition:
     transform 180ms ease,
     background 180ms ease,
+    border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
 .pajara-button:hover {
   transform: translateY(-2px);
+}
+
+.pajara-button:focus-visible,
+.pajara-nav a:focus-visible,
+.pajara-access-button:focus-visible,
+.pajara-file-action:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
 
 .pajara-button-primary {
@@ -237,22 +267,22 @@ button {
 
 .pajara-button-primary:hover {
   background: var(--green-dark);
+  color: var(--white);
 }
 
 .pajara-button-secondary {
-  border: 1px solid var(--line);
+  border-color: var(--line);
   background: var(--white);
   color: var(--green-dark);
 }
 
 .pajara-button-secondary:hover {
-  border-color: rgba(47, 107, 69, 0.28);
+  border-color: rgba(47, 107, 69, 0.35);
+  background: var(--soft);
   box-shadow: var(--shadow-sm);
 }
 
-/* =========================
-   FORM BASE
-========================= */
+/* FORM BASE */
 
 label {
   color: var(--green-dark);
@@ -268,9 +298,7 @@ textarea {
   background: var(--white);
   color: var(--text);
   outline: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 input:focus,
@@ -285,9 +313,7 @@ textarea::placeholder {
   color: #9a9f9b;
 }
 
-/* =========================
-   CARDS
-========================= */
+/* CARDS */
 
 .pajara-card {
   border: 1px solid var(--line);
@@ -296,9 +322,7 @@ textarea::placeholder {
   box-shadow: var(--shadow-sm);
 }
 
-/* =========================
-   DASHBOARD
-========================= */
+/* DASHBOARD */
 
 .pajara-dashboard {
   min-height: calc(100vh - 76px);
@@ -344,7 +368,7 @@ textarea::placeholder {
 .pajara-dashboard-card {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 20px;
   min-height: 190px;
   padding: 28px;
@@ -352,10 +376,7 @@ textarea::placeholder {
   border-radius: var(--radius-md);
   background: var(--white);
   box-shadow: var(--shadow-sm);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    border-color 180ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .pajara-dashboard-card:hover {
@@ -394,7 +415,7 @@ textarea::placeholder {
   font-family: "Playfair Display", serif;
   font-size: 24px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .pajara-dashboard-card > div:last-child > p:last-child {
@@ -411,9 +432,7 @@ textarea::placeholder {
   margin-top: 40px;
 }
 
-/* =========================
-   ORDER PAGE
-========================= */
+/* ORDER FORM */
 
 .pajara-order {
   min-height: calc(100vh - 76px);
@@ -462,7 +481,7 @@ textarea::placeholder {
 
 .pajara-form-section-heading {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 16px;
   align-items: flex-start;
   margin-bottom: 28px;
@@ -488,7 +507,7 @@ textarea::placeholder {
   font-family: "Playfair Display", serif;
   font-size: 25px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .pajara-form-section-heading p {
@@ -507,6 +526,7 @@ textarea::placeholder {
 .pajara-form-field {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .pajara-form-field + .pajara-form-field {
@@ -527,6 +547,7 @@ textarea::placeholder {
 .pajara-form-field select,
 .pajara-form-field textarea {
   width: 100%;
+  min-width: 0;
   border: 1px solid rgba(33, 77, 50, 0.16);
   border-radius: 12px;
   background: var(--white);
@@ -534,9 +555,7 @@ textarea::placeholder {
   font-family: inherit;
   font-size: 15px;
   outline: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .pajara-form-field input,
@@ -605,9 +624,7 @@ textarea::placeholder {
   flex-shrink: 0;
 }
 
-/* =========================
-   ORDER DETAIL
-========================= */
+/* ORDER DETAIL */
 
 .pajara-order-detail {
   min-height: calc(100vh - 76px);
@@ -626,19 +643,122 @@ textarea::placeholder {
   font-size: clamp(40px, 5vw, 60px);
   font-weight: 600;
   letter-spacing: -0.045em;
-  line-height: 1.06;
+  line-height: 1.08;
 }
 
 .pajara-order-detail-header h1 span {
   color: var(--green);
 }
 
-.pajara-order-detail-header p {
+.pajara-order-detail-header > p:last-child {
   max-width: 680px;
   margin: 16px 0 0;
   color: var(--muted);
   font-size: 17px;
   line-height: 1.75;
+}
+
+.pajara-order-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.pajara-order-detail-card {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.pajara-order-detail-card h2 {
+  margin: 0;
+  color: var(--green-dark);
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.pajara-order-detail-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.pajara-order-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(47, 107, 69, 0.12);
+  border-radius: 999px;
+  background: rgba(47, 107, 69, 0.1);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* CONSISTENT ORDER ACCESS BUTTONS */
+
+.pajara-access-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--green);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.pajara-access-button:hover {
+  border-color: var(--green);
+  background: var(--soft);
+}
+
+.pajara-access-button:active {
+  transform: scale(0.99);
+}
+
+.pajara-access-button > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pajara-access-arrow {
+  flex-shrink: 0;
+  color: var(--brown);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.pajara-consistent-text {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
 }
 
 /* ORDER SUMMARY */
@@ -743,7 +863,7 @@ textarea::placeholder {
   font-size: 14px;
 }
 
-/* PROGRESS */
+/* PROJECT PROGRESS */
 
 .pajara-order-progress {
   margin-bottom: 20px;
@@ -844,7 +964,7 @@ textarea::placeholder {
   line-height: 1.4;
 }
 
-/* MENU */
+/* ORDER ACTION MENU */
 
 .pajara-order-menu {
   padding: 30px;
@@ -871,7 +991,7 @@ textarea::placeholder {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .pajara-order-menu-grid {
@@ -973,50 +1093,7 @@ textarea::placeholder {
   font-weight: 700;
 }
 
-/* =========================
-   ORDER DETAIL LEGACY
-========================= */
-
-.pajara-order-detail-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
-  gap: 20px;
-}
-
-.pajara-order-detail-card {
-  padding: 28px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--white);
-  box-shadow: var(--shadow-sm);
-}
-
-.pajara-order-detail-card h2 {
-  margin: 0 0 18px;
-  color: var(--green-dark);
-  font-family: "Playfair Display", serif;
-  font-size: 24px;
-}
-
-.pajara-order-detail-card p {
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.pajara-order-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(47, 107, 69, 0.1);
-  color: var(--green);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* =========================
-   FILES
-========================= */
+/* FILES */
 
 .pajara-files {
   display: grid;
@@ -1036,6 +1113,7 @@ textarea::placeholder {
 
 .pajara-file-card strong {
   color: var(--green-dark);
+  overflow-wrap: anywhere;
 }
 
 .pajara-file-card span {
@@ -1043,9 +1121,24 @@ textarea::placeholder {
   font-size: 13px;
 }
 
-/* =========================
-   PAYMENT
-========================= */
+.pajara-file-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+/* PAYMENT */
 
 .pajara-payment {
   max-width: 760px;
@@ -1067,9 +1160,7 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-/* =========================
-   REVISION
-========================= */
+/* REVISION */
 
 .pajara-revision-list {
   display: grid;
@@ -1089,17 +1180,18 @@ textarea::placeholder {
   color: var(--green-dark);
   font-family: "Playfair Display", serif;
   font-size: 21px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .pajara-revision-card p {
   margin: 8px 0 0;
   color: var(--muted);
-  line-height: 1.65;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
-/* =========================
-   FOOTER
-========================= */
+/* FOOTER */
 
 .pajara-footer {
   padding: 48px 0;
@@ -1114,17 +1206,15 @@ textarea::placeholder {
   line-height: 1.7;
 }
 
-/* =========================
-   MOBILE
-========================= */
+/* TABLET */
 
 @media (max-width: 900px) {
   .pajara-order-detail-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pajara-order-menu-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .pajara-progress-line {
@@ -1134,7 +1224,7 @@ textarea::placeholder {
 
   .pajara-progress-step {
     display: grid;
-    grid-template-columns: 35px 1fr;
+    grid-template-columns: 35px minmax(0, 1fr);
     column-gap: 12px;
     align-items: center;
   }
@@ -1161,13 +1251,22 @@ textarea::placeholder {
   }
 }
 
+/* MOBILE */
+
 @media (max-width: 640px) {
   .pajara-container {
-    width: min(100% - 28px, 1180px);
+    width: calc(100% - 28px);
   }
 
+  .pajara-header-inner,
   .pajara-navbar-inner {
     min-height: 68px;
+    gap: 12px;
+  }
+
+  .pajara-brand {
+    gap: 8px;
+    font-size: 14px;
   }
 
   .pajara-brand-logo {
@@ -1185,27 +1284,35 @@ textarea::placeholder {
   }
 
   .pajara-nav a {
-    font-size: 13px;
+    font-size: 12px;
   }
 
-  .pajara-nav-cta {
-    padding: 9px 12px !important;
+  .pajara-nav .pajara-nav-cta {
+    min-height: 38px;
+    padding: 9px 11px;
+    border-radius: 9px;
   }
+
+  .pajara-button {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
+  /* HERO */
 
   .pajara-hero {
     padding: 64px 0;
   }
 
-  .pajara-hero h1 {
-    font-size: 40px;
+  .pajara-hero h1,
+  .pajara-services h1 {
+    font-size: clamp(36px, 10vw, 44px);
   }
 
   .pajara-hero-description,
   .pajara-section-description {
-    font-size: 16px;
+    font-size: 15px;
   }
-
-  /* Hero Actions */
 
   .pajara-hero-actions {
     flex-direction: column;
@@ -1218,7 +1325,7 @@ textarea::placeholder {
     width: 100%;
   }
 
-  /* Dashboard */
+  /* DASHBOARD */
 
   .pajara-dashboard {
     padding: 48px 0 64px;
@@ -1235,11 +1342,11 @@ textarea::placeholder {
   }
 
   .pajara-dashboard-header p:last-child {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .pajara-dashboard-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
   }
 
@@ -1268,7 +1375,7 @@ textarea::placeholder {
     width: 100%;
   }
 
-  /* Order */
+  /* ORDER FORM */
 
   .pajara-order {
     padding: 48px 0 68px;
@@ -1283,11 +1390,11 @@ textarea::placeholder {
   }
 
   .pajara-order-header > p:last-child {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .pajara-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
 
@@ -1323,23 +1430,58 @@ textarea::placeholder {
     width: 100%;
   }
 
-  /* Order Detail */
+  /* ORDER DETAIL */
 
   .pajara-order-detail {
-    padding: 48px 0 64px;
+    padding: 44px 0 60px;
   }
 
   .pajara-order-detail-header {
-    margin-bottom: 28px;
+    margin-bottom: 26px;
   }
 
   .pajara-order-detail-header h1 {
     font-size: 38px;
   }
 
-  .pajara-order-detail-header p {
-    font-size: 16px;
+  .pajara-order-detail-header > p:last-child {
+    font-size: 15px;
   }
+
+  .pajara-order-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .pajara-order-detail-card {
+    padding: 21px;
+    border-radius: 16px;
+  }
+
+  .pajara-order-detail-card h2 {
+    font-size: 22px;
+  }
+
+  .pajara-order-status {
+    font-size: 11px;
+  }
+
+  .pajara-access-button {
+    min-height: 48px;
+    padding: 13px 14px;
+    font-size: 13px;
+  }
+
+  .pajara-consistent-text {
+    font-size: 13px;
+  }
+
+  .pajara-file-action {
+    min-height: 44px;
+    padding: 11px 14px;
+  }
+
+  /* LEGACY ORDER SUMMARY */
 
   .pajara-order-summary {
     border-radius: 20px;
@@ -1362,7 +1504,7 @@ textarea::placeholder {
   }
 
   .pajara-order-summary-meta {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pajara-order-summary-meta > div {
@@ -1392,17 +1534,37 @@ textarea::placeholder {
     font-size: 24px;
   }
 
+  .pajara-order-menu-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .pajara-order-action {
     min-height: 175px;
   }
 
-  /* Legacy Detail */
-
-  .pajara-order-detail-card {
+  .pajara-payment-card {
     padding: 22px;
   }
 
-  .pajara-payment-card {
-    padding: 22px;
+  .pajara-payment-amount {
+    font-size: 32px;
+  }
+
+  .pajara-file-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
