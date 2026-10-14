@@ -56,7 +56,9 @@ function getStatusLabel(status: string | null) {
   }
 }
 
-function PajaraLoading({ message = "Menyiapkan brief desainmu..." }: {
+function PajaraLoading({
+  message = "Menyiapkan brief desainmu...",
+}: {
   message?: string;
 }) {
   return (
@@ -267,7 +269,7 @@ function BriefContent() {
     gap: 14,
     width: "100%",
     minHeight: 58,
-    padding: "15px 18px",
+    padding: "13px 16px",
     marginBottom: 28,
     boxSizing: "border-box",
     background: "#FFFFFF",
@@ -314,89 +316,25 @@ function BriefContent() {
         fontFamily: '"DM Sans", sans-serif',
       }}
     >
-      <header
-        style={{
-          width: "100%",
-          background: "rgba(255,255,255,.92)",
-          borderBottom: "1px solid rgba(33,77,50,.10)",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1160,
-            minHeight: 76,
-            margin: "0 auto",
-            padding: "14px clamp(18px, 4vw, 28px)",
-            boxSizing: "border-box",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 11,
-              minWidth: 0,
-              color: "#214D32",
-              textDecoration: "none",
-              fontWeight: 700,
-              fontSize: 15,
-            }}
-          >
-            <img
-              src={LOGO}
-              alt="Logo Pajara Studio"
-              style={{
-                width: 42,
-                height: 42,
-                objectFit: "contain",
-                borderRadius: 10,
-                flexShrink: 0,
-              }}
-            />
-            <span>Pajara Studio</span>
-          </Link>
-
-          <Link
-            href="/order"
-            style={{
-              display: "inline-flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: 42,
-              padding: "10px 15px",
-              boxSizing: "border-box",
-              borderRadius: 11,
-              background: "#2F6B45",
-              color: "#FFFFFF",
-              textDecoration: "none",
-              fontSize: 12,
-              fontWeight: 700,
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}
-          >
-            Pesan Desain
-          </Link>
-        </div>
-      </header>
-
       <section
         style={{
           width: "100%",
           maxWidth: 1160,
           margin: "0 auto",
-          padding: "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
+          padding:
+            "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
           boxSizing: "border-box",
         }}
       >
         <Link href={backHref} style={backStyle}>
-          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              minWidth: 0,
+            }}
+          >
             <span
               aria-hidden="true"
               style={{
@@ -415,9 +353,14 @@ function BriefContent() {
             </span>
             <span>Kembali ke Pesanan</span>
           </span>
+
           <span
             aria-hidden="true"
-            style={{ color: "#8A6A4A", fontSize: 18, flexShrink: 0 }}
+            style={{
+              color: "#8A6A4A",
+              fontSize: 18,
+              flexShrink: 0,
+            }}
           >
             →
           </span>
@@ -503,7 +446,7 @@ function BriefContent() {
                 Coba Lagi
               </button>
 
-              <Link href={backHref} style={backStyleForError}>
+              <Link href={backHref} style={backErrorStyle}>
                 Kembali ke Pesanan
               </Link>
             </div>
@@ -559,6 +502,7 @@ function BriefContent() {
               </div>
 
               <p style={eyebrowStyle}>RINGKASAN PROJECT</p>
+
               <h2
                 style={{
                   margin: "0 0 22px",
@@ -574,7 +518,8 @@ function BriefContent() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
                   gap: 12,
                 }}
               >
@@ -654,7 +599,7 @@ function BriefContent() {
               <div
                 style={{
                   ...valueStyle,
-                  padding: "20px",
+                  padding: 20,
                   minHeight: 110,
                   boxSizing: "border-box",
                   border: "1px solid #EAE7DF",
@@ -720,6 +665,7 @@ function BriefContent() {
               >
                 PAJARA STUDIO
               </p>
+
               <p
                 style={{
                   margin: "8px 0 0",
@@ -736,21 +682,15 @@ function BriefContent() {
       </section>
 
       <style>{`
-        * {
-          box-sizing: border-box;
-        }
-
-        @media (max-width: 480px) {
-          .pajara-brief-content {
-            padding: 20px;
-          }
+        @keyframes pajara-brief-spin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </main>
   );
 }
 
-const backStyleForError: React.CSSProperties = {
+const backErrorStyle: React.CSSProperties = {
   display: "inline-flex",
   justifyContent: "center",
   alignItems: "center",
@@ -768,7 +708,9 @@ const backStyleForError: React.CSSProperties = {
 
 export default function BriefPage() {
   return (
-    <Suspense fallback={<PajaraLoading message="Memuat halaman brief..." />}>
+    <Suspense
+      fallback={<PajaraLoading message="Memuat halaman brief..." />}
+    >
       <BriefContent />
     </Suspense>
   );
