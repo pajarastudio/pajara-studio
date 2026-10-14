@@ -3518,3 +3518,124 @@ transition: none;
 animation-duration: 2s;
 }
 }
+
+/* PAJARA STUDIO — MINIMAL CENTERED TESTIMONIALS */
+
+.pajara-testimonials-page .pajara-testimonials-grid {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 22px;
+}
+
+.pajara-testimonials-page .pajara-testimonial-card {
+align-items: center;
+padding: 35px 30px 29px;
+text-align: center;
+border: 1px solid var(--line);
+border-radius: 4px 18px 4px 18px;
+background: rgba(255, 255, 255, 0.76);
+box-shadow: none;
+}
+
+.pajara-testimonials-page .pajara-testimonial-card:hover {
+transform: translateY(-3px);
+border-color: rgba(47, 107, 69, 0.35);
+box-shadow: var(--shadow-sm);
+}
+
+/* Hilangkan nomor, tanda kutip, avatar, dan logo dekoratif */
+.pajara-testimonials-page .pajara-testimonial-number,
+.pajara-testimonials-page .pajara-testimonial-quote,
+.pajara-testimonials-page .pajara-testimonial-avatar,
+.pajara-testimonials-page .pajara-testimonial-customer-mark {
+display: none !important;
+}
+
+/* Rating bintang di tengah */
+.pajara-testimonials-page .pajara-testimonial-card-top {
+display: none;
+}
+
+.pajara-testimonials-page .pajara-testimonial-rating {
+justify-content: center;
+gap: 5px;
+margin: 0 0 21px;
+font-size: 17px;
+letter-spacing: 1px;
+}
+
+/* Isi testimoni di tengah */
+.pajara-testimonials-page .pajara-testimonial-content {
+flex: 1;
+width: 100%;
+margin: 0 0 23px;
+color: var(--green-dark);
+font-family: "DM Sans", sans-serif;
+font-size: 17px;
+font-weight: 500;
+line-height: 1.8;
+text-align: center;
+overflow-wrap: anywhere;
+}
+
+/* Garis pemisah elegan */
+.pajara-testimonials-page .pajara-testimonial-divider {
+width: 44px;
+height: 1px;
+margin: 0 auto;
+background: var(--brown);
+opacity: 0.65;
+}
+
+/* Nama pelanggan di tengah */
+.pajara-testimonials-page .pajara-testimonial-customer {
+justify-content: center;
+width: 100%;
+margin-top: 18px;
+text-align: center;
+}
+
+.pajara-testimonials-page .pajara-testimonial-customer-info {
+flex: initial;
+min-width: 0;
+text-align: center;
+}
+
+.pajara-testimonials-page .pajara-testimonial-customer-info strong {
+margin: 0;
+color: var(--brown);
+font-size: 12px;
+font-weight: 700;
+letter-spacing: 1.1px;
+line-height: 1.7;
+}
+
+.pajara-testimonials-page .pajara-testimonial-customer-info > span {
+display: none;
+}
+
+/* Tampilan HP */
+@media (max-width: 640px) {
+.pajara-testimonials-page .pajara-testimonials-grid {
+grid-template-columns: minmax(0, 1fr);
+gap: 15px;
+}
+
+.pajara-testimonials-page .pajara-testimonial-card {
+padding: 29px 20px 25px;
+}
+
+.pajara-testimonials-page .pajara-testimonial-rating {
+margin-bottom: 17px;
+font-size: 16px;
+}
+
+.pajara-testimonials-page .pajara-testimonial-content {
+margin-bottom: 19px;
+font-size: 16px;
+line-height: 1.8;
+}
+
+.pajara-testimonials-page .pajara-testimonial-customer {
+margin-top: 15px;
+}
+}
