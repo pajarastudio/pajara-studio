@@ -31,6 +31,8 @@ type FinalFile = {
   url: string | null;
 };
 
+type AccessType = "brief" | "files" | null;
+
 function formatFileSize(size: number | null) {
   if (!size) return "-";
   if (size < 1024) return `${size} B`;
@@ -59,6 +61,103 @@ function getStatusLabel(status: string | null) {
   }
 }
 
+function PajaraLoading() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: "24px",
+        background: "#F7F4EE",
+        fontFamily: '"DM Sans", sans-serif',
+      }}
+    >
+      <style>{`
+        @keyframes pajara-spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pajara-pulse {
+          0%, 100% { opacity: .65; transform: scale(.96); }
+          50% { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "340px",
+          padding: "38px 24px",
+          textAlign: "center",
+          border: "1px solid rgba(33,77,50,.12)",
+          borderRadius: "24px",
+          background: "rgba(255,255,255,.8)",
+          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
+        }}
+      >
+        <img
+          src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+          alt="Pajara Studio"
+          style={{
+            width: "66px",
+            height: "66px",
+            objectFit: "contain",
+            borderRadius: "16px",
+            marginBottom: "18px",
+            animation: "pajara-pulse 1.8s ease-in-out infinite",
+          }}
+        />
+
+        <p
+          style={{
+            margin: 0,
+            color: "#214D32",
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: "25px",
+          }}
+        >
+          Pajara Studio
+        </p>
+
+        <p
+          style={{
+            margin: "10px 0 24px",
+            color: "#70766F",
+            fontSize: "13px",
+            lineHeight: 1.8,
+          }}
+        >
+          Menyiapkan detail pesananmu...
+        </p>
+
+        <div
+          style={{
+            width: "30px",
+            height: "30px",
+            margin: "0 auto",
+            border: "3px solid #DCE5DC",
+            borderTopColor: "#2F6B45",
+            borderRadius: "50%",
+            animation: "pajara-spin .8s linear infinite",
+          }}
+        />
+
+        <p
+          style={{
+            margin: "22px 0 0",
+            color: "#8A6A4A",
+            fontSize: "10px",
+            letterSpacing: "2px",
+            fontWeight: 700,
+          }}
+        >
+          DESAIN YANG PUNYA ARAH
+        </p>
+      </div>
+    </main>
+  );
+}
+
 function OrderDetailContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -72,6 +171,7 @@ function OrderDetailContent() {
   const [fileMessage, setFileMessage] = useState("");
   const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [activeAccess, setActiveAccess] = useState<AccessType>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -133,8 +233,6 @@ function OrderDetailContent() {
         return;
       }
 
-      // Pesanan yang terhubung ke subscription_requests
-      // merupakan desain yang menggunakan kuota paket.
       const {
         data: subscriptionRequest,
         error: subscriptionRequestError,
@@ -151,9 +249,6 @@ function OrderDetailContent() {
           "Gagal memeriksa jenis pesanan:",
           subscriptionRequestError
         );
-
-        // Demi keamanan, jangan tampilkan tagihan jika
-        // jenis pesanan belum berhasil diverifikasi.
         setError(
           "Jenis pesanan belum dapat diverifikasi. Silakan muat ulang halaman."
         );
@@ -165,7 +260,7 @@ function OrderDetailContent() {
       setOrder(data);
       setLoading(false);
 
-      await loadFinalFiles(data.id, mounted);
+      await loadFinalFiles(data.id, () => mounted);
     };
 
     loadOrder();
@@ -177,7 +272,7 @@ function OrderDetailContent() {
 
   const loadFinalFiles = async (
     orderId: string,
-    mounted: boolean
+    isMounted: () => boolean
   ) => {
     setLoadingFiles(true);
     setFileMessage("");
@@ -197,7 +292,7 @@ function OrderDetailContent() {
       .eq("file_category", "final")
       .order("created_at", { ascending: false });
 
-    if (!mounted) return;
+    if (!isMounted()) return;
 
     if (filesError) {
       console.error("Gagal mengambil order_files:", filesError);
@@ -222,13 +317,14 @@ function OrderDetailContent() {
           .from("pajara-files")
           .createSignedUrl(file.file_path, 60 * 60);
 
+      if (!isMounted()) return;
+
       if (signedError || !signedData?.signedUrl) {
         console.error(
           "Gagal membuat signed URL:",
           file.file_path,
           signedError
         );
-
         filesWithUrls.push({ ...file, url: null });
         continue;
       }
@@ -236,7 +332,7 @@ function OrderDetailContent() {
       filesWithUrls.push({ ...file, url: signedData.signedUrl });
     }
 
-    if (!mounted) return;
+    if (!isMounted()) return;
 
     setFinalFiles(filesWithUrls);
 
@@ -300,15 +396,7 @@ function OrderDetailContent() {
   };
 
   if (loading) {
-    return (
-      <main>
-        <section className="pajara-order-detail">
-          <div className="pajara-container">
-            <p>Memuat detail pesanan...</p>
-          </div>
-        </section>
-      </main>
-    );
+    return <PajaraLoading />;
   }
 
   if (error || !order) {
@@ -396,7 +484,6 @@ function OrderDetailContent() {
                       #{order.order_code}
                     </h2>
                   </div>
-
                   <span className="pajara-order-status">
                     {getStatusLabel(order.status)}
                   </span>
@@ -419,8 +506,8 @@ function OrderDetailContent() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Pesanan ini menggunakan kuota paket Anda. Tidak ada pembayaran
-                    tambahan per desain.
+                    Pesanan ini menggunakan kuota paket Anda. Tidak ada
+                    pembayaran tambahan per desain.
                   </div>
                 )}
 
@@ -450,224 +537,228 @@ function OrderDetailContent() {
                 </div>
               </div>
 
-              <div className="pajara-order-detail-card">
-                <p className="pajara-eyebrow">BRIEF</p>
-                <h2>Brief Desain</h2>
-                <p style={{ marginTop: "16px", whiteSpace: "pre-wrap" }}>
-                  {order.brief || "Belum ada brief."}
-                </p>
+              {activeAccess === "brief" && (
+                <div className="pajara-order-detail-card">
+                  <p className="pajara-eyebrow">BRIEF</p>
+                  <h2>Brief Desain</h2>
+                  <p style={{ marginTop: "16px", whiteSpace: "pre-wrap" }}>
+                    {order.brief || "Belum ada brief."}
+                  </p>
 
-                {order.notes && (
-                  <div
-                    style={{
-                      marginTop: "20px",
-                      paddingTop: "20px",
-                      borderTop: "1px solid var(--line)",
-                    }}
-                  >
-                    <p>Catatan Tambahan</p>
-                    <p style={{ whiteSpace: "pre-wrap" }}>{order.notes}</p>
-                  </div>
-                )}
-              </div>
+                  {order.notes && (
+                    <div
+                      style={{
+                        marginTop: "20px",
+                        paddingTop: "20px",
+                        borderTop: "1px solid var(--line)",
+                      }}
+                    >
+                      <p>Catatan Tambahan</p>
+                      <p style={{ whiteSpace: "pre-wrap" }}>{order.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div className="pajara-order-detail-card">
-                <p className="pajara-eyebrow">FILE FINAL</p>
-                <h2>File Desain Final</h2>
-                <p
-                  style={{
-                    marginTop: "10px",
-                    color: "var(--muted)",
-                    fontSize: "14px",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  File hasil desain akan tersedia di halaman ini setelah pesanan
-                  selesai dan file final sudah diunggah oleh tim Pajara Studio.
-                </p>
-
-                {loadingFiles ? (
-                  <div
+              {activeAccess === "files" && (
+                <div className="pajara-order-detail-card">
+                  <p className="pajara-eyebrow">FILE FINAL</p>
+                  <h2>File Desain Final</h2>
+                  <p
                     style={{
-                      marginTop: "18px",
-                      padding: "16px",
-                      borderRadius: "12px",
-                      background: "var(--soft)",
-                    }}
-                  >
-                    Memuat file final...
-                  </div>
-                ) : finalFiles.length === 0 ? (
-                  <div
-                    style={{
-                      marginTop: "18px",
-                      padding: "16px",
-                      borderRadius: "12px",
-                      background: "var(--soft)",
+                      marginTop: "10px",
+                      color: "var(--muted)",
                       fontSize: "14px",
                       lineHeight: 1.6,
                     }}
                   >
-                    {fileMessage || "Belum ada file final."}
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: "14px",
-                      marginTop: "20px",
-                    }}
-                  >
-                    {finalFiles.map((file) => {
-                      const isImage = file.file_type?.startsWith("image/");
-                      const isPdf = file.file_type === "application/pdf";
-                      const isDownloading = downloadingFileId === file.id;
+                    File hasil desain akan tersedia setelah tim Pajara Studio
+                    mengunggah file final pesanan Anda.
+                  </p>
 
-                      return (
-                        <div
-                          key={file.id}
-                          style={{
-                            border: "1px solid var(--line)",
-                            borderRadius: "14px",
-                            padding: "16px",
-                            background: "#fff",
-                          }}
-                        >
+                  {loadingFiles ? (
+                    <div
+                      style={{
+                        marginTop: "18px",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        background: "var(--soft)",
+                      }}
+                    >
+                      Memuat file final...
+                    </div>
+                  ) : finalFiles.length === 0 ? (
+                    <div
+                      style={{
+                        marginTop: "18px",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        background: "var(--soft)",
+                        fontSize: "14px",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {fileMessage || "Belum ada file final."}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: "14px",
+                        marginTop: "20px",
+                      }}
+                    >
+                      {finalFiles.map((file) => {
+                        const isImage = file.file_type?.startsWith("image/");
+                        const isPdf = file.file_type === "application/pdf";
+                        const isDownloading = downloadingFileId === file.id;
+
+                        return (
                           <div
+                            key={file.id}
                             style={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              justifyContent: "space-between",
-                              gap: "14px",
-                              flexWrap: "wrap",
+                              border: "1px solid var(--line)",
+                              borderRadius: "14px",
+                              padding: "16px",
+                              background: "#fff",
                             }}
                           >
-                            <div style={{ minWidth: 0, flex: "1 1 220px" }}>
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontWeight: 700,
-                                  color: "var(--green)",
-                                  wordBreak: "break-word",
-                                }}
-                              >
-                                {file.file_name}
-                              </p>
-                              <p
-                                style={{
-                                  margin: "6px 0 0",
-                                  fontSize: "12px",
-                                  color: "var(--muted)",
-                                }}
-                              >
-                                {formatFileSize(file.file_size)}
-                              </p>
-                            </div>
-                          </div>
-
-                          {isImage && file.url && (
-                            <div
-                              style={{
-                                marginTop: "16px",
-                                borderRadius: "10px",
-                                overflow: "hidden",
-                                background: "#f5f5f5",
-                              }}
-                            >
-                              <img
-                                src={file.url}
-                                alt={file.file_name}
-                                style={{
-                                  display: "block",
-                                  width: "100%",
-                                  maxHeight: "500px",
-                                  objectFit: "contain",
-                                }}
-                              />
-                            </div>
-                          )}
-
-                          {file.url ? (
                             <div
                               style={{
                                 display: "flex",
-                                gap: "10px",
+                                alignItems: "flex-start",
+                                justifyContent: "space-between",
+                                gap: "14px",
                                 flexWrap: "wrap",
-                                marginTop: "16px",
                               }}
                             >
-                              <a
-                                href={file.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="pajara-button pajara-button-primary"
-                              >
-                                {isPdf ? "Buka PDF" : "Buka File"}
-                              </a>
-                              <button
-                                type="button"
-                                onClick={() => handleDownload(file)}
-                                disabled={isDownloading}
-                                className="pajara-button pajara-button-secondary"
+                              <div style={{ minWidth: 0, flex: "1 1 220px" }}>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    fontWeight: 700,
+                                    color: "var(--green)",
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  {file.file_name}
+                                </p>
+                                <p
+                                  style={{
+                                    margin: "6px 0 0",
+                                    fontSize: "12px",
+                                    color: "var(--muted)",
+                                  }}
+                                >
+                                  {formatFileSize(file.file_size)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {isImage && file.url && (
+                              <div
                                 style={{
-                                  border: "none",
-                                  cursor: isDownloading ? "wait" : "pointer",
-                                  opacity: isDownloading ? 0.7 : 1,
+                                  marginTop: "16px",
+                                  borderRadius: "10px",
+                                  overflow: "hidden",
+                                  background: "#f5f5f5",
                                 }}
                               >
-                                {isDownloading ? "Mengunduh..." : "Download"}
-                              </button>
-                            </div>
-                          ) : (
-                            <div
-                              style={{
-                                marginTop: "16px",
-                                padding: "12px",
-                                borderRadius: "10px",
-                                background: "var(--soft)",
-                                fontSize: "13px",
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              File tercatat di sistem, tetapi link file belum dapat
-                              dibuat.
-                            </div>
-                          )}
+                                <img
+                                  src={file.url}
+                                  alt={file.file_name}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    maxHeight: "500px",
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              </div>
+                            )}
 
-                          {downloadError && downloadingFileId === null && (
-                            <div
-                              style={{
-                                marginTop: "12px",
-                                padding: "12px 14px",
-                                borderRadius: "10px",
-                                background: "var(--soft)",
-                                fontSize: "13px",
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              {downloadError}
-                            </div>
-                          )}
+                            {file.url ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "10px",
+                                  flexWrap: "wrap",
+                                  marginTop: "16px",
+                                }}
+                              >
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="pajara-button pajara-button-primary"
+                                >
+                                  {isPdf ? "Buka PDF" : "Buka File"}
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownload(file)}
+                                  disabled={isDownloading}
+                                  className="pajara-button pajara-button-secondary"
+                                  style={{
+                                    border: "none",
+                                    cursor: isDownloading ? "wait" : "pointer",
+                                    opacity: isDownloading ? 0.7 : 1,
+                                  }}
+                                >
+                                  {isDownloading ? "Mengunduh..." : "Download"}
+                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                style={{
+                                  marginTop: "16px",
+                                  padding: "12px",
+                                  borderRadius: "10px",
+                                  background: "var(--soft)",
+                                  fontSize: "13px",
+                                  lineHeight: 1.5,
+                                }}
+                              >
+                                File tercatat di sistem, tetapi link file belum
+                                dapat dibuat.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {fileMessage && (
+                        <div
+                          style={{
+                            padding: "12px 14px",
+                            borderRadius: "10px",
+                            background: "var(--soft)",
+                            fontSize: "13px",
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {fileMessage}
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+                  )}
 
-                    {fileMessage && (
-                      <div
-                        style={{
-                          padding: "12px 14px",
-                          borderRadius: "10px",
-                          background: "var(--soft)",
-                          fontSize: "13px",
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {fileMessage}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                  {downloadError && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "12px 14px",
+                        borderRadius: "10px",
+                        background: "var(--soft)",
+                        fontSize: "13px",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {downloadError}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div
@@ -680,6 +771,16 @@ function OrderDetailContent() {
               <div className="pajara-order-detail-card">
                 <p className="pajara-eyebrow">AKSES PESANAN</p>
                 <h2>Kelola Project</h2>
+                <p
+                  style={{
+                    marginTop: "10px",
+                    color: "var(--muted)",
+                    fontSize: "13px",
+                    lineHeight: 1.8,
+                  }}
+                >
+                  Buka informasi project dan file desainmu saat diperlukan.
+                </p>
 
                 <div
                   style={{
@@ -704,11 +805,49 @@ function OrderDetailContent() {
                     Revisi
                   </a>
 
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveAccess((current) =>
+                        current === "brief" ? null : "brief"
+                      )
+                    }
+                    aria-expanded={activeAccess === "brief"}
+                    className="pajara-button pajara-button-secondary"
+                    style={{
+                      width: "100%",
+                      cursor: "pointer",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span>Lihat Brief Desain</span>
+                    <span>{activeAccess === "brief" ? "−" : "+"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveAccess((current) =>
+                        current === "files" ? null : "files"
+                      )
+                    }
+                    aria-expanded={activeAccess === "files"}
+                    className="pajara-button pajara-button-secondary"
+                    style={{
+                      width: "100%",
+                      cursor: "pointer",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span>Lihat File Final Anda</span>
+                    <span>{activeAccess === "files" ? "−" : "+"}</span>
+                  </button>
+
                   <a
                     href={`/orders/files?id=${order.id}`}
                     className="pajara-button pajara-button-secondary"
                   >
-                    File Pesanan
+                    File Referensi Pesanan
                   </a>
                 </div>
               </div>
@@ -762,15 +901,7 @@ function OrderDetailContent() {
 }
 
 function OrderDetailFallback() {
-  return (
-    <main>
-      <section className="pajara-order-detail">
-        <div className="pajara-container">
-          <p>Memuat detail pesanan...</p>
-        </div>
-      </section>
-    </main>
-  );
+  return <PajaraLoading />;
 }
 
 export default function OrderDetailPage() {
