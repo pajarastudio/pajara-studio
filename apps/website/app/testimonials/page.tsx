@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -7,344 +6,376 @@ import { createClient } from "@supabase/supabase-js";
 import "../globals.css";
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+process.env.NEXT_PUBLIC_SUPABASE_URL!,
+process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
 );
 
 type Testimonial = {
-  id: string;
-  customer_name: string | null;
-  content: string;
-  rating: number | null;
-  created_at: string;
+id: string;
+customer_name: string | null;
+content: string;
+rating: number | null;
+created_at: string;
 };
 
+function MenuIcon({ open }: { open: boolean }) {
+return (
+<svg
+width="22"
+height="22"
+viewBox="0 0 24 24"
+fill="none"
+aria-hidden="true"
+>
+{open ? (
+<path
+d="M6 6l12 12M18 6L6 18"
+stroke="currentColor"
+strokeWidth="1.8"
+strokeLinecap="round"
+/>
+) : (
+<path
+d="M4 7h16M4 12h16M4 17h16"
+stroke="currentColor"
+strokeWidth="1.8"
+strokeLinecap="round"
+/>
+)}
+</svg>
+);
+}
+
+function ArrowIcon() {
+return (
+<svg
+width="18"
+height="18"
+viewBox="0 0 24 24"
+fill="none"
+aria-hidden="true"
+>
+<path
+d="M5 12h14M13 5l7 7-7 7"
+stroke="currentColor"
+strokeWidth="1.7"
+strokeLinecap="round"
+strokeLinejoin="round"
+/>
+</svg>
+);
+}
+
 export default function TestimonialsPage() {
-  const [items, setItems] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const [items, setItems] = useState<Testimonial[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+const [menuOpen, setMenuOpen] = useState(false);
 
-  const loadTestimonials = useCallback(async () => {
-    setLoading(true);
-    setError("");
+const loadTestimonials = useCallback(async () => {
+setLoading(true);
+setError("");
 
-    try {
-      const { data, error: queryError } = await supabase
-        .from("testimonials")
-        .select("id, customer_name, content, rating, created_at")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false });
+try {
+  const { data, error: queryError } = await supabase
+    .from("testimonials")
+    .select("id, customer_name, content, rating, created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
 
-      if (queryError) {
-        console.error("Gagal memuat testimoni:", queryError);
-        setError(queryError.message);
-        return;
-      }
+  if (queryError) {
+    console.error("Gagal memuat testimoni:", queryError);
+    setError(queryError.message);
+    return;
+  }
 
-      setItems((data || []) as Testimonial[]);
-    } catch (err) {
-      console.error("Kesalahan memuat testimoni:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Terjadi kesalahan saat memuat testimoni."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadTestimonials();
-  }, [loadTestimonials]);
-
-  return (
-    <main className="pajara-site">
-      <nav className="pajara-nav" aria-label="Navigasi utama">
-        <div className="pajara-container pajara-navbar-inner">
-          <Link href="/" className="pajara-brand">
-            <span className="pajara-brand-name">Pajara Studio</span>
-          </Link>
-
-          <div className="pajara-nav">
-            <Link href="/">Beranda</Link>
-            <Link href="/portfolio">Portfolio</Link>
-            <a href="/#kontak" className="pajara-nav-button">
-              Pesan Desain
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      <section className="pajara-section">
-        <div className="pajara-container">
-          <div className="pajara-section-heading">
-            <span className="pajara-eyebrow">CERITA PELANGGAN</span>
-            <h1 className="testimonial-page-title">
-              Perjalanan kita,
-              <br />
-              dari sudut pandang mereka.
-            </h1>
-            <p>
-              Setiap proyek memiliki cerita. Berikut pengalaman
-              pelanggan yang telah bekerja bersama Pajara Studio.
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="testimonial-empty">
-              <p>Memuat testimoni pelanggan...</p>
-            </div>
-          ) : error ? (
-            <div className="testimonial-empty">
-              <h2>Testimoni belum dapat dimuat.</h2>
-              <p>{error}</p>
-              <button
-                type="button"
-                className="pajara-button pajara-button-secondary"
-                onClick={() => void loadTestimonials()}
-              >
-                Coba Lagi
-              </button>
-            </div>
-          ) : items.length === 0 ? (
-            <div className="testimonial-empty">
-              <span className="pajara-eyebrow">TESTIMONI</span>
-              <h2>Cerita baru segera hadir.</h2>
-              <p>
-                Belum ada testimoni yang dipublikasikan atau
-                dapat diakses oleh website.
-              </p>
-            </div>
-          ) : (
-            <div className="testimonial-page-grid">
-              {items.map((item, index) => (
-                <article
-                  key={item.id}
-                  className="testimonial-page-card"
-                >
-                  <div className="testimonial-page-card-top">
-                    <span className="testimonial-page-number">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="testimonial-page-quote">
-                      “
-                    </span>
-                  </div>
-
-                  <p className="testimonial-page-content">
-                    {item.content}
-                  </p>
-
-                  {item.rating !== null && (
-                    <div
-                      aria-label={`Rating ${item.rating} dari 5`}
-                      style={{
-                        color: "#8a6a4a",
-                        letterSpacing: 3,
-                        marginBottom: 20,
-                      }}
-                    >
-                      {"★".repeat(
-                        Math.max(0, Math.min(5, item.rating))
-                      )}
-                      {"☆".repeat(
-                        5 - Math.max(0, Math.min(5, item.rating))
-                      )}
-                    </div>
-                  )}
-
-                  <div className="testimonial-page-divider" />
-
-                  <div className="testimonial-page-person">
-                    <span className="testimonial-page-avatar">
-                      {(item.customer_name || "P")
-                        .trim()
-                        .charAt(0)
-                        .toUpperCase()}
-                    </span>
-
-                    <div>
-                      <h2>
-                        {item.customer_name || "Pelanggan Pajara"}
-                      </h2>
-                      <span>Client Pajara Studio</span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <div className="testimonial-page-back">
-            <Link
-              href="/"
-              className="pajara-button pajara-button-secondary"
-            >
-              ← Kembali ke Beranda
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="pajara-footer">
-        <div className="pajara-container">
-          <div className="pajara-footer-bottom">
-            <span>© 2026 Pajara Studio.</span>
-            <span>Berakar di Tanah Pasundan.</span>
-          </div>
-        </div>
-      </footer>
-
-      <style jsx>{`
-        .testimonial-page-title {
-          margin: 0;
-          color: var(--green-dark);
-          font-family: "Playfair Display", Georgia, serif;
-          font-size: clamp(38px, 6vw, 68px);
-          font-weight: 600;
-          line-height: 1.08;
-          letter-spacing: -2px;
-        }
-
-        .testimonial-page-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 22px;
-        }
-
-        .testimonial-page-card {
-          min-width: 0;
-          padding: 30px;
-          border: 1px solid var(--line);
-          border-radius: 22px;
-          background: var(--white);
-          box-shadow: var(--shadow-sm);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .testimonial-page-card:hover {
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-md);
-        }
-
-        .testimonial-page-card-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .testimonial-page-number {
-          color: var(--brown);
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 1px;
-        }
-
-        .testimonial-page-quote {
-          color: var(--green);
-          font-family: "Playfair Display", Georgia, serif;
-          font-size: 56px;
-          line-height: 0.8;
-        }
-
-        .testimonial-page-content {
-          margin: 24px 0 30px;
-          color: var(--text);
-          font-family: "Playfair Display", Georgia, serif;
-          font-size: 22px;
-          line-height: 1.55;
-          overflow-wrap: anywhere;
-          white-space: pre-line;
-        }
-
-        .testimonial-page-divider {
-          height: 1px;
-          background: var(--line);
-        }
-
-        .testimonial-page-person {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          margin-top: 22px;
-        }
-
-        .testimonial-page-avatar {
-          display: grid;
-          width: 42px;
-          height: 42px;
-          flex: 0 0 42px;
-          place-items: center;
-          border-radius: 50%;
-          background: #eaf1e9;
-          color: var(--green-dark);
-          font-family: "Playfair Display", Georgia, serif;
-          font-size: 20px;
-          font-weight: 700;
-        }
-
-        .testimonial-page-person h2 {
-          margin: 0 0 4px;
-          color: var(--text);
-          font-size: 14px;
-          font-weight: 700;
-          overflow-wrap: anywhere;
-        }
-
-        .testimonial-page-person div > span {
-          color: var(--muted);
-          font-size: 11px;
-        }
-
-        .testimonial-empty {
-          padding: 42px 24px;
-          border: 1px solid var(--line);
-          border-radius: 22px;
-          background: var(--white);
-          text-align: center;
-          overflow-wrap: anywhere;
-        }
-
-        .testimonial-empty h2 {
-          color: var(--green-dark);
-          font-family: "Playfair Display", Georgia, serif;
-        }
-
-        .testimonial-empty p {
-          color: var(--muted);
-          line-height: 1.7;
-        }
-
-        .testimonial-empty button {
-          margin-top: 12px;
-        }
-
-        .testimonial-page-back {
-          margin-top: 36px;
-          text-align: center;
-        }
-
-        @media (max-width: 700px) {
-          .testimonial-page-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .testimonial-page-card {
-            padding: 24px;
-          }
-
-          .testimonial-page-content {
-            font-size: 20px;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .testimonial-page-card {
-            transition: none;
-          }
-        }
-      `}</style>
-    </main>
+  setItems((data || []) as Testimonial[]);
+} catch (err) {
+  console.error("Kesalahan memuat testimoni:", err);
+  setError(
+    err instanceof Error
+      ? err.message
+      : "Terjadi kesalahan saat memuat testimoni."
   );
+} finally {
+  setLoading(false);
+}
+
+}, []);
+
+useEffect(() => {
+void loadTestimonials();
+}, [loadTestimonials]);
+
+return (
+<main className="pajara-site pajara-testimonials-page">
+<nav className="pajara-nav" aria-label="Navigasi utama">
+<div className="pajara-container pajara-navbar-inner">
+<Link
+href="/"
+className="pajara-brand"
+onClick={() => setMenuOpen(false)}
+>
+<img
+src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+alt="Logo Pajara Studio"
+className="pajara-logo pajara-navbar-logo-mark"
+/>
+<span className="pajara-brand-name">Pajara Studio</span>
+</Link>
+
+      <button
+        type="button"
+        className="pajara-menu-toggle"
+        aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+        aria-expanded={menuOpen}
+        aria-controls="pajara-testimonials-nav-menu"
+        onClick={() => setMenuOpen((value) => !value)}
+      >
+        <MenuIcon open={menuOpen} />
+      </button>
+
+      <div
+        id="pajara-testimonials-nav-menu"
+        className={`pajara-nav-menu${menuOpen ? " is-open" : ""}`}
+      >
+        <Link href="/" onClick={() => setMenuOpen(false)}>
+          Beranda
+        </Link>
+        <Link
+          href="/portfolio"
+          onClick={() => setMenuOpen(false)}
+        >
+          Portfolio
+        </Link>
+        <a
+          href="/#tentang"
+          onClick={() => setMenuOpen(false)}
+        >
+          Tentang
+        </a>
+        <Link
+          href="/#kontak"
+          className="pajara-nav-button"
+          onClick={() => setMenuOpen(false)}
+        >
+          Pesan Desain
+        </Link>
+      </div>
+    </div>
+  </nav>
+
+  <section className="pajara-testimonials-hero">
+    <div className="pajara-container">
+      <div className="pajara-testimonials-hero-inner">
+        <span className="pajara-eyebrow">
+          CERITA PELANGGAN · PAJARA STUDIO
+        </span>
+
+        <h1>
+          Perjalanan kita,
+          <br />
+          <span>dari sudut pandang mereka.</span>
+        </h1>
+
+        <p>
+          Di balik setiap desain, ada cerita dan kepercayaan.
+          Dengarkan pengalaman pelanggan yang telah menjadi
+          bagian dari perjalanan Pajara Studio.
+        </p>
+
+        <div className="pajara-testimonials-hero-meta">
+          <span className="pajara-testimonials-meta-dot" />
+          <span>
+            {items.length}{" "}
+            {items.length === 1 ? "cerita pelanggan" : "cerita pelanggan"}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section className="pajara-section pajara-testimonials-content">
+    <div className="pajara-container">
+      <div className="pajara-testimonials-section-heading">
+        <div>
+          <span className="pajara-eyebrow">SUARA MEREKA</span>
+          <h2>Cerita yang berarti</h2>
+          <p>
+            Setiap pengalaman adalah bagian dari perjalanan
+            kita untuk terus bertumbuh.
+          </p>
+        </div>
+
+        <span className="pajara-testimonials-total">
+          {loading ? "MEMUAT..." : `${items.length} CERITA`}
+        </span>
+      </div>
+
+      {loading ? (
+        <div className="pajara-testimonials-state" role="status">
+          <span className="pajara-testimonials-loader" />
+          <h3>Menyiapkan cerita pelanggan</h3>
+          <p>Sebentar, kami sedang memuat testimoni.</p>
+        </div>
+      ) : error ? (
+        <div
+          className="pajara-testimonials-state"
+          role="alert"
+        >
+          <span className="pajara-testimonials-state-label">
+            PAJARA STUDIO
+          </span>
+          <h3>Testimoni belum dapat dimuat</h3>
+          <p>{error}</p>
+          <button
+            type="button"
+            className="pajara-testimonials-retry"
+            onClick={() => void loadTestimonials()}
+          >
+            Coba Lagi <ArrowIcon />
+          </button>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="pajara-testimonials-state">
+          <span className="pajara-testimonials-state-label">
+            CERITA PELANGGAN
+          </span>
+          <h3>Cerita baru segera hadir.</h3>
+          <p>
+            Belum ada testimoni yang dipublikasikan atau
+            dapat diakses oleh website. Nantikan cerita
+            berikutnya dari perjalanan kita.
+          </p>
+        </div>
+      ) : (
+        <div className="pajara-testimonials-grid">
+          {items.map((item, index) => {
+            const rating =
+              item.rating === null
+                ? null
+                : Math.max(0, Math.min(5, item.rating));
+
+            return (
+              <article
+                key={item.id}
+                className="pajara-testimonial-card"
+                style={{
+                  animationDelay: `${Math.min(index, 8) * 45}ms`,
+                }}
+              >
+                <div className="pajara-testimonial-card-top">
+                  <span className="pajara-testimonial-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <span
+                    className="pajara-testimonial-quote"
+                    aria-hidden="true"
+                  >
+                    “
+                  </span>
+                </div>
+
+                {rating !== null && (
+                  <div
+                    className="pajara-testimonial-rating"
+                    aria-label={`Rating ${rating} dari 5`}
+                  >
+                    {Array.from({ length: 5 }, (_, star) => (
+                      <span
+                        key={star}
+                        className={
+                          star < rating
+                            ? "is-filled"
+                            : "is-empty"
+                        }
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <p className="pajara-testimonial-content">
+                  {item.content}
+                </p>
+
+                <div className="pajara-testimonial-divider" />
+
+                <div className="pajara-testimonial-customer">
+                  <span className="pajara-testimonial-avatar">
+                    {(item.customer_name || "P")
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase()}
+                  </span>
+
+                  <div className="pajara-testimonial-customer-info">
+                    <strong>
+                      {item.customer_name || "Pelanggan Pajara"}
+                    </strong>
+                    <span>Client Pajara Studio</span>
+                  </div>
+
+                  <span
+                    className="pajara-testimonial-customer-mark"
+                    aria-hidden="true"
+                  >
+                    P.
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="pajara-testimonials-back-wrap">
+        <Link
+          href="/"
+          className="pajara-testimonials-back"
+        >
+          <span aria-hidden="true">←</span>
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
+    </div>
+  </section>
+
+  <section className="pajara-testimonials-contact">
+    <div className="pajara-container">
+      <div className="pajara-testimonials-contact-card">
+        <div>
+          <span className="pajara-eyebrow">
+            SEKARANG GILIRAN KANG/TEH
+          </span>
+          <h2>Mari mulai cerita baru bersama.</h2>
+          <p>
+            Punya ide desain untuk dikembangkan? Mari diskusikan
+            kebutuhan dan arah visual yang tepat untuk proyekmu.
+          </p>
+        </div>
+
+        <Link
+          href="/#kontak"
+          className="pajara-testimonials-contact-link"
+        >
+          Pesan Desain <ArrowIcon />
+        </Link>
+      </div>
+    </div>
+  </section>
+
+  <footer className="pajara-footer">
+    <div className="pajara-container">
+      <div className="pajara-footer-bottom">
+        <span>© 2026 Pajara Studio. All rights reserved.</span>
+        <span>Berakar di Tanah Pasundan.</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+);
 }
