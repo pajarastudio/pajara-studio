@@ -2702,3 +2702,56 @@ grid-template-columns: minmax(0, 1fr);
 font-size: 19px;
 }
 }
+
+/* FIX FINAL — CARD PORTFOLIO TIDAK TERBELAH */
+
+.pajara-portfolio-page .pajara-portfolio-info {
+display: block !important;
+width: 100%;
+min-width: 0;
+box-sizing: border-box;
+}
+
+.pajara-portfolio-page .pajara-portfolio-card-topline {
+display: flex !important;
+flex-direction: row !important;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+width: 100%;
+}
+
+.pajara-portfolio-page .pajara-portfolio-info h3 {
+display: block !important;
+width: 100%;
+max-width: 100%;
+margin: 0;
+font-size: 20px;
+line-height: 1.4;
+overflow-wrap: break-word;
+word-break: normal;
+}
+
+.pajara-portfolio-page .pajara-portfolio-description {
+display: block !important;
+width: 100%;
+margin-top: 9px;
+overflow-wrap: break-word;
+word-break: normal;
+}
+
+@media (max-width: 640px) {
+.pajara-portfolio-page .pajara-portfolio-info {
+padding: 14px 12px 16px !important;
+}
+
+.pajara-portfolio-page .pajara-portfolio-info h3 {
+font-size: 18px;
+line-height: 1.45;
+}
+
+.pajara-portfolio-page .pajara-portfolio-description {
+font-size: 11px;
+line-height: 1.7;
+}
+}
