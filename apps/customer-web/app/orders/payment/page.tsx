@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -95,20 +94,12 @@ function PaymentLoading() {
             height={76}
             priority
             unoptimized
-            style={{
-              width: "76px",
-              height: "76px",
-              objectFit: "contain",
-            }}
+            style={loadingLogoStyle}
           />
         </div>
 
         <p style={loadingEyebrowStyle}>PAJARA STUDIO</p>
-
-        <h1 style={loadingTitleStyle}>
-          Menyiapkan pembayaran
-        </h1>
-
+        <h1 style={loadingTitleStyle}>Menyiapkan pembayaran</h1>
         <div style={loadingSpinnerStyle} />
 
         <p style={loadingTextStyle}>
@@ -117,9 +108,7 @@ function PaymentLoading() {
 
         <div style={loadingDividerStyle} />
 
-        <p style={loadingTaglineStyle}>
-          Berakar di Tanah Pasundan.
-        </p>
+        <p style={loadingTaglineStyle}>Berakar di Tanah Pasundan.</p>
       </section>
 
       <style jsx>{`
@@ -152,7 +141,7 @@ function PaymentLoading() {
 
 function BackToOrders({ orderId }: { orderId: string }) {
   return (
-    <a href={`/orders?id=${orderId}`} style={backCardStyle}>
+    <a href={orderId ? `/orders?id=${orderId}` : "/orders"} style={backCardStyle}>
       <span style={backIconStyle} aria-hidden="true">
         <svg
           width="19"
@@ -211,7 +200,7 @@ function PaymentMethodDetails({
 
         <p style={detailDescription}>
           Scan QRIS untuk membayar {typeLabel.toLowerCase()} sebesar{" "}
-          <strong style={{ color: "var(--green-dark)" }}>
+          <strong style={{ color: "#214d32" }}>
             {formatRupiah(amount)}
           </strong>
           .
@@ -237,7 +226,7 @@ function PaymentMethodDetails({
 
       <div
         style={{
-          color: "var(--green-dark)",
+          color: "#214d32",
           fontSize: "18px",
           fontWeight: 700,
           wordBreak: "break-word",
@@ -258,7 +247,7 @@ function PaymentMethodDetails({
 
       <p style={detailDescription}>
         Nominal {typeLabel.toLowerCase()}:{" "}
-        <strong style={{ color: "var(--green-dark)" }}>
+        <strong style={{ color: "#214d32" }}>
           {formatRupiah(amount)}
         </strong>
       </p>
@@ -266,23 +255,23 @@ function PaymentMethodDetails({
   );
 }
 
-const detailBox = {
+const detailBox: React.CSSProperties = {
   marginTop: "24px",
   padding: "20px",
   borderRadius: "14px",
   background: "#f7f4ee",
   border: "1px solid #e8e2d8",
-  textAlign: "center" as const,
+  textAlign: "center",
 };
 
-const detailTitle = {
+const detailTitle: React.CSSProperties = {
   marginTop: 0,
   marginBottom: "14px",
-  color: "var(--green-dark)",
+  color: "#214d32",
   fontWeight: 700,
 };
 
-const detailDescription = {
+const detailDescription: React.CSSProperties = {
   marginTop: "14px",
   marginBottom: 0,
   color: "#666",
@@ -290,7 +279,7 @@ const detailDescription = {
   lineHeight: 1.7,
 };
 
-const cardStyle = {
+const cardStyle: React.CSSProperties = {
   marginTop: "20px",
   background: "#fff",
   borderRadius: "20px",
@@ -434,7 +423,7 @@ function PaymentContent() {
       setLoading(false);
     }
 
-    loadData();
+    void loadData();
 
     return () => {
       mounted = false;
@@ -486,11 +475,20 @@ function PaymentContent() {
       return null;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("Sesi login tidak ditemukan. Silakan login kembali.");
+      return null;
+    }
+
     const { data: latestOrder, error: latestOrderError } = await supabase
       .from("orders")
       .select("status, dp_amount, remaining_amount")
       .eq("id", order.id)
-      .eq("customer_id", (await supabase.auth.getUser()).data.user?.id || "")
+      .eq("customer_id", user.id)
       .maybeSingle();
 
     if (latestOrderError || !latestOrder) {
@@ -727,7 +725,7 @@ function PaymentContent() {
     return (
       <main style={pageStyle}>
         <div style={containerStyle}>
-          <BackToOrders orderId={id || ""} />
+          <BackToOrders orderId="" />
 
           <section style={cardStyle}>
             <h1 style={pageHeadingStyle}>Pesanan tidak ditemukan</h1>
@@ -901,9 +899,7 @@ function PaymentContent() {
                   >
                     <div style={methodTopStyle}>
                       <div style={{ minWidth: 0 }}>
-                        <strong style={methodNameStyle}>
-                          {method.name}
-                        </strong>
+                        <strong style={methodNameStyle}>{method.name}</strong>
                         <p style={methodDescriptionStyle}>
                           {method.description}
                         </p>
@@ -931,15 +927,11 @@ function PaymentContent() {
                       </strong>
 
                       {method.owner && (
-                        <span style={accountOwnerStyle}>
-                          {method.owner}
-                        </span>
+                        <span style={accountOwnerStyle}>{method.owner}</span>
                       )}
 
                       {method.note && (
-                        <span style={accountOwnerStyle}>
-                          {method.note}
-                        </span>
+                        <span style={accountOwnerStyle}>{method.note}</span>
                       )}
                     </div>
                   </button>
@@ -1036,9 +1028,7 @@ function PaymentContent() {
                 method={payment.payment_method}
                 amount={payment.amount}
                 typeLabel={
-                  payment.payment_type === "Pelunasan"
-                    ? "Pelunasan"
-                    : "DP"
+                  payment.payment_type === "Pelunasan" ? "Pelunasan" : "DP"
                 }
               />
             )}
@@ -1111,7 +1101,8 @@ function PaymentContent() {
             <div>
               <h2 style={noticeHeadingStyle}>Menunggu Verifikasi</h2>
               <p style={noticeTextStyle}>
-                Bukti {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
+                Bukti{" "}
+                {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
                 sudah diterima. Pajara Studio akan memverifikasi pembayaranmu.
               </p>
             </div>
@@ -1128,9 +1119,7 @@ function PaymentContent() {
           >
             <div style={noticeIconStyle}>✓</div>
             <div>
-              <h2 style={noticeHeadingStyle}>
-                Pembayaran Terverifikasi
-              </h2>
+              <h2 style={noticeHeadingStyle}>Pembayaran Terverifikasi</h2>
               <p style={noticeTextStyle}>
                 Pembayaran{" "}
                 {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
@@ -1170,17 +1159,6 @@ function PaymentContent() {
       </div>
 
       <style jsx>{`
-        @keyframes contentFade {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
         a,
         button {
           -webkit-tap-highlight-color: transparent;
@@ -1200,12 +1178,6 @@ function PaymentContent() {
           a:hover,
           button:hover {
             box-shadow: 0 7px 20px rgba(33, 77, 50, 0.08);
-          }
-        }
-
-        @media (max-width: 520px) {
-          .payment-content {
-            padding: 22px 15px 45px;
           }
         }
 
@@ -1242,6 +1214,7 @@ const loadingCardStyle: React.CSSProperties = {
   maxWidth: "390px",
   boxSizing: "border-box",
   padding: "34px 24px 28px",
+  margin: "min(12vh, 90px) auto 0",
   borderRadius: "24px",
   background: "#fff",
   border: "1px solid rgba(33,77,50,.12)",
@@ -1260,6 +1233,12 @@ const loadingLogoFrameStyle: React.CSSProperties = {
   borderRadius: "20px",
   background: "#f7f4ee",
   border: "1px solid #e8e2d8",
+};
+
+const loadingLogoStyle: React.CSSProperties = {
+  width: "76px",
+  height: "76px",
+  objectFit: "contain",
 };
 
 const loadingEyebrowStyle: React.CSSProperties = {
@@ -1746,3 +1725,15 @@ const footerSmallStyle: React.CSSProperties = {
   color: "#999387",
   fontSize: "10px",
 };
+
+function PaymentFallback() {
+  return <PaymentLoading />;
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<PaymentFallback />}>
+      <PaymentContent />
+    </Suspense>
+  );
+}
