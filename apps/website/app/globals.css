@@ -3639,3 +3639,68 @@ line-height: 1.8;
 margin-top: 15px;
 }
 }
+
+/* =====================================
+PAJARA STUDIO — TYPOGRAPHY LAYANAN
+===================================== */
+
+/* Judul utama bagian Layanan */
+.pajara-site #layanan .pajara-section-heading h2 {
+font-family: "Playfair Display", Georgia, serif;
+font-size: clamp(38px, 5vw, 56px);
+font-weight: 600;
+line-height: 1.16;
+letter-spacing: -1.2px;
+}
+
+/* Nama setiap layanan */
+.pajara-site #layanan .pajara-service-card h3 {
+font-family: "DM Sans", sans-serif;
+font-size: 19px;
+font-weight: 700;
+line-height: 1.4;
+letter-spacing: -0.45px;
+color: var(--green-dark);
+overflow-wrap: normal;
+word-break: normal;
+}
+
+/* Deskripsi layanan */
+.pajara-site #layanan .pajara-service-card p {
+font-family: "DM Sans", sans-serif;
+font-size: 13px;
+font-weight: 400;
+line-height: 1.85;
+letter-spacing: 0;
+color: var(--muted);
+overflow-wrap: normal;
+word-break: normal;
+}
+
+/* Nomor urut layanan */
+.pajara-site #layanan .pajara-service-number {
+font-family: "DM Sans", sans-serif;
+font-size: 11px;
+font-weight: 700;
+letter-spacing: 2px;
+color: var(--brown);
+}
+
+/* Penyesuaian layar HP */
+@media (max-width: 640px) {
+.pajara-site #layanan .pajara-section-heading h2 {
+font-size: clamp(34px, 9vw, 43px);
+letter-spacing: -0.8px;
+line-height: 1.2;
+}
+
+.pajara-site #layanan .pajara-service-card h3 {
+font-size: 17px;
+line-height: 1.45;
+}
+
+.pajara-site #layanan .pajara-service-card p {
+font-size: 12px;
+line-height: 1.8;
+}
+}
