@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -394,6 +393,43 @@ function RevisionStyles() {
         margin: 22px 0 0;
         color: #969188;
         font-size: 11px;
+      }
+
+      .revision-footer {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        border-top: 1px solid #e4ddd1;
+        padding-top: 22px;
+        margin-top: 36px;
+      }
+
+      .revision-footer-logo {
+        display: block;
+        width: 43px;
+        height: 43px;
+        flex: 0 0 43px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .revision-footer-name {
+        color: #214d32;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .revision-footer-tagline {
+        margin: 4px 0 0;
+        color: #8a6a4a;
+        font-size: 11px;
+      }
+
+      .revision-footer-caption {
+        margin: 3px 0 0;
+        color: #999387;
+        font-size: 10px;
       }
 
       @keyframes pajaraRevisionSpin {
@@ -1598,11 +1634,31 @@ function RevisionContent() {
           )}
         </section>
 
-        <footer style={{ color: "#8b887f", fontSize: 12, textAlign: "center", padding: "28px 0 6px" }}>
-          <span style={{ color: "#2f6b45", fontWeight: 700 }}>PAJARA STUDIO</span>
-          <p style={{ margin: "7px 0 0" }}>Desain yang punya arah.</p>
+        <footer className="revision-footer">
+          <img
+            src={LOGO_IMAGE}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            className="revision-footer-logo"
+          />
+
+          <div>
+            <strong className="revision-footer-name">
+              Pajara Studio
+            </strong>
+
+            <p className="revision-footer-tagline">
+              Berakar di Tanah Pasundan.
+            </p>
+
+            <p className="revision-footer-caption">
+              Desain yang punya arah.
+            </p>
+          </div>
         </footer>
       </div>
+
       <RevisionStyles />
     </main>
   );
