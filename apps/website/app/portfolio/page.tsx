@@ -223,18 +223,9 @@ className="pajara-logo pajara-navbar-logo-mark"
           <div className="pajara-portfolio-hero-meta">
             <span className="pajara-portfolio-meta-dot" />
             <span>
-              {items.length} {items.length === 1 ? "karya" : "karya"}{" "}
-              dalam koleksi
+              {items.length} karya dalam koleksi
             </span>
           </div>
-        </div>
-
-        <div className="pajara-portfolio-hero-mark" aria-hidden="true">
-          <span className="pajara-portfolio-mark-small">P.</span>
-          <span className="pajara-portfolio-mark-line" />
-          <span className="pajara-portfolio-mark-caption">
-            BERAKAR DI TANAH PASUNDAN
-          </span>
         </div>
       </div>
     </div>
@@ -253,7 +244,7 @@ className="pajara-logo pajara-navbar-logo-mark"
         </div>
 
         <span className="pajara-portfolio-total">
-          {loading ? "Memuat..." : `${filteredItems.length} KARYA`}
+          {loading ? "MEMUAT..." : `${filteredItems.length} KARYA`}
         </span>
       </div>
 
@@ -285,8 +276,13 @@ className="pajara-logo pajara-navbar-logo-mark"
           <p>Sebentar, kami sedang memuat hasil desain.</p>
         </div>
       ) : error ? (
-        <div className="pajara-portfolio-state pajara-portfolio-error" role="alert">
-          <span className="pajara-portfolio-state-number">01 / INFO</span>
+        <div
+          className="pajara-portfolio-state pajara-portfolio-error"
+          role="alert"
+        >
+          <span className="pajara-portfolio-state-number">
+            PAJARA STUDIO
+          </span>
           <h3>Koleksi belum dapat dimuat</h3>
           <p>{error}</p>
           <button
@@ -299,7 +295,9 @@ className="pajara-logo pajara-navbar-logo-mark"
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="pajara-portfolio-state">
-          <span className="pajara-portfolio-state-number">PAJARA STUDIO</span>
+          <span className="pajara-portfolio-state-number">
+            PAJARA STUDIO
+          </span>
           <h3>
             {items.length === 0
               ? "Cerita baru sedang disiapkan."
@@ -327,7 +325,9 @@ className="pajara-logo pajara-navbar-logo-mark"
             <article
               key={item.id}
               className="pajara-portfolio-card"
-              style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+              style={{
+                animationDelay: `${Math.min(index, 8) * 45}ms`,
+              }}
             >
               <div className="pajara-portfolio-image">
                 <img
@@ -388,10 +388,7 @@ className="pajara-logo pajara-navbar-logo-mark"
       )}
 
       <div className="pajara-portfolio-back-wrap">
-        <Link
-          href="/"
-          className="pajara-portfolio-back"
-        >
+        <Link href="/" className="pajara-portfolio-back">
           <span aria-hidden="true">←</span>
           <span>Kembali ke Beranda</span>
         </Link>
@@ -403,7 +400,9 @@ className="pajara-logo pajara-navbar-logo-mark"
     <div className="pajara-container">
       <div className="pajara-portfolio-contact-card">
         <div>
-          <span className="pajara-eyebrow">PUNYA RENCANA DESAIN?</span>
+          <span className="pajara-eyebrow">
+            PUNYA RENCANA DESAIN?
+          </span>
           <h2>Mari wujudkan identitas yang berarti.</h2>
           <p>
             Ceritakan ide Kang/Teh. Kita mulai dari arah yang
@@ -411,7 +410,10 @@ className="pajara-logo pajara-navbar-logo-mark"
           </p>
         </div>
 
-        <Link href="/#kontak" className="pajara-portfolio-contact-link">
+        <Link
+          href="/#kontak"
+          className="pajara-portfolio-contact-link"
+        >
           Diskusikan Proyek <ArrowIcon />
         </Link>
       </div>
