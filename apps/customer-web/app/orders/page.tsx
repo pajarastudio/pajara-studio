@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -23,6 +22,20 @@ type Order = {
 
 function formatRupiah(amount: number | null) {
   return `Rp ${(amount || 0).toLocaleString("id-ID")}`;
+}
+
+function formatDeadline(deadline: string | null) {
+  if (!deadline) return "Belum ditentukan";
+
+  const date = new Date(`${deadline.slice(0, 10)}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return "Belum ditentukan";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function getStatusLabel(status: string | null) {
@@ -213,12 +226,14 @@ function OrderDetailContent() {
           return;
         }
 
-        const { data: subscriptionRequest, error: subscriptionError } =
-          await supabase
-            .from("subscription_requests")
-            .select("id")
-            .eq("order_id", data.id)
-            .maybeSingle();
+        const {
+          data: subscriptionRequest,
+          error: subscriptionError,
+        } = await supabase
+          .from("subscription_requests")
+          .select("id")
+          .eq("order_id", data.id)
+          .maybeSingle();
 
         if (!mounted) return;
 
@@ -256,23 +271,26 @@ function OrderDetailContent() {
 
   const accessButtonStyle: React.CSSProperties = {
     width: "100%",
-    minHeight: 50,
+    minWidth: 0,
+    minHeight: 54,
     boxSizing: "border-box",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 14,
-    padding: "14px 16px",
+    gap: 12,
+    padding: "15px 16px",
     border: "1px solid var(--line)",
-    borderRadius: 12,
+    borderRadius: 14,
     background: "#fff",
     color: "var(--green)",
     fontFamily: "inherit",
     fontSize: 14,
     fontWeight: 600,
-    lineHeight: 1.5,
+    lineHeight: 1.6,
     textAlign: "left",
     textDecoration: "none",
+    overflowWrap: "normal",
+    wordBreak: "normal",
     transition: "border-color .2s ease, background .2s ease",
   };
 
@@ -283,9 +301,7 @@ function OrderDetailContent() {
     fontWeight: 500,
   };
 
-  if (loading) {
-    return <PajaraLoading />;
-  }
+  if (loading) return <PajaraLoading />;
 
   if (error || !order) {
     return (
@@ -338,7 +354,7 @@ function OrderDetailContent() {
   }
 
   return (
-    <main>
+    <main style={{ minWidth: 0, width: "100%", overflowX: "clip" }}>
       <header className="pajara-header">
         <div className="pajara-container pajara-header-inner">
           <a
@@ -348,6 +364,7 @@ function OrderDetailContent() {
               display: "flex",
               alignItems: "center",
               gap: 10,
+              minWidth: 0,
               textDecoration: "none",
             }}
           >
@@ -382,7 +399,17 @@ function OrderDetailContent() {
           overflowX: "clip",
         }}
       >
-        <div className="pajara-container">
+        <div
+          className="pajara-container"
+          style={{
+            width: "100%",
+            maxWidth: 1160,
+            marginInline: "auto",
+            paddingInline: "clamp(18px, 4vw, 28px)",
+            boxSizing: "border-box",
+            minWidth: 0,
+          }}
+        >
           <div
             className="pajara-order-detail-header"
             style={{
@@ -393,7 +420,7 @@ function OrderDetailContent() {
               height: "auto",
               boxSizing: "border-box",
               margin: "0 0 28px",
-              padding: "0",
+              padding: 0,
               textAlign: "left",
               overflowWrap: "break-word",
             }}
@@ -422,7 +449,8 @@ function OrderDetailContent() {
                 fontSize: "clamp(30px, 5vw, 46px)",
                 lineHeight: 1.2,
                 fontWeight: 600,
-                overflowWrap: "break-word",
+                overflowWrap: "normal",
+                wordBreak: "normal",
               }}
             >
               Pesanan <span>Pajara.</span>
@@ -448,8 +476,7 @@ function OrderDetailContent() {
             className="pajara-order-detail-grid"
             style={{
               display: "grid",
-              gridTemplateColumns:
-                "minmax(0, 1.5fr) minmax(0, 1fr)",
+              gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)",
               gap: 24,
               alignItems: "start",
               width: "100%",
@@ -464,14 +491,15 @@ function OrderDetailContent() {
                 minWidth: 0,
               }}
             >
-              <div className="pajara-order-detail-card">
+              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
                     justifyContent: "space-between",
-                    gap: 20,
+                    gap: 16,
                     flexWrap: "wrap",
+                    minWidth: 0,
                   }}
                 >
                   <div style={{ minWidth: 0, overflowWrap: "anywhere" }}>
@@ -487,7 +515,7 @@ function OrderDetailContent() {
                 </div>
               </div>
 
-              <div className="pajara-order-detail-card">
+              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
                 <p className="pajara-eyebrow">RINGKASAN</p>
                 <h2>Informasi Pesanan</h2>
 
@@ -535,21 +563,10 @@ function OrderDetailContent() {
                     <strong>{getStatusLabel(order.status)}</strong>
                   </div>
 
-                  {order.deadline && (
-                    <div>
-                      <p className="pajara-eyebrow">DEADLINE</p>
-                      <strong>
-                        {new Date(`${order.deadline}T00:00:00`).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          }
-                        )}
-                      </strong>
-                    </div>
-                  )}
+                  <div>
+                    <p className="pajara-eyebrow">DEADLINE</p>
+                    <strong>{formatDeadline(order.deadline)}</strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -562,7 +579,7 @@ function OrderDetailContent() {
                 minWidth: 0,
               }}
             >
-              <div className="pajara-order-detail-card">
+              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
                 <p className="pajara-eyebrow">AKSES PESANAN</p>
                 <h2>Kelola Project</h2>
 
@@ -576,8 +593,11 @@ function OrderDetailContent() {
                 <div
                   style={{
                     display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr)",
                     gap: 12,
                     marginTop: 22,
+                    width: "100%",
+                    minWidth: 0,
                   }}
                 >
                   {!isSubscriptionOrder && (
@@ -586,7 +606,7 @@ function OrderDetailContent() {
                       className="pajara-access-button"
                       style={accessButtonStyle}
                     >
-                      <span>Pembayaran</span>
+                      <span style={{ minWidth: 0 }}>Pembayaran</span>
                       <span style={accessArrowStyle}>→</span>
                     </a>
                   )}
@@ -596,7 +616,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span>Revisi</span>
+                    <span style={{ minWidth: 0 }}>Revisi</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -605,7 +625,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span>Lihat Brief Desain</span>
+                    <span style={{ minWidth: 0 }}>Lihat Brief Desain</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -614,7 +634,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span>Lihat File Final Anda</span>
+                    <span style={{ minWidth: 0 }}>Lihat File Final Anda</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -623,14 +643,14 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span>File Referensi Pesanan</span>
+                    <span style={{ minWidth: 0 }}>File Referensi Pesanan</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
                 </div>
               </div>
 
               {!isSubscriptionOrder && (
-                <div className="pajara-order-detail-card">
+                <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
                   <p className="pajara-eyebrow">PEMBAYARAN</p>
                   <h2>Ringkasan Biaya</h2>
 
@@ -705,6 +725,55 @@ function OrderDetailContent() {
           </div>
         </div>
       </section>
+
+      <style>{`
+        .pajara-order-detail-grid > * {
+          min-width: 0;
+        }
+
+        .pajara-order-detail-card {
+          box-sizing: border-box;
+          min-width: 0;
+          overflow-wrap: break-word;
+        }
+
+        .pajara-access-button {
+          white-space: normal;
+          word-break: normal !important;
+          overflow-wrap: break-word;
+        }
+
+        .pajara-access-button > span:first-child {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+
+        @media (max-width: 760px) {
+          .pajara-order-detail-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+            gap: 18px !important;
+          }
+
+          .pajara-order-detail-grid > * {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .pajara-order-detail-card {
+            width: 100%;
+            padding: clamp(20px, 5vw, 28px) !important;
+          }
+
+          .pajara-order-detail-header h1 {
+            font-size: clamp(30px, 8vw, 38px) !important;
+          }
+
+          .pajara-access-button {
+            width: 100%;
+            min-height: 54px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
