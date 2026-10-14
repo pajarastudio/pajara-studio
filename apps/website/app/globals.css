@@ -1,17 +1,18 @@
-
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
 
 :root {
   --green: #2f6b45;
   --green-dark: #214d32;
+  --green-deep: #183b27;
   --brown: #8a6a4a;
   --cream: #f7f4ee;
+  --cream-dark: #f1ece6;
   --white: #ffffff;
   --text: #1f2a23;
-  --muted: #6f766f;
+  --muted: #70776f;
   --line: #e5e0d7;
   --shadow-sm: 0 8px 24px rgba(33, 77, 50, 0.06);
-  --shadow-md: 0 18px 48px rgba(33, 77, 50, 0.1);
+  --shadow-md: 0 20px 55px rgba(33, 77, 50, 0.11);
   --radius: 22px;
   --container: 1160px;
 }
@@ -52,6 +53,7 @@ a {
 }
 
 img {
+  display: block;
   max-width: 100%;
 }
 
@@ -59,30 +61,32 @@ img {
   width: 100%;
   min-height: 100vh;
   overflow: clip;
-  background: var(--cream);
+  background:
+    radial-gradient(ellipse at 92% 5%, rgba(138, 106, 74, 0.055), transparent 28%),
+    var(--cream);
   color: var(--text);
   font-family: "DM Sans", sans-serif;
 }
 
 .pajara-site .pajara-container {
-  width: min(var(--container), calc(100% - 48px));
+  width: min(var(--container), calc(100% - 64px));
   margin-inline: auto;
 }
 
-/* NAVBAR */
+/* NAVIGATION */
 
 .pajara-site .pajara-nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(247, 244, 238, 0.94);
-  border-bottom: 1px solid rgba(229, 224, 215, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(247, 244, 238, 0.91);
+  border-bottom: 1px solid rgba(229, 224, 215, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .pajara-site .pajara-navbar-inner {
-  min-height: 78px;
+  min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,30 +96,30 @@ img {
 .pajara-site .pajara-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  gap: 11px;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .pajara-site img.pajara-logo {
   display: block;
-  object-fit: contain;
   height: auto;
+  object-fit: contain;
 }
 
 .pajara-site img.pajara-navbar-logo-mark {
   display: block !important;
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  min-height: 30px !important;
-  max-width: 30px !important;
-  max-height: 30px !important;
-  flex: 0 0 30px !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  flex: 0 0 36px !important;
   aspect-ratio: 1 / 1;
-  padding: 2px;
+  padding: 3px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 11px;
   background: var(--white);
   border: 1px solid var(--line);
 }
@@ -123,57 +127,82 @@ img {
 .pajara-site .pajara-brand-name {
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 700;
+  letter-spacing: -0.6px;
   white-space: nowrap;
 }
 
-.pajara-site .pajara-nav .pajara-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 24px;
-}
-
+.pajara-site .pajara-nav .pajara-nav,
 .pajara-site .pajara-navbar-inner > .pajara-nav {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 24px;
+  gap: 25px;
 }
 
 .pajara-site .pajara-navbar-inner > .pajara-nav > a {
+  position: relative;
   color: #48534a;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   transition: color 0.2s ease;
+}
+
+.pajara-site .pajara-navbar-inner > .pajara-nav > a:not(.pajara-nav-button)::after {
+  position: absolute;
+  right: 0;
+  bottom: -7px;
+  left: 0;
+  height: 1px;
+  background: var(--green);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
 
 .pajara-site .pajara-navbar-inner > .pajara-nav > a:hover {
   color: var(--green);
 }
 
+.pajara-site .pajara-navbar-inner > .pajara-nav > a:not(.pajara-nav-button):hover::after {
+  transform: scaleX(1);
+}
+
 .pajara-site .pajara-navbar-inner > .pajara-nav > .pajara-nav-button {
-  padding: 12px 18px;
+  padding: 13px 19px;
   border-radius: 999px;
   background: var(--green);
   color: var(--white);
   white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .pajara-site .pajara-navbar-inner > .pajara-nav > .pajara-nav-button:hover {
   background: var(--green-dark);
   color: var(--white);
+  transform: translateY(-1px);
 }
 
-/* TYPOGRAPHY */
+/* TYPE */
 
 .pajara-site .pajara-eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--green);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2.5px;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+}
+
+.pajara-site .pajara-eyebrow::before {
+  width: 23px;
+  height: 1px;
+  background: var(--brown);
+  content: "";
 }
 
 .pajara-site h1,
@@ -189,31 +218,37 @@ img {
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
   font-weight: 600;
-  letter-spacing: -0.8px;
+  letter-spacing: -1.1px;
 }
 
 .pajara-site p {
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.85;
+}
+
+.pajara-site ::selection {
+  background: var(--green);
+  color: var(--white);
 }
 
 /* BUTTONS */
 
 .pajara-site .pajara-button {
   display: inline-flex;
-  min-height: 48px;
+  min-height: 49px;
   align-items: center;
   justify-content: center;
-  padding: 13px 21px;
+  padding: 14px 23px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-align: center;
   transition:
     transform 0.2s ease,
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .pajara-site .pajara-button:hover {
@@ -223,15 +258,17 @@ img {
 .pajara-site .pajara-button-primary {
   background: var(--green);
   color: var(--white);
+  box-shadow: 0 7px 18px rgba(47, 107, 69, 0.14);
 }
 
 .pajara-site .pajara-button-primary:hover {
   background: var(--green-dark);
+  box-shadow: 0 10px 24px rgba(47, 107, 69, 0.2);
 }
 
 .pajara-site .pajara-button-secondary {
-  border-color: var(--line);
-  background: transparent;
+  border-color: #d8d2c7;
+  background: rgba(255, 255, 255, 0.25);
   color: var(--green-dark);
 }
 
@@ -243,30 +280,61 @@ img {
 /* HERO */
 
 .pajara-site .pajara-hero {
-  padding: 76px 0 86px;
+  position: relative;
+  padding: 94px 0 96px;
+}
+
+.pajara-site .pajara-hero::before {
+  position: absolute;
+  top: 46px;
+  right: -115px;
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(138, 106, 74, 0.13);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.pajara-site .pajara-hero::after {
+  position: absolute;
+  top: 95px;
+  right: -55px;
+  width: 240px;
+  height: 240px;
+  border: 1px solid rgba(47, 107, 69, 0.1);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
 }
 
 .pajara-site .pajara-hero-inner {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.78fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.78fr);
   align-items: center;
-  gap: 70px;
+  gap: 76px;
 }
 
 .pajara-site .pajara-hero-copy h1 {
-  margin: 20px 0;
-  font-size: clamp(42px, 5.5vw, 70px);
-  line-height: 1.12;
+  max-width: 670px;
+  margin: 24px 0;
+  font-size: clamp(48px, 6.1vw, 79px);
+  line-height: 1.04;
+  letter-spacing: -2.6px;
 }
 
 .pajara-site .pajara-hero-copy h1 span {
   color: var(--green);
+  font-style: italic;
 }
 
 .pajara-site .pajara-hero-description {
-  max-width: 500px;
-  margin-bottom: 28px;
-  font-size: 16px;
+  max-width: 475px;
+  margin: 0 0 30px;
+  font-size: 14px;
+  line-height: 1.95;
 }
 
 .pajara-site .pajara-hero-actions {
@@ -276,9 +344,20 @@ img {
 }
 
 .pajara-site .pajara-hero-note {
-  margin-top: 24px;
-  font-size: 12px;
-  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  color: #777b70;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+
+.pajara-site .pajara-hero-note::before {
+  width: 26px;
+  height: 1px;
+  background: var(--brown);
+  content: "";
 }
 
 .pajara-site .pajara-hero-visual {
@@ -286,43 +365,57 @@ img {
 }
 
 .pajara-site .pajara-hero-card {
+  position: relative;
   padding: 25px;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  background: var(--white);
+  border: 1px solid rgba(229, 224, 215, 0.95);
+  border-radius: 4px 28px 4px 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 246, 240, 0.97));
   box-shadow: var(--shadow-md);
+}
+
+.pajara-site .pajara-hero-card::before {
+  position: absolute;
+  top: -55px;
+  right: -55px;
+  width: 155px;
+  height: 155px;
+  border: 1px solid rgba(47, 107, 69, 0.14);
+  border-radius: 50%;
+  content: "";
 }
 
 .pajara-site .pajara-hero-card-top,
 .pajara-site .pajara-hero-card-bottom {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.5px;
 }
 
 .pajara-site img.pajara-hero-logo {
   display: block;
-  width: min(100%, 280px) !important;
+  width: min(100%, 300px) !important;
   height: auto !important;
-  max-width: 280px !important;
-  max-height: 280px;
+  max-width: 300px !important;
+  max-height: 300px;
   aspect-ratio: 1 / 1;
-  margin: 24px auto;
+  margin: 28px auto;
   padding: 12px;
   object-fit: contain;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 3px 20px 3px 20px;
   background: var(--cream);
 }
 
 .pajara-site .pajara-hero-card-bottom {
-  padding-top: 18px;
+  padding-top: 19px;
   border-top: 1px solid var(--line);
 }
 
@@ -331,45 +424,46 @@ img {
 .pajara-site .pajara-trust {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.48);
 }
 
 .pajara-site .pajara-trust-inner {
   display: flex;
-  min-height: 78px;
+  min-height: 83px;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 22px;
 }
 
 .pajara-site .pajara-trust-item {
   color: var(--green-dark);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.1px;
 }
 
-/* GENERAL SECTIONS */
+/* SECTIONS */
 
 .pajara-site .pajara-section {
-  padding: 88px 0;
+  padding: 100px 0;
 }
 
 .pajara-site .pajara-section-heading {
-  max-width: 650px;
-  margin-bottom: 38px;
+  max-width: 680px;
+  margin-bottom: 43px;
 }
 
 .pajara-site .pajara-section-heading h2 {
-  margin: 16px 0;
-  font-size: clamp(32px, 4vw, 46px);
-  line-height: 1.2;
+  margin: 18px 0;
+  font-size: clamp(36px, 4.5vw, 54px);
+  line-height: 1.12;
+  letter-spacing: -1.5px;
 }
 
 .pajara-site .pajara-section-heading p {
-  max-width: 540px;
+  max-width: 530px;
   margin-bottom: 0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* SERVICES */
@@ -377,52 +471,86 @@ img {
 .pajara-site .pajara-services-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 17px;
 }
 
 .pajara-site .pajara-service-card {
   position: relative;
-  min-height: 230px;
-  padding: 26px;
+  min-height: 236px;
+  padding: 27px;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.7);
+  border-radius: 3px 20px 3px 20px;
+  background: rgba(255, 255, 255, 0.55);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.pajara-site .pajara-service-card::after {
+  position: absolute;
+  right: -35px;
+  bottom: -55px;
+  width: 120px;
+  height: 120px;
+  border: 1px solid rgba(47, 107, 69, 0.1);
+  border-radius: 50%;
+  content: "";
+  transition: transform 0.3s ease;
 }
 
 .pajara-site .pajara-service-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  border-color: rgba(47, 107, 69, 0.35);
+  background: var(--white);
   box-shadow: var(--shadow-sm);
+}
+
+.pajara-site .pajara-service-card:hover::after {
+  transform: scale(1.18);
 }
 
 .pajara-site .pajara-service-number {
   color: var(--brown);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.4px;
 }
 
 .pajara-site .pajara-service-card h3 {
-  margin: 30px 0 10px;
+  position: relative;
+  z-index: 1;
+  margin: 32px 0 10px;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 600;
+  letter-spacing: -0.4px;
 }
 
 .pajara-site .pajara-service-card p {
+  position: relative;
+  z-index: 1;
+  max-width: 280px;
   margin-bottom: 22px;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.8;
 }
 
 .pajara-site .pajara-service-arrow {
   position: absolute;
   right: 24px;
-  bottom: 20px;
+  bottom: 17px;
+  z-index: 1;
   color: var(--green);
-  font-size: 22px;
+  font-size: 23px;
+  transition: transform 0.2s ease;
+}
+
+.pajara-site .pajara-service-card:hover .pajara-service-arrow {
+  transform: translate(3px, -3px);
 }
 
 /* PORTFOLIO */
@@ -430,29 +558,38 @@ img {
 .pajara-site .pajara-portfolio-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 23px;
 }
 
 .pajara-site .pajara-portfolio-card {
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 3px 20px 3px 20px;
   background: var(--white);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .pajara-site .pajara-portfolio-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
 }
 
 .pajara-site .pajara-portfolio-image {
+  position: relative;
   overflow: hidden;
   aspect-ratio: 4 / 5;
-  background: #ece8df;
+  background: #eae5db;
+}
+
+.pajara-site .pajara-portfolio-image::after {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(33, 77, 50, 0.06);
+  content: "";
+  pointer-events: none;
 }
 
 .pajara-site .pajara-portfolio-image img {
@@ -460,66 +597,81 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  transition: transform 0.5s cubic-bezier(0.2, 0.65, 0.3, 1);
 }
 
 .pajara-site .pajara-portfolio-card:hover .pajara-portfolio-image img {
-  transform: scale(1.035);
+  transform: scale(1.045);
 }
 
 .pajara-site .pajara-portfolio-info {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 20px;
+  padding: 21px;
 }
 
 .pajara-site .pajara-portfolio-number {
-  padding-top: 3px;
+  padding-top: 4px;
   color: var(--brown);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .pajara-site .pajara-portfolio-info h3 {
-  margin: 0 0 5px;
+  margin: 0 0 6px;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .pajara-site .pajara-portfolio-info p {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.7;
 }
 
 /* ABOUT */
 
 .pajara-site .pajara-about-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
   align-items: center;
-  gap: 70px;
+  gap: 82px;
 }
 
 .pajara-site .pajara-about-mark {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  padding: 24px;
+  min-height: 340px;
+  padding: 35px;
+}
+
+.pajara-site .pajara-about-mark::before {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(138, 106, 74, 0.2);
+  border-radius: 50%;
+  content: "";
 }
 
 .pajara-site .pajara-about-mark img.pajara-logo {
+  position: relative;
+  z-index: 1;
   display: block;
-  width: min(100%, 260px) !important;
+  width: min(100%, 265px) !important;
   height: auto !important;
-  max-width: 260px !important;
-  max-height: 260px;
+  max-width: 265px !important;
+  max-height: 265px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 3px 24px 3px 24px;
   background: var(--white);
   box-shadow: var(--shadow-md);
   object-fit: contain;
@@ -527,107 +679,185 @@ img {
 
 .pajara-site .pajara-about-label {
   color: var(--brown);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 }
 
 .pajara-site .pajara-about-content h2 {
-  margin: 16px 0 22px;
-  font-size: clamp(32px, 4vw, 44px);
-  line-height: 1.2;
+  margin: 18px 0 22px;
+  font-size: clamp(35px, 4.2vw, 49px);
+  line-height: 1.13;
+  letter-spacing: -1.4px;
 }
 
 .pajara-site .pajara-about-text p {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .pajara-site .pajara-about-signature {
-  margin-top: 26px;
+  margin-top: 27px;
   color: var(--green);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 23px;
+  font-size: 25px;
   font-style: italic;
 }
 
 /* FOUNDER */
 
 .pajara-site .pajara-founder-card {
-  padding: 42px;
+  position: relative;
+  padding: 46px;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--white);
+  border-radius: 3px 25px 3px 25px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(138, 106, 74, 0.07), transparent 32%),
+    var(--white);
   box-shadow: var(--shadow-sm);
+}
+
+.pajara-site .pajara-founder-card::after {
+  position: absolute;
+  top: 25px;
+  right: 28px;
+  width: 50px;
+  height: 50px;
+  border-top: 1px solid rgba(138, 106, 74, 0.45);
+  border-right: 1px solid rgba(138, 106, 74, 0.45);
+  content: "";
+  pointer-events: none;
 }
 
 .pajara-site .pajara-founder-label {
   color: var(--brown);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2.2px;
+  letter-spacing: 2.7px;
 }
 
 .pajara-site .pajara-founder-heading h3 {
-  margin: 15px 0 6px;
+  margin: 17px 0 7px;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(27px, 4vw, 38px);
+  font-size: clamp(29px, 4vw, 42px);
   font-weight: 600;
+  letter-spacing: -1px;
 }
 
 .pajara-site .pajara-founder-role {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .pajara-site .pajara-founder-info {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 28px;
-  margin-top: 30px;
+  gap: 0 30px;
+  margin-top: 32px;
 }
 
 .pajara-site .pajara-founder-info > div {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding: 17px 0;
+  padding: 18px 0;
   border-top: 1px solid var(--line);
 }
 
 .pajara-site .pajara-founder-info span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .pajara-site .pajara-founder-info strong {
   color: var(--green-dark);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .pajara-site .pajara-founder-signature {
-  margin-top: 22px;
+  margin-top: 23px;
   color: var(--brown);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 20px;
+  font-size: 21px;
   font-style: italic;
+}
+
+/* TESTIMONIALS */
+
+.pajara-site .pajara-testimonial-card {
+  position: relative;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 3px 18px 3px 18px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pajara-site .pajara-testimonial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pajara-site .pajara-testimonial-card p {
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.pajara-site .pajara-testimonial-card h3 {
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+}
+
+.pajara-site .pajara-testimonial-card span {
+  color: var(--brown);
 }
 
 /* CTA */
 
 .pajara-site .pajara-cta {
-  padding: 70px 0;
-  background: var(--green-dark);
+  position: relative;
+  padding: 82px 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.07), transparent 28%),
+    var(--green-dark);
   color: var(--white);
 }
 
+.pajara-site .pajara-cta::before {
+  position: absolute;
+  top: -140px;
+  right: -80px;
+  width: 380px;
+  height: 380px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  content: "";
+}
+
+.pajara-site .pajara-cta::after {
+  position: absolute;
+  top: -80px;
+  right: -20px;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 50%;
+  content: "";
+}
+
 .pajara-site .pajara-cta-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 42px;
 }
 
 .pajara-site .pajara-cta-copy {
@@ -636,40 +866,40 @@ img {
 
 .pajara-site .pajara-cta-label {
   color: #d8c2a5;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 }
 
 .pajara-site .pajara-cta h2 {
-  margin: 17px 0;
+  margin: 19px 0;
   color: var(--white);
-  font-size: clamp(32px, 4.5vw, 48px);
-  line-height: 1.2;
+  font-size: clamp(36px, 4.6vw, 54px);
+  line-height: 1.12;
+  letter-spacing: -1.3px;
 }
 
 .pajara-site .pajara-cta p {
   max-width: 520px;
   margin-bottom: 0;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 13px;
 }
 
 .pajara-site .pajara-cta-button {
   display: inline-flex;
-  min-height: 50px;
+  min-height: 51px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 14px 24px;
+  padding: 15px 25px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
   background: var(--cream);
   color: var(--green-dark);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .pajara-site .pajara-cta-button:hover {
@@ -680,38 +910,38 @@ img {
 /* FOOTER */
 
 .pajara-site .pajara-footer {
-  padding: 44px 0 22px;
-  background: #f1ece6;
+  padding: 48px 0 23px;
+  background: var(--cream-dark);
 }
 
 .pajara-site .pajara-footer-top {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: 50px;
-  padding-bottom: 34px;
+  padding-bottom: 37px;
 }
 
 .pajara-site .pajara-footer-brand {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 13px;
 }
 
 .pajara-site img.pajara-footer-logo {
   display: block !important;
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  max-width: 36px !important;
-  max-height: 36px !important;
-  flex: 0 0 36px !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
+  flex: 0 0 42px !important;
   aspect-ratio: 1 / 1;
   padding: 3px;
   object-fit: contain;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: 11px;
   background: var(--white);
 }
 
@@ -719,7 +949,7 @@ img {
   margin: 0;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .pajara-site .pajara-footer-links {
@@ -727,12 +957,12 @@ img {
   flex-wrap: wrap;
   align-content: flex-start;
   justify-content: flex-end;
-  gap: 15px 22px;
+  gap: 16px 25px;
 }
 
 .pajara-site .pajara-footer-links a {
   color: #596258;
-  font-size: 12px;
+  font-size: 11px;
   transition: color 0.2s ease;
 }
 
@@ -744,33 +974,50 @@ img {
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  padding-top: 20px;
+  padding-top: 21px;
   border-top: 1px solid #ded7cd;
 }
 
 .pajara-site .pajara-footer-bottom span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 /* RESPONSIVE TABLET */
 
 @media (max-width: 900px) {
+  .pajara-site .pajara-container {
+    width: calc(100% - 44px);
+  }
+
   .pajara-site .pajara-navbar-inner {
-    min-height: 70px;
+    min-height: 74px;
     gap: 14px;
   }
 
   .pajara-site .pajara-navbar-inner > .pajara-nav {
-    gap: 14px;
+    gap: 15px;
   }
 
   .pajara-site .pajara-navbar-inner > .pajara-nav > a {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  .pajara-site .pajara-brand-name {
+    font-size: 18px;
+  }
+
+  .pajara-site .pajara-hero {
+    padding: 76px 0;
   }
 
   .pajara-site .pajara-hero-inner {
-    gap: 36px;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 0.8fr);
+    gap: 35px;
+  }
+
+  .pajara-site .pajara-hero-copy h1 {
+    font-size: clamp(43px, 6.3vw, 60px);
   }
 
   .pajara-site .pajara-services-grid {
@@ -778,7 +1025,11 @@ img {
   }
 
   .pajara-site .pajara-about-grid {
-    gap: 36px;
+    gap: 40px;
+  }
+
+  .pajara-site .pajara-founder-card {
+    padding: 35px;
   }
 }
 
@@ -786,7 +1037,7 @@ img {
 
 @media (max-width: 640px) {
   html {
-    scroll-padding-top: 80px;
+    scroll-padding-top: 105px;
   }
 
   .pajara-site .pajara-container {
@@ -794,38 +1045,38 @@ img {
   }
 
   .pajara-site .pajara-navbar-inner {
-    min-height: 66px;
+    min-height: 0;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 12px;
+    padding-bottom: 8px;
   }
 
   .pajara-site .pajara-brand {
-    gap: 8px;
+    gap: 9px;
   }
 
   .pajara-site img.pajara-navbar-logo-mark {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-    max-width: 28px !important;
-    max-height: 28px !important;
-    flex-basis: 28px !important;
+    width: 31px !important;
+    height: 31px !important;
+    min-width: 31px !important;
+    min-height: 31px !important;
+    max-width: 31px !important;
+    max-height: 31px !important;
+    flex-basis: 31px !important;
   }
 
   .pajara-site .pajara-brand-name {
-    font-size: 17px;
+    font-size: 19px;
   }
 
   .pajara-site .pajara-navbar-inner > .pajara-nav {
     width: 100%;
     justify-content: flex-start;
-    gap: 18px;
+    gap: 20px;
     overflow-x: auto;
-    padding: 4px 0 7px;
+    padding: 8px 0 9px;
     scrollbar-width: none;
   }
 
@@ -835,83 +1086,137 @@ img {
 
   .pajara-site .pajara-navbar-inner > .pajara-nav > a {
     flex-shrink: 0;
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .pajara-site .pajara-navbar-inner > .pajara-nav > .pajara-nav-button {
-    padding: 9px 13px;
+    padding: 10px 15px;
   }
 
   .pajara-site .pajara-hero {
-    padding: 54px 0 60px;
+    padding: 57px 0 62px;
+  }
+
+  .pajara-site .pajara-hero::before {
+    top: 25px;
+    right: -190px;
+    width: 300px;
+    height: 300px;
+  }
+
+  .pajara-site .pajara-hero::after {
+    top: 65px;
+    right: -135px;
+    width: 210px;
+    height: 210px;
   }
 
   .pajara-site .pajara-hero-inner {
     grid-template-columns: minmax(0, 1fr);
-    gap: 38px;
+    gap: 37px;
+  }
+
+  .pajara-site .pajara-eyebrow {
+    font-size: 9px;
+    letter-spacing: 2px;
   }
 
   .pajara-site .pajara-hero-copy h1 {
-    font-size: clamp(40px, 11vw, 56px);
+    margin: 21px 0;
+    font-size: clamp(43px, 12vw, 59px);
+    line-height: 1.06;
+    letter-spacing: -1.8px;
   }
 
   .pajara-site .pajara-hero-description {
-    font-size: 14px;
+    margin-bottom: 25px;
+    font-size: 13px;
+  }
+
+  .pajara-site .pajara-hero-actions {
+    gap: 10px;
+  }
+
+  .pajara-site .pajara-button {
+    min-height: 46px;
+    padding: 12px 17px;
+    font-size: 11px;
+  }
+
+  .pajara-site .pajara-hero-note {
+    margin-top: 22px;
+    font-size: 10px;
   }
 
   .pajara-site .pajara-hero-card {
     padding: 18px;
-    border-radius: 20px;
+    border-radius: 3px 21px 3px 21px;
   }
 
   .pajara-site img.pajara-hero-logo {
-    width: min(100%, 220px) !important;
-    max-width: 220px !important;
-    max-height: 220px;
-    margin: 20px auto;
-    padding: 8px;
-    border-radius: 16px;
+    width: min(100%, 230px) !important;
+    max-width: 230px !important;
+    max-height: 230px;
+    margin: 22px auto;
+    padding: 9px;
+    border-radius: 3px 16px 3px 16px;
+  }
+
+  .pajara-site .pajara-hero-card-top,
+  .pajara-site .pajara-hero-card-bottom {
+    font-size: 8px;
+    letter-spacing: 1px;
   }
 
   .pajara-site .pajara-trust-inner {
-    min-height: 76px;
+    min-height: 80px;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 13px 22px;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    gap: 13px 20px;
+    padding-top: 17px;
+    padding-bottom: 17px;
   }
 
   .pajara-site .pajara-trust-item {
     font-size: 9px;
-    letter-spacing: 1.4px;
+    letter-spacing: 1.2px;
   }
 
   .pajara-site .pajara-section {
-    padding: 62px 0;
+    padding: 67px 0;
   }
 
   .pajara-site .pajara-section-heading {
-    margin-bottom: 28px;
+    margin-bottom: 29px;
   }
 
   .pajara-site .pajara-section-heading h2 {
-    font-size: 34px;
+    margin: 16px 0;
+    font-size: 36px;
+    letter-spacing: -1px;
+  }
+
+  .pajara-site .pajara-section-heading p {
+    font-size: 12px;
   }
 
   .pajara-site .pajara-services-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+    gap: 13px;
   }
 
   .pajara-site .pajara-service-card {
-    min-height: 190px;
-    padding: 22px;
+    min-height: 194px;
+    padding: 23px;
   }
 
   .pajara-site .pajara-service-card h3 {
-    margin-top: 22px;
-    font-size: 21px;
+    margin-top: 25px;
+    font-size: 22px;
+  }
+
+  .pajara-site .pajara-service-card p {
+    font-size: 12px;
   }
 
   .pajara-site .pajara-portfolio-grid {
@@ -919,12 +1224,20 @@ img {
     gap: 18px;
   }
 
+  .pajara-site .pajara-portfolio-card {
+    border-radius: 3px 17px 3px 17px;
+  }
+
   .pajara-site .pajara-portfolio-image {
-    aspect-ratio: 4 / 4.5;
+    aspect-ratio: 4 / 4.6;
   }
 
   .pajara-site .pajara-portfolio-info {
-    padding: 17px;
+    padding: 18px;
+  }
+
+  .pajara-site .pajara-portfolio-info h3 {
+    font-size: 19px;
   }
 
   .pajara-site .pajara-about-grid {
@@ -933,7 +1246,12 @@ img {
   }
 
   .pajara-site .pajara-about-mark {
-    padding: 8px;
+    min-height: 250px;
+    padding: 22px;
+  }
+
+  .pajara-site .pajara-about-mark::before {
+    inset: 5px 20px;
   }
 
   .pajara-site .pajara-about-mark img.pajara-logo {
@@ -941,63 +1259,102 @@ img {
     max-width: 190px !important;
     max-height: 190px;
     padding: 9px;
-    border-radius: 18px;
+    border-radius: 3px 18px 3px 18px;
   }
 
   .pajara-site .pajara-about-content h2 {
-    font-size: 34px;
+    font-size: 36px;
+  }
+
+  .pajara-site .pajara-about-text p {
+    font-size: 12px;
+  }
+
+  .pajara-site .pajara-about-signature {
+    font-size: 23px;
   }
 
   .pajara-site .pajara-founder-card {
-    padding: 24px 20px;
-    border-radius: 20px;
+    padding: 27px 21px;
+    border-radius: 3px 20px 3px 20px;
+  }
+
+  .pajara-site .pajara-founder-card::after {
+    top: 18px;
+    right: 18px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .pajara-site .pajara-founder-heading h3 {
+    max-width: 90%;
+    font-size: 31px;
   }
 
   .pajara-site .pajara-founder-info {
     grid-template-columns: minmax(0, 1fr);
-    margin-top: 22px;
+    margin-top: 24px;
   }
 
   .pajara-site .pajara-founder-info > div {
     padding: 14px 0;
   }
 
+  .pajara-site .pajara-founder-info strong {
+    font-size: 12px;
+  }
+
+  .pajara-site .pajara-founder-signature {
+    font-size: 19px;
+  }
+
+  .pajara-site .pajara-testimonial-card {
+    padding: 21px;
+  }
+
   .pajara-site .pajara-cta {
-    padding: 52px 0;
+    padding: 59px 0;
   }
 
   .pajara-site .pajara-cta-inner {
     align-items: flex-start;
     flex-direction: column;
-    gap: 25px;
+    gap: 26px;
   }
 
   .pajara-site .pajara-cta h2 {
-    font-size: 35px;
+    font-size: 37px;
+    letter-spacing: -1px;
   }
 
   .pajara-site .pajara-cta p {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .pajara-site .pajara-cta-button {
+    min-height: 47px;
+    padding: 13px 20px;
+    font-size: 11px;
   }
 
   .pajara-site .pajara-footer {
-    padding-top: 34px;
+    padding-top: 36px;
   }
 
   .pajara-site .pajara-footer-top {
     grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+    gap: 27px;
     padding-bottom: 26px;
   }
 
   .pajara-site img.pajara-footer-logo {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    flex-basis: 36px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    flex-basis: 38px !important;
   }
 
   .pajara-site .pajara-footer-links {
@@ -1007,7 +1364,7 @@ img {
 
   .pajara-site .pajara-footer-bottom {
     flex-direction: column;
-    gap: 8px;
+    gap: 9px;
   }
 }
 
