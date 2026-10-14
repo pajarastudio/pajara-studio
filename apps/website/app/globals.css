@@ -1378,3 +1378,307 @@ img {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* =========================================
+   PAJARA STUDIO — HAMBURGER & DISCOVERY CARD
+   ========================================= */
+
+/* Tombol menu tiga garis */
+.pajara-site .pajara-menu-toggle {
+  display: none;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--green-dark);
+  cursor: pointer;
+}
+
+/* Card menuju portfolio dan testimoni */
+.pajara-site .pajara-discovery-card {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  width: 100%;
+  margin-top: 30px;
+  padding: 25px 27px;
+  border: 1px solid var(--line);
+  border-radius: 4px 20px 4px 20px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(47, 107, 69, 0.09),
+      transparent 38%
+    ),
+    rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.pajara-site .pajara-discovery-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(47, 107, 69, 0.45);
+  box-shadow: var(--shadow-md);
+}
+
+.pajara-site .pajara-discovery-icon {
+  display: flex;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(47, 107, 69, 0.12);
+  border-radius: 15px;
+  background: var(--cream);
+  color: var(--green);
+}
+
+.pajara-site .pajara-discovery-icon svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+}
+
+.pajara-site .pajara-discovery-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.pajara-site .pajara-discovery-kicker {
+  color: var(--brown);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.pajara-site .pajara-discovery-copy strong {
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pajara-site .pajara-discovery-description {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.pajara-site .pajara-discovery-arrow {
+  display: flex;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--green);
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.pajara-site .pajara-discovery-card:hover .pajara-discovery-arrow {
+  transform: translateX(3px);
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--white);
+}
+
+/* Testimoni */
+.pajara-site .pajara-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 20px;
+}
+
+.pajara-site .pajara-testimonials-grid .pajara-testimonial-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.pajara-site .pajara-testimonial-quote {
+  color: var(--green);
+  font-family: Georgia, serif;
+  font-size: 43px;
+  line-height: 1;
+}
+
+.pajara-site .pajara-testimonials-grid .pajara-testimonial-content {
+  flex: 1;
+  margin: 10px 0 22px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.pajara-site .pajara-testimonial-rating {
+  margin-bottom: 18px;
+  color: var(--brown);
+  font-size: 13px;
+  letter-spacing: 3px;
+}
+
+.pajara-site .pajara-testimonial-customer {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pajara-site .pajara-testimonial-customer strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--green-dark);
+  font-size: 14px;
+}
+
+.pajara-site .pajara-testimonial-customer span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* Desktop: navigasi tetap terlihat */
+@media (min-width: 641px) {
+  .pajara-site .pajara-nav-menu {
+    display: flex;
+  }
+}
+
+/* Tampilan HP */
+@media (max-width: 640px) {
+  .pajara-site .pajara-navbar-inner {
+    position: relative;
+    min-height: 62px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .pajara-site .pajara-menu-toggle {
+    display: inline-flex;
+  }
+
+  .pajara-site .pajara-nav-menu {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 3px;
+    padding: 10px;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: 0 0 17px 17px;
+    background: var(--cream);
+    box-shadow: var(--shadow-md);
+  }
+
+  .pajara-site .pajara-nav-menu.is-open {
+    display: flex;
+  }
+
+  .pajara-site .pajara-navbar-inner > .pajara-nav-menu > a {
+    display: flex;
+    min-height: 43px;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 11px 13px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+
+  .pajara-site .pajara-navbar-inner > .pajara-nav-menu > a:not(.pajara-nav-button)::after {
+    display: none;
+  }
+
+  .pajara-site .pajara-navbar-inner > .pajara-nav-menu > a:hover {
+    background: rgba(47, 107, 69, 0.06);
+  }
+
+  .pajara-site .pajara-navbar-inner > .pajara-nav-menu > .pajara-nav-button {
+    justify-content: center;
+    margin-top: 4px;
+    padding: 12px 16px;
+  }
+
+  .pajara-site .pajara-discovery-card {
+    gap: 12px;
+    margin-top: 23px;
+    padding: 18px 13px;
+  }
+
+  .pajara-site .pajara-discovery-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+  }
+
+  .pajara-site .pajara-discovery-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .pajara-site .pajara-discovery-kicker {
+    font-size: 8px;
+    letter-spacing: 1.3px;
+  }
+
+  .pajara-site .pajara-discovery-copy strong {
+    font-size: 16px;
+  }
+
+  .pajara-site .pajara-discovery-description {
+    font-size: 10px;
+  }
+
+  .pajara-site .pajara-discovery-arrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pajara-site .pajara-discovery-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pajara-site .pajara-testimonials-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pajara-site .pajara-discovery-card,
+  .pajara-site .pajara-discovery-arrow,
+  .pajara-site .pajara-menu-toggle {
+    transition: none;
+  }
+}
