@@ -3,6 +3,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { supabase } from "@pajara/supabase";
 
 type Order = {
@@ -25,6 +26,9 @@ type Payment = {
   status: string | null;
   created_at: string | null;
 };
+
+const LOGO =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 const QRIS_IMAGE =
   "/qr_ID1026470184411_08.10.26_1791447334_1791447334905.jpeg";
@@ -79,6 +83,104 @@ function getPaymentStatus(payment: Payment | null) {
   }
 }
 
+function PaymentLoading() {
+  return (
+    <main style={pageStyle}>
+      <section style={loadingCardStyle}>
+        <div style={loadingLogoFrameStyle}>
+          <Image
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={76}
+            height={76}
+            priority
+            unoptimized
+            style={{
+              width: "76px",
+              height: "76px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+
+        <p style={loadingEyebrowStyle}>PAJARA STUDIO</p>
+
+        <h1 style={loadingTitleStyle}>
+          Menyiapkan pembayaran
+        </h1>
+
+        <div style={loadingSpinnerStyle} />
+
+        <p style={loadingTextStyle}>
+          Sebentar, kami sedang menyiapkan informasi pembayaranmu.
+        </p>
+
+        <div style={loadingDividerStyle} />
+
+        <p style={loadingTaglineStyle}>
+          Berakar di Tanah Pasundan.
+        </p>
+      </section>
+
+      <style jsx>{`
+        @keyframes paymentSpin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes paymentFade {
+          from {
+            opacity: 0;
+            transform: translateY(9px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
+    </main>
+  );
+}
+
+function BackToOrders({ orderId }: { orderId: string }) {
+  return (
+    <a href={`/orders?id=${orderId}`} style={backCardStyle}>
+      <span style={backIconStyle} aria-hidden="true">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m15 18-6-6 6-6" />
+          <path d="M9 12h11" />
+        </svg>
+      </span>
+
+      <span style={{ flex: 1 }}>
+        <span style={backCaptionStyle}>NAVIGASI PESANAN</span>
+        <span style={backTitleStyle}>Kembali ke Pesanan</span>
+      </span>
+
+      <span style={backArrowStyle} aria-hidden="true">
+        →
+      </span>
+    </a>
+  );
+}
+
 function PaymentMethodDetails({
   method,
   amount,
@@ -92,6 +194,7 @@ function PaymentMethodDetails({
     return (
       <div style={detailBox}>
         <p style={detailTitle}>QRIS Pajara Studio</p>
+
         <img
           src={QRIS_IMAGE}
           alt="QRIS Pajara Studio"
@@ -105,12 +208,14 @@ function PaymentMethodDetails({
             background: "#fff",
           }}
         />
+
         <p style={detailDescription}>
           Scan QRIS untuk membayar {typeLabel.toLowerCase()} sebesar{" "}
           <strong style={{ color: "var(--green-dark)" }}>
             {formatRupiah(amount)}
           </strong>
-          .<br />
+          .
+          <br />
           A/N Pajara Studio
         </p>
       </div>
@@ -129,6 +234,7 @@ function PaymentMethodDetails({
   return (
     <div style={detailBox}>
       <p style={detailTitle}>Detail {method}</p>
+
       <div
         style={{
           color: "var(--green-dark)",
@@ -139,6 +245,7 @@ function PaymentMethodDetails({
       >
         {account}
       </div>
+
       <div
         style={{
           marginTop: "4px",
@@ -148,6 +255,7 @@ function PaymentMethodDetails({
       >
         A/N TUTI
       </div>
+
       <p style={detailDescription}>
         Nominal {typeLabel.toLowerCase()}:{" "}
         <strong style={{ color: "var(--green-dark)" }}>
@@ -183,11 +291,12 @@ const detailDescription = {
 };
 
 const cardStyle = {
-  marginTop: "18px",
+  marginTop: "20px",
   background: "#fff",
-  borderRadius: "18px",
-  padding: "28px",
+  borderRadius: "20px",
+  padding: "26px",
   border: "1px solid #e8e2d8",
+  boxShadow: "0 6px 22px rgba(33,77,50,.035)",
 };
 
 function PaymentContent() {
@@ -256,12 +365,14 @@ function PaymentContent() {
         return;
       }
 
-      const { data: subscriptionRequest, error: subscriptionError } =
-        await supabase
-          .from("subscription_requests")
-          .select("id")
-          .eq("order_id", orderData.id)
-          .maybeSingle();
+      const {
+        data: subscriptionRequest,
+        error: subscriptionError,
+      } = await supabase
+        .from("subscription_requests")
+        .select("id")
+        .eq("order_id", orderData.id)
+        .maybeSingle();
 
       if (!mounted) return;
 
@@ -355,7 +466,12 @@ function PaymentContent() {
   );
 
   async function createPayment() {
-    if (!order || !paymentType || amountDue === null || amountDue === undefined) {
+    if (
+      !order ||
+      !paymentType ||
+      amountDue === null ||
+      amountDue === undefined
+    ) {
       setError("Tahap pembayaran tidak valid. Silakan muat ulang halaman.");
       return null;
     }
@@ -370,11 +486,11 @@ function PaymentContent() {
       return null;
     }
 
-    // Periksa ulang status di database sebelum membuat tagihan.
     const { data: latestOrder, error: latestOrderError } = await supabase
       .from("orders")
       .select("status, dp_amount, remaining_amount")
       .eq("id", order.id)
+      .eq("customer_id", (await supabase.auth.getUser()).data.user?.id || "")
       .maybeSingle();
 
     if (latestOrderError || !latestOrder) {
@@ -604,28 +720,24 @@ function PaymentContent() {
   }
 
   if (loading) {
-    return (
-      <main style={pageStyle}>
-        <div style={containerStyle}>
-          <p style={{ color: "var(--green)" }}>Memuat pembayaran...</p>
-        </div>
-      </main>
-    );
+    return <PaymentLoading />;
   }
 
   if (!id || !order) {
     return (
       <main style={pageStyle}>
         <div style={containerStyle}>
-          <h1 style={{ color: "var(--green-dark)" }}>
-            Pesanan tidak ditemukan
-          </h1>
-          <p style={{ color: "#666" }}>
-            {error || "Pesanan tidak tersedia atau bukan milik akun ini."}
-          </p>
-          <a href="/orders" style={linkStyle}>
-            ← Kembali ke Pesanan
-          </a>
+          <BackToOrders orderId={id || ""} />
+
+          <section style={cardStyle}>
+            <h1 style={pageHeadingStyle}>Pesanan tidak ditemukan</h1>
+            <p style={bodyTextStyle}>
+              {error || "Pesanan tidak tersedia atau bukan milik akun ini."}
+            </p>
+            <a href="/orders" style={secondaryButtonStyle}>
+              Buka Daftar Pesanan →
+            </a>
+          </section>
         </div>
       </main>
     );
@@ -635,14 +747,19 @@ function PaymentContent() {
     return (
       <main style={pageStyle}>
         <div style={containerStyle}>
-          <h1 style={{ color: "var(--green-dark)" }}>Pesanan Paket</h1>
+          <BackToOrders orderId={order.id} />
+
           <section style={cardStyle}>
-            <p style={{ color: "#666", lineHeight: 1.7 }}>
+            <p style={eyebrowStyle}>PAJARA PACKAGE</p>
+            <h1 style={pageHeadingStyle}>Pesanan Paket</h1>
+
+            <p style={bodyTextStyle}>
               Pesanan ini menggunakan kuota paket. Tidak ada pembayaran
               tambahan per desain melalui halaman ini.
             </p>
-            <a href={`/orders?id=${order.id}`} style={linkStyle}>
-              ← Kembali ke Pesanan
+
+            <a href="/subscriptions" style={primaryButtonStyle}>
+              Lihat Paket Saya →
             </a>
           </section>
         </div>
@@ -659,43 +776,63 @@ function PaymentContent() {
   return (
     <main style={pageStyle}>
       <div style={containerStyle}>
-        <a href={`/orders?id=${order.id}`} style={linkStyle}>
-          ← Kembali ke Pesanan
-        </a>
+        <BackToOrders orderId={order.id} />
 
-        <div style={{ marginTop: "28px" }}>
-          <p
-            style={{
-              color: "var(--brown)",
-              fontWeight: 700,
-              marginBottom: "8px",
-              letterSpacing: "0.08em",
-            }}
-          >
-            PEMBAYARAN
+        <header style={pageHeaderStyle}>
+          <p style={eyebrowStyle}>
+            <span style={eyebrowDotStyle} />
+            PAJARA STUDIO
           </p>
-          <h1
-            style={{
-              color: "var(--green-dark)",
-              marginBottom: "8px",
-            }}
-          >
-            {order.order_code}
-          </h1>
-          <p style={{ color: "#666" }}>
-            {order.service_name || "Layanan Pajara Studio"}
+
+          <h1 style={pageHeadingStyle}>Pembayaran</h1>
+
+          <p style={bodyTextStyle}>
+            Selesaikan pembayaran pesanan dengan langkah yang mudah dan jelas.
           </p>
-        </div>
+        </header>
+
+        <section style={orderIdentityCardStyle}>
+          <div style={orderIdentityIconStyle}>
+            <svg
+              width="25"
+              height="25"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="4" y="3" width="16" height="18" rx="2" />
+              <path d="M8 8h8M8 12h8M8 16h4" />
+            </svg>
+          </div>
+
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={orderCodeStyle}>{order.order_code}</p>
+            <h2 style={orderServiceStyle}>
+              {order.service_name || "Layanan Pajara Studio"}
+            </h2>
+          </div>
+        </section>
 
         {message && (
-          <div style={successStyle}>{message}</div>
+          <div style={successStyle}>
+            <strong>Informasi</strong>
+            <p style={noticeTextStyle}>{message}</p>
+          </div>
         )}
 
         {error && (
-          <div style={errorStyle}>{error}</div>
+          <div style={errorStyle}>
+            <strong>Perlu diperhatikan</strong>
+            <p style={noticeTextStyle}>{error}</p>
+          </div>
         )}
 
-        <section style={{ ...cardStyle, marginTop: "28px" }}>
+        <section style={cardStyle}>
+          <p style={sectionEyebrowStyle}>RINGKASAN</p>
           <h2 style={sectionHeading}>Ringkasan Pembayaran</h2>
 
           <div style={summaryListStyle}>
@@ -717,12 +854,7 @@ function PaymentContent() {
 
             <div style={summaryRowStyle}>
               <span style={mutedText}>Sisa Pembayaran</span>
-              <strong
-                style={{
-                  color: "var(--brown)",
-                  fontSize: "18px",
-                }}
-              >
+              <strong style={highlightAmountStyle}>
                 {formatRupiah(order.remaining_amount)}
               </strong>
             </div>
@@ -731,27 +863,22 @@ function PaymentContent() {
 
         {canStartPayment && !payment && (
           <section style={cardStyle}>
+            <p style={sectionEyebrowStyle}>LANGKAH 01</p>
             <h2 style={sectionHeading}>
               {isWaitingDP ? "Pembayaran DP" : "Pembayaran Pelunasan"}
             </h2>
 
-            <p style={{ color: "#666", lineHeight: 1.7 }}>
+            <p style={bodyTextStyle}>
               {isWaitingDP
                 ? "Pilih metode untuk membayar DP sebesar "
-                : "Desain final sudah memasuki tahap pelunasan. Pilih metode untuk membayar sisa tagihan sebesar "}
+                : "Pilih metode untuk membayar sisa tagihan sebesar "}
               <strong style={strongText}>
                 {formatRupiah(amountDue ?? 0)}
               </strong>
               .
             </p>
 
-            <div
-              style={{
-                display: "grid",
-                gap: "12px",
-                marginTop: "22px",
-              }}
-            >
+            <div style={paymentMethodListStyle}>
               {PAYMENT_METHODS.map((method) => {
                 const selected = selectedMethod === method.name;
 
@@ -765,102 +892,55 @@ function PaymentContent() {
                       setMessage("");
                     }}
                     style={{
-                      width: "100%",
-                      textAlign: "left",
-                      padding: "18px",
-                      borderRadius: "14px",
+                      ...paymentMethodCardStyle,
                       border: selected
-                        ? "2px solid var(--green)"
-                        : "1px solid #ddd5c9",
+                        ? "2px solid #2f6b45"
+                        : "1px solid #e5ded3",
                       background: selected ? "#f1f7f2" : "#fff",
-                      cursor: "pointer",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "16px",
-                      }}
-                    >
+                    <div style={methodTopStyle}>
                       <div style={{ minWidth: 0 }}>
-                        <strong
-                          style={{
-                            color: "var(--green-dark)",
-                            fontSize: "16px",
-                          }}
-                        >
+                        <strong style={methodNameStyle}>
                           {method.name}
                         </strong>
-
-                        <div
-                          style={{
-                            marginTop: "5px",
-                            color: "#777",
-                            fontSize: "13px",
-                          }}
-                        >
+                        <p style={methodDescriptionStyle}>
                           {method.description}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: "12px",
-                            padding: "10px 12px",
-                            borderRadius: "10px",
-                            background: "#f7f4ee",
-                          }}
-                        >
-                          <div
-                            style={{
-                              color: "var(--green-dark)",
-                              fontWeight: 700,
-                              fontSize: "14px",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {method.account}
-                          </div>
-
-                          {method.owner && (
-                            <div
-                              style={{
-                                marginTop: "3px",
-                                color: "#777",
-                                fontSize: "12px",
-                              }}
-                            >
-                              {method.owner}
-                            </div>
-                          )}
-
-                          {method.note && (
-                            <div
-                              style={{
-                                marginTop: "4px",
-                                color: "#777",
-                                fontSize: "12px",
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              {method.note}
-                            </div>
-                          )}
-                        </div>
+                        </p>
                       </div>
 
-                      <div
+                      <span
                         style={{
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
+                          ...radioStyle,
                           border: selected
-                            ? "6px solid var(--green)"
+                            ? "6px solid #2f6b45"
                             : "2px solid #c9c0b4",
-                          flexShrink: 0,
                         }}
                       />
+                    </div>
+
+                    <div style={accountBoxStyle}>
+                      <span style={accountLabelStyle}>
+                        {method.name === "QRIS"
+                          ? "PENERIMA"
+                          : "NOMOR / REKENING"}
+                      </span>
+
+                      <strong style={accountTextStyle}>
+                        {method.account}
+                      </strong>
+
+                      {method.owner && (
+                        <span style={accountOwnerStyle}>
+                          {method.owner}
+                        </span>
+                      )}
+
+                      {method.note && (
+                        <span style={accountOwnerStyle}>
+                          {method.note}
+                        </span>
+                      )}
                     </div>
                   </button>
                 );
@@ -868,12 +948,12 @@ function PaymentContent() {
             </div>
 
             {selectedPaymentMethod && (
-              <div style={successStyle}>
+              <div style={selectedMethodNoticeStyle}>
                 <strong>Metode dipilih: {selectedPaymentMethod.name}</strong>
-                <div style={{ marginTop: "5px" }}>
+                <p style={noticeTextStyle}>
                   Nominal {typeLabel.toLowerCase()}:{" "}
-                  <strong>{formatRupiah(amountDue ?? 0)}</strong>
-                </div>
+                  {formatRupiah(amountDue ?? 0)}
+                </p>
               </div>
             )}
 
@@ -892,35 +972,31 @@ function PaymentContent() {
               style={{
                 ...primaryButtonStyle,
                 marginTop: "22px",
-                opacity: saving || !selectedMethod ? 0.7 : 1,
-                cursor: saving || !selectedMethod ? "not-allowed" : "pointer",
+                opacity: saving || !selectedMethod ? 0.65 : 1,
+                cursor:
+                  saving || !selectedMethod ? "not-allowed" : "pointer",
               }}
             >
-              {saving ? "Menyimpan..." : "Lanjutkan Pembayaran"}
+              {saving ? "Menyimpan pembayaran..." : "Lanjutkan Pembayaran →"}
             </button>
           </section>
         )}
 
         {payment && (
           <section style={cardStyle}>
-            <p
-              style={{
-                color: "var(--brown)",
-                fontWeight: 700,
-                marginTop: 0,
-                marginBottom: "8px",
-                fontSize: "13px",
-                letterSpacing: "0.06em",
-              }}
-            >
-              {payment.payment_type === "Pelunasan"
-                ? "PEMBAYARAN PELUNASAN"
-                : "PEMBAYARAN DP"}
-            </p>
+            <p style={sectionEyebrowStyle}>STATUS PEMBAYARAN</p>
 
-            <h2 style={sectionHeading}>
-              {formatRupiah(payment.amount)}
-            </h2>
+            <div style={paymentAmountPanelStyle}>
+              <span style={mutedText}>
+                {payment.payment_type === "Pelunasan"
+                  ? "TAGIHAN PELUNASAN"
+                  : "TAGIHAN DP"}
+              </span>
+
+              <h2 style={paymentAmountStyle}>
+                {formatRupiah(payment.amount)}
+              </h2>
+            </div>
 
             <div style={summaryListStyle}>
               <div style={summaryRowStyle}>
@@ -932,18 +1008,24 @@ function PaymentContent() {
 
               <div style={summaryRowStyle}>
                 <span style={mutedText}>Status</span>
-                <strong style={strongText}>
+                <strong
+                  style={{
+                    color:
+                      payment.status === "verified"
+                        ? "#2f6b45"
+                        : payment.status === "rejected"
+                          ? "#a13f31"
+                          : "#8a6a4a",
+                    textAlign: "right",
+                  }}
+                >
                   {paymentStatus}
                 </strong>
               </div>
 
               <div style={summaryRowStyle}>
                 <span style={mutedText}>Bukti Pembayaran</span>
-                <strong
-                  style={{
-                    color: hasProof ? "var(--green)" : "var(--brown)",
-                  }}
-                >
+                <strong style={{ color: hasProof ? "#2f6b45" : "#8a6a4a" }}>
                   {hasProof ? "Sudah Diupload" : "Belum Diupload"}
                 </strong>
               </div>
@@ -967,9 +1049,10 @@ function PaymentContent() {
           payment.status !== "verified" &&
           (!hasProof || payment.status === "rejected") && (
             <section style={cardStyle}>
+              <p style={sectionEyebrowStyle}>LANGKAH 02</p>
               <h2 style={sectionHeading}>Upload Bukti Pembayaran</h2>
 
-              <p style={{ color: "#666", lineHeight: 1.7 }}>
+              <p style={bodyTextStyle}>
                 Setelah membayar sebesar{" "}
                 <strong style={strongText}>
                   {formatRupiah(payment.amount)}
@@ -979,15 +1062,7 @@ function PaymentContent() {
                   " Bukti sebelumnya ditolak. Silakan unggah bukti yang benar."}
               </p>
 
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "18px",
-                  borderRadius: "14px",
-                  background: "var(--cream)",
-                  border: "1px dashed #cfc5b7",
-                }}
-              >
+              <div style={fileInputBoxStyle}>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,application/pdf"
@@ -999,30 +1074,15 @@ function PaymentContent() {
                   style={{ width: "100%" }}
                 />
 
-                <p
-                  style={{
-                    color: "#777",
-                    fontSize: "13px",
-                    lineHeight: 1.6,
-                    marginBottom: 0,
-                  }}
-                >
+                <p style={fileHelpStyle}>
                   Format: JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
                 </p>
               </div>
 
               {proofFile && (
-                <div
-                  style={{
-                    marginTop: "14px",
-                    padding: "12px 14px",
-                    borderRadius: "10px",
-                    background: "#f7f4ee",
-                    color: "var(--green-dark)",
-                    fontSize: "14px",
-                  }}
-                >
-                  File dipilih: <strong>{proofFile.name}</strong>
+                <div style={selectedFileStyle}>
+                  <span>File dipilih</span>
+                  <strong>{proofFile.name}</strong>
                 </div>
               )}
 
@@ -1033,55 +1093,57 @@ function PaymentContent() {
                 style={{
                   ...primaryButtonStyle,
                   marginTop: "18px",
-                  opacity: uploadingProof || !proofFile ? 0.7 : 1,
+                  opacity: uploadingProof || !proofFile ? 0.65 : 1,
                   cursor:
                     uploadingProof || !proofFile ? "not-allowed" : "pointer",
                 }}
               >
                 {uploadingProof
-                  ? "Mengupload..."
-                  : "Upload Bukti Pembayaran"}
+                  ? "Mengunggah bukti..."
+                  : "Upload Bukti Pembayaran →"}
               </button>
             </section>
           )}
 
         {payment && hasProof && payment.status === "pending" && (
-          <section style={cardStyle}>
-            <h2 style={sectionHeading}>Menunggu Verifikasi</h2>
-            <p style={{ color: "#666", lineHeight: 1.7, marginBottom: 0 }}>
-              Bukti {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
-              sudah diterima. Pajara Studio akan memverifikasi pembayaran Anda.
-            </p>
+          <section style={noticeCardStyle}>
+            <div style={noticeIconStyle}>✓</div>
+            <div>
+              <h2 style={noticeHeadingStyle}>Menunggu Verifikasi</h2>
+              <p style={noticeTextStyle}>
+                Bukti {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
+                sudah diterima. Pajara Studio akan memverifikasi pembayaranmu.
+              </p>
+            </div>
           </section>
         )}
 
         {payment && payment.status === "verified" && (
           <section
             style={{
-              ...cardStyle,
+              ...noticeCardStyle,
               background: "#edf6ef",
               borderColor: "#c8dfcc",
             }}
           >
-            <h2 style={sectionHeading}>Pembayaran Terverifikasi</h2>
-            <p
-              style={{
-                color: "var(--green-dark)",
-                lineHeight: 1.7,
-                marginBottom: 0,
-              }}
-            >
-              Pembayaran{" "}
-              {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
-              Anda sudah diverifikasi oleh Pajara Studio.
-            </p>
+            <div style={noticeIconStyle}>✓</div>
+            <div>
+              <h2 style={noticeHeadingStyle}>
+                Pembayaran Terverifikasi
+              </h2>
+              <p style={noticeTextStyle}>
+                Pembayaran{" "}
+                {payment.payment_type === "Pelunasan" ? "pelunasan" : "DP"}{" "}
+                kamu sudah diverifikasi oleh Pajara Studio.
+              </p>
+            </div>
           </section>
         )}
 
         {!paymentType && !payment && (
           <section style={cardStyle}>
             <h2 style={sectionHeading}>Pembayaran</h2>
-            <p style={{ color: "#666", lineHeight: 1.7, marginBottom: 0 }}>
+            <p style={bodyTextStyle}>
               {order.status === "completed"
                 ? "Pesanan sudah selesai. Tidak ada tagihan baru pada tahap ini."
                 : "Pembayaran belum dapat dilakukan pada tahap pesanan saat ini."}
@@ -1089,109 +1151,598 @@ function PaymentContent() {
           </section>
         )}
 
-        <div style={{ marginTop: "28px" }}>
-          <a href="/orders" style={linkStyle}>
-            ← Kembali ke Pesanan
-          </a>
-        </div>
+        <footer style={footerStyle}>
+          <Image
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            unoptimized
+            style={footerLogoStyle}
+          />
+
+          <div>
+            <strong style={footerTitleStyle}>Pajara Studio</strong>
+            <p style={footerTaglineStyle}>Berakar di Tanah Pasundan.</p>
+            <p style={footerSmallStyle}>Desain yang punya arah.</p>
+          </div>
+        </footer>
       </div>
+
+      <style jsx>{`
+        @keyframes contentFade {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        a,
+        button {
+          -webkit-tap-highlight-color: transparent;
+          transition:
+            background 160ms ease,
+            border-color 160ms ease,
+            box-shadow 160ms ease,
+            transform 160ms ease;
+        }
+
+        button:active,
+        a:active {
+          transform: scale(0.99);
+        }
+
+        @media (hover: hover) {
+          a:hover,
+          button:hover {
+            box-shadow: 0 7px 20px rgba(33, 77, 50, 0.08);
+          }
+        }
+
+        @media (max-width: 520px) {
+          .payment-content {
+            padding: 22px 15px 45px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
-const pageStyle = {
+const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  background: "var(--cream)",
-  padding: "40px 20px",
+  background: "var(--cream, #f7f4ee)",
+  padding: "30px 18px 55px",
+  boxSizing: "border-box",
+  color: "var(--text, #1d2a22)",
+  fontFamily: '"DM Sans", Arial, sans-serif',
 };
 
-const containerStyle = {
-  maxWidth: "900px",
+const containerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "760px",
   margin: "0 auto",
 };
 
-const linkStyle = {
-  color: "var(--green)",
-  fontSize: "14px",
+const loadingCardStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "390px",
+  boxSizing: "border-box",
+  padding: "34px 24px 28px",
+  borderRadius: "24px",
+  background: "#fff",
+  border: "1px solid rgba(33,77,50,.12)",
+  boxShadow: "0 18px 45px rgba(33,77,50,.08)",
+  textAlign: "center",
+  animation: "paymentFade 400ms ease both",
+};
+
+const loadingLogoFrameStyle: React.CSSProperties = {
+  width: "86px",
+  height: "86px",
+  margin: "0 auto 20px",
+  display: "grid",
+  placeItems: "center",
+  overflow: "hidden",
+  borderRadius: "20px",
+  background: "#f7f4ee",
+  border: "1px solid #e8e2d8",
+};
+
+const loadingEyebrowStyle: React.CSSProperties = {
+  margin: "0 0 9px",
+  color: "#8a6a4a",
+  fontSize: "10px",
+  fontWeight: 800,
+  letterSpacing: "0.2em",
+};
+
+const loadingTitleStyle: React.CSSProperties = {
+  margin: "0 0 23px",
+  color: "#214d32",
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontSize: "25px",
+  lineHeight: 1.35,
+  fontWeight: 600,
+};
+
+const loadingSpinnerStyle: React.CSSProperties = {
+  width: "30px",
+  height: "30px",
+  margin: "0 auto 17px",
+  border: "3px solid #e4ebe2",
+  borderTopColor: "#2f6b45",
+  borderRadius: "50%",
+  animation: "paymentSpin 800ms linear infinite",
+};
+
+const loadingTextStyle: React.CSSProperties = {
+  margin: "0 auto",
+  maxWidth: "270px",
+  color: "#747d74",
+  fontSize: "13px",
+  lineHeight: 1.8,
+};
+
+const loadingDividerStyle: React.CSSProperties = {
+  width: "42px",
+  height: "2px",
+  margin: "22px auto 14px",
+  background: "#d8e4d7",
+  borderRadius: "10px",
+};
+
+const loadingTaglineStyle: React.CSSProperties = {
+  margin: 0,
+  color: "#8a6a4a",
+  fontSize: "11px",
+  fontWeight: 600,
+};
+
+const backCardStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "13px 15px",
+  marginBottom: "28px",
+  border: "1px solid rgba(33,77,50,.12)",
+  borderRadius: "16px",
+  background: "#fff",
+  boxShadow: "0 5px 18px rgba(33,77,50,.045)",
+  color: "#214d32",
+  textDecoration: "none",
+  boxSizing: "border-box",
+};
+
+const backIconStyle: React.CSSProperties = {
+  width: "39px",
+  height: "39px",
+  display: "grid",
+  placeItems: "center",
+  flexShrink: 0,
+  borderRadius: "12px",
+  background: "#edf4ee",
+  color: "#2f6b45",
+};
+
+const backCaptionStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: "3px",
+  color: "#8a6a4a",
+  fontSize: "9px",
+  fontWeight: 800,
+  letterSpacing: "0.13em",
+};
+
+const backTitleStyle: React.CSSProperties = {
+  display: "block",
+  color: "#214d32",
+  fontSize: "13px",
   fontWeight: 700,
 };
 
-const sectionHeading = {
-  color: "var(--green-dark)",
-  marginTop: 0,
+const backArrowStyle: React.CSSProperties = {
+  color: "#8a6a4a",
+  fontSize: "18px",
 };
 
-const summaryListStyle = {
-  display: "grid",
+const pageHeaderStyle: React.CSSProperties = {
+  margin: "0 0 24px",
+};
+
+const eyebrowStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  margin: "0 0 10px",
+  color: "#8a6a4a",
+  fontSize: "10px",
+  fontWeight: 800,
+  letterSpacing: "0.18em",
+};
+
+const eyebrowDotStyle: React.CSSProperties = {
+  width: "7px",
+  height: "7px",
+  borderRadius: "50%",
+  background: "#2f6b45",
+};
+
+const pageHeadingStyle: React.CSSProperties = {
+  margin: "0 0 9px",
+  color: "#214d32",
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontSize: "clamp(30px, 6vw, 39px)",
+  lineHeight: 1.25,
+  fontWeight: 600,
+};
+
+const bodyTextStyle: React.CSSProperties = {
+  margin: "8px 0 0",
+  color: "#707970",
+  fontSize: "13px",
+  lineHeight: 1.8,
+};
+
+const orderIdentityCardStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
   gap: "14px",
+  padding: "18px",
+  marginBottom: "20px",
+  border: "1px solid #e8e2d8",
+  borderRadius: "18px",
+  background: "#fff",
+  boxShadow: "0 5px 17px rgba(33,77,50,.035)",
+};
+
+const orderIdentityIconStyle: React.CSSProperties = {
+  width: "48px",
+  height: "48px",
+  display: "grid",
+  placeItems: "center",
+  flexShrink: 0,
+  borderRadius: "15px",
+  background: "#edf3ec",
+  color: "#2f6b45",
+};
+
+const orderCodeStyle: React.CSSProperties = {
+  margin: "0 0 5px",
+  color: "#8a6a4a",
+  fontSize: "10px",
+  fontWeight: 800,
+  letterSpacing: "0.09em",
+};
+
+const orderServiceStyle: React.CSSProperties = {
+  margin: 0,
+  color: "#214d32",
+  fontSize: "16px",
+  lineHeight: 1.5,
+  fontWeight: 800,
+};
+
+const sectionEyebrowStyle: React.CSSProperties = {
+  margin: "0 0 7px",
+  color: "#8a6a4a",
+  fontSize: "10px",
+  fontWeight: 800,
+  letterSpacing: "0.14em",
+};
+
+const sectionHeading: React.CSSProperties = {
+  margin: "0 0 15px",
+  color: "#214d32",
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontSize: "22px",
+  lineHeight: 1.35,
+  fontWeight: 600,
+};
+
+const summaryListStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "15px",
   marginTop: "22px",
 };
 
-const summaryRowStyle = {
+const summaryRowStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
-  gap: "20px",
+  gap: "16px",
   alignItems: "flex-start",
+  fontSize: "13px",
+  lineHeight: 1.7,
 };
 
-const mutedText = {
-  color: "#666",
+const mutedText: React.CSSProperties = {
+  color: "#777970",
 };
 
-const strongText = {
-  color: "var(--green-dark)",
+const strongText: React.CSSProperties = {
+  color: "#214d32",
+  fontWeight: 800,
+  textAlign: "right",
+  overflowWrap: "anywhere",
 };
 
-const separatorStyle = {
+const highlightAmountStyle: React.CSSProperties = {
+  color: "#8a6a4a",
+  fontSize: "17px",
+  fontWeight: 800,
+  textAlign: "right",
+  overflowWrap: "anywhere",
+};
+
+const separatorStyle: React.CSSProperties = {
   height: "1px",
   background: "#e8e2d8",
 };
 
-const successStyle = {
+const paymentMethodListStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "12px",
+  marginTop: "22px",
+};
+
+const paymentMethodCardStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "17px",
+  borderRadius: "15px",
+  cursor: "pointer",
+  textAlign: "left",
+  boxSizing: "border-box",
+};
+
+const methodTopStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "14px",
+};
+
+const methodNameStyle: React.CSSProperties = {
+  color: "#214d32",
+  fontSize: "15px",
+  fontWeight: 800,
+};
+
+const methodDescriptionStyle: React.CSSProperties = {
+  margin: "5px 0 0",
+  color: "#777970",
+  fontSize: "12px",
+  lineHeight: 1.6,
+};
+
+const radioStyle: React.CSSProperties = {
+  width: "20px",
+  height: "20px",
+  flexShrink: 0,
+  borderRadius: "50%",
+  boxSizing: "border-box",
+};
+
+const accountBoxStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "5px",
+  marginTop: "14px",
+  padding: "12px",
+  borderRadius: "11px",
+  background: "#f7f4ee",
+};
+
+const accountLabelStyle: React.CSSProperties = {
+  color: "#8a6a4a",
+  fontSize: "9px",
+  fontWeight: 800,
+  letterSpacing: "0.1em",
+};
+
+const accountTextStyle: React.CSSProperties = {
+  color: "#214d32",
+  fontSize: "14px",
+  fontWeight: 800,
+  overflowWrap: "anywhere",
+};
+
+const accountOwnerStyle: React.CSSProperties = {
+  color: "#777970",
+  fontSize: "11px",
+  lineHeight: 1.6,
+};
+
+const selectedMethodNoticeStyle: React.CSSProperties = {
+  marginTop: "18px",
+  padding: "15px",
+  borderRadius: "12px",
+  background: "#edf6ef",
+  border: "1px solid #c8dfcc",
+  color: "#214d32",
+  fontSize: "13px",
+  lineHeight: 1.6,
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+  width: "100%",
+  minHeight: "48px",
+  padding: "14px 18px",
+  border: "1px solid #2f6b45",
+  borderRadius: "12px",
+  background: "#2f6b45",
+  color: "#fff",
+  fontWeight: 800,
+  fontSize: "13px",
+  textAlign: "center",
+  textDecoration: "none",
+  boxSizing: "border-box",
+  cursor: "pointer",
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  width: "100%",
+  minHeight: "46px",
+  padding: "12px 16px",
+  border: "1px solid #dce5da",
+  borderRadius: "12px",
+  background: "#f7faf6",
+  color: "#214d32",
+  fontSize: "13px",
+  fontWeight: 800,
+  textDecoration: "none",
+  boxSizing: "border-box",
+};
+
+const paymentAmountPanelStyle: React.CSSProperties = {
+  padding: "18px",
+  borderRadius: "14px",
+  background: "#f7f4ee",
+  border: "1px solid #e8e2d8",
+};
+
+const paymentAmountStyle: React.CSSProperties = {
+  margin: "8px 0 0",
+  color: "#214d32",
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontSize: "clamp(26px, 6vw, 34px)",
+  overflowWrap: "anywhere",
+};
+
+const fileInputBoxStyle: React.CSSProperties = {
   marginTop: "20px",
+  padding: "18px",
+  borderRadius: "14px",
+  background: "#f7f4ee",
+  border: "1px dashed #cfc5b7",
+};
+
+const fileHelpStyle: React.CSSProperties = {
+  color: "#777970",
+  fontSize: "12px",
+  lineHeight: 1.7,
+  marginBottom: 0,
+};
+
+const selectedFileStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "5px",
+  marginTop: "14px",
+  padding: "13px 14px",
+  borderRadius: "11px",
+  background: "#f7f4ee",
+  color: "#214d32",
+  fontSize: "12px",
+  overflowWrap: "anywhere",
+};
+
+const successStyle: React.CSSProperties = {
+  marginTop: "18px",
   padding: "16px 18px",
   borderRadius: "14px",
   background: "#edf6ef",
   border: "1px solid #c8dfcc",
-  color: "var(--green-dark)",
-  lineHeight: 1.6,
+  color: "#214d32",
+  fontSize: "13px",
+  lineHeight: 1.7,
 };
 
-const errorStyle = {
-  marginTop: "20px",
+const errorStyle: React.CSSProperties = {
+  marginTop: "18px",
   padding: "16px 18px",
   borderRadius: "14px",
   background: "#fff3f0",
   border: "1px solid #ead0c9",
   color: "#8a3d2f",
-  lineHeight: 1.6,
+  fontSize: "13px",
+  lineHeight: 1.7,
 };
 
-const primaryButtonStyle = {
-  width: "100%",
-  padding: "15px 20px",
-  border: "none",
-  borderRadius: "12px",
-  background: "var(--green)",
-  color: "#fff",
-  fontWeight: 700,
-  fontSize: "15px",
+const noticeTextStyle: React.CSSProperties = {
+  margin: "6px 0 0",
+  fontSize: "13px",
+  lineHeight: 1.8,
 };
 
-function PaymentFallback() {
-  return (
-    <main style={pageStyle}>
-      <div style={containerStyle}>
-        <p style={{ color: "var(--green)" }}>Memuat pembayaran...</p>
-      </div>
-    </main>
-  );
-}
+const noticeCardStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "14px",
+  marginTop: "20px",
+  padding: "20px",
+  border: "1px solid #c8dfcc",
+  borderRadius: "17px",
+  background: "#f1f7f2",
+};
 
-export default function PaymentPage() {
-  return (
-    <Suspense fallback={<PaymentFallback />}>
-      <PaymentContent />
-    </Suspense>
-  );
-}
+const noticeIconStyle: React.CSSProperties = {
+  width: "34px",
+  height: "34px",
+  display: "grid",
+  placeItems: "center",
+  flexShrink: 0,
+  borderRadius: "11px",
+  background: "#dcebdd",
+  color: "#2f6b45",
+  fontWeight: 800,
+};
+
+const noticeHeadingStyle: React.CSSProperties = {
+  margin: "2px 0 0",
+  color: "#214d32",
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontSize: "19px",
+};
+
+const footerStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "13px",
+  borderTop: "1px solid #e4ddd1",
+  paddingTop: "22px",
+  marginTop: "36px",
+};
+
+const footerLogoStyle: React.CSSProperties = {
+  width: "43px",
+  height: "43px",
+  flexShrink: 0,
+  objectFit: "contain",
+  borderRadius: "10px",
+  background: "#fff",
+};
+
+const footerTitleStyle: React.CSSProperties = {
+  color: "#214d32",
+  fontSize: "13px",
+};
+
+const footerTaglineStyle: React.CSSProperties = {
+  margin: "4px 0 0",
+  color: "#8a6a4a",
+  fontSize: "11px",
+};
+
+const footerSmallStyle: React.CSSProperties = {
+  margin: "3px 0 0",
+  color: "#999387",
+  fontSize: "10px",
+};
