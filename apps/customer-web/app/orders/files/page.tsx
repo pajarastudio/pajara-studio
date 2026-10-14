@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
@@ -211,7 +212,7 @@ function FilesContent() {
     ? `/orders?id=${encodeURIComponent(id)}`
     : "/orders";
 
-  const cardStyle: React.CSSProperties = {
+  const cardStyle: CSSProperties = {
     background: "#FFFFFF",
     border: "1px solid rgba(33,77,50,.11)",
     borderRadius: 22,
@@ -221,7 +222,7 @@ function FilesContent() {
     minWidth: 0,
   };
 
-  const eyebrowStyle: React.CSSProperties = {
+  const eyebrowStyle: CSSProperties = {
     color: "#8A6A4A",
     fontSize: 10,
     fontWeight: 700,
@@ -230,7 +231,7 @@ function FilesContent() {
     margin: "0 0 8px",
   };
 
-  const backStyle: React.CSSProperties = {
+  const backStyle: CSSProperties = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -251,7 +252,7 @@ function FilesContent() {
     lineHeight: 1.6,
   };
 
-  const primaryButtonStyle: React.CSSProperties = {
+  const primaryButtonStyle: CSSProperties = {
     display: "inline-flex",
     justifyContent: "center",
     alignItems: "center",
@@ -670,39 +671,71 @@ function FilesContent() {
 
         <footer
           style={{
-            padding: "28px 0 10px",
-            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            gap: 13,
+            borderTop: "1px solid #e4ddd1",
+            paddingTop: 22,
+            marginTop: 36,
           }}
         >
-          <p
+          <img
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
             style={{
-              margin: 0,
-              color: "#8A6A4A",
-              fontSize: 10,
-              letterSpacing: 2,
-              fontWeight: 700,
+              display: "block",
+              width: 43,
+              height: 43,
+              flexShrink: 0,
+              objectFit: "contain",
+              borderRadius: 10,
+              background: "#fff",
             }}
-          >
-            PAJARA STUDIO
-          </p>
+          />
 
-          <p
-            style={{
-              margin: "8px 0 0",
-              color: "#70766F",
-              fontSize: 12,
-              lineHeight: 1.8,
-            }}
-          >
-            Desain yang punya arah.
-          </p>
+          <div>
+            <strong
+              style={{
+                display: "block",
+                color: "#214d32",
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+            >
+              Pajara Studio
+            </strong>
+
+            <p
+              style={{
+                margin: "4px 0 0",
+                color: "#8a6a4a",
+                fontSize: 11,
+                lineHeight: 1.5,
+              }}
+            >
+              Berakar di Tanah Pasundan.
+            </p>
+
+            <p
+              style={{
+                margin: "3px 0 0",
+                color: "#999387",
+                fontSize: 10,
+                lineHeight: 1.5,
+              }}
+            >
+              Desain yang punya arah.
+            </p>
+          </div>
         </footer>
       </section>
     </main>
   );
 }
 
-const secondaryButtonStyle: React.CSSProperties = {
+const secondaryButtonStyle: CSSProperties = {
   display: "inline-flex",
   justifyContent: "center",
   alignItems: "center",
