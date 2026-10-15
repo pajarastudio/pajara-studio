@@ -812,17 +812,42 @@ function OrderDetailContent() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7f4ee] px-4 py-8 pb-28 text-[#292821] sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="animate-pulse rounded-3xl border border-[#e9e3d8] bg-white p-6">
-            <div className="h-3 w-24 rounded bg-[#eee9df]" />
-            <div className="mt-4 h-7 w-56 rounded-lg bg-[#eee9df]" />
-            <div className="mt-3 h-4 w-40 rounded bg-[#eee9df]" />
-            <div className="mt-8 space-y-3">
-              <div className="h-16 rounded-2xl bg-[#faf8f4]" />
-              <div className="h-16 rounded-2xl bg-[#faf8f4]" />
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f4ee] px-5 py-10 pb-28 text-[#292821]">
+        <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#2f6b45]/[0.06] blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-[#8a6a4a]/[0.08] blur-3xl" />
+
+        <div className="relative w-full max-w-sm">
+          <div className="rounded-[28px] border border-[#e9e3d8] bg-white/90 p-7 text-center shadow-[0_20px_60px_-30px_rgba(33,77,50,0.22)] backdrop-blur-sm sm:p-9">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[26px] border border-[#dce8de] bg-[#f1f6f1]">
+              <div className="relative flex h-11 w-11 items-center justify-center">
+                <span className="absolute inset-0 animate-spin rounded-full border-[3px] border-[#d8e6dc] border-t-[#2f6b45]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#2f6b45]" />
+              </div>
             </div>
-            <p className="mt-5 text-sm text-[#858074]">Memuat detail pesanan...</p>
+
+            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6a4a]">
+              PAJARA ADMIN
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-[#214d32]">
+              Menyiapkan Detail
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-[250px] text-sm leading-6 text-[#858074]">
+              Sedang memuat informasi pesanan. Mohon tunggu sebentar.
+            </p>
+
+            <div className="mt-7 flex justify-center gap-1.5">
+              <span className="h-1.5 w-6 animate-pulse rounded-full bg-[#2f6b45]" />
+              <span className="h-1.5 w-3 animate-pulse rounded-full bg-[#8a6a4a]/50 [animation-delay:150ms]" />
+              <span className="h-1.5 w-3 animate-pulse rounded-full bg-[#d8e6dc] [animation-delay:300ms]" />
+            </div>
+
+            <div className="mt-7 border-t border-[#f0ece4] pt-4">
+              <p className="text-[10px] font-medium tracking-wide text-[#a09a8f]">
+                PAJARA STUDIO · BERAKAR DI TANAH PASUNDAN
+              </p>
+            </div>
           </div>
         </div>
       </main>
@@ -1435,11 +1460,43 @@ export default function OrderDetailPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f4ee] px-4 py-8 pb-28 text-[#292821] sm:px-6">
-          <div className="mx-auto max-w-5xl rounded-3xl border border-[#e9e3d8] bg-white p-6 shadow-sm">
-            <div className="h-3 w-24 animate-pulse rounded bg-[#eee9df]" />
-            <div className="mt-4 h-7 w-52 animate-pulse rounded-lg bg-[#eee9df]" />
-            <p className="mt-5 text-sm text-[#777166]">Memuat halaman...</p>
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f4ee] px-5 py-10 pb-28 text-[#292821]">
+          <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#2f6b45]/[0.06] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-[#8a6a4a]/[0.08] blur-3xl" />
+
+          <div className="relative w-full max-w-sm">
+            <div className="rounded-[28px] border border-[#e9e3d8] bg-white/90 p-7 text-center shadow-[0_20px_60px_-30px_rgba(33,77,50,0.22)] backdrop-blur-sm sm:p-9">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[26px] border border-[#dce8de] bg-[#f1f6f1]">
+                <div className="relative flex h-11 w-11 items-center justify-center">
+                  <span className="absolute inset-0 animate-spin rounded-full border-[3px] border-[#d8e6dc] border-t-[#2f6b45]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#2f6b45]" />
+                </div>
+              </div>
+
+              <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6a4a]">
+                PAJARA ADMIN
+              </p>
+
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-[#214d32]">
+                Membuka Halaman
+              </h2>
+
+              <p className="mx-auto mt-2 max-w-[250px] text-sm leading-6 text-[#858074]">
+                Menyiapkan halaman detail pesanan.
+              </p>
+
+              <div className="mt-7 flex justify-center gap-1.5">
+                <span className="h-1.5 w-6 animate-pulse rounded-full bg-[#2f6b45]" />
+                <span className="h-1.5 w-3 animate-pulse rounded-full bg-[#8a6a4a]/50 [animation-delay:150ms]" />
+                <span className="h-1.5 w-3 animate-pulse rounded-full bg-[#d8e6dc] [animation-delay:300ms]" />
+              </div>
+
+              <div className="mt-7 border-t border-[#f0ece4] pt-4">
+                <p className="text-[10px] font-medium tracking-wide text-[#a09a8f]">
+                  PAJARA STUDIO · BERAKAR DI TANAH PASUNDAN
+                </p>
+              </div>
+            </div>
           </div>
         </main>
       }
