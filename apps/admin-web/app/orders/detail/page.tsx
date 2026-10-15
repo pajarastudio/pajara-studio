@@ -1,77 +1,77 @@
 "use client";
-
+ 
 import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
-
+ 
 const supabase = createClient(
-process.env.NEXT_PUBLIC_SUPABASE_URL!,
-process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+process.env.NEXT\_PUBLIC\_SUPABASE\_URL!,
+process.env.NEXT\_PUBLIC\_SUPABASE\_PUBLISHABLE\_KEY!
 );
-
+ 
 type Order = {
 id: string;
-order_code: string;
-service_name: string;
-design_type: string | null;
+order\_code: string;
+service\_name: string;
+design\_type: string | null;
 quantity: number | null;
 brief: string | null;
 notes: string | null;
-total_amount: number | null;
-dp_amount: number | null;
-remaining_amount: number | null;
+total\_amount: number | null;
+dp\_amount: number | null;
+remaining\_amount: number | null;
 status: string;
 deadline: string | null;
-created_at: string;
+created\_at: string;
 };
-
+ 
 type ReferenceFile = {
 id: string;
-file_name: string;
-file_path: string;
-file_type: string | null;
-file_size: number | null;
-created_at: string;
+file\_name: string;
+file\_path: string;
+file\_type: string | null;
+file\_size: number | null;
+created\_at: string;
 url: string | null;
 };
-
+ 
 type Payment = {
 id: string;
-order_id: string;
-payment_method: string | null;
-payment_type: string | null;
+order\_id: string;
+payment\_method: string | null;
+payment\_type: string | null;
 amount: number | null;
-transaction_id: string | null;
-proof_file_id: string | null;
+transaction\_id: string | null;
+proof\_file\_id: string | null;
 status: string | null;
-verified_by: string | null;
-verified_at: string | null;
+verified\_by: string | null;
+verified\_at: string | null;
 notes: string | null;
-created_at: string;
+created\_at: string;
 };
-
+ 
 type PaymentProof = {
 id: string;
-file_name: string;
-file_path: string;
-file_type: string | null;
-file_size: number | null;
-created_at: string;
+file\_name: string;
+file\_path: string;
+file\_type: string | null;
+file\_size: number | null;
+created\_at: string;
 url: string | null;
 };
-
+ 
 type Revision = {
 id: string;
-order_id: string;
-revision_number: number;
-customer_note: string | null;
-admin_note: string | null;
+order\_id: string;
+revision\_number: number;
+customer\_note: string | null;
+admin\_note: string | null;
 status: string;
-created_by: string | null;
-created_at: string;
-updated_at: string;
+created\_by: string | null;
+created\_at: string;
+updated\_at: string;
 };
-
+ 
 function formatRupiah(value: number | null | undefined) {
 return new Intl.NumberFormat("id-ID", {
 style: "currency",
@@ -79,36 +79,36 @@ currency: "IDR",
 minimumFractionDigits: 0,
 }).format(Number(value || 0));
 }
-
+ 
 function formatDate(value: string | null | undefined) {
 if (!value) return "-";
-
+ 
 return new Date(value).toLocaleString("id-ID", {
 dateStyle: "medium",
 timeStyle: "short",
 });
 }
-
+ 
 function formatFileSize(bytes: number | null | undefined) {
 if (!bytes) return "-";
-if (bytes < 1024) return ${bytes} B;
-if (bytes < 1024 * 1024) return ${(bytes / 1024).toFixed(1)} KB;
-return ${(bytes / (1024 * 1024)).toFixed(1)} MB;
+if (bytes &lt; 1024) return `${bytes} B`;
+if (bytes &lt; 1024 \* 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
+ 
 function getStatusLabel(status: string | null | undefined) {
 switch (status) {
 case "pending": return "Pesanan Baru";
-case "waiting_dp": return "Menunggu DP";
+case "waiting\_dp": return "Menunggu DP";
 case "processing": return "Diproses";
 case "revision": return "Revisi";
-case "waiting_payment": return "Menunggu Pelunasan";
+case "waiting\_payment": return "Menunggu Pelunasan";
 case "completed": return "Selesai";
 case "cancelled": return "Dibatalkan";
 default: return status || "-";
 }
 }
-
+ 
 function getStatusClass(status: string | null | undefined) {
 switch (status) {
 case "completed":
@@ -119,14 +119,14 @@ case "revision":
 return "border-purple-200 bg-purple-50 text-purple-700";
 case "cancelled":
 return "border-red-200 bg-red-50 text-red-700";
-case "waiting_payment":
-case "waiting_dp":
+case "waiting\_payment":
+case "waiting\_dp":
 return "border-amber-200 bg-amber-50 text-amber-700";
 default:
-return "border-[#e9e3d8] bg-white text-[#625d53]";
+return "border-&#91;#e9e3d8&#93; bg-white text-&#91;#625d53&#93;";
 }
 }
-
+ 
 function getPaymentStatusLabel(status: string | null | undefined) {
 switch (status) {
 case "pending": return "Menunggu Verifikasi";
@@ -135,7 +135,7 @@ case "rejected": return "Ditolak";
 default: return status || "-";
 }
 }
-
+ 
 function getPaymentStatusClass(status: string | null | undefined) {
 switch (status) {
 case "verified":
@@ -146,7 +146,7 @@ default:
 return "border-amber-200 bg-amber-50 text-amber-700";
 }
 }
-
+ 
 function getRevisionStatusLabel(status: string | null | undefined) {
 switch (status) {
 case "pending": return "Menunggu Diproses";
@@ -156,7 +156,7 @@ case "rejected": return "Ditolak";
 default: return status || "-";
 }
 }
-
+ 
 function getRevisionStatusClass(status: string | null | undefined) {
 switch (status) {
 case "completed":
@@ -169,20 +169,20 @@ default:
 return "border-amber-200 bg-amber-50 text-amber-700";
 }
 }
-
+ 
 function isImageFile(type: string | null | undefined, name: string) {
 return Boolean(type?.startsWith("image/")) ||
 /.(jpg|jpeg|png|webp|gif)$/i.test(name);
 }
-
+ 
 function isPdfFile(type: string | null | undefined, name: string) {
 return type === "application/pdf" || /.pdf$/i.test(name);
 }
-
+ 
 function isSettlement(payment: Payment | null) {
-return payment?.payment_type?.trim().toLowerCase() === "pelunasan";
+return payment?.payment\_type?.trim().toLowerCase() === "pelunasan";
 }
-
+ 
 function Section({
 title,
 description,
@@ -193,22 +193,23 @@ description?: string;
 children: React.ReactNode;
 }) {
 return (
-<section className="overflow-hidden rounded-3xl border border-[#e9e3d8] bg-white shadow-sm">
-<div className="border-b border-[#f0ece4] px-5 py-4 sm:px-6 sm:py-5">
-<h2 className="text-base font-bold tracking-tight text-[#292821] sm:text-lg">
+
+
+## 
 {title}
-</h2>
-{description && (
-<p className="mt-1 text-sm leading-5 text-[#858074]">
+
+{description &amp;&amp; (
+
 {description}
-</p>
+
 )}
-</div>
-<div className="p-5 sm:p-6">{children}</div>
-</section>
+
+{children}
+
+
 );
 }
-
+ 
 function InfoRow({
 label,
 value,
@@ -217,15 +218,15 @@ label: string;
 value: React.ReactNode;
 }) {
 return (
-<div className="flex flex-col gap-1.5 border-b border-[#eee9df] py-3.5 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-<span className="text-sm text-[#858074]">{label}</span>
-<span className="break-words text-sm font-semibold text-[#292821] sm:max-w-[65%] sm:text-right">
+
+{label}
+
 {value}
-</span>
-</div>
+
+
 );
 }
-
+ 
 function EmptyState({
 icon,
 title,
@@ -236,58 +237,62 @@ title: string;
 description: string;
 }) {
 return (
-<div className="rounded-2xl border border-dashed border-[#ded8cc] bg-[#faf8f4] px-5 py-8 text-center">
-<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf5ef] text-xl text-[#2f6b45]">
+
+
 {icon}
-</div>
-<p className="text-sm font-bold text-[#454137]">{title}</p>
-<p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-[#858074]">
+
+{title}
+
+
 {description}
-</p>
-</div>
+
+
 );
 }
-
+ 
 function OrderDetailContent() {
 const router = useRouter();
 const searchParams = useSearchParams();
 const orderId = searchParams.get("id");
-
-const [order, setOrder] = useState<Order | null>(null);
-const [isPackageOrder, setIsPackageOrder] = useState(false);
-const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
-const [payment, setPayment] = useState<Payment | null>(null);
-const [paymentProof, setPaymentProof] = useState<PaymentProof | null>(null);
-const [revisions, setRevisions] = useState<Revision[]>([]);
-const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({});
-const [revisionActions, setRevisionActions] = useState<Record<string, boolean>>({});
-
-const [loading, setLoading] = useState(true);
-const [loadingPayment, setLoadingPayment] = useState(false);
-const [loadingRevisions, setLoadingRevisions] = useState(false);
-const [error, setError] = useState("");
-const [message, setMessage] = useState("");
-const [totalInput, setTotalInput] = useState("");
-const [savingPrice, setSavingPrice] = useState(false);
-const [changingStatus, setChangingStatus] = useState(false);
-const [paymentAction, setPaymentAction] = useState<"verify" | "reject" | null>(null);
-const [uploadingFinal, setUploadingFinal] = useState(false);
-
+ 
+const &#91;order, setOrder&#93; = useState&lt;Order | null>(null);
+const &#91;isPackageOrder, setIsPackageOrder&#93; = useState(false);
+const &#91;referenceFiles, setReferenceFiles&#93; = useState&lt;ReferenceFile&#91;&#93;>(&#91;&#93;);
+const &#91;payment, setPayment&#93; = useState&lt;Payment | null>(null);
+const &#91;paymentProof, setPaymentProof&#93; = useState&lt;PaymentProof | null>(null);
+const &#91;revisions, setRevisions&#93; = useState&lt;Revision&#91;&#93;>(&#91;&#93;);
+const &#91;revisionNotes, setRevisionNotes&#93; = useState&lt;Record&lt;string, string>>({});
+const &#91;revisionActions, setRevisionActions&#93; = useState&lt;Record&lt;string, boolean>>({});
+ 
+const &#91;loading, setLoading&#93; = useState(true);
+const &#91;loadingPayment, setLoadingPayment&#93; = useState(false);
+const &#91;loadingRevisions, setLoadingRevisions&#93; = useState(false);
+const &#91;error, setError&#93; = useState("");
+const &#91;message, setMessage&#93; = useState("");
+const &#91;totalInput, setTotalInput&#93; = useState("");
+const &#91;savingPrice, setSavingPrice&#93; = useState(false);
+const &#91;changingStatus, setChangingStatus&#93; = useState(false);
+const &#91;paymentAction, setPaymentAction&#93; = useState&lt;"verify" | "reject" | null>(null);
+const &#91;uploadingFinal, setUploadingFinal&#93; = useState(false);
+ 
 useEffect(() => {
 if (!orderId) {
 setError("ID pesanan tidak ditemukan.");
 setLoading(false);
 return;
 }
-
+ 
+```
 void loadOrder(orderId);  
-// eslint-disable-next-line react-hooks/exhaustive-deps
-
-}, [orderId]);
-
+// eslint-disable-next-line react-hooks/exhaustive-deps  
+```
+ 
+}, &#91;orderId&#93;);
+ 
 async function checkAdmin() {
 const { data: { session } } = await supabase.auth.getSession();
-
+ 
+```
 if (!session?.user) {  
   router.replace("/");  
   return null;  
@@ -305,17 +310,19 @@ if (profileError || profile?.role !== "admin") {
   return null;  
 }  
 
-return session.user;
-
+return session.user;  
+```
+ 
 }
-
+ 
 async function loadOrder(id: string) {
 try {
 setLoading(true);
 setError("");
 setMessage("");
-
-const user = await checkAdmin();  
+ 
+```
+  const user = await checkAdmin();  
   if (!user) return;  
 
   const { data, error: orderError } = await supabase  
@@ -363,18 +370,20 @@ const user = await checkAdmin();
   setError(err?.message || "Gagal memuat detail pesanan.");  
 } finally {  
   setLoading(false);  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function loadReferenceFiles(id: string) {
 const { data, error: filesError } = await supabase
-.from("order_files")
-.select("id, file_name, file_path, file_type, file_size, created_at")
-.eq("order_id", id)
-.eq("file_category", "reference")
-.order("created_at", { ascending: false });
-
+.from("order\_files")
+.select("id, file\_name, file\_path, file\_type, file\_size, created\_at")
+.eq("order\_id", id)
+.eq("file\_category", "reference")
+.order("created\_at", { ascending: false });
+ 
+```
 if (filesError) {  
   console.error("Gagal memuat file referensi:", filesError);  
   return;  
@@ -395,17 +404,19 @@ const filesWithUrls = await Promise.all(
   })  
 );  
 
-setReferenceFiles(filesWithUrls);
-
+setReferenceFiles(filesWithUrls);  
+```
+ 
 }
-
+ 
 async function loadPayment(id: string, orderStatus: string) {
 try {
 setLoadingPayment(true);
 setPayment(null);
 setPaymentProof(null);
-
-const { data: paymentRows, error: paymentError } = await supabase  
+ 
+```
+  const { data: paymentRows, error: paymentError } = await supabase  
     .from("payments")  
     .select(`  
       id, order_id, payment_method, payment_type, amount, transaction_id,  
@@ -476,15 +487,17 @@ const { data: paymentRows, error: paymentError } = await supabase
   setError(`Gagal memuat data pembayaran: ${err?.message || "Kesalahan tidak diketahui"}`);  
 } finally {  
   setLoadingPayment(false);  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function loadRevisions(id: string) {
 try {
 setLoadingRevisions(true);
-
-const { data, error: revisionsError } = await supabase  
+ 
+```
+  const { data, error: revisionsError } = await supabase  
     .from("revisions")  
     .select(`  
       id, order_id, revision_number, customer_note, admin_note, status,  
@@ -511,13 +524,15 @@ const { data, error: revisionsError } = await supabase
   setRevisions([]);  
 } finally {  
   setLoadingRevisions(false);  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function handleRevisionStatusChange(revision: Revision, newStatus: string) {
 if (!order) return;
-
+ 
+```
 try {  
   setRevisionActions((current) => ({ ...current, [revision.id]: true }));  
   setError("");  
@@ -567,17 +582,19 @@ try {
   setError(err?.message || "Gagal memperbarui status revisi.");  
 } finally {  
   setRevisionActions((current) => ({ ...current, [revision.id]: false }));  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function handleSaveRevisionNote(revision: Revision) {
 try {
-setRevisionActions((current) => ({ ...current, [revision.id]: true }));
+setRevisionActions((current) => ({ ...current, &#91;revision.id&#93;: true }));
 setError("");
 setMessage("");
-
-const adminNote = revisionNotes[revision.id]?.trim() || null;  
+ 
+```
+  const adminNote = revisionNotes[revision.id]?.trim() || null;  
 
   const { data, error: updateError } = await supabase  
     .from("revisions")  
@@ -600,13 +617,15 @@ const adminNote = revisionNotes[revision.id]?.trim() || null;
   setError(err?.message || "Gagal menyimpan catatan revisi.");  
 } finally {  
   setRevisionActions((current) => ({ ...current, [revision.id]: false }));  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function handleSavePrice() {
 if (!order || isPackageOrder) return;
-
+ 
+```
 setMessage("");  
 setError("");  
 
@@ -647,13 +666,15 @@ try {
   setError(err?.message || "Gagal menyimpan harga.");  
 } finally {  
   setSavingPrice(false);  
+}  
+```
+ 
 }
-
-}
-
-async function handleStatusChange(event: React.ChangeEvent<HTMLSelectElement>) {
+ 
+async function handleStatusChange(event: React.ChangeEvent) {
 if (!order) return;
-
+ 
+```
 const newStatus = event.target.value;  
 
 try {  
@@ -679,13 +700,15 @@ try {
   setError(err?.message || "Gagal mengubah status pesanan.");  
 } finally {  
   setChangingStatus(false);  
+}  
+```
+ 
 }
-
-}
-
+ 
 async function handlePaymentAction(action: "verify" | "reject") {
 if (!order || !payment || isPackageOrder) return;
-
+ 
+```
 if (!payment.proof_file_id) {  
   setError("Bukti pembayaran belum tersedia.");  
   return;  
@@ -758,13 +781,15 @@ try {
   setError(err?.message || "Gagal memproses pembayaran.");  
 } finally {  
   setPaymentAction(null);  
+}  
+```
+ 
 }
-
-}
-
-async function handleUploadFinalFile(event: React.ChangeEvent<HTMLInputElement>) {
+ 
+async function handleUploadFinalFile(event: React.ChangeEvent) {
 if (!order) return;
-
+ 
+```
 const file = event.target.files?.[0];  
 if (!file) return;  
 
@@ -817,101 +842,104 @@ try {
 } finally {  
   setUploadingFinal(false);  
   event.target.value = "";  
+}  
+```
+ 
 }
-
-}
-
+ 
 if (loading) {
 return (
-<main className="min-h-screen bg-[#f7f4ee] px-4 py-8 pb-28 text-[#292821] sm:px-6">
-<div className="mx-auto max-w-5xl">
-<div className="animate-pulse rounded-3xl border border-[#e9e3d8] bg-white p-6">
-<div className="h-3 w-24 rounded bg-[#eee9df]" />
-<div className="mt-4 h-7 w-56 rounded-lg bg-[#eee9df]" />
-<div className="mt-3 h-4 w-40 rounded bg-[#eee9df]" />
-<div className="mt-8 space-y-3">
-<div className="h-16 rounded-2xl bg-[#faf8f4]" />
-<div className="h-16 rounded-2xl bg-[#faf8f4]" />
-</div>
-<p className="mt-5 text-sm text-[#858074]">Memuat detail pesanan...</p>
-</div>
-</div>
-</main>
+
+
+
+
+
+
+
+
+
+
+Memuat detail pesanan...
+
+
+
+
 );
 }
-
+ 
 if (!order) {
 return (
-<main className="min-h-screen bg-[#f7f4ee] px-4 py-8 pb-28 text-[#292821] sm:px-6">
-<div className="mx-auto max-w-3xl rounded-3xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
-<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-xl text-red-600">
+
+
+
 !
-</div>
-<h1 className="text-xl font-bold">Detail pesanan tidak tersedia</h1>
-<p className="mt-2 break-words text-sm leading-6 text-red-600">
+
+# Detail pesanan tidak tersedia
+
+
 {error || "Pesanan tidak ditemukan."}
-</p>
-<button
+
+&lt;button
 type="button"
 onClick={() => router.push("/orders")}
-className="mt-5 rounded-xl bg-[#2f6b45] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245537]"
+className="mt-5 rounded-xl bg-&#91;#2f6b45&#93; px-5 py-3 text-sm font-semibold text-white transition hover:bg-&#91;#245537&#93;"
 >
 Kembali ke Pesanan
-</button>
-</div>
-</main>
+
+
+
 );
 }
-
+ 
 const settlementPayment = isSettlement(payment);
 const paymentTitle = settlementPayment ? "Pembayaran Pelunasan" : "Pembayaran DP";
 const paymentAmountLabel = settlementPayment ? "Nominal Pelunasan" : "Nominal DP";
-
+ 
 return (
-<main className="min-h-screen bg-[#f7f4ee] px-4 pb-32 pt-5 text-[#292821] sm:px-6 sm:pt-8">
-<div className="mx-auto max-w-5xl space-y-5">
-{/* HEADER */}
-<header className="overflow-hidden rounded-3xl border border-[#e9e3d8] bg-white shadow-sm">
-<div className="h-1.5 bg-[#2f6b45]" />
-<div className="p-5 sm:p-7">
-<div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-<div className="min-w-0">
-<p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8a6a4a]">
-PAJARA ADMIN / PESANAN
-</p>
-<h1 className="mt-2 text-2xl font-bold tracking-tight text-[#214d32] sm:text-3xl">
-Detail Pesanan
-</h1>
-<p className="mt-2 break-all font-mono text-sm text-[#777166]">
-{order.order_code}
-</p>
-</div>
-<div className="flex flex-wrap items-center gap-2">
-<span className={inline-flex items-center rounded-full border px-4 py-2 text-sm font-bold ${getStatusClass(order.status)}}>
-<span className="mr-2 h-2 w-2 rounded-full bg-current" />
-{getStatusLabel(order.status)}
-</span>
-</div>
-</div>
-<div className="mt-5 flex flex-wrap gap-2 border-t border-[#f0ece4] pt-4">
-<span className="rounded-xl bg-[#faf8f4] px-3 py-2 text-xs font-medium text-[#625d53]">
-{order.service_name || "Layanan"}
-</span>
-{order.design_type && (
-<span className="rounded-xl bg-[#faf8f4] px-3 py-2 text-xs font-medium text-[#625d53]">
-{order.design_type}
-</span>
-)}
-{isPackageOrder && (
-<span className="rounded-xl border border-[#d8e6dc] bg-[#edf5ef] px-3 py-2 text-xs font-semibold text-[#2f6b45]">
-Pesanan Paket
-</span>
-)}
-</div>
-</div>
-</header>
 
-{error && (  
+
+{/\* HEADER \*/}
+
+
+
+
+
+
+PAJARA ADMIN / PESANAN
+
+# 
+Detail Pesanan
+
+
+{order.order\_code}
+
+
+
+&lt;span className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-bold ${getStatusClass(order.status)}`}>
+
+{getStatusLabel(order.status)}
+
+
+
+
+
+{order.service\_name || "Layanan"}
+
+{order.design\_type &amp;&amp; (
+
+{order.design\_type}
+
+)}
+{isPackageOrder &amp;&amp; (
+
+Pesanan Paket
+
+)}
+
+
+ 
+```
+    {error && (  
       <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-700">  
         <span className="font-bold">!</span>  
         <p className="min-w-0 break-words leading-6">{error}</p>  
@@ -1438,25 +1466,27 @@ Pesanan Paket
       Pajara Studio · Berakar di Tanah Pasundan.  
     </p>  
   </div>  
-</main>
-
+</main>  
+```
+ 
 );
 }
-
+ 
 export default function OrderDetailPage() {
 return (
-<Suspense
+&lt;Suspense
 fallback={
-<main className="min-h-screen bg-[#f7f4ee] px-4 py-8 pb-28 text-[#292821] sm:px-6">
-<div className="mx-auto max-w-5xl rounded-3xl border border-[#e9e3d8] bg-white p-6 shadow-sm">
-<div className="h-3 w-24 animate-pulse rounded bg-[#eee9df]" />
-<div className="mt-4 h-7 w-52 animate-pulse rounded-lg bg-[#eee9df]" />
-<p className="mt-5 text-sm text-[#777166]">Memuat halaman...</p>
-</div>
-</main>
+
+
+
+
+Memuat halaman...
+
+
+
 }
 >
-<OrderDetailContent />
-</Suspense>
+
+
 );
 }
