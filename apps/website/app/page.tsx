@@ -665,6 +665,13 @@ export default function Home() {
             </div>
 
             <div className="pajara-footer-links">
+              <a
+                href="https://pajara-links.pajarastd.workers.dev/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Pajara Links
+              </a>
               <a href="#layanan">Layanan</a>
               <a href="#portfolio">Portfolio</a>
               <a href="#tentang">Tentang</a>
