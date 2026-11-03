@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,31 +21,31 @@ const services = [
     number: "01",
     title: "Logo & Branding",
     description:
-      "Membangun identitas visual yang kuat, jelas, dan mudah dikenali.",
+      "Jasa desain logo dan branding untuk membangun identitas visual yang kuat, profesional, dan mudah dikenali oleh pelanggan.",
   },
   {
     number: "02",
     title: "Desain Promosi",
     description:
-      "Materi promosi yang menarik perhatian dan tetap punya arah.",
+      "Desain poster, brosur, dan materi promosi untuk membantu brand dan UMKM menyampaikan informasi secara menarik.",
   },
   {
     number: "03",
-    title: "Social Media",
+    title: "Desain Social Media",
     description:
-      "Visual social media yang konsisten, rapi, dan sesuai karakter brand.",
+      "Desain konten Instagram, feed, dan story dengan visual konsisten sesuai karakter dan identitas brand.",
   },
   {
     number: "04",
-    title: "Banner",
+    title: "Desain Banner",
     description:
-      "Banner informatif dengan hierarki visual yang jelas dan profesional.",
+      "Pembuatan desain banner untuk kebutuhan promosi usaha, acara, dan publikasi dengan informasi yang jelas.",
   },
   {
     number: "05",
-    title: "Kemasan & Menu",
+    title: "Desain Kemasan & Menu",
     description:
-      "Desain kemasan dan menu yang membantu produk tampil lebih meyakinkan.",
+      "Desain kemasan produk dan menu usaha untuk memperkuat tampilan visual serta karakter sebuah brand.",
   },
 ];
 
@@ -336,13 +337,14 @@ export default function Home() {
           <div className="pajara-section-heading">
             <span className="pajara-eyebrow">LAYANAN</span>
             <h2>
-              Visual yang bekerja
+              Jasa desain grafis
               <br />
-              untuk brand.
+              untuk brand dan usaha.
             </h2>
             <p>
-              Setiap desain dibuat dengan tujuan, bukan sekadar
-              terlihat bagus.
+              Pajara Studio menyediakan layanan desain logo, branding,
+              desain promosi, social media, banner, kemasan, dan menu
+              untuk membantu brand membangun identitas visual yang kuat.
             </p>
           </div>
 
