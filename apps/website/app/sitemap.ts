@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://pajara-website.pajarastd.workers.dev";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = [
     "",
