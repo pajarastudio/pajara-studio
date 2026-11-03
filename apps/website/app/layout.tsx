@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "Pajara Studio — Desain yang Punya Arah",
+    default: "Jasa Desain Grafis & Branding | Pajara Studio",
     template: "%s — Pajara Studio",
   },
 
   description:
-    "Pajara Studio adalah studio desain grafis dari Tanah Pasundan yang membantu usaha dan brand membangun identitas visual, desain promosi, social media, banner, kemasan, dan menu yang punya arah.",
+    "Pajara Studio adalah studio desain grafis dari Tanah Pasundan yang menyediakan jasa desain logo, branding, promosi, social media, banner, kemasan, dan menu untuk membangun identitas visual brand.",
 
   keywords: [
     "Pajara Studio",
@@ -59,9 +59,9 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "https://pajara-website.pajarastd.workers.dev",
     siteName: "Pajara Studio",
-    title: "Pajara Studio — Desain yang Punya Arah",
+    title: "Jasa Desain Grafis & Branding | Pajara Studio",
     description:
-      "Studio desain grafis dari Tanah Pasundan. Identitas visual, branding, desain promosi, social media, banner, kemasan, dan menu.",
+      "Studio desain grafis dari Tanah Pasundan yang menyediakan layanan logo, branding, desain promosi, social media, banner, kemasan, dan menu.",
     images: [
       {
         url: "/755809946_17926162029385149_3739923509439876817_n.jpg",
@@ -74,9 +74,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Pajara Studio — Desain yang Punya Arah",
+    title: "Jasa Desain Grafis & Branding | Pajara Studio",
     description:
-      "Studio desain grafis dari Tanah Pasundan. Desain yang punya arah.",
+      "Studio desain grafis dari Tanah Pasundan. Identitas visual dan desain yang punya arah.",
     images: [
       "/755809946_17926162029385149_3739923509439876817_n.jpg",
     ],
