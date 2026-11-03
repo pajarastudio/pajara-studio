@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 mkdir -p apps/website/public
@@ -15,4 +16,3 @@ sed -i 's#"build": "next build"#"build": "rm -rf out \&\& next build"#' apps/web
 pnpm --filter @pajara/website build
 
 cp apps/website/public/robots.txt apps/website/out/robots.txt
-cp apps/website/public/sitemap.xml apps/website/out/sitemap.xml
