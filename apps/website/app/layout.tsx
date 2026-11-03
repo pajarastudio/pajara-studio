@@ -1,9 +1,14 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import Analytics from "./analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pajara-website.pajarastd.workers.dev"),
+
+  verification: {
+    google: "bf5igmY7oAVkRVqJ0qISDIzdQidiyKJWV3qoK739u90",
+  },
 
   title: {
     default: "Pajara Studio — Desain yang Punya Arah",
