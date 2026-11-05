@@ -101,26 +101,11 @@ export default function RootLayout({
         <Analytics />
 
         <Script
-          id="tawk-to"
+          id="taphtml-widget"
+          src="https://widget.taphtml.com"
+          type="module"
+          data-id="590c5775-017c-43e8-9d3a-567ca22de2df"
           strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              var Tawk_API = Tawk_API || {};
-              var Tawk_LoadStart = new Date();
-
-              (function () {
-                var s1 = document.createElement("script");
-                var s0 = document.getElementsByTagName("script")[0];
-
-                s1.async = true;
-                s1.src = "https://embed.tawk.to/6aec9f43bbd10f3c33bfb25f/1k6m4s8p6";
-                s1.charset = "UTF-8";
-                s1.setAttribute("crossorigin", "*");
-
-                s0.parentNode.insertBefore(s1, s0);
-              })();
-            `,
-          }}
         />
 
         {children}
