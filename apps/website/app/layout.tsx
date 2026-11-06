@@ -1,6 +1,5 @@
 
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import Analytics from "./analytics";
 
@@ -99,15 +98,6 @@ export default function RootLayout({
     <html lang="id">
       <body>
         <Analytics />
-
-        <Script
-          id="taphtml-widget"
-          src="https://widget.taphtml.com"
-          type="module"
-          data-id="590c5775-017c-43e8-9d3a-567ca22de2df"
-          strategy="afterInteractive"
-        />
-
         {children}
       </body>
     </html>
