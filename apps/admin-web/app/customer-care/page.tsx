@@ -1,7 +1,13 @@
 
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -29,6 +35,11 @@ type Attachment = {
   mime_type: string;
   file_size: number;
   url: string | null;
+};
+
+type SelectedAttachment = {
+  file: File;
+  previewUrl: string;
 };
 
 type Message = {
@@ -61,6 +72,7 @@ export default function CustomerCarePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [messageInput, setMessageInput] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<SelectedAttachment[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -74,11 +86,13 @@ export default function CustomerCarePage() {
 
   const apiRequest = useCallback(
     async (path: string, options: RequestInit = {}) => {
+      const isFormData = options.body instanceof FormData;
+
       const response = await fetch(`${API_URL}${path}`, {
         ...options,
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          ...(options.body
+          ...(options.body && !isFormData
             ? { "Content-Type": "application/json" }
             : {}),
           ...options.headers,
@@ -223,26 +237,109 @@ export default function CustomerCarePage() {
     return () => window.clearInterval(interval);
   }, [selectedId, loadMessages]);
 
+  useEffect(() => {
+    return () => {
+      selectedFiles.forEach(({ previewUrl }) => {
+        URL.revokeObjectURL(previewUrl);
+      });
+    };
+  }, [selectedFiles]);
+
+  function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    if (!files.length) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    const remainingSlots = 3 - selectedFiles.length;
+
+    if (remainingSlots <= 0) {
+      setError("Maksimal 3 lampiran dalam satu pesan.");
+      return;
+    }
+
+    const validFiles: SelectedAttachment[] = [];
+
+    for (const file of files.slice(0, remainingSlots)) {
+      if (!allowedTypes.includes(file.type)) {
+        setError(`${file.name}: format file tidak didukung.`);
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError(`${file.name}: ukuran maksimal 5 MB.`);
+        continue;
+      }
+
+      validFiles.push({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
+    }
+
+    setSelectedFiles((current) => [...current, ...validFiles]);
+  }
+
+  function removeSelectedFile(index: number) {
+    setSelectedFiles((current) => {
+      const target = current[index];
+
+      if (target) URL.revokeObjectURL(target.previewUrl);
+
+      return current.filter((_, i) => i !== index);
+    });
+  }
+
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const message = messageInput.trim();
 
-    if (!message || !selectedId || sending) return;
+    if ((!message && selectedFiles.length === 0) || !selectedId || sending) {
+      return;
+    }
 
     setSending(true);
     setError("");
     setNotice("");
 
     try {
-      await apiRequest("/admin/message/reply", {
-        method: "POST",
-        body: JSON.stringify({
-          conversation_id: selectedId,
-          message,
-        }),
+      if (selectedFiles.length > 0) {
+        const formData = new FormData();
+
+        formData.append("conversation_id", selectedId);
+        formData.append("message", message);
+
+        selectedFiles.forEach(({ file }) => {
+          formData.append("files", file);
+        });
+
+        await apiRequest("/admin/message/reply-with-attachments", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        await apiRequest("/admin/message/reply", {
+          method: "POST",
+          body: JSON.stringify({
+            conversation_id: selectedId,
+            message,
+          }),
+        });
+      }
+
+      selectedFiles.forEach(({ previewUrl }) => {
+        URL.revokeObjectURL(previewUrl);
       });
 
+      setSelectedFiles([]);
       setMessageInput("");
       setNotice("Balasan berhasil dikirim.");
 
@@ -577,11 +674,47 @@ export default function CustomerCarePage() {
                 </div>
               ) : (
                 <form className="reply-form" onSubmit={handleSend}>
+                  {selectedFiles.length > 0 && (
+                    <div className="selected-attachments">
+                      {selectedFiles.map((item, index) => (
+                        <div
+                          className="selected-attachment"
+                          key={item.previewUrl}
+                        >
+                          {item.file.type.startsWith("image/") ? (
+                            <img
+                              src={item.previewUrl}
+                              alt={item.file.name}
+                              className="selected-preview-image"
+                            />
+                          ) : (
+                            <div className="selected-preview-pdf">PDF</div>
+                          )}
+
+                          <div className="selected-file-info">
+                            <strong>{item.file.name}</strong>
+                            <small>
+                              {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                            </small>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="remove-attachment"
+                            onClick={() => removeSelectedFile(index)}
+                            disabled={sending}
+                            aria-label="Hapus lampiran"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <textarea
                     value={messageInput}
-                    onChange={(event) =>
-                      setMessageInput(event.target.value)
-                    }
+                    onChange={(event) => setMessageInput(event.target.value)}
                     placeholder="Tulis balasan untuk pelanggan..."
                     maxLength={2000}
                     rows={2}
@@ -589,10 +722,29 @@ export default function CustomerCarePage() {
                   />
 
                   <div className="reply-footer">
-                    <span>{messageInput.length}/2000</span>
+                    <div className="reply-tools">
+                      <label className="attach-button">
+                        + Lampiran
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          multiple
+                          onChange={handleFileSelect}
+                          disabled={sending || selectedFiles.length >= 3}
+                        />
+                      </label>
+
+                      <span>
+                        {selectedFiles.length}/3 file · {messageInput.length}/2000
+                      </span>
+                    </div>
+
                     <button
                       type="submit"
-                      disabled={!messageInput.trim() || sending}
+                      disabled={
+                        (!messageInput.trim() && selectedFiles.length === 0) ||
+                        sending
+                      }
                     >
                       {sending ? "Mengirim..." : "Kirim Balasan"}
                     </button>
@@ -1049,6 +1201,100 @@ const styles = `
   .reply-footer button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+  }
+
+  .reply-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .attach-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 12px;
+    border: 1px solid #DCD5CA;
+    border-radius: 9px;
+    background: #FAFAF8;
+    color: #214D32;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .attach-button input {
+    display: none;
+  }
+
+  .selected-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 12px;
+  }
+
+  .selected-attachment {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    max-width: 100%;
+    padding: 8px 30px 8px 8px;
+    border: 1px solid #E5E1DA;
+    border-radius: 10px;
+    background: #FAFAF8;
+  }
+
+  .selected-preview-image {
+    width: 52px;
+    height: 52px;
+    border-radius: 7px;
+    object-fit: cover;
+  }
+
+  .selected-preview-pdf {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    place-items: center;
+    border-radius: 7px;
+    background: #FCE9E5;
+    color: #A34C3D;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .selected-file-info {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .selected-file-info strong {
+    max-width: 160px;
+    overflow: hidden;
+    color: #214D32;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .selected-file-info small {
+    color: #85877F;
+    font-size: 9px;
+  }
+
+  .remove-attachment {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    border: 0;
+    background: transparent;
+    color: #A34C3D;
+    font-size: 17px;
+    cursor: pointer;
   }
 
   .completed-notice {
