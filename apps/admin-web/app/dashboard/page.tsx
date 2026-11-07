@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -650,6 +651,11 @@ export default function DashboardPage() {
               { label: "Dashboard", icon: "⌂", action: "home" },
               { label: "Pesanan", icon: "▤", action: "orders" },
               {
+                label: "Customer Care",
+                icon: "✉",
+                action: "customer-care",
+              },
+              {
                 label: "Notifikasi",
                 icon: "♧",
                 action: "notifications",
@@ -672,6 +678,8 @@ export default function DashboardPage() {
                       });
                     } else if (item.action === "orders") {
                       router.push("/orders");
+                    } else if (item.action === "customer-care") {
+                      router.push("/customer-care");
                     } else if (item.action === "notifications") {
                       router.push("/notifications");
                     } else {
@@ -1515,10 +1523,10 @@ export default function DashboardPage() {
 
         .bottom-navigation-inner {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 5px;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 3px;
           width: 100%;
-          max-width: 620px;
+          max-width: 680px;
           margin: 0 auto;
         }
 
@@ -1556,10 +1564,13 @@ export default function DashboardPage() {
         }
 
         .nav-label {
-          font-size: 9px;
+          max-width: 100%;
+          font-size: 8px;
           font-weight: 700;
           line-height: 1.2;
-          white-space: nowrap;
+          text-align: center;
+          white-space: normal;
+          overflow-wrap: anywhere;
         }
 
         .nav-item-active .nav-label {
@@ -1661,6 +1672,19 @@ export default function DashboardPage() {
             height: 52px;
             padding: 5px;
             border-radius: 16px;
+          }
+
+          .bottom-navigation {
+            padding-right: 6px;
+            padding-left: 6px;
+          }
+
+          .bottom-navigation-inner {
+            gap: 2px;
+          }
+
+          .nav-label {
+            font-size: 7px;
           }
         }
 
