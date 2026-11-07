@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { label: "Portofolio", icon: "portfolio", path: "/portfolios" },
   { label: "Testimoni", icon: "testimonials", path: "/testimonials" },
   { label: "Pajara News", icon: "news", path: "/news" },
+  { label: "Customer Care", icon: "customer-care", path: "/customer-care" },
   { label: "Notifikasi", icon: "notifications", path: "/notifications" },
   { label: "Keuangan", icon: "finance", path: "/finance" },
 ];
@@ -74,6 +76,14 @@ function NavIcon({ name }: { name: string }) {
         <svg {...commonProps}>
           <path d="M5 4h14a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H6a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2Z" />
           <path d="M7 8h4v4H7zM14 8h4M14 11h4M7 15h11M7 18h11" />
+        </svg>
+      );
+
+    case "customer-care":
+      return (
+        <svg {...commonProps}>
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H10l-5 4v-4.5a2.5 2.5 0 0 1-1-2Z" />
+          <path d="M8 8h8M8 12h5" />
         </svg>
       );
 
@@ -266,10 +276,10 @@ export default function BottomNavigation() {
 
         .bottom-navigation-inner {
           display: grid;
-          grid-template-columns: repeat(7, minmax(0, 1fr));
-          gap: 3px;
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+          gap: 2px;
           width: 100%;
-          max-width: 720px;
+          max-width: 760px;
           margin: 0 auto;
         }
 
@@ -334,10 +344,10 @@ export default function BottomNavigation() {
           display: block;
           max-width: 100%;
           overflow: hidden;
-          font-size: clamp(8px, 1.8vw, 10px);
+          font-size: clamp(7px, 1.55vw, 9px);
           font-weight: 500;
           line-height: 1.25;
-          letter-spacing: -0.15px;
+          letter-spacing: -0.25px;
           text-align: center;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -373,12 +383,12 @@ export default function BottomNavigation() {
 
         @media (max-width: 380px) {
           .bottom-navigation {
-            padding-right: 3px;
-            padding-left: 3px;
+            padding-right: 2px;
+            padding-left: 2px;
           }
 
           .bottom-navigation-inner {
-            gap: 1px;
+            gap: 0;
           }
 
           .nav-item {
@@ -386,22 +396,27 @@ export default function BottomNavigation() {
             gap: 4px;
             padding-right: 0;
             padding-left: 0;
-            border-radius: 10px;
+            border-radius: 8px;
+          }
+
+          .nav-icon {
+            width: 22px;
+            height: 22px;
           }
 
           .nav-icon :global(svg) {
+            width: 18px;
+            height: 18px;
+          }
+
+          .nav-item-active .nav-icon :global(svg) {
             width: 19px;
             height: 19px;
           }
 
-          .nav-item-active .nav-icon :global(svg) {
-            width: 20px;
-            height: 20px;
-          }
-
           .nav-label {
-            font-size: 8px;
-            letter-spacing: -0.3px;
+            font-size: 7px;
+            letter-spacing: -0.4px;
           }
         }
 
