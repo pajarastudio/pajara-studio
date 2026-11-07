@@ -23,6 +23,14 @@ type Conversation = {
   unread_count?: number;
 };
 
+type Attachment = {
+  id?: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  url: string | null;
+};
+
 type Message = {
   id: string;
   conversation_id: string;
@@ -30,6 +38,7 @@ type Message = {
   message: string;
   is_read: boolean;
   created_at: string;
+  attachments?: Attachment[];
 };
 
 type ConversationResponse = {
@@ -507,7 +516,54 @@ export default function CustomerCarePage() {
                             ? "Pajara Studio"
                             : selectedConversation.customer_name}
                         </span>
-                        <p>{item.message}</p>
+
+                        {item.message && <p>{item.message}</p>}
+
+                        {item.attachments && item.attachments.length > 0 && (
+                          <div className="attachment-list">
+                            {item.attachments.map((file, index) => (
+                              <div
+                                className="attachment-item"
+                                key={file.id || `${file.file_name}-${index}`}
+                              >
+                                {file.url &&
+                                file.mime_type.startsWith("image/") ? (
+                                  <a
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="attachment-image-link"
+                                  >
+                                    <img
+                                      src={file.url}
+                                      alt={file.file_name}
+                                      className="attachment-image"
+                                    />
+                                  </a>
+                                ) : file.url &&
+                                  file.mime_type === "application/pdf" ? (
+                                  <a
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="attachment-pdf"
+                                  >
+                                    <span className="pdf-icon">PDF</span>
+                                    <span>
+                                      <strong>{file.file_name}</strong>
+                                      <small>Buka dokumen PDF</small>
+                                    </span>
+                                  </a>
+                                ) : (
+                                  <span className="attachment-unavailable">
+                                    Lampiran tidak tersedia: {file.file_name}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <time>{formatTime(item.created_at)}</time>
                       </div>
                     </div>
@@ -871,6 +927,80 @@ const styles = `
     color: #92928B;
     font-size: 9px;
     text-align: right;
+  }
+
+  .attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 9px;
+  }
+
+  .attachment-item {
+    max-width: 100%;
+  }
+
+  .attachment-image-link {
+    display: block;
+    overflow: hidden;
+    border: 1px solid #EAE5DC;
+    border-radius: 10px;
+  }
+
+  .attachment-image {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    max-height: 280px;
+    object-fit: contain;
+    background: #F5F3EF;
+  }
+
+  .attachment-pdf {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 280px;
+    padding: 11px;
+    border: 1px solid #E5E1DA;
+    border-radius: 10px;
+    background: #FAFAF8;
+    color: #214D32;
+    text-decoration: none;
+  }
+
+  .pdf-icon {
+    display: grid;
+    width: 38px;
+    height: 42px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 7px;
+    background: #FCE9E5;
+    color: #A34C3D;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .attachment-pdf strong,
+  .attachment-pdf small {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .attachment-pdf strong {
+    font-size: 11px;
+  }
+
+  .attachment-pdf small {
+    margin-top: 4px;
+    color: #85877F;
+    font-size: 10px;
+  }
+
+  .attachment-unavailable {
+    color: #A34C3D;
+    font-size: 11px;
   }
 
   .reply-form {
