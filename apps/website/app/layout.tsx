@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import Analytics from "./analytics";
 
@@ -99,6 +100,11 @@ export default function RootLayout({
       <body>
         <Analytics />
         {children}
+
+        <Script
+          src="https://pajara-connect-widget.pages.dev/pajara-connect.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
