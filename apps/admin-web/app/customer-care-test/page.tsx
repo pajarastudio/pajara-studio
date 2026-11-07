@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,13 +11,16 @@ const supabase = createClient(
 
 const API_URL = "https://pajara-connect-api.pajarastd.workers.dev";
 
+const CONVERSATION_ID =
+  "e200f970-292b-4786-acd0-cad5aa5d45d3";
+
 export default function CustomerCareTestPage() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function testConnection() {
+    async function testMessages() {
       try {
         const { data, error: sessionError } =
           await supabase.auth.getSession();
@@ -26,11 +30,13 @@ export default function CustomerCareTestPage() {
         const session = data.session;
 
         if (!session?.access_token) {
-          throw new Error("Sesi admin tidak ditemukan. Silakan login.");
+          throw new Error(
+            "Sesi admin tidak ditemukan. Silakan login."
+          );
         }
 
         const response = await fetch(
-          `${API_URL}/admin/conversations`,
+          `${API_URL}/admin/messages?conversation_id=${CONVERSATION_ID}`,
           {
             method: "GET",
             headers: {
@@ -57,7 +63,7 @@ export default function CustomerCareTestPage() {
       }
     }
 
-    testConnection();
+    testMessages();
   }, []);
 
   return (
@@ -71,9 +77,9 @@ export default function CustomerCareTestPage() {
       }}
     >
       <h1>Pajara Customer Care</h1>
-      <p>Admin API Connection Test</p>
+      <p>Admin Messages API Test</p>
 
-      {loading && <p>Menghubungkan ke API...</p>}
+      {loading && <p>Mengambil pesan percakapan...</p>}
 
       {!loading && (
         <>
