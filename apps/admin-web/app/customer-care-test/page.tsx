@@ -14,13 +14,16 @@ const API_URL = "https://pajara-connect-api.pajarastd.workers.dev";
 const CONVERSATION_ID =
   "e200f970-292b-4786-acd0-cad5aa5d45d3";
 
+const REPLY_MESSAGE =
+  "Halo, terima kasih sudah menghubungi Pajara Studio. Ada yang bisa kami bantu?";
+
 export default function CustomerCareTestPage() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function testMessages() {
+    async function testReply() {
       try {
         const { data, error: sessionError } =
           await supabase.auth.getSession();
@@ -35,7 +38,30 @@ export default function CustomerCareTestPage() {
           );
         }
 
-        const response = await fetch(
+        const replyResponse = await fetch(
+          `${API_URL}/admin/message/reply`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              conversation_id: CONVERSATION_ID,
+              message: REPLY_MESSAGE,
+            }),
+          }
+        );
+
+        const replyResult = await replyResponse.json();
+
+        if (!replyResponse.ok) {
+          throw new Error(
+            replyResult.message || `HTTP ${replyResponse.status}`
+          );
+        }
+
+        const messagesResponse = await fetch(
           `${API_URL}/admin/messages?conversation_id=${CONVERSATION_ID}`,
           {
             method: "GET",
@@ -45,13 +71,19 @@ export default function CustomerCareTestPage() {
           }
         );
 
-        const json = await response.json();
+        const messagesResult = await messagesResponse.json();
 
-        setResult(json);
-
-        if (!response.ok) {
-          setError(json.message || `HTTP ${response.status}`);
+        if (!messagesResponse.ok) {
+          throw new Error(
+            messagesResult.message ||
+              `HTTP ${messagesResponse.status}`
+          );
         }
+
+        setResult({
+          reply_test: replyResult,
+          messages_test: messagesResult,
+        });
       } catch (err) {
         setError(
           err instanceof Error
@@ -63,7 +95,7 @@ export default function CustomerCareTestPage() {
       }
     }
 
-    testMessages();
+    testReply();
   }, []);
 
   return (
@@ -77,14 +109,14 @@ export default function CustomerCareTestPage() {
       }}
     >
       <h1>Pajara Customer Care</h1>
-      <p>Admin Messages API Test</p>
+      <p>Admin Reply API Test</p>
 
-      {loading && <p>Mengambil pesan percakapan...</p>}
+      {loading && <p>Mengirim balasan dan memeriksa pesan...</p>}
 
       {!loading && (
         <>
           <h3>
-            {error ? "Koneksi bermasalah" : "Hasil pengujian"}
+            {error ? "Pengujian gagal" : "Hasil pengujian"}
           </h3>
 
           {error && (
