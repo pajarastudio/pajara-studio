@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useState } from "react";
 import Link from "next/link";
 import "./globals.css";
 
@@ -10,11 +9,6 @@ const customerWeb = "https://pajara-customer.pajarastd.workers.dev/";
 
 const logo =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
 
 const services = [
   {
@@ -48,26 +42,6 @@ const services = [
       "Desain kemasan produk dan menu usaha untuk memperkuat tampilan visual serta karakter sebuah brand.",
   },
 ];
-
-type PortfolioItem = {
-  id: string;
-  title: string;
-  category: string | null;
-  description: string | null;
-  image_path: string;
-  project_url: string | null;
-  is_featured: boolean;
-  is_active: boolean;
-  sort_order: number;
-};
-
-type TestimonialItem = {
-  id: string;
-  customer_name: string | null;
-  content: string;
-  rating: number | null;
-  created_at: string;
-};
 
 function Logo({
   className = "",
@@ -153,83 +127,7 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 export default function Home() {
-  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
-  const [portfolioLoading, setPortfolioLoading] = useState(true);
-
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
-  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
-
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadPortfolio() {
-      try {
-        const { data, error } = await supabase
-          .from("portfolios")
-          .select(
-            "id, title, category, description, image_path, project_url, is_featured, is_active, sort_order"
-          )
-          .eq("is_active", true)
-          .eq("is_featured", true)
-          .order("sort_order", { ascending: true })
-          .limit(3);
-
-        if (error) {
-          console.error("Gagal memuat portfolio:", error.message);
-          return;
-        }
-
-        if (!cancelled) {
-          setPortfolio((data || []) as PortfolioItem[]);
-        }
-      } catch (error) {
-        console.error("Terjadi kesalahan saat memuat portfolio:", error);
-      } finally {
-        if (!cancelled) setPortfolioLoading(false);
-      }
-    }
-
-    async function loadTestimonials() {
-      try {
-        const { data, error } = await supabase
-          .from("testimonials")
-          .select("id, customer_name, content, rating, created_at")
-          .eq("is_published", true)
-          .order("created_at", { ascending: false })
-          .limit(3);
-
-        if (error) {
-          console.error("Gagal memuat testimoni:", error.message);
-          return;
-        }
-
-        if (!cancelled) {
-          const items: TestimonialItem[] = (data || []).map((item) => ({
-            id: item.id,
-            customer_name: item.customer_name || null,
-            content: item.content || "",
-            rating: item.rating ?? null,
-            created_at: item.created_at,
-          }));
-
-          setTestimonials(items);
-        }
-      } catch (error) {
-        console.error("Terjadi kesalahan saat memuat testimoni:", error);
-      } finally {
-        if (!cancelled) setTestimonialsLoading(false);
-      }
-    }
-
-    void loadPortfolio();
-    void loadTestimonials();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   function closeMenu() {
     setMenuOpen(false);
@@ -376,45 +274,10 @@ export default function Home() {
               yang sudah dibuat.
             </h2>
             <p>
-              Pilihan karya yang dikelola langsung melalui
-              Pajara Admin.
+              Jelajahi berbagai karya dan eksplorasi visual
+              dari Pajara Studio.
             </p>
           </div>
-
-          {portfolioLoading ? (
-            <p>Memuat karya Pajara Studio...</p>
-          ) : portfolio.length === 0 ? (
-            <p>
-              Karya pilihan sedang dipersiapkan. Nantikan
-              perjalanan kita berikutnya.
-            </p>
-          ) : (
-            <div className="pajara-portfolio-grid">
-              {portfolio.map((item, index) => (
-                <article
-                  key={item.id}
-                  className="pajara-portfolio-card"
-                >
-                  <div className="pajara-portfolio-image">
-                    <img
-                      src={item.image_path}
-                      alt={item.title}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="pajara-portfolio-info">
-                    <span className="pajara-portfolio-number">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p>{item.category || "Karya Pajara Studio"}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
 
           <Link
             href="/portfolio"
@@ -441,6 +304,7 @@ export default function Home() {
                 <circle cx="9" cy="8.5" r="1.3" fill="currentColor" />
               </svg>
             </span>
+
             <span className="pajara-discovery-copy">
               <span className="pajara-discovery-kicker">JELAJAHI KARYA</span>
               <strong>Lihat lebih banyak hasil desain</strong>
@@ -448,6 +312,7 @@ export default function Home() {
                 Temukan karya dan eksplorasi visual lainnya dari Pajara Studio.
               </span>
             </span>
+
             <span className="pajara-discovery-arrow" aria-hidden="true">
               <ArrowIcon />
             </span>
@@ -472,56 +337,6 @@ export default function Home() {
             </p>
           </div>
 
-          {testimonialsLoading ? (
-            <p>Memuat testimoni pelanggan...</p>
-          ) : testimonials.length === 0 ? (
-            <p>
-              Testimoni pelanggan akan ditampilkan di sini
-              setelah tersedia.
-            </p>
-          ) : (
-            <div className="pajara-testimonials-grid">
-              {testimonials.map((item) => (
-                <article
-                  key={item.id}
-                  className="pajara-testimonial-card"
-                >
-                  <span
-                    className="pajara-testimonial-quote"
-                    aria-hidden="true"
-                  >
-                    “
-                  </span>
-
-                  <p className="pajara-testimonial-content">
-                    {item.content.length > 170
-                      ? `${item.content.slice(0, 170).trimEnd()}…`
-                      : item.content}
-                  </p>
-
-                  {item.rating !== null && (
-                    <div
-                      className="pajara-testimonial-rating"
-                      aria-label={`Rating ${item.rating} dari 5`}
-                    >
-                      {"★".repeat(Math.max(0, Math.min(5, item.rating)))}
-                      {"☆".repeat(
-                        5 - Math.max(0, Math.min(5, item.rating))
-                      )}
-                    </div>
-                  )}
-
-                  <div className="pajara-testimonial-customer">
-                    <strong>
-                      {item.customer_name || "Pelanggan Pajara Studio"}
-                    </strong>
-                    <span>Pelanggan Pajara Studio</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
           <Link
             href="/testimonials"
             className="pajara-discovery-card pajara-discovery-card-testimonial"
@@ -543,6 +358,7 @@ export default function Home() {
                 />
               </svg>
             </span>
+
             <span className="pajara-discovery-copy">
               <span className="pajara-discovery-kicker">CERITA PELANGGAN</span>
               <strong>Lihat lebih banyak testimoni</strong>
@@ -550,6 +366,7 @@ export default function Home() {
                 Simak pengalaman pelanggan yang menjadi bagian dari perjalanan kami.
               </span>
             </span>
+
             <span className="pajara-discovery-arrow" aria-hidden="true">
               <ArrowIcon />
             </span>
