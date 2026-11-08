@@ -234,18 +234,22 @@ export default function CustomerDashboard() {
           margin: 0 auto;
         }
 
+        /* GLASS NAVBAR */
+
         .dashboard-header {
           position: sticky;
           top: 0;
-          z-index: 20;
+          z-index: 100;
           border-bottom: 1px solid rgba(47, 107, 69, 0.1);
-          background: rgba(247, 244, 238, 0.94);
-          backdrop-filter: blur(16px);
+          background: rgba(247, 244, 238, 0.68);
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
+          backdrop-filter: blur(22px) saturate(160%);
+          transition: background 0.3s ease;
         }
 
         .dashboard-header-inner {
           display: flex;
-          min-height: 66px;
+          min-height: 70px;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
@@ -276,18 +280,25 @@ export default function CustomerDashboard() {
         }
 
         .dashboard-header-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
           flex-shrink: 0;
-          color: #536457;
+          padding: 10px 14px;
+          border: 1px solid rgba(47, 107, 69, 0.2);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.38);
+          color: #214d32;
           font-size: 12px;
           font-weight: 700;
           text-decoration: none;
+          transition: all 0.25s ease;
         }
 
-        .dashboard-header-link.primary {
-          padding: 10px 13px;
-          border-radius: 10px;
-          background: #2f6b45;
-          color: #fff;
+        .dashboard-header-link:hover {
+          border-color: #2f6b45;
+          background: rgba(255, 255, 255, 0.75);
         }
 
         .dashboard-main {
@@ -707,8 +718,8 @@ export default function CustomerDashboard() {
             <span>Pajara Studio</span>
           </a>
 
-          <a href="/order" className="dashboard-header-link primary">
-            + Pesan Desain
+          <a href="/order" className="dashboard-header-link">
+            Pesan Desain <span aria-hidden="true">↗</span>
           </a>
         </div>
       </header>
