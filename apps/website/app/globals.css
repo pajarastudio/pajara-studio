@@ -5410,3 +5410,18 @@ line-height: 1.8;
     width: 100%;
   }
 }
+
+
+/* PAJARA PORTFOLIO — FINAL OVERRIDE */
+
+.pajara-site.pajara-portfolio-page .pajara-portfolio-image {
+  aspect-ratio: 3 / 4 !important;
+  height: auto !important;
+  overflow: hidden;
+}
+
+.pajara-site.pajara-portfolio-page .pajara-portfolio-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
