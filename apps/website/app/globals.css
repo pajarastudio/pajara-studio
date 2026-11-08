@@ -553,38 +553,44 @@ img {
   transform: translate(3px, -3px);
 }
 
-/* PORTFOLIO */
+/* =========================================
+   PAJARA 2.0 — PORTFOLIO
+   Premium Minimalis · Modern Editorial
+========================================= */
 
-.pajara-site .pajara-portfolio-grid {
+.pajara-portfolio-page .pajara-portfolio-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 23px;
+  gap: 28px;
 }
 
-.pajara-site .pajara-portfolio-card {
+.pajara-portfolio-page .pajara-portfolio-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 3px 20px 3px 20px;
-  background: var(--white);
+  border: 1px solid rgba(33, 77, 50, 0.1);
+  border-radius: 4px 18px 4px 18px;
+  background: #fffefa;
+  animation: pajaraPortfolioReveal 0.65s ease both;
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
-.pajara-site .pajara-portfolio-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
+.pajara-portfolio-page .pajara-portfolio-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(47, 107, 69, 0.35);
+  box-shadow: 0 22px 50px rgba(33, 77, 50, 0.1);
 }
 
-.pajara-site .pajara-portfolio-image {
+.pajara-portfolio-page .pajara-portfolio-image {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   background: #eae5db;
 }
 
-.pajara-site .pajara-portfolio-image::after {
+.pajara-portfolio-page .pajara-portfolio-image::after {
   position: absolute;
   inset: 0;
   border: 1px solid rgba(33, 77, 50, 0.06);
@@ -592,46 +598,228 @@ img {
   pointer-events: none;
 }
 
-.pajara-site .pajara-portfolio-image img {
+.pajara-portfolio-page .pajara-portfolio-image img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.2, 0.65, 0.3, 1);
+  transition: transform 0.65s cubic-bezier(0.2, 0.65, 0.3, 1);
 }
 
-.pajara-site .pajara-portfolio-card:hover .pajara-portfolio-image img {
+.pajara-portfolio-page .pajara-portfolio-card:hover
+.pajara-portfolio-image img {
   transform: scale(1.045);
 }
 
-.pajara-site .pajara-portfolio-info {
+.pajara-portfolio-page .pajara-portfolio-image-index {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 2;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(247, 244, 238, 0.88);
+  color: var(--green-dark);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  backdrop-filter: blur(10px);
+}
+
+.pajara-portfolio-page .pajara-portfolio-image-link {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  z-index: 2;
   display: flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  background: rgba(247, 244, 238, 0.92);
+  color: var(--green-dark);
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.pajara-portfolio-page .pajara-portfolio-image-link:hover {
+  transform: translateY(-3px);
+  background: var(--green-dark);
+  color: white;
+}
+
+.pajara-portfolio-page .pajara-portfolio-info {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 12px;
   padding: 21px;
 }
 
-.pajara-site .pajara-portfolio-number {
-  padding-top: 4px;
+.pajara-portfolio-page .pajara-portfolio-card-topline {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--brown);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
-.pajara-site .pajara-portfolio-info h3 {
-  margin: 0 0 6px;
+.pajara-portfolio-page .pajara-portfolio-card-number {
+  flex-shrink: 0;
+  color: #9a9f96;
+  font-size: 9px;
+}
+
+.pajara-portfolio-page .pajara-portfolio-info h3 {
+  margin: 0;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   line-height: 1.35;
 }
 
-.pajara-site .pajara-portfolio-info p {
+.pajara-portfolio-page .pajara-portfolio-description {
   margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.pajara-portfolio-page .pajara-portfolio-project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 4px;
+  color: var(--green-dark);
   font-size: 11px;
-  line-height: 1.7;
+  font-weight: 700;
+  transition: gap 0.25s ease;
+}
+
+.pajara-portfolio-page .pajara-portfolio-project-link:hover {
+  gap: 13px;
+}
+
+.pajara-portfolio-page .pajara-portfolio-filter {
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.pajara-portfolio-page .pajara-portfolio-filter:hover {
+  transform: translateY(-2px);
+}
+
+.pajara-portfolio-page .pajara-portfolio-state {
+  animation: pajaraPortfolioReveal 0.5s ease both;
+}
+
+.pajara-portfolio-page .pajara-portfolio-contact-card {
+  border-radius: 4px 22px 4px 22px;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.pajara-portfolio-page .pajara-portfolio-contact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 45px rgba(33, 77, 50, 0.09);
+}
+
+.pajara-portfolio-page .pajara-portfolio-back {
+  transition:
+    color 0.25s ease,
+    gap 0.25s ease;
+}
+
+.pajara-portfolio-page .pajara-portfolio-back:hover {
+  color: var(--green);
+}
+
+@keyframes pajaraPortfolioReveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .pajara-portfolio-page .pajara-portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pajara-portfolio-page .pajara-portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-info {
+    gap: 9px;
+    padding: 13px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-info h3 {
+    font-size: 17px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-description {
+    font-size: 10px;
+    line-height: 1.65;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-card-topline {
+    font-size: 8px;
+    letter-spacing: 0.7px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-card-number {
+    font-size: 8px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-image-index {
+    top: 9px;
+    left: 9px;
+    padding: 5px 7px;
+    font-size: 8px;
+  }
+
+  .pajara-portfolio-page .pajara-portfolio-image-link {
+    right: 9px;
+    bottom: 9px;
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pajara-portfolio-page .pajara-portfolio-card,
+  .pajara-portfolio-page .pajara-portfolio-state {
+    animation: none;
+  }
+
+  .pajara-portfolio-page * {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ABOUT */
