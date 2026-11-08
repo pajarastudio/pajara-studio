@@ -973,36 +973,451 @@ img {
   font-style: italic;
 }
 
-/* TESTIMONIALS */
+/* =========================================
+   PAJARA 2.0 — TESTIMONIALS
+========================================= */
+
+.pajara-site .pajara-testimonials-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 105px 0 90px;
+  background:
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(138, 106, 74, 0.09),
+      transparent 30%
+    ),
+    var(--cream);
+}
+
+.pajara-site .pajara-testimonials-hero-inner {
+  max-width: 760px;
+}
+
+.pajara-site .pajara-testimonials-hero h1 {
+  margin: 22px 0 18px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(38px, 6vw, 66px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -1.8px;
+}
+
+.pajara-site .pajara-testimonials-hero h1 span {
+  color: var(--brown);
+}
+
+.pajara-site .pajara-testimonials-hero-inner > p {
+  max-width: 570px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.pajara-site .pajara-testimonials-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  color: var(--green-dark);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.pajara-site .pajara-testimonials-meta-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.pajara-site .pajara-testimonials-content {
+  padding-top: 85px;
+  padding-bottom: 85px;
+  background: var(--white);
+}
+
+.pajara-site .pajara-testimonials-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 25px;
+  margin-bottom: 38px;
+}
+
+.pajara-site .pajara-testimonials-section-heading h2 {
+  margin: 12px 0 9px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(29px, 4vw, 42px);
+  font-weight: 600;
+}
+
+.pajara-site .pajara-testimonials-section-heading p {
+  max-width: 490px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.pajara-site .pajara-testimonials-total {
+  flex-shrink: 0;
+  padding-bottom: 8px;
+  color: var(--brown);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.pajara-site .pajara-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
 
 .pajara-site .pajara-testimonial-card {
   position: relative;
-  padding: 25px;
-  border: 1px solid var(--line);
-  border-radius: 3px 18px 3px 18px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 285px;
+  padding: 27px;
+  overflow: hidden;
+  border: 1px solid rgba(33, 77, 50, 0.11);
+  border-radius: 3px 22px 3px 22px;
+  background: #fffefa;
+  box-shadow: 0 7px 24px rgba(33, 77, 50, 0.045);
+  animation: pajaraTestimonialReveal 0.55s ease both;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .pajara-site .pajara-testimonial-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-5px);
+  border-color: rgba(33, 77, 50, 0.23);
+  box-shadow: 0 15px 35px rgba(33, 77, 50, 0.09);
 }
 
-.pajara-site .pajara-testimonial-card p {
+.pajara-site .pajara-testimonial-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pajara-site .pajara-testimonial-number {
+  color: var(--brown);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pajara-site .pajara-testimonial-quote {
+  height: 43px;
+  color: rgba(138, 106, 74, 0.2);
+  font-family: Georgia, serif;
+  font-size: 65px;
+  line-height: 0.9;
+}
+
+.pajara-site .pajara-testimonial-rating {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 15px;
   font-size: 13px;
-  line-height: 1.85;
 }
 
-.pajara-site .pajara-testimonial-card h3 {
+.pajara-site .pajara-testimonial-rating .is-filled {
+  color: #b18a4d;
+}
+
+.pajara-site .pajara-testimonial-rating .is-empty {
+  color: #ded8ce;
+}
+
+.pajara-site .pajara-testimonial-content {
+  flex: 1;
+  margin: 0;
+  color: #625e56;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.pajara-site .pajara-testimonial-divider {
+  width: 100%;
+  height: 1px;
+  margin: 23px 0 17px;
+  background: rgba(33, 77, 50, 0.1);
+}
+
+.pajara-site .pajara-testimonial-customer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pajara-site .pajara-testimonial-avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 39px;
+  height: 39px;
+  border: 1px solid rgba(33, 77, 50, 0.13);
+  border-radius: 50%;
+  background: #f0eee6;
   color: var(--green-dark);
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.pajara-site .pajara-testimonial-card span {
+.pajara-site .pajara-testimonial-customer-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+
+.pajara-site .pajara-testimonial-customer-info strong {
+  overflow: hidden;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+
+.pajara-site .pajara-testimonial-customer-info span {
   color: var(--brown);
+  font-size: 10px;
+}
+
+.pajara-site .pajara-testimonial-customer-mark {
+  color: rgba(33, 77, 50, 0.2);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pajara-site .pajara-testimonials-state {
+  padding: 65px 25px;
+  border: 1px solid var(--line);
+  border-radius: 3px 22px 3px 22px;
+  background: #fffefa;
+  text-align: center;
+}
+
+.pajara-site .pajara-testimonials-state h3 {
+  margin: 16px 0 9px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px;
+}
+
+.pajara-site .pajara-testimonials-state p {
+  max-width: 470px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.pajara-site .pajara-testimonials-state-label {
+  color: var(--brown);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.pajara-site .pajara-testimonials-loader {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(33, 77, 50, 0.15);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: pajaraTestimonialSpin 0.8s linear infinite;
+}
+
+.pajara-site .pajara-testimonials-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 11px 18px;
+  border: 1px solid var(--green-dark);
+  border-radius: 3px 12px 3px 12px;
+  background: var(--green-dark);
+  color: white;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pajara-site .pajara-testimonials-back-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 45px;
+}
+
+.pajara-site .pajara-testimonials-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: gap 0.2s ease;
+}
+
+.pajara-site .pajara-testimonials-back:hover {
+  gap: 15px;
+}
+
+.pajara-site .pajara-testimonials-contact {
+  padding: 65px 0;
+  background: var(--cream);
+}
+
+.pajara-site .pajara-testimonials-contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 35px;
+  padding: 45px;
+  border: 1px solid rgba(33, 77, 50, 0.1);
+  border-radius: 3px 24px 3px 24px;
+  background: #fffefa;
+}
+
+.pajara-site .pajara-testimonials-contact-card h2 {
+  max-width: 540px;
+  margin: 13px 0 10px;
+  color: var(--green-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(27px, 4vw, 39px);
+  line-height: 1.2;
+}
+
+.pajara-site .pajara-testimonials-contact-card p {
+  max-width: 540px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.pajara-site .pajara-testimonials-contact-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 21px;
+  border-radius: 3px 14px 3px 14px;
+  background: var(--green-dark);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.pajara-site .pajara-testimonials-contact-link:hover {
+  transform: translateY(-2px);
+  background: var(--green);
+}
+
+.pajara-site .pajara-testimonials-page .pajara-footer {
+  background: var(--green-dark);
+}
+
+.pajara-site .pajara-testimonials-page .pajara-footer-bottom {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@keyframes pajaraTestimonialReveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pajaraTestimonialSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .pajara-site .pajara-testimonials-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pajara-site .pajara-testimonials-contact-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .pajara-site .pajara-testimonials-hero {
+    padding: 75px 0 65px;
+  }
+
+  .pajara-site .pajara-testimonials-hero h1 {
+    font-size: 39px;
+    letter-spacing: -1.2px;
+  }
+
+  .pajara-site .pajara-testimonials-content {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .pajara-site .pajara-testimonials-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .pajara-site .pajara-testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .pajara-site .pajara-testimonial-card {
+    min-height: 250px;
+    padding: 23px;
+  }
+
+  .pajara-site .pajara-testimonials-contact {
+    padding: 45px 0;
+  }
+
+  .pajara-site .pajara-testimonials-contact-card {
+    padding: 28px 23px;
+  }
+
+  .pajara-site .pajara-testimonials-contact-link {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pajara-site .pajara-testimonial-card,
+  .pajara-site .pajara-testimonial-rating,
+  .pajara-site .pajara-testimonials-loader {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* CTA */
