@@ -211,44 +211,52 @@ export default function OrderListPage() {
         }
 
         .back-button {
+          position: relative;
           display: inline-flex;
           align-items: center;
-          gap: 11px;
-          padding: 10px 16px 10px 10px;
-          margin-bottom: 26px;
+          gap: 12px;
+          padding: 9px 19px 9px 9px;
+          margin-bottom: 28px;
+          border: 1px solid rgba(33, 77, 50, 0.13);
+          border-radius: 50px;
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(247, 244, 238, 0.88)
+          );
           color: ${COLORS.darkGreen};
-          border: 1px solid ${COLORS.border};
-          border-radius: 16px;
-          background: ${COLORS.white};
-          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.05);
+          box-shadow:
+            0 4px 14px rgba(33, 77, 50, 0.045),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+          font-family: "DM Sans", Arial, sans-serif;
           font-size: 12px;
           font-weight: 700;
+          letter-spacing: 0.1px;
           cursor: pointer;
-          transition:
-            transform 160ms ease,
-            box-shadow 160ms ease,
-            border-color 160ms ease;
+          transition: all 200ms ease;
           -webkit-tap-highlight-color: transparent;
         }
 
         .back-button:hover {
-          border-color: rgba(47, 107, 69, 0.25);
+          border-color: rgba(47, 107, 69, 0.3);
+          background: #ffffff;
           box-shadow: 0 8px 22px rgba(33, 77, 50, 0.09);
-          transform: translateY(-1px);
+          transform: translateY(-2px);
         }
 
         .back-button:active {
-          transform: scale(0.98);
+          transform: scale(0.97);
         }
 
         .back-icon {
           display: grid;
-          width: 32px;
-          height: 32px;
+          width: 35px;
+          height: 35px;
           flex-shrink: 0;
           place-items: center;
-          border-radius: 11px;
-          background: #edf4ee;
+          border: 1px solid rgba(47, 107, 69, 0.1);
+          border-radius: 50%;
+          background: #edf3e9;
           color: ${COLORS.green};
           font-size: 19px;
           line-height: 1;
