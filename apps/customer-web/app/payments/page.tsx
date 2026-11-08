@@ -199,7 +199,7 @@ export default function PaymentsPage() {
             z-index: 1;
             width: 100%;
             max-width: 370px;
-            padding: 38px 27px 35px;
+            padding: 38px 27px 27px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -288,13 +288,16 @@ export default function PaymentsPage() {
           }
 
           .pajara-loading-footer {
-            position: absolute;
-            bottom: 30px;
-            z-index: 1;
+            position: static;
+            width: 100%;
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(47, 107, 69, 0.12);
             color: #9b978c;
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 1.5px;
+            text-align: center;
           }
 
           @keyframes pajaraLoadingAppear {
@@ -319,7 +322,7 @@ export default function PaymentsPage() {
 
           @media (max-width: 380px) {
             .pajara-loading-glass {
-              padding: 32px 21px 30px;
+              padding: 32px 21px 24px;
               border-radius: 23px;
             }
 
@@ -367,10 +370,10 @@ export default function PaymentsPage() {
           <div className="pajara-loading-track">
             <div className="pajara-loading-progress" />
           </div>
-        </div>
 
-        <div className="pajara-loading-footer">
-          DESAIN YANG PUNYA ARAH.
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH.
+          </div>
         </div>
       </main>
     );
@@ -976,9 +979,6 @@ export default function PaymentsPage() {
 
           .dashboard-brand {
             gap: 8px;
-          }
-
-          .dashboard-brand {
             font-size: 13px;
           }
 
