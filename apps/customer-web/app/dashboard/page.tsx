@@ -32,8 +32,6 @@ type SubscriptionPlan = {
 const logo =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
-const whatsappLink = "https://wa.me/message/TBAFLG4D554PC1";
-
 export default function CustomerDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -621,48 +619,6 @@ export default function CustomerDashboard() {
           line-height: 1.7;
         }
 
-        .dashboard-support {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          padding: 16px;
-          border: 1px solid #d7e5d4;
-          border-radius: 17px;
-          background: #f0f7ed;
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .dashboard-support-icon {
-          display: flex;
-          width: 43px;
-          height: 43px;
-          flex: 0 0 43px;
-          align-items: center;
-          justify-content: center;
-          border-radius: 13px;
-          background: #25d366;
-          color: #fff;
-          font-size: 21px;
-        }
-
-        .dashboard-support-content {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .dashboard-support-content strong {
-          color: #214d32;
-          font-size: 13px;
-        }
-
-        .dashboard-support-content p {
-          margin: 5px 0 0;
-          color: #687366;
-          font-size: 11px;
-          line-height: 1.7;
-        }
-
         .dashboard-footer {
           padding: 24px 0 20px;
           color: #777c72;
@@ -985,29 +941,6 @@ export default function CustomerDashboard() {
                 </div>
               )}
             </div>
-          </section>
-
-          <section className="dashboard-section">
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="dashboard-support"
-            >
-              <span className="dashboard-support-icon" aria-hidden="true">
-                ☎
-              </span>
-
-              <span className="dashboard-support-content">
-                <strong>Butuh bantuan atau konsultasi?</strong>
-                <p>
-                  Hubungi tim Pajara Studio melalui WhatsApp.{" "}
-                  <span style={{ color: "#2f6b45", fontWeight: 800 }}>
-                    Chat sekarang ↗
-                  </span>
-                </p>
-              </span>
-            </a>
           </section>
 
           <footer className="dashboard-footer">
