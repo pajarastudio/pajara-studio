@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
 
@@ -75,6 +75,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_FILES = 10;
 
 export default function CreateOrder() {
+  const [pageLoading, setPageLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -87,6 +90,26 @@ export default function CreateOrder() {
   const [brief, setBrief] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentType, setPaymentType] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function preparePage() {
+      try {
+        await supabase.auth.getUser();
+      } finally {
+        if (mounted) {
+          setPageLoading(false);
+        }
+      }
+    }
+
+    preparePage();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function handleFileSelection(files: File[]) {
     setError("");
@@ -162,7 +185,6 @@ export default function CreateOrder() {
         return;
       }
 
-      // Membuat kode pesanan sebelum menyimpan data ke Supabase.
       const orderCode = `PJ-${Date.now().toString().slice(-8)}`;
 
       const { data: order, error: orderError } = await supabase
@@ -266,105 +288,204 @@ export default function CreateOrder() {
     }
   }
 
+  if (pageLoading) {
+    return (
+      <main className="pajara-loading-page">
+        <div className="pajara-loading-content">
+          <div className="pajara-loading-logo">
+            <img src={LOGO} alt="Pajara Studio" />
+          </div>
+
+          <div className="pajara-loading-brand">PAJARA STUDIO</div>
+
+          <h1>Menyiapkan Pesanan</h1>
+
+          <p>
+            Mohon tunggu sebentar, kami sedang menyiapkan halaman pesanan Anda.
+          </p>
+
+          <div className="pajara-loading-progress">
+            <span />
+          </div>
+
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH
+          </div>
+        </div>
+
+        <style jsx>{`
+          .pajara-loading-page {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 25px;
+            background: #f7f4ee;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+          }
+
+          .pajara-loading-content {
+            display: flex;
+            width: 100%;
+            max-width: 360px;
+            flex-direction: column;
+            align-items: center;
+          }
+
+          .pajara-loading-logo {
+            display: grid;
+            width: 90px;
+            height: 90px;
+            place-items: center;
+            margin-bottom: 25px;
+            padding: 9px;
+            overflow: hidden;
+            border: 1px solid rgba(47, 107, 69, 0.2);
+            border-radius: 23px;
+            background: #fff;
+            box-shadow: 0 8px 25px rgba(33, 77, 50, 0.08);
+          }
+
+          .pajara-loading-logo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            object-fit: contain;
+          }
+
+          .pajara-loading-brand {
+            margin-bottom: 13px;
+            color: #8a6a4a;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 3px;
+          }
+
+          .pajara-loading-content h1 {
+            margin: 0;
+            color: #214d32;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 29px;
+            font-weight: 500;
+            letter-spacing: -0.7px;
+          }
+
+          .pajara-loading-content p {
+            max-width: 290px;
+            margin: 12px 0 25px;
+            color: #85877c;
+            font-size: 11px;
+            line-height: 1.8;
+          }
+
+          .pajara-loading-progress {
+            position: relative;
+            width: 155px;
+            height: 3px;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #e4e7dd;
+          }
+
+          .pajara-loading-progress span {
+            position: absolute;
+            top: 0;
+            left: -45%;
+            width: 45%;
+            height: 100%;
+            border-radius: 10px;
+            background: #2f6b45;
+            animation: pajara-loading 1.3s ease-in-out infinite;
+          }
+
+          @keyframes pajara-loading {
+            0% {
+              left: -45%;
+            }
+            100% {
+              left: 100%;
+            }
+          }
+
+          .pajara-loading-footer {
+            margin-top: 35px;
+            color: #aaa394;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .pajara-loading-progress span {
+              animation-duration: 2.5s;
+            }
+          }
+        `}</style>
+      </main>
+    );
+  }
+
   return (
     <main className="order-page">
-      <header className="order-navbar">
-        <div className="order-navbar-inner">
-          <Link
-            href="/dashboard"
-            className="order-brand"
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: "10px",
-              minWidth: 0,
-              flex: "1 1 auto",
-              color: "#214d32",
-              textDecoration: "none",
-            }}
-          >
+      <header className="dashboard-header">
+        <div className="dashboard-container dashboard-header-inner">
+          <Link href="/dashboard" className="dashboard-brand">
             <img
               src={LOGO}
               alt="Logo Pajara Studio"
-              className="order-brand-logo"
-              style={{
-                display: "block",
-                width: "40px",
-                height: "40px",
-                minWidth: "40px",
-                flex: "0 0 40px",
-                objectFit: "cover",
-                borderRadius: "11px",
-              }}
+              className="dashboard-logo"
+              width={39}
+              height={39}
             />
+            <span>Pajara Studio</span>
+          </Link>
 
-            <span
-              className="order-brand-copy"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                minWidth: 0,
-                flex: "1 1 auto",
-                gap: "4px",
-                textAlign: "left",
-              }}
+          <div className="dashboard-header-actions">
+            <button
+              type="button"
+              className={`dashboard-menu-button ${
+                menuOpen ? "is-open" : ""
+              }`}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
             >
-              <strong
-                style={{
-                  display: "block",
-                  margin: 0,
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: "16px",
-                  fontWeight: 700,
-                  lineHeight: 1.15,
-                }}
-              >
-                Pajara Studio
-              </strong>
+              <span />
+              <span />
+            </button>
 
-              <span
-                style={{
-                  display: "block",
-                  fontSize: "9px",
-                  lineHeight: 1.4,
-                  color: "#85877c",
-                }}
-              >
-                Berakar di Tanah Pasundan.
-              </span>
-            </span>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="order-dashboard-link"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px",
-              flexShrink: 0,
-              minHeight: "42px",
-              padding: "9px 14px",
-              border: "1px solid #d5e2cf",
-              borderRadius: "13px",
-              background: "#edf3e9",
-              color: "#214d32",
-              fontSize: "12px",
-              fontWeight: 700,
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-              boxShadow: "0 3px 10px rgba(33, 77, 50, 0.08)",
-            }}
-          >
-            <span>Dashboard</span>
-            <span aria-hidden="true">↗</span>
-          </Link>
+            <Link href="/order" className="dashboard-header-link">
+              Pesan Desain <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
         </div>
+
+        {menuOpen && (
+          <nav className="dashboard-menu" aria-label="Navigasi dashboard">
+            <p className="dashboard-menu-label">MENU PELANGGAN</p>
+
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+              Dashboard <span>↗</span>
+            </Link>
+
+            <Link href="/orders/list" onClick={() => setMenuOpen(false)}>
+              Pesanan Saya <span>↗</span>
+            </Link>
+
+            <Link href="/subscriptions" onClick={() => setMenuOpen(false)}>
+              Paket Desain <span>↗</span>
+            </Link>
+
+            <Link href="/payments" onClick={() => setMenuOpen(false)}>
+              Pembayaran <span>↗</span>
+            </Link>
+          </nav>
+        )}
       </header>
 
       <div className="order-container">
@@ -781,104 +902,176 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
-        .order-navbar {
-          position: relative;
-          z-index: 10;
-          width: 100%;
-          background: #fff;
-          border-bottom: 1px solid #e9e7df;
-          box-shadow: 0 4px 20px rgba(33, 77, 50, 0.035);
+        /* DASHBOARD NAVBAR */
+
+        .dashboard-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+          background: rgba(247, 244, 238, 0.88);
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
+          backdrop-filter: blur(22px) saturate(160%);
+          transition: background 0.3s ease;
         }
 
-        .order-navbar-inner {
-          width: min(1120px, calc(100% - 24px));
-          min-height: 74px;
+        .dashboard-container {
+          width: min(100% - 32px, 680px);
           margin: 0 auto;
+        }
+
+        .dashboard-header-inner {
           display: flex;
-          flex-direction: row;
+          min-height: 70px;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
+          gap: 12px;
         }
 
-        .order-brand {
-          display: flex;
-          flex-direction: row;
+        .dashboard-brand {
+          display: inline-flex;
+          min-width: 0;
           align-items: center;
           gap: 10px;
-          min-width: 0;
-          flex: 1 1 auto;
-          color: var(--green-dark);
+          color: #214d32;
+          font-size: 15px;
+          font-weight: 800;
           text-decoration: none;
         }
 
-        .order-brand-logo {
-          display: block;
-          width: 40px;
-          height: 40px;
-          min-width: 40px;
-          flex: 0 0 40px;
+        .dashboard-logo {
+          display: block !important;
+          width: 39px !important;
+          height: 39px !important;
+          min-width: 39px !important;
+          max-width: 39px !important;
+          min-height: 39px !important;
+          max-height: 39px !important;
+          flex: 0 0 39px !important;
+          border-radius: 12px;
           object-fit: cover;
+        }
+
+        .dashboard-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          flex-shrink: 0;
+        }
+
+        .dashboard-menu-button {
+          display: flex;
+          width: 42px;
+          height: 42px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 5px;
+          border: 1px solid rgba(47, 107, 69, 0.2);
           border-radius: 11px;
-          border: 1px solid #e6e8df;
+          background: rgba(255, 255, 255, 0.55);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .dashboard-menu-button:hover {
+          border-color: #2f6b45;
           background: #fff;
         }
 
-        .order-brand-copy {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: center;
-          min-width: 0;
-          gap: 4px;
-          text-align: left;
-        }
-
-        .order-brand-copy strong {
+        .dashboard-menu-button span {
           display: block;
-          margin: 0;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 16px;
-          font-weight: 700;
-          line-height: 1.15;
-          letter-spacing: -0.3px;
+          width: 17px;
+          height: 2px;
+          border-radius: 5px;
+          background: #214d32;
+          transition: transform 0.2s ease;
         }
 
-        .order-brand-copy > span {
-          display: block;
-          color: #85877c;
-          font-size: 9px;
-          line-height: 1.4;
+        .dashboard-menu-button.is-open span:first-child {
+          transform: translateY(3.5px) rotate(45deg);
         }
 
-        .order-dashboard-link {
+        .dashboard-menu-button.is-open span:last-child {
+          transform: translateY(-3.5px) rotate(-45deg);
+        }
+
+        .dashboard-header-link {
           display: inline-flex;
-          flex-direction: row;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          flex: 0 0 auto;
+          gap: 7px;
+          flex-shrink: 0;
           min-height: 42px;
-          padding: 9px 14px;
-          border: 1px solid #d5e2cf;
-          border-radius: 13px;
-          background: #edf3e9;
-          color: var(--green-dark);
+          padding: 10px 14px;
+          border: 1px solid rgba(47, 107, 69, 0.2);
+          border-radius: 10px;
+          background: #214d32;
+          color: #fff;
           font-size: 12px;
           font-weight: 700;
           text-decoration: none;
-          white-space: nowrap;
-          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
-          transition:
-            background 0.2s ease,
-            border-color 0.2s ease,
-            transform 0.2s ease;
+          transition: all 0.25s ease;
         }
 
-        .order-dashboard-link:hover {
-          background: #e3eddd;
-          border-color: #b9ceb0;
-          transform: translateY(-1px);
+        .dashboard-header-link:hover {
+          border-color: #2f6b45;
+          background: #2f6b45;
+        }
+
+        .dashboard-menu {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          width: min(680px, calc(100% - 32px));
+          padding: 13px;
+          border: 1px solid rgba(47, 107, 69, 0.12);
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.97);
+          box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12);
+          transform: translateX(-50%);
+          animation: dashboard-menu-in 0.18s ease;
+        }
+
+        @keyframes dashboard-menu-in {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -5px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        .dashboard-menu-label {
+          margin: 2px 9px 9px;
+          color: #999487;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+        }
+
+        .dashboard-menu a {
+          display: flex;
+          min-height: 43px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 11px;
+          border-radius: 9px;
+          color: #214d32;
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 0.2s ease;
+        }
+
+        .dashboard-menu a:hover {
+          background: #f1f5ed;
+        }
+
+        .dashboard-menu a span:last-child {
+          color: #8a6a4a;
         }
 
         .order-container {
@@ -1425,46 +1618,6 @@ export default function CreateOrder() {
         }
 
         @media (max-width: 600px) {
-          .order-navbar-inner {
-            width: calc(100% - 24px);
-            min-height: 74px;
-            gap: 8px;
-          }
-
-          .order-brand {
-            gap: 8px;
-          }
-
-          .order-brand-logo {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            flex-basis: 38px;
-          }
-
-          .order-brand-copy {
-            gap: 4px;
-          }
-
-          .order-brand-copy strong {
-            font-size: 15px;
-            letter-spacing: -0.3px;
-          }
-
-          .order-brand-copy > span {
-            max-width: 150px;
-            font-size: 8px;
-            line-height: 1.3;
-          }
-
-          .order-dashboard-link {
-            gap: 8px;
-            min-height: 40px;
-            padding: 8px 11px;
-            border-radius: 11px;
-            font-size: 11px;
-          }
-
           .order-container {
             width: calc(100% - 28px);
           }
@@ -1543,38 +1696,6 @@ export default function CreateOrder() {
         }
 
         @media (max-width: 360px) {
-          .order-navbar-inner {
-            width: calc(100% - 16px);
-            gap: 5px;
-          }
-
-          .order-brand {
-            gap: 6px;
-          }
-
-          .order-brand-logo {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            flex-basis: 32px;
-            border-radius: 9px;
-          }
-
-          .order-brand-copy strong {
-            font-size: 13px;
-          }
-
-          .order-brand-copy > span {
-            max-width: 112px;
-            font-size: 7px;
-          }
-
-          .order-dashboard-link {
-            gap: 6px;
-            padding: 7px 9px;
-            font-size: 10px;
-          }
-
           .order-container {
             width: calc(100% - 22px);
           }
