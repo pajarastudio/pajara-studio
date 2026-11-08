@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -372,9 +371,10 @@ export default function CustomerDashboard() {
           }
 
           .pajara-loading-footer {
-            position: absolute;
-            bottom: 30px;
-            z-index: 1;
+            position: static;
+            margin-top: 27px;
+            padding-top: 17px;
+            border-top: 1px solid rgba(47, 107, 69, 0.13);
             color: #9b978c;
             font-size: 9px;
             font-weight: 700;
@@ -454,10 +454,10 @@ export default function CustomerDashboard() {
           <div className="pajara-loading-track">
             <div className="pajara-loading-progress" />
           </div>
-        </div>
 
-        <div className="pajara-loading-footer">
-          DESAIN YANG PUNYA ARAH.
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH.
+          </div>
         </div>
       </main>
     );
