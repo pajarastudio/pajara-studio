@@ -598,10 +598,6 @@ export default function Home() {
 
             <div className="pajara-founder-info">
               <div>
-                <span>Tanggal Lahir</span>
-                <strong>04-03</strong>
-              </div>
-              <div>
                 <span>Pendidikan</span>
                 <strong>SMK Pertiwi Cibungbulang</strong>
               </div>
@@ -614,10 +610,6 @@ export default function Home() {
                 <strong>
                   Photoshop, Illustrator, Branding, Layout, Tipografi
                 </strong>
-              </div>
-              <div>
-                <span>Domisili</span>
-                <strong>Kab. Bogor, Kec. Leuwiliang</strong>
               </div>
               <div>
                 <span>Fokus</span>
