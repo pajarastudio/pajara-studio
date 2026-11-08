@@ -27,6 +27,9 @@ const COLORS = {
   border: "rgba(33,77,50,.10)",
 };
 
+const logo =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+
 function statusLabel(status: string | null) {
   const labels: Record<string, string> = {
     pending: "Pesanan Baru",
@@ -198,68 +201,95 @@ export default function OrderListPage() {
       <style jsx>{`
         .order-page {
           min-height: 100vh;
+          padding: 0 16px 36px;
           background: ${COLORS.cream};
           color: ${COLORS.text};
-          padding: 24px 16px 36px;
           font-family: "DM Sans", Arial, sans-serif;
         }
 
-        .order-container {
-          width: 100%;
-          max-width: 760px;
+        .order-header {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          width: calc(100% + 32px);
+          margin-left: -16px;
+          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+          background: rgba(247, 244, 238, 0.78);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+
+        .order-header-inner {
+          display: flex;
+          width: min(100% - 32px, 760px);
+          min-height: 68px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
           margin: 0 auto;
         }
 
-        .back-button {
-          position: relative;
+        .order-brand {
           display: inline-flex;
+          min-width: 0;
           align-items: center;
-          gap: 12px;
-          padding: 9px 19px 9px 9px;
-          margin-bottom: 28px;
-          border: 1px solid rgba(33, 77, 50, 0.13);
-          border-radius: 50px;
-          background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.96),
-            rgba(247, 244, 238, 0.88)
-          );
+          gap: 10px;
           color: ${COLORS.darkGreen};
-          box-shadow:
-            0 4px 14px rgba(33, 77, 50, 0.045),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
-          font-family: "DM Sans", Arial, sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.1px;
+          font-size: 15px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .order-logo {
+          display: block;
+          width: 39px;
+          height: 39px;
+          flex: 0 0 39px;
+          border-radius: 12px;
+          object-fit: cover;
+        }
+
+        .back-button {
+          display: inline-flex;
+          min-height: 40px;
+          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 0 13px;
+          border: 1px solid rgba(47, 107, 69, 0.16);
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.72);
+          color: ${COLORS.darkGreen};
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 800;
           cursor: pointer;
-          transition: all 200ms ease;
+          transition: all 180ms ease;
           -webkit-tap-highlight-color: transparent;
         }
 
         .back-button:hover {
-          border-color: rgba(47, 107, 69, 0.3);
-          background: #ffffff;
-          box-shadow: 0 8px 22px rgba(33, 77, 50, 0.09);
-          transform: translateY(-2px);
+          border-color: rgba(47, 107, 69, 0.35);
+          background: #fff;
+          box-shadow: 0 5px 16px rgba(33, 77, 50, 0.08);
+          transform: translateY(-1px);
         }
 
         .back-button:active {
           transform: scale(0.97);
         }
 
-        .back-icon {
-          display: grid;
-          width: 35px;
-          height: 35px;
-          flex-shrink: 0;
-          place-items: center;
-          border: 1px solid rgba(47, 107, 69, 0.1);
-          border-radius: 50%;
-          background: #edf3e9;
-          color: ${COLORS.green};
-          font-size: 19px;
+        .back-arrow {
+          font-size: 16px;
           line-height: 1;
+        }
+
+        .order-container {
+          width: 100%;
+          max-width: 760px;
+          margin: 0 auto;
+          padding-top: 27px;
         }
 
         .eyebrow {
@@ -568,6 +598,33 @@ export default function OrderListPage() {
             padding-left: 13px;
           }
 
+          .order-header {
+            width: calc(100% + 26px);
+            margin-left: -13px;
+          }
+
+          .order-header-inner {
+            width: calc(100% - 26px);
+          }
+
+          .order-brand {
+            gap: 8px;
+            font-size: 13px;
+          }
+
+          .order-logo {
+            width: 36px;
+            height: 36px;
+            flex-basis: 36px;
+          }
+
+          .back-button {
+            min-height: 38px;
+            gap: 6px;
+            padding: 0 10px;
+            font-size: 10px;
+          }
+
           .summary {
             gap: 7px;
           }
@@ -621,18 +678,33 @@ export default function OrderListPage() {
         }
       `}</style>
 
-      <div className="order-container">
-        <button
-          type="button"
-          className="back-button"
-          onClick={() => router.push("/dashboard")}
-        >
-          <span className="back-icon" aria-hidden="true">
-            ←
-          </span>
-          <span>Kembali ke Beranda</span>
-        </button>
+      <header className="order-header">
+        <div className="order-header-inner">
+          <a href="/" className="order-brand">
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              className="order-logo"
+              width={39}
+              height={39}
+            />
+            <span>Pajara Studio</span>
+          </a>
 
+          <button
+            type="button"
+            className="back-button"
+            onClick={() => router.push("/dashboard")}
+          >
+            <span className="back-arrow" aria-hidden="true">
+              ←
+            </span>
+            <span>Kembali ke Beranda</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="order-container">
         <header>
           <p className="eyebrow">PAJARA STUDIO · CUSTOMER SPACE</p>
           <h1 className="page-title">
