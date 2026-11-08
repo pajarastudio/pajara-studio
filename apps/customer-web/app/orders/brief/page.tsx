@@ -65,8 +65,7 @@ const navbarStyle: React.CSSProperties = {
   position: "sticky",
   top: 0,
   zIndex: 50,
-  width: "calc(100% + 36px)",
-  marginLeft: -18,
+  width: "100%",
   borderBottom: "1px solid rgba(47,107,69,.10)",
   background: "rgba(247,244,238,.88)",
   backdropFilter: "blur(16px)",
@@ -76,13 +75,13 @@ const navbarStyle: React.CSSProperties = {
 const navbarInnerStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: 796,
-  minHeight: 58,
+  minHeight: 66,
   padding: "0 18px",
   margin: "0 auto",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 10,
+  gap: 12,
   boxSizing: "border-box",
 };
 
@@ -90,19 +89,19 @@ const navbarBrandStyle: React.CSSProperties = {
   display: "inline-flex",
   minWidth: 0,
   alignItems: "center",
-  gap: 9,
-  color: "#214D32",
-  fontSize: 14,
+  gap: 10,
+  color: "#214d32",
+  fontSize: 15,
   fontWeight: 800,
   textDecoration: "none",
 };
 
 const navbarLogoStyle: React.CSSProperties = {
   display: "block",
-  width: 35,
-  height: 35,
-  minWidth: 35,
-  borderRadius: 11,
+  width: 39,
+  height: 39,
+  minWidth: 39,
+  borderRadius: 12,
   objectFit: "cover",
 };
 
@@ -110,14 +109,14 @@ const navbarBackStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: 6,
+  gap: 7,
   flexShrink: 0,
-  padding: "8px 11px",
+  padding: "10px 13px",
   border: "1px solid rgba(47,107,69,.16)",
-  borderRadius: 9,
+  borderRadius: 10,
   background: "rgba(255,255,255,.72)",
-  color: "#214D32",
-  fontSize: 10,
+  color: "#214d32",
+  fontSize: 11,
   fontWeight: 800,
   textDecoration: "none",
   whiteSpace: "nowrap",
@@ -130,13 +129,13 @@ function BriefNavbar({ orderId = "" }: { orderId?: string }) {
 
   return (
     <nav style={navbarStyle}>
-      <div style={navbarInnerStyle}>
+      <div style={navbarInnerStyle} className="brief-navbar-inner">
         <Link href="/dashboard" style={navbarBrandStyle}>
           <Image
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={35}
-            height={35}
+            width={39}
+            height={39}
             priority
             unoptimized
             style={navbarLogoStyle}
@@ -163,34 +162,43 @@ function PajaraLoading({
   message?: string;
 }) {
   return (
-    <main style={pageStyle}>
-      <BriefNavbar />
-
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background: "#F7F4EE",
+        fontFamily: '"DM Sans", sans-serif',
+        boxSizing: "border-box",
+      }}
+    >
       <div
         style={{
           width: "100%",
-          maxWidth: 320,
-          padding: "30px 20px",
-          margin: "min(12vh, 80px) auto 0",
+          maxWidth: 340,
+          padding: "38px 24px",
           boxSizing: "border-box",
           textAlign: "center",
           border: "1px solid rgba(33,77,50,.12)",
-          borderRadius: 20,
+          borderRadius: 24,
           background: "rgba(255,255,255,.9)",
-          boxShadow: "0 15px 40px rgba(33,77,50,.06)",
+          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
         }}
       >
         <Image
           src={LOGO}
           alt="Pajara Studio"
-          width={56}
-          height={56}
+          width={66}
+          height={66}
           priority
           unoptimized
           style={{
+            width: 66,
+            height: 66,
             objectFit: "contain",
-            borderRadius: 13,
-            marginBottom: 14,
+            borderRadius: 16,
+            marginBottom: 18,
           }}
         />
 
@@ -198,8 +206,8 @@ function PajaraLoading({
           style={{
             margin: 0,
             color: "#214D32",
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: 22,
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: 25,
           }}
         >
           Pajara Studio
@@ -207,23 +215,35 @@ function PajaraLoading({
 
         <p
           style={{
-            margin: "8px 0 20px",
+            margin: "10px 0 24px",
             color: "#70766F",
-            fontSize: 12,
-            lineHeight: 1.7,
+            fontSize: 13,
+            lineHeight: 1.8,
           }}
         >
           {message}
         </p>
 
-        <div className="brief-spinner" role="status" aria-label="Memuat" />
+        <div
+          role="status"
+          aria-label="Memuat"
+          style={{
+            width: 30,
+            height: 30,
+            margin: "0 auto",
+            border: "3px solid #DCE5DC",
+            borderTopColor: "#2F6B45",
+            borderRadius: "50%",
+            animation: "pajara-brief-spin .8s linear infinite",
+          }}
+        />
 
         <p
           style={{
-            margin: "18px 0 0",
+            margin: "22px 0 0",
             color: "#8A6A4A",
-            fontSize: 9,
-            letterSpacing: 1.8,
+            fontSize: 10,
+            letterSpacing: 2,
             fontWeight: 700,
           }}
         >
@@ -231,171 +251,14 @@ function PajaraLoading({
         </p>
       </div>
 
-      <BriefGlobalStyles />
+      <style>{`
+        @keyframes pajara-brief-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </main>
-  );
-}
-
-/* =========================
-   PAGE STYLE
-========================= */
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "#F7F4EE",
-  padding: "0 18px 40px",
-  boxSizing: "border-box",
-  color: "#1D2A22",
-  fontFamily: '"DM Sans", Arial, sans-serif',
-};
-
-/* =========================
-   GLOBAL CSS
-========================= */
-
-function BriefGlobalStyles() {
-  return (
-    <style jsx global>{`
-      .brief-page * {
-        box-sizing: border-box;
-      }
-
-      .brief-spinner {
-        width: 26px;
-        height: 26px;
-        margin: 0 auto;
-        border: 3px solid #dce5dc;
-        border-top-color: #2f6b45;
-        border-radius: 50%;
-        animation: briefSpin 0.8s linear infinite;
-      }
-
-      .brief-page a,
-      .brief-page button {
-        -webkit-tap-highlight-color: transparent;
-        transition: all 160ms ease;
-      }
-
-      .brief-page a:active,
-      .brief-page button:active {
-        transform: scale(0.99);
-      }
-
-      .brief-page a:focus-visible,
-      .brief-page button:focus-visible {
-        outline: 2px solid rgba(47, 107, 69, 0.45);
-        outline-offset: 3px;
-      }
-
-      .brief-container {
-        width: 100%;
-        max-width: 760px;
-        margin: 0 auto;
-        padding-top: 23px !important;
-        padding-bottom: 25px !important;
-      }
-
-      .brief-header {
-        margin-bottom: 20px !important;
-      }
-
-      .brief-header h1 {
-        font-size: clamp(29px, 5vw, 37px) !important;
-        margin-bottom: 8px !important;
-      }
-
-      .brief-header > p:last-child {
-        font-size: 12px !important;
-        line-height: 1.7 !important;
-      }
-
-      .brief-content {
-        display: grid;
-        gap: 15px !important;
-        min-width: 0;
-      }
-
-      .brief-card {
-        padding: 19px !important;
-        border-radius: 17px !important;
-      }
-
-      .brief-card h2 {
-        font-size: 22px !important;
-      }
-
-      .brief-info-grid {
-        gap: 9px !important;
-      }
-
-      .brief-info-item {
-        padding: 13px 14px !important;
-        border-radius: 12px !important;
-      }
-
-      .brief-info-item p:first-child {
-        font-size: 9px !important;
-        margin-bottom: 5px !important;
-      }
-
-      .brief-info-item p:last-child {
-        font-size: 13px !important;
-        line-height: 1.6 !important;
-      }
-
-      .brief-text-box {
-        min-height: 65px !important;
-        padding: 14px !important;
-        font-size: 13px !important;
-        line-height: 1.75 !important;
-      }
-
-      .brief-footer {
-        margin-top: 25px !important;
-        padding-top: 17px !important;
-      }
-
-      .brief-footer img {
-        width: 38px !important;
-        height: 38px !important;
-      }
-
-      @keyframes briefSpin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      @media (max-width: 420px) {
-        .brief-navbar-inner {
-          gap: 8px !important;
-          padding: 0 13px !important;
-        }
-
-        .brief-navbar-inner a:first-child {
-          gap: 8px !important;
-          font-size: 13px !important;
-        }
-
-        .brief-navbar-inner a:last-child {
-          padding: 8px 9px !important;
-          font-size: 9px !important;
-        }
-
-        .brief-card {
-          padding: 16px !important;
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-    `}</style>
   );
 }
 
@@ -484,25 +347,25 @@ function BriefContent() {
   const cardStyle: React.CSSProperties = {
     background: "#FFFFFF",
     border: "1px solid rgba(33,77,50,.11)",
-    borderRadius: 17,
-    padding: 19,
-    boxShadow: "0 8px 25px rgba(33,77,50,.04)",
+    borderRadius: 22,
+    padding: "clamp(20px, 5vw, 30px)",
+    boxShadow: "0 12px 35px rgba(33,77,50,.045)",
     boxSizing: "border-box",
     minWidth: 0,
   };
 
   const eyebrowStyle: React.CSSProperties = {
     color: "#8A6A4A",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 700,
-    letterSpacing: 1.6,
+    letterSpacing: 1.8,
     lineHeight: 1.7,
-    margin: "0 0 7px",
+    margin: "0 0 8px",
   };
 
   const valueStyle: React.CSSProperties = {
-    fontSize: 13,
-    lineHeight: 1.75,
+    fontSize: 14,
+    lineHeight: 1.85,
     color: "#34443A",
     whiteSpace: "pre-wrap",
     overflowWrap: "anywhere",
@@ -514,16 +377,16 @@ function BriefContent() {
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    minHeight: 42,
-    padding: "10px 15px",
+    minHeight: 48,
+    padding: "12px 18px",
     boxSizing: "border-box",
-    borderRadius: 10,
+    borderRadius: 12,
     border: "none",
     background: "#2F6B45",
     color: "#FFFFFF",
     textDecoration: "none",
     fontFamily: "inherit",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 700,
     cursor: "pointer",
   };
@@ -532,15 +395,15 @@ function BriefContent() {
     display: "inline-flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: 42,
-    padding: "10px 14px",
+    minHeight: 48,
+    padding: "12px 16px",
     boxSizing: "border-box",
     border: "1px solid rgba(33,77,50,.14)",
-    borderRadius: 10,
+    borderRadius: 12,
     background: "#FFFFFF",
     color: "#214D32",
     textDecoration: "none",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 700,
   };
 
@@ -557,23 +420,32 @@ function BriefContent() {
         color: "#26352A",
         fontFamily: '"DM Sans", sans-serif',
       }}
-      className="brief-page"
     >
       <BriefNavbar orderId={id || ""} />
 
-      <section className="brief-container">
-        <div className="brief-header">
+      <section
+        style={{
+          width: "100%",
+          maxWidth: 1160,
+          margin: "0 auto",
+          padding:
+            "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div style={{ marginBottom: 28 }}>
           <p style={eyebrowStyle}>RUANG PROJECT PAJARA</p>
 
           <h1
             style={{
-              margin: "0 0 10px",
+              margin: "0 0 12px",
               color: "#214D32",
-              fontFamily: '"Playfair Display", Georgia, serif',
-              fontSize: 37,
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontSize: "clamp(32px, 6vw, 46px)",
               fontWeight: 600,
               lineHeight: 1.18,
-              letterSpacing: "-.6px",
+              letterSpacing: "-.7px",
+              overflowWrap: "break-word",
             }}
           >
             Brief <span style={{ color: "#8A6A4A" }}>Desain.</span>
@@ -584,8 +456,8 @@ function BriefContent() {
               maxWidth: 590,
               margin: 0,
               color: "#70766F",
-              fontSize: 12,
-              lineHeight: 1.7,
+              fontSize: 14,
+              lineHeight: 1.9,
             }}
           >
             Semua arahan dan informasi desain tersimpan di satu tempat agar
@@ -594,18 +466,18 @@ function BriefContent() {
         </div>
 
         {error ? (
-          <section style={cardStyle} className="brief-card">
+          <section style={cardStyle} aria-live="polite">
             <div
               style={{
                 display: "grid",
                 placeItems: "center",
-                width: 40,
-                height: 40,
-                marginBottom: 14,
-                borderRadius: 12,
+                width: 48,
+                height: 48,
+                marginBottom: 18,
+                borderRadius: 15,
                 background: "#F9EFEB",
                 color: "#A13B32",
-                fontSize: 19,
+                fontSize: 22,
               }}
             >
               !
@@ -613,10 +485,10 @@ function BriefContent() {
 
             <h2
               style={{
-                margin: "0 0 8px",
+                margin: "0 0 10px",
                 color: "#214D32",
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontSize: 22,
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: 24,
               }}
             >
               Brief belum tersedia
@@ -624,16 +496,16 @@ function BriefContent() {
 
             <p
               style={{
-                margin: "0 0 17px",
+                margin: "0 0 20px",
                 color: "#70766F",
-                fontSize: 12,
+                fontSize: 14,
                 lineHeight: 1.8,
               }}
             >
               {error}
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               <button
                 onClick={() => window.location.reload()}
                 style={primaryButtonStyle}
@@ -647,18 +519,18 @@ function BriefContent() {
             </div>
           </section>
         ) : order ? (
-          <div className="brief-content">
-            <section style={cardStyle} className="brief-card">
+          <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
+            <section style={cardStyle}>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  gap: 12,
+                  gap: 14,
                   flexWrap: "wrap",
-                  paddingBottom: 17,
+                  paddingBottom: 22,
                   borderBottom: "1px solid #EEEAE3",
-                  marginBottom: 19,
+                  marginBottom: 24,
                 }}
               >
                 <div style={{ minWidth: 0 }}>
@@ -668,8 +540,8 @@ function BriefContent() {
                     style={{
                       margin: 0,
                       color: "#214D32",
-                      fontFamily: '"Playfair Display", Georgia, serif',
-                      fontSize: 23,
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontSize: "clamp(21px, 4vw, 27px)",
                       lineHeight: 1.4,
                       overflowWrap: "anywhere",
                     }}
@@ -682,13 +554,15 @@ function BriefContent() {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    padding: "7px 11px",
+                    maxWidth: "100%",
+                    padding: "8px 13px",
                     borderRadius: 999,
                     background: "#EDF4EB",
                     color: "#2F6B45",
-                    fontSize: 10,
+                    fontSize: 11,
                     lineHeight: 1.5,
                     fontWeight: 700,
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {getStatusLabel(order.status)}
@@ -699,10 +573,10 @@ function BriefContent() {
 
               <h2
                 style={{
-                  margin: "0 0 17px",
+                  margin: "0 0 22px",
                   color: "#214D32",
-                  fontFamily: '"Playfair Display", Georgia, serif',
-                  fontSize: 25,
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 24,
                   lineHeight: 1.35,
                 }}
               >
@@ -710,12 +584,11 @@ function BriefContent() {
               </h2>
 
               <div
-                className="brief-info-grid"
                 style={{
                   display: "grid",
                   gridTemplateColumns:
                     "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
-                  gap: 9,
+                  gap: 12,
                 }}
               >
                 {[
@@ -738,13 +611,13 @@ function BriefContent() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="brief-info-item"
                     style={{
-                      padding: 14,
+                      padding: 17,
                       minWidth: 0,
                       border: "1px solid #EEEAE3",
-                      borderRadius: 12,
+                      borderRadius: 14,
                       background: "#FCFBF8",
+                      boxSizing: "border-box",
                     }}
                   >
                     <p style={eyebrowStyle}>{item.label}</p>
@@ -753,8 +626,8 @@ function BriefContent() {
                       style={{
                         margin: 0,
                         color: "#34443A",
-                        fontSize: 13,
-                        lineHeight: 1.6,
+                        fontSize: 14,
+                        lineHeight: 1.8,
                         fontWeight: 600,
                         overflowWrap: "anywhere",
                       }}
@@ -766,15 +639,15 @@ function BriefContent() {
               </div>
             </section>
 
-            <section style={cardStyle} className="brief-card">
+            <section style={cardStyle}>
               <p style={eyebrowStyle}>ARAHAN DESAIN</p>
 
               <h2
                 style={{
-                  margin: "0 0 8px",
+                  margin: "0 0 10px",
                   color: "#214D32",
-                  fontFamily: '"Playfair Display", Georgia, serif',
-                  fontSize: 25,
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 27,
                   lineHeight: 1.35,
                 }}
               >
@@ -783,9 +656,9 @@ function BriefContent() {
 
               <p
                 style={{
-                  margin: "0 0 16px",
+                  margin: "0 0 20px",
                   color: "#70766F",
-                  fontSize: 12,
+                  fontSize: 13,
                   lineHeight: 1.8,
                 }}
               >
@@ -793,13 +666,13 @@ function BriefContent() {
               </p>
 
               <div
-                className="brief-text-box"
                 style={{
                   ...valueStyle,
-                  padding: 15,
-                  minHeight: 80,
+                  padding: 20,
+                  minHeight: 110,
+                  boxSizing: "border-box",
                   border: "1px solid #EAE7DF",
-                  borderRadius: 13,
+                  borderRadius: 15,
                   background: "#FAF9F6",
                 }}
               >
@@ -810,7 +683,7 @@ function BriefContent() {
               <div
                 style={{
                   height: 1,
-                  margin: "21px 0",
+                  margin: "26px 0",
                   background: "#EEEAE3",
                 }}
               />
@@ -819,10 +692,10 @@ function BriefContent() {
 
               <h2
                 style={{
-                  margin: "0 0 13px",
+                  margin: "0 0 16px",
                   color: "#214D32",
-                  fontFamily: '"Playfair Display", Georgia, serif',
-                  fontSize: 22,
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 23,
                   lineHeight: 1.4,
                 }}
               >
@@ -830,13 +703,13 @@ function BriefContent() {
               </h2>
 
               <div
-                className="brief-text-box"
                 style={{
                   ...valueStyle,
-                  padding: 15,
-                  minHeight: 65,
+                  padding: 20,
+                  minHeight: 76,
+                  boxSizing: "border-box",
                   border: "1px solid #EAE7DF",
-                  borderRadius: 13,
+                  borderRadius: 15,
                   background: "#FAF9F6",
                 }}
               >
@@ -849,33 +722,32 @@ function BriefContent() {
         {/* FOOTER */}
 
         <footer
-          className="brief-footer"
           style={{
             borderTop: "1px solid #e4ddd1",
-            paddingTop: 17,
-            marginTop: 25,
+            paddingTop: 22,
+            marginTop: 36,
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 11,
+              gap: 13,
             }}
           >
             <Image
               src={LOGO}
               alt="Logo Pajara Studio"
-              width={38}
-              height={38}
+              width={43}
+              height={43}
               unoptimized
               style={{
-                width: 38,
-                height: 38,
+                width: 43,
+                height: 43,
                 flexShrink: 0,
                 objectFit: "contain",
-                borderRadius: 9,
-                background: "#FFFFFF",
+                borderRadius: 10,
+                background: "#fff",
               }}
             />
 
@@ -883,8 +755,8 @@ function BriefContent() {
               <strong
                 style={{
                   display: "block",
-                  color: "#214D32",
-                  fontSize: 12,
+                  color: "#214d32",
+                  fontSize: 13,
                   lineHeight: 1.5,
                 }}
               >
@@ -893,9 +765,9 @@ function BriefContent() {
 
               <p
                 style={{
-                  margin: "3px 0 0",
-                  color: "#8A6A4A",
-                  fontSize: 10,
+                  margin: "4px 0 0",
+                  color: "#8a6a4a",
+                  fontSize: 11,
                   lineHeight: 1.5,
                 }}
               >
@@ -906,11 +778,11 @@ function BriefContent() {
 
           <p
             style={{
-              margin: "16px 0 0",
-              paddingTop: 12,
+              margin: "20px 0 0",
+              paddingTop: 14,
               borderTop: "1px solid #e9e3d9",
               color: "#999387",
-              fontSize: 9,
+              fontSize: 10,
               lineHeight: 1.7,
             }}
           >
@@ -919,7 +791,30 @@ function BriefContent() {
         </footer>
       </section>
 
-      <BriefGlobalStyles />
+      <style>{`
+        @keyframes pajara-brief-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @media (max-width: 420px) {
+          .brief-navbar-inner {
+            gap: 8px !important;
+            padding: 0 13px !important;
+          }
+
+          .brief-navbar-inner a:first-child {
+            gap: 8px !important;
+            font-size: 13px !important;
+          }
+
+          .brief-navbar-inner a:last-child {
+            padding: 9px 10px !important;
+            font-size: 10px !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
@@ -927,7 +822,9 @@ function BriefContent() {
 export default function BriefPage() {
   return (
     <Suspense
-      fallback={<PajaraLoading message="Memuat halaman brief..." />}
+      fallback={
+        <PajaraLoading message="Memuat halaman brief..." />
+      }
     >
       <BriefContent />
     </Suspense>
