@@ -238,12 +238,16 @@ export default function CustomerDashboard() {
           }
 
           .pajara-loading-logo {
-            width: 82px;
-            height: 82px;
-            object-fit: cover;
-            border-radius: 22px;
+            display: block;
+            width: 90px;
+            height: 90px;
+            padding: 9px;
+            object-fit: contain;
+            border: 1px solid rgba(47, 107, 69, 0.2);
+            border-radius: 23px;
+            background: #ffffff;
+            box-shadow: 0 8px 25px rgba(33, 77, 50, 0.10);
             margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(33, 77, 50, 0.09);
           }
 
           .pajara-loading-brand {
