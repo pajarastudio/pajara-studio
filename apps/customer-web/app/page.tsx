@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -147,7 +146,7 @@ export default function CustomerHome() {
 
         .pajara-home {
           min-height: 100vh;
-          overflow: hidden;
+          overflow: clip;
           color: var(--pajara-ink);
           background: var(--pajara-cream);
           font-family: "DM Sans", "Segoe UI", sans-serif;
@@ -161,10 +160,12 @@ export default function CustomerHome() {
         .pajara-navbar {
           position: sticky;
           top: 0;
-          z-index: 30;
-          background: rgba(247, 244, 238, 0.92);
+          z-index: 100;
+          width: 100%;
+          background: rgba(247, 244, 238, 0.94);
           border-bottom: 1px solid var(--pajara-line);
           backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
         }
 
         .pajara-navbar-inner {
@@ -381,7 +382,7 @@ export default function CustomerHome() {
           box-shadow: 0 0 0 4px rgba(47, 107, 69, 0.1);
         }
 
-        /* HERO ART — PAJARA FLOATING IDENTITY */
+        /* HERO ART */
 
         .pajara-hero-art {
           position: relative;
@@ -518,8 +519,6 @@ export default function CustomerHome() {
           font-size: 11px;
           line-height: 1.8;
         }
-
-        /* Lapisan abstrak seperti lembar desain yang bertumpuk */
 
         .pajara-art-shape {
           position: absolute;
@@ -1403,6 +1402,7 @@ export default function CustomerHome() {
               <a href="/login" className="pajara-button pajara-button-primary">
                 Mulai Pesan <span aria-hidden="true">↗</span>
               </a>
+
               <a
                 href="#cara-order"
                 className="pajara-button pajara-button-secondary"
@@ -1433,9 +1433,20 @@ export default function CustomerHome() {
             className="pajara-hero-art"
             aria-label="Identitas visual Pajara Studio"
           >
-            <div className="pajara-art-shape pajara-art-shape-one" aria-hidden="true" />
-            <div className="pajara-art-shape pajara-art-shape-two" aria-hidden="true" />
-            <div className="pajara-art-shape pajara-art-shape-three" aria-hidden="true" />
+            <div
+              className="pajara-art-shape pajara-art-shape-one"
+              aria-hidden="true"
+            />
+
+            <div
+              className="pajara-art-shape pajara-art-shape-two"
+              aria-hidden="true"
+            />
+
+            <div
+              className="pajara-art-shape pajara-art-shape-three"
+              aria-hidden="true"
+            />
 
             <div className="pajara-art-card">
               <span className="pajara-art-card-label">
@@ -1451,6 +1462,7 @@ export default function CustomerHome() {
               </div>
 
               <h2>Desain yang punya arah.</h2>
+
               <p>
                 Berakar di Tanah Pasundan.
                 <br />
@@ -1467,10 +1479,12 @@ export default function CustomerHome() {
             <strong>Satu tempat</strong>
             <span>Kelola pesanan desain</span>
           </div>
+
           <div className="pajara-trust-item">
             <strong>Lebih terarah</strong>
             <span>Pantau proses dan status</span>
           </div>
+
           <div className="pajara-trust-item">
             <strong>Lebih praktis</strong>
             <span>Akses informasi pesanan</span>
@@ -1493,11 +1507,13 @@ export default function CustomerHome() {
         >
           <div className="pajara-section-heading">
             <p className="pajara-eyebrow">Mulai dari sini</p>
+
             <h2>
               Dari ide sederhana
               <br />
               menjadi karya yang berarti.
             </h2>
+
             <p>
               Proses pemesanan dirancang agar Kang/Teh bisa menyampaikan
               kebutuhan dengan jelas dan mengikuti perkembangan pesanan
@@ -1516,10 +1532,12 @@ export default function CustomerHome() {
               >
                 <div className="pajara-step-top">
                   <span className="pajara-step-number">{step.number}</span>
+
                   <span className="pajara-step-icon" aria-hidden="true">
                     {step.icon}
                   </span>
                 </div>
+
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
               </article>
@@ -1543,12 +1561,15 @@ export default function CustomerHome() {
         >
           <div className="pajara-facilities-intro">
             <p className="pajara-eyebrow">Di dalam akunmu</p>
+
             <h2>Semua kebutuhan desain, lebih mudah dijangkau.</h2>
+
             <p>
               Customer Web menjadi tempat untuk mengikuti perjalanan
               pesanan, mulai dari informasi order hingga file hasil desain
               yang tersedia.
             </p>
+
             <a
               href="/register"
               className="pajara-button pajara-button-primary"
@@ -1560,14 +1581,15 @@ export default function CustomerHome() {
           <div className="pajara-facilities-list">
             {facilities.map((facility, index) => (
               <article
-                className={`pajara-facility pajara-reveal pajara-reveal-delay-${index % 3} ${
-                  visible.includes(1) ? "is-visible" : ""
-                }`}
+                className={`pajara-facility pajara-reveal pajara-reveal-delay-${
+                  index % 3
+                } ${visible.includes(1) ? "is-visible" : ""}`}
                 key={facility.number}
               >
                 <div className="pajara-facility-icon" aria-hidden="true">
                   {facility.icon}
                 </div>
+
                 <h3>{facility.title}</h3>
                 <p>{facility.description}</p>
               </article>
@@ -1580,11 +1602,13 @@ export default function CustomerHome() {
         <div className="pajara-container pajara-quote-inner">
           <div>
             <p className="pajara-eyebrow">Mari mulai perjalanan kita</p>
+
             <h2>
               Ide Kang/Teh layak
               <br />
               diwujudkan dengan <em>arah.</em>
             </h2>
+
             <p>
               Mulai dengan membuat akun atau masuk ke akun yang sudah
               dimiliki. Setelah masuk, Kang/Teh bisa membuka Dashboard
@@ -1611,6 +1635,7 @@ export default function CustomerHome() {
             <a href="https://pajara-website.pajarastd.workers.dev/">
               Website
             </a>
+
             <a href="/login">Login</a>
             <a href="/register">Buat Akun</a>
           </div>
