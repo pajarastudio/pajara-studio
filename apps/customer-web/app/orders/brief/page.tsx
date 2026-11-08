@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@pajara/supabase";
 
 type Order = {
@@ -56,28 +57,204 @@ function getStatusLabel(status: string | null) {
   }
 }
 
+/* =========================
+   SHARED STYLES
+========================= */
+
+const pageStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "#F7F4EE",
+  padding: "0 18px 55px",
+  boxSizing: "border-box",
+  color: "#1D2A22",
+  fontFamily: '"DM Sans", Arial, sans-serif',
+};
+
+const containerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 760,
+  margin: "0 auto",
+  paddingTop: 30,
+};
+
+const navbarStyle: React.CSSProperties = {
+  position: "sticky",
+  top: 0,
+  zIndex: 50,
+  width: "calc(100% + 36px)",
+  marginLeft: -18,
+  borderBottom: "1px solid rgba(47,107,69,.10)",
+  background: "rgba(247,244,238,.88)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+};
+
+const navbarInnerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 796,
+  minHeight: 66,
+  padding: "0 18px",
+  margin: "0 auto",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  boxSizing: "border-box",
+};
+
+const navbarBrandStyle: React.CSSProperties = {
+  display: "inline-flex",
+  minWidth: 0,
+  alignItems: "center",
+  gap: 10,
+  color: "#214D32",
+  fontSize: 15,
+  fontWeight: 800,
+  textDecoration: "none",
+};
+
+const navbarLogoStyle: React.CSSProperties = {
+  display: "block",
+  width: 39,
+  height: 39,
+  minWidth: 39,
+  borderRadius: 12,
+  objectFit: "cover",
+};
+
+const navbarBackStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 7,
+  flexShrink: 0,
+  padding: "10px 13px",
+  border: "1px solid rgba(47,107,69,.16)",
+  borderRadius: 10,
+  background: "rgba(255,255,255,.72)",
+  color: "#214D32",
+  fontSize: 11,
+  fontWeight: 800,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+};
+
+const cardStyle: React.CSSProperties = {
+  background: "#FFFFFF",
+  border: "1px solid rgba(33,77,50,.11)",
+  borderRadius: 22,
+  padding: "clamp(20px, 5vw, 30px)",
+  boxShadow: "0 12px 35px rgba(33,77,50,.045)",
+  boxSizing: "border-box",
+  minWidth: 0,
+};
+
+const eyebrowStyle: React.CSSProperties = {
+  color: "#8A6A4A",
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: 1.8,
+  lineHeight: 1.7,
+  margin: "0 0 8px",
+};
+
+const valueStyle: React.CSSProperties = {
+  fontSize: 14,
+  lineHeight: 1.85,
+  color: "#34443A",
+  whiteSpace: "pre-wrap",
+  overflowWrap: "anywhere",
+  margin: 0,
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+  display: "inline-flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 8,
+  minHeight: 48,
+  padding: "12px 18px",
+  boxSizing: "border-box",
+  borderRadius: 12,
+  border: "none",
+  background: "#2F6B45",
+  color: "#FFFFFF",
+  textDecoration: "none",
+  fontFamily: "inherit",
+  fontSize: 14,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const backErrorStyle: React.CSSProperties = {
+  display: "inline-flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: 48,
+  padding: "12px 16px",
+  boxSizing: "border-box",
+  border: "1px solid rgba(33,77,50,.14)",
+  borderRadius: 12,
+  background: "#FFFFFF",
+  color: "#214D32",
+  textDecoration: "none",
+  fontSize: 14,
+  fontWeight: 700,
+};
+
+/* =========================
+   NAVBAR
+========================= */
+
+function BriefNavbar({ orderId = "" }: { orderId?: string }) {
+  const backHref = orderId
+    ? `/orders?id=${encodeURIComponent(orderId)}`
+    : "/orders";
+
+  return (
+    <nav style={navbarStyle}>
+      <div style={navbarInnerStyle} className="brief-navbar-inner">
+        <Link href="/dashboard" style={navbarBrandStyle}>
+          <Image
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={39}
+            height={39}
+            priority
+            unoptimized
+            style={navbarLogoStyle}
+          />
+          <span>Pajara Studio</span>
+        </Link>
+
+        <Link href={backHref} style={navbarBackStyle}>
+          <span aria-hidden="true">←</span>
+          Kembali ke Pesanan
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+/* =========================
+   LOADING
+========================= */
+
 function PajaraLoading({
   message = "Menyiapkan brief desainmu...",
 }: {
   message?: string;
 }) {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-        background: "#F7F4EE",
-        fontFamily: '"DM Sans", sans-serif',
-        boxSizing: "border-box",
-      }}
-    >
+    <main style={pageStyle}>
+      <BriefNavbar />
+
       <div
         style={{
           width: "100%",
           maxWidth: 340,
           padding: "38px 24px",
+          margin: "min(12vh, 90px) auto 0",
           boxSizing: "border-box",
           textAlign: "center",
           border: "1px solid rgba(33,77,50,.12)",
@@ -86,12 +263,14 @@ function PajaraLoading({
           boxShadow: "0 20px 55px rgba(33,77,50,.07)",
         }}
       >
-        <img
+        <Image
           src={LOGO}
           alt="Pajara Studio"
+          width={66}
+          height={66}
+          priority
+          unoptimized
           style={{
-            width: 66,
-            height: 66,
             objectFit: "contain",
             borderRadius: 16,
             marginBottom: 18,
@@ -102,7 +281,7 @@ function PajaraLoading({
           style={{
             margin: 0,
             color: "#214D32",
-            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontFamily: '"Playfair Display", Georgia, serif',
             fontSize: 25,
           }}
         >
@@ -120,19 +299,7 @@ function PajaraLoading({
           {message}
         </p>
 
-        <div
-          role="status"
-          aria-label="Memuat"
-          style={{
-            width: 30,
-            height: 30,
-            margin: "0 auto",
-            border: "3px solid #DCE5DC",
-            borderTopColor: "#2F6B45",
-            borderRadius: "50%",
-            animation: "pajara-brief-spin .8s linear infinite",
-          }}
-        />
+        <div className="brief-spinner" role="status" aria-label="Memuat" />
 
         <p
           style={{
@@ -147,14 +314,107 @@ function PajaraLoading({
         </p>
       </div>
 
-      <style>{`
-        @keyframes pajara-brief-spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <BriefGlobalStyles />
     </main>
   );
 }
+
+/* =========================
+   GLOBAL STYLES
+========================= */
+
+function BriefGlobalStyles() {
+  return (
+    <style jsx global>{`
+      .brief-page * {
+        box-sizing: border-box;
+      }
+
+      .brief-spinner {
+        width: 30px;
+        height: 30px;
+        margin: 0 auto;
+        border: 3px solid #dce5dc;
+        border-top-color: #2f6b45;
+        border-radius: 50%;
+        animation: briefSpin 0.8s linear infinite;
+      }
+
+      .brief-page a,
+      .brief-page button {
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          transform 160ms ease;
+      }
+
+      .brief-page a:active,
+      .brief-page button:active {
+        transform: scale(0.99);
+      }
+
+      .brief-page a:focus-visible,
+      .brief-page button:focus-visible {
+        outline: 2px solid rgba(47, 107, 69, 0.45);
+        outline-offset: 3px;
+      }
+
+      @media (hover: hover) {
+        .brief-page a:hover,
+        .brief-page button:hover {
+          box-shadow: 0 7px 20px rgba(33, 77, 50, 0.08);
+        }
+      }
+
+      @keyframes briefSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .brief-container {
+          padding-top: 24px !important;
+        }
+
+        .brief-card {
+          padding: 20px !important;
+          border-radius: 17px !important;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .brief-navbar-inner {
+          gap: 8px !important;
+        }
+
+        .brief-navbar-inner a:first-child span {
+          font-size: 13px;
+        }
+
+        .brief-navbar-inner a:last-child {
+          padding: 9px 10px !important;
+          font-size: 10px !important;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
 
 function BriefContent() {
   const searchParams = useSearchParams();
@@ -262,46 +522,6 @@ function BriefContent() {
     margin: 0,
   };
 
-  const backStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 14,
-    width: "100%",
-    minHeight: 58,
-    padding: "13px 16px",
-    marginBottom: 28,
-    boxSizing: "border-box",
-    background: "#FFFFFF",
-    color: "#214D32",
-    border: "1px solid rgba(33,77,50,.12)",
-    borderRadius: 15,
-    boxShadow: "0 6px 20px rgba(33,77,50,.035)",
-    textDecoration: "none",
-    fontSize: 14,
-    fontWeight: 700,
-    lineHeight: 1.6,
-  };
-
-  const primaryButtonStyle: React.CSSProperties = {
-    display: "inline-flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    minHeight: 48,
-    padding: "12px 18px",
-    boxSizing: "border-box",
-    borderRadius: 12,
-    border: "none",
-    background: "#2F6B45",
-    color: "#FFFFFF",
-    textDecoration: "none",
-    fontFamily: "inherit",
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
-  };
-
   if (loading) return <PajaraLoading />;
 
   return (
@@ -315,57 +535,20 @@ function BriefContent() {
         color: "#26352A",
         fontFamily: '"DM Sans", sans-serif',
       }}
+      className="brief-page"
     >
+      <BriefNavbar orderId={id || ""} />
+
       <section
         style={{
           width: "100%",
-          maxWidth: 1160,
+          maxWidth: 760,
           margin: "0 auto",
-          padding:
-            "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
+          padding: "30px 0 34px",
           boxSizing: "border-box",
         }}
+        className="brief-container"
       >
-        <Link href={backHref} style={backStyle}>
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              minWidth: 0,
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                display: "grid",
-                placeItems: "center",
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                background: "#F0F4EE",
-                color: "#2F6B45",
-                fontSize: 19,
-                flexShrink: 0,
-              }}
-            >
-              ←
-            </span>
-            <span>Kembali ke Pesanan</span>
-          </span>
-
-          <span
-            aria-hidden="true"
-            style={{
-              color: "#8A6A4A",
-              fontSize: 18,
-              flexShrink: 0,
-            }}
-          >
-            →
-          </span>
-        </Link>
-
         <div style={{ marginBottom: 28 }}>
           <p style={eyebrowStyle}>RUANG PROJECT PAJARA</p>
 
@@ -373,7 +556,7 @@ function BriefContent() {
             style={{
               margin: "0 0 12px",
               color: "#214D32",
-              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontFamily: '"Playfair Display", Georgia, serif',
               fontSize: "clamp(32px, 6vw, 46px)",
               fontWeight: 600,
               lineHeight: 1.18,
@@ -399,7 +582,7 @@ function BriefContent() {
         </div>
 
         {error ? (
-          <section style={cardStyle} aria-live="polite">
+          <section style={cardStyle} className="brief-card" aria-live="polite">
             <div
               style={{
                 display: "grid",
@@ -420,7 +603,7 @@ function BriefContent() {
               style={{
                 margin: "0 0 10px",
                 color: "#214D32",
-                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontFamily: '"Playfair Display", Georgia, serif',
                 fontSize: 24,
               }}
             >
@@ -453,7 +636,7 @@ function BriefContent() {
           </section>
         ) : order ? (
           <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
-            <section style={cardStyle}>
+            <section style={cardStyle} className="brief-card">
               <div
                 style={{
                   display: "flex",
@@ -472,7 +655,7 @@ function BriefContent() {
                     style={{
                       margin: 0,
                       color: "#214D32",
-                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontFamily: '"Playfair Display", Georgia, serif',
                       fontSize: "clamp(21px, 4vw, 27px)",
                       lineHeight: 1.4,
                       overflowWrap: "anywhere",
@@ -507,7 +690,7 @@ function BriefContent() {
                 style={{
                   margin: "0 0 22px",
                   color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontFamily: '"Playfair Display", Georgia, serif',
                   fontSize: 24,
                   lineHeight: 1.35,
                 }}
@@ -570,14 +753,14 @@ function BriefContent() {
               </div>
             </section>
 
-            <section style={cardStyle}>
+            <section style={cardStyle} className="brief-card">
               <p style={eyebrowStyle}>ARAHAN DESAIN</p>
 
               <h2
                 style={{
                   margin: "0 0 10px",
                   color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontFamily: '"Playfair Display", Georgia, serif',
                   fontSize: 27,
                   lineHeight: 1.35,
                 }}
@@ -625,7 +808,7 @@ function BriefContent() {
                 style={{
                   margin: "0 0 16px",
                   color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontFamily: '"Playfair Display", Georgia, serif',
                   fontSize: 23,
                   lineHeight: 1.4,
                 }}
@@ -650,93 +833,83 @@ function BriefContent() {
           </div>
         ) : null}
 
+        {/* FOOTER */}
+
         <footer
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 13,
             borderTop: "1px solid #e4ddd1",
             paddingTop: 22,
             marginTop: 36,
           }}
         >
-          <img
-            src={LOGO}
-            alt="Logo Pajara Studio"
-            width={43}
-            height={43}
+          <div
             style={{
-              display: "block",
-              width: 43,
-              height: 43,
-              flexShrink: 0,
-              objectFit: "contain",
-              borderRadius: 10,
-              background: "#fff",
+              display: "flex",
+              alignItems: "center",
+              gap: 13,
             }}
-          />
-
-          <div>
-            <strong
+          >
+            <Image
+              src={LOGO}
+              alt="Logo Pajara Studio"
+              width={43}
+              height={43}
+              unoptimized
               style={{
                 display: "block",
-                color: "#214d32",
-                fontSize: 13,
-                lineHeight: 1.5,
+                width: 43,
+                height: 43,
+                flexShrink: 0,
+                objectFit: "contain",
+                borderRadius: 10,
+                background: "#FFFFFF",
               }}
-            >
-              Pajara Studio
-            </strong>
+            />
 
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "#8a6a4a",
-                fontSize: 11,
-                lineHeight: 1.5,
-              }}
-            >
-              Berakar di Tanah Pasundan.
-            </p>
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  color: "#214D32",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                }}
+              >
+                Pajara Studio
+              </strong>
 
-            <p
-              style={{
-                margin: "3px 0 0",
-                color: "#999387",
-                fontSize: 10,
-                lineHeight: 1.5,
-              }}
-            >
-              Desain yang punya arah.
-            </p>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  color: "#8A6A4A",
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                }}
+              >
+                Berakar di Tanah Pasundan.
+              </p>
+            </div>
           </div>
+
+          <p
+            style={{
+              margin: "20px 0 0",
+              paddingTop: 14,
+              borderTop: "1px solid #e9e3d9",
+              color: "#999387",
+              fontSize: 10,
+              lineHeight: 1.7,
+            }}
+          >
+            © 2026 Pajara Studio. Desain yang punya arah.
+          </p>
         </footer>
       </section>
 
-      <style>{`
-        @keyframes pajara-brief-spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <BriefGlobalStyles />
     </main>
   );
 }
-
-const backErrorStyle: React.CSSProperties = {
-  display: "inline-flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: 48,
-  padding: "12px 16px",
-  boxSizing: "border-box",
-  border: "1px solid rgba(33,77,50,.14)",
-  borderRadius: 12,
-  background: "#FFFFFF",
-  color: "#214D32",
-  textDecoration: "none",
-  fontSize: 14,
-  fontWeight: 700,
-};
 
 export default function BriefPage() {
   return (
