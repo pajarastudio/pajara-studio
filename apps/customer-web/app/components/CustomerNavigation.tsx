@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +6,7 @@ import { supabase } from "@pajara/supabase";
 import CustomerBottomNav from "./CustomerBottomNav";
 
 const HIDDEN_PATHS = new Set([
+  "/",
   "/login",
   "/forgot-password",
   "/reset-password",
