@@ -308,6 +308,139 @@ export default function SubscriptionsPage() {
           }
         }
 
+        /* LOADING */
+
+        .pajara-loading-screen {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          overflow: hidden;
+          background:
+            radial-gradient(
+              circle at 15% 15%,
+              rgba(47, 107, 69, 0.12),
+              transparent 35%
+            ),
+            radial-gradient(
+              circle at 85% 85%,
+              rgba(138, 106, 74, 0.12),
+              transparent 35%
+            ),
+            ${COLORS.cream};
+        }
+
+        .pajara-loading-orb {
+          position: absolute;
+          border: 1px solid rgba(47, 107, 69, 0.12);
+          border-radius: 50%;
+          pointer-events: none;
+        }
+
+        .pajara-loading-orb.one {
+          width: 280px;
+          height: 280px;
+          top: -110px;
+          right: -90px;
+        }
+
+        .pajara-loading-orb.two {
+          width: 220px;
+          height: 220px;
+          bottom: -90px;
+          left: -80px;
+        }
+
+        .pajara-loading-glass {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: 370px;
+          padding: 34px 27px 25px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
+          border-radius: 27px;
+          background: rgba(255, 255, 255, 0.48);
+          box-shadow:
+            0 20px 60px rgba(33, 77, 50, 0.09),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
+          text-align: center;
+        }
+
+        .pajara-loading-logo-wrap {
+          display: grid;
+          width: 94px;
+          height: 94px;
+          place-items: center;
+          margin: 0 auto 23px;
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          border-radius: 25px;
+          background: rgba(255, 255, 255, 0.65);
+          box-shadow: 0 10px 30px rgba(33, 77, 50, 0.08);
+        }
+
+        .pajara-loading-logo {
+          width: 67px;
+          height: 67px;
+          border-radius: 17px;
+          object-fit: contain;
+        }
+
+        .pajara-loading-title {
+          margin: 0;
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: 24px;
+          font-weight: 500;
+        }
+
+        .pajara-loading-description {
+          margin: 9px 0 25px;
+          color: ${COLORS.muted};
+          font-size: 11px;
+          line-height: 1.8;
+        }
+
+        .pajara-loading-track {
+          width: 100%;
+          height: 5px;
+          overflow: hidden;
+          border-radius: 20px;
+          background: rgba(47, 107, 69, 0.12);
+        }
+
+        .pajara-loading-progress {
+          width: 40%;
+          height: 100%;
+          border-radius: inherit;
+          background: ${COLORS.green};
+          animation: pajara-loading-move 1.4s ease-in-out infinite;
+        }
+
+        .pajara-loading-footer {
+          position: static;
+          margin-top: 27px;
+          padding-top: 17px;
+          border-top: 1px solid rgba(47, 107, 69, 0.13);
+          color: #9b978c;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+        }
+
+        @keyframes pajara-loading-move {
+          0% {
+            transform: translateX(-110%);
+          }
+          100% {
+            transform: translateX(260%);
+          }
+        }
+
         /* PAGE */
 
         .page-container {
@@ -943,7 +1076,8 @@ export default function SubscriptionsPage() {
           .plan-card,
           .choose-button,
           .skeleton,
-          .dashboard-menu-button span {
+          .dashboard-menu-button span,
+          .pajara-loading-progress {
             animation: none;
             transition: none;
           }
@@ -1077,16 +1211,36 @@ export default function SubscriptionsPage() {
           </div>
 
           {loading ? (
-            <div className="plan-grid">
-              {[1, 2].map((item) => (
-                <div className="state-card" key={item}>
-                  <div className="state-icon">✳</div>
-                  <div className="skeleton short" />
-                  <div className="skeleton" />
-                  <div className="skeleton" />
-                  <div className="skeleton short" />
+            <div className="pajara-loading-screen">
+              <div className="pajara-loading-orb one" />
+              <div className="pajara-loading-orb two" />
+
+              <div className="pajara-loading-glass">
+                <div className="pajara-loading-logo-wrap">
+                  <img
+                    src={logo}
+                    alt="Pajara Studio"
+                    className="pajara-loading-logo"
+                  />
                 </div>
-              ))}
+
+                <h2 className="pajara-loading-title">
+                  Menyiapkan ruang desain
+                </h2>
+
+                <p className="pajara-loading-description">
+                  Kami sedang menyiapkan informasi paket desain
+                  untuk Kang/Teh.
+                </p>
+
+                <div className="pajara-loading-track">
+                  <div className="pajara-loading-progress" />
+                </div>
+
+                <div className="pajara-loading-footer">
+                  DESAIN YANG PUNYA ARAH.
+                </div>
+              </div>
             </div>
           ) : plans.length === 0 ? (
             <div className="state-card">
