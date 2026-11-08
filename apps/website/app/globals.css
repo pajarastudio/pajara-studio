@@ -5146,3 +5146,79 @@ line-height: 1.8;
     flex-direction: column;
   }
 }
+
+
+/* PAJARA LEGAL — BOTTOM BACK CARD */
+
+.pajara-legal-back-card {
+  max-width: 1100px;
+  margin: 72px auto 0;
+  padding: 34px 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  background: #f7f4ee;
+  border: 1px solid #e9e6df;
+  border-radius: 5px;
+}
+
+.pajara-legal-back-kicker {
+  color: #8a6a4a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.pajara-legal-back-card h2 {
+  margin: 12px 0 8px;
+  color: #214d32;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.pajara-legal-back-card p {
+  max-width: 480px;
+  margin: 0;
+  color: #687269;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.pajara-legal-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 14px 20px;
+  background: #214d32;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.pajara-legal-back-button:hover {
+  background: #2f6b45;
+}
+
+@media (max-width: 680px) {
+  .pajara-legal-back-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 26px 22px;
+    margin-top: 52px;
+  }
+
+  .pajara-legal-back-card h2 {
+    font-size: 23px;
+  }
+
+  .pajara-legal-back-button {
+    width: 100%;
+  }
+}
