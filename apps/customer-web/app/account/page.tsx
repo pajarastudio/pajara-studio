@@ -20,9 +20,13 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const logo =
+    "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -155,6 +159,11 @@ export default function AccountPage() {
     }
   }
 
+  function navigateTo(path: string) {
+    setMenuOpen(false);
+    router.push(path);
+  }
+
   const initials = fullName.trim()
     ? fullName
         .trim()
@@ -167,19 +176,86 @@ export default function AccountPage() {
 
   return (
     <main style={styles.page}>
-      <div style={styles.container}>
-        <header style={styles.header}>
+      <nav className="customer-navbar">
+        <div className="navbar-inner">
           <button
             type="button"
+            className="navbar-brand"
             onClick={() => router.push("/dashboard")}
-            style={styles.backButton}
+            aria-label="Pajara Studio - Beranda"
           >
-            <span aria-hidden="true" style={styles.backIcon}>
-              ←
-            </span>
-            <span>Kembali ke Beranda</span>
+            <Image
+              src={logo}
+              alt="Logo Pajara Studio"
+              width={39}
+              height={39}
+              unoptimized
+              className="navbar-logo"
+            />
+            <span>Pajara Studio</span>
           </button>
 
+          <div className="navbar-actions">
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={() => setMenuOpen((value) => !value)}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              >
+                {menuOpen ? (
+                  <path d="M6 6l12 12M18 6L6 18" />
+                ) : (
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                )}
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="order-link"
+              onClick={() => navigateTo("/order")}
+            >
+              Pesan Desain <span>↗</span>
+            </button>
+          </div>
+
+          {menuOpen && (
+            <div className="navbar-menu">
+              <button onClick={() => navigateTo("/dashboard")}>
+                Beranda
+              </button>
+              <button onClick={() => navigateTo("/orders/list")}>
+                Pesanan Saya
+              </button>
+              <button onClick={() => navigateTo("/subscriptions")}>
+                Paket Pajara
+              </button>
+              <button onClick={() => navigateTo("/payments")}>
+                Pembayaran
+              </button>
+              <button onClick={() => navigateTo("/files")}>
+                File Desain
+              </button>
+              <button onClick={() => navigateTo("/account")}>
+                Akun Saya
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <div style={styles.container}>
+        <header style={styles.header}>
           <div style={styles.eyebrow}>PAJARA STUDIO</div>
           <h1 style={styles.title}>Profil Saya</h1>
           <p style={styles.subtitle}>
@@ -428,16 +504,14 @@ export default function AccountPage() {
             </div>
 
             <footer style={styles.footer}>
-              <div style={styles.footerMark}>
-                <Image
-                  src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-                  alt="Logo Pajara Studio"
-                  width={44}
-                  height={44}
-                  unoptimized
-                  style={styles.footerLogo}
-                />
-              </div>
+              <Image
+                src={logo}
+                alt="Logo Pajara Studio"
+                width={43}
+                height={43}
+                unoptimized
+                style={styles.footerLogo}
+              />
 
               <div>
                 <strong style={styles.footerTitle}>
@@ -446,6 +520,9 @@ export default function AccountPage() {
                 <p style={styles.footerText}>
                   Berakar di Tanah Pasundan.
                 </p>
+                <p style={styles.footerCopyright}>
+                  © 2026 Pajara Studio. Desain yang punya arah.
+                </p>
               </div>
             </footer>
           </>
@@ -453,6 +530,119 @@ export default function AccountPage() {
       </div>
 
       <style jsx>{`
+        .customer-navbar {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          margin: -30px -18px 30px;
+          background: rgba(247, 244, 238, 0.88);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+        }
+
+        .navbar-inner {
+          position: relative;
+          max-width: 796px;
+          min-height: 66px;
+          margin: 0 auto;
+          padding: 0 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+        }
+
+        .navbar-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: #214d32;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .navbar-logo {
+          width: 39px;
+          height: 39px;
+          object-fit: contain;
+          border-radius: 12px;
+        }
+
+        .navbar-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .menu-toggle {
+          width: 40px;
+          height: 40px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(33, 77, 50, 0.13);
+          border-radius: 12px;
+          background: #fff;
+          color: #214d32;
+          cursor: pointer;
+        }
+
+        .order-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 11px 15px;
+          border: none;
+          border-radius: 12px;
+          background: #2f6b45;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .order-link span {
+          font-size: 14px;
+        }
+
+        .navbar-menu {
+          position: absolute;
+          top: calc(100% - 1px);
+          right: 18px;
+          z-index: 60;
+          width: 210px;
+          padding: 8px;
+          display: grid;
+          gap: 3px;
+          border: 1px solid #e8e2d8;
+          border-radius: 14px;
+          background: #fff;
+          box-shadow: 0 12px 30px rgba(33, 77, 50, 0.12);
+          animation: fadeUp 180ms ease both;
+        }
+
+        .navbar-menu button {
+          width: 100%;
+          padding: 12px;
+          border: none;
+          border-radius: 9px;
+          background: transparent;
+          color: #34483a;
+          text-align: left;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .navbar-menu button:hover {
+          background: #f1f5ef;
+          color: #214d32;
+        }
+
         @keyframes fadeUp {
           from {
             opacity: 0;
@@ -482,6 +672,22 @@ export default function AccountPage() {
           transform: scale(0.985);
         }
 
+        @media (max-width: 480px) {
+          .navbar-brand {
+            gap: 8px;
+            font-size: 13px;
+          }
+
+          .navbar-actions {
+            gap: 7px;
+          }
+
+          .order-link {
+            padding: 10px 11px;
+            font-size: 10px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -509,35 +715,6 @@ const styles: Record<string, React.CSSProperties> = {
   header: {
     marginBottom: "25px",
     animation: "fadeUp 350ms ease both",
-  },
-  backButton: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "11px",
-    padding: "10px 16px 10px 10px",
-    marginBottom: "27px",
-    color: "#214d32",
-    border: "1px solid rgba(33,77,50,.10)",
-    borderRadius: "16px",
-    background: "#ffffff",
-    boxShadow: "0 5px 18px rgba(33,77,50,.05)",
-    fontSize: "12px",
-    fontWeight: 700,
-    cursor: "pointer",
-    boxSizing: "border-box",
-    textAlign: "left",
-  },
-  backIcon: {
-    display: "grid",
-    width: "32px",
-    height: "32px",
-    flexShrink: 0,
-    placeItems: "center",
-    borderRadius: "11px",
-    background: "#edf4ee",
-    color: "#2f6b45",
-    fontSize: "19px",
-    lineHeight: 1,
   },
   eyebrow: {
     fontSize: "11px",
@@ -852,24 +1029,15 @@ const styles: Record<string, React.CSSProperties> = {
   footer: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "13px",
     borderTop: "1px solid #e4ddd1",
     paddingTop: "22px",
-    marginTop: "38px",
-  },
-  footerMark: {
-    width: "44px",
-    height: "44px",
-    flexShrink: 0,
-    overflow: "hidden",
-    display: "grid",
-    placeItems: "center",
-    borderRadius: "10px",
-    background: "#fff",
+    marginTop: "36px",
   },
   footerLogo: {
-    width: "44px",
-    height: "44px",
+    width: "43px",
+    height: "43px",
+    flexShrink: 0,
     objectFit: "contain",
     borderRadius: "10px",
   },
@@ -881,5 +1049,11 @@ const styles: Record<string, React.CSSProperties> = {
     margin: "3px 0 0",
     color: "#85847b",
     fontSize: "11px",
+  },
+  footerCopyright: {
+    margin: "4px 0 0",
+    color: "#98958c",
+    fontSize: "10px",
+    lineHeight: 1.5,
   },
 };
