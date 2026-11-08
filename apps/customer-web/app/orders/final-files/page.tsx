@@ -1,31 +1,163 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import type { CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@pajara/supabase";
 
 type Order = {
   id: string;
   order_code: string;
-};
-
-type FinalFile = {
-  id: string;
-  file_name: string;
-  file_path: string;
-  file_type: string | null;
-  file_size: number | null;
+  service_name: string | null;
+  design_type: string | null;
+  quantity: number | null;
+  brief: string | null;
+  notes: string | null;
+  deadline: string | null;
+  status: string | null;
   created_at: string;
-  url: string;
 };
 
 const LOGO =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
+function formatDeadline(deadline: string | null) {
+  if (!deadline) return "Belum ditentukan";
+
+  const date = new Date(`${deadline.slice(0, 10)}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return "Belum ditentukan";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getStatusLabel(status: string | null) {
+  switch (status) {
+    case "pending":
+      return "Menunggu Diproses";
+    case "waiting_dp":
+      return "Menunggu DP";
+    case "processing":
+      return "Sedang Diproses";
+    case "revision":
+      return "Dalam Revisi";
+    case "waiting_payment":
+      return "Menunggu Pelunasan";
+    case "completed":
+      return "Selesai";
+    case "cancelled":
+      return "Dibatalkan";
+    default:
+      return status || "Dalam proses";
+  }
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+const navbarStyle: React.CSSProperties = {
+  position: "sticky",
+  top: 0,
+  zIndex: 50,
+  width: "100%",
+  borderBottom: "1px solid rgba(47,107,69,.10)",
+  background: "rgba(247,244,238,.88)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+};
+
+const navbarInnerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 796,
+  minHeight: 66,
+  padding: "0 18px",
+  margin: "0 auto",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  boxSizing: "border-box",
+};
+
+const navbarBrandStyle: React.CSSProperties = {
+  display: "inline-flex",
+  minWidth: 0,
+  alignItems: "center",
+  gap: 10,
+  color: "#214d32",
+  fontSize: 15,
+  fontWeight: 800,
+  textDecoration: "none",
+};
+
+const navbarLogoStyle: React.CSSProperties = {
+  display: "block",
+  width: 39,
+  height: 39,
+  minWidth: 39,
+  borderRadius: 12,
+  objectFit: "cover",
+};
+
+const navbarBackStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 7,
+  flexShrink: 0,
+  padding: "10px 13px",
+  border: "1px solid rgba(47,107,69,.16)",
+  borderRadius: 10,
+  background: "rgba(255,255,255,.72)",
+  color: "#214d32",
+  fontSize: 11,
+  fontWeight: 800,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+};
+
+function BriefNavbar({ orderId = "" }: { orderId?: string }) {
+  const backHref = orderId
+    ? `/orders?id=${encodeURIComponent(orderId)}`
+    : "/orders";
+
+  return (
+    <nav style={navbarStyle}>
+      <div style={navbarInnerStyle} className="brief-navbar-inner">
+        <Link href="/dashboard" style={navbarBrandStyle}>
+          <Image
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={39}
+            height={39}
+            priority
+            unoptimized
+            style={navbarLogoStyle}
+          />
+          <span>Pajara Studio</span>
+        </Link>
+
+        <Link href={backHref} style={navbarBackStyle}>
+          <span aria-hidden="true">←</span>
+          Kembali ke Pesanan
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+/* =========================
+   LOADING
+========================= */
+
 function PajaraLoading({
-  message = "Menyiapkan file final Anda...",
+  message = "Menyiapkan brief desainmu...",
 }: {
   message?: string;
 }) {
@@ -54,9 +186,13 @@ function PajaraLoading({
           boxShadow: "0 20px 55px rgba(33,77,50,.07)",
         }}
       >
-        <img
+        <Image
           src={LOGO}
           alt="Pajara Studio"
+          width={66}
+          height={66}
+          priority
+          unoptimized
           style={{
             width: 66,
             height: 66,
@@ -98,7 +234,7 @@ function PajaraLoading({
             border: "3px solid #DCE5DC",
             borderTopColor: "#2F6B45",
             borderRadius: "50%",
-            animation: "pajara-files-spin .8s linear infinite",
+            animation: "pajara-brief-spin .8s linear infinite",
           }}
         />
 
@@ -116,50 +252,41 @@ function PajaraLoading({
       </div>
 
       <style>{`
-        @keyframes pajara-files-spin {
-          to { transform: rotate(360deg); }
+        @keyframes pajara-brief-spin {
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </main>
   );
 }
 
-function FileIcon({ size = 23 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6M8 13h8M8 17h8" />
-    </svg>
-  );
-}
+/* =========================
+   MAIN CONTENT
+========================= */
 
-function FinalFilesContent() {
+function BriefContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
   const [order, setOrder] = useState<Order | null>(null);
-  const [files, setFiles] = useState<FinalFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    async function loadFiles() {
+    async function loadOrder() {
       setLoading(true);
       setError("");
 
       try {
+        if (!id) {
+          if (active) setError("ID pesanan tidak ditemukan.");
+          return;
+        }
+
         const {
           data: { user },
           error: authError,
@@ -172,106 +299,52 @@ function FinalFilesContent() {
           return;
         }
 
-        if (!id) {
-          setError("ID pesanan tidak ditemukan.");
-          return;
-        }
-
-        const { data: orderData, error: orderError } = await supabase
+        const { data, error: orderError } = await supabase
           .from("orders")
-          .select("id, order_code")
+          .select(
+            "id, order_code, service_name, design_type, quantity, brief, notes, deadline, status, created_at"
+          )
           .eq("id", id)
           .eq("customer_id", user.id)
           .maybeSingle();
 
         if (!active) return;
 
-        if (orderError) throw orderError;
+        if (orderError) {
+          console.error("Gagal mengambil brief:", orderError);
+          setError("Brief pesanan gagal dimuat. Silakan coba lagi.");
+          return;
+        }
 
-        if (!orderData) {
+        if (!data) {
           setError("Pesanan tidak ditemukan atau tidak dapat diakses.");
           return;
         }
 
-        setOrder(orderData as Order);
-
-        const { data: fileData, error: fileError } = await supabase
-          .from("order_files")
-          .select(
-            "id, file_name, file_path, file_type, file_size, created_at"
-          )
-          .eq("order_id", orderData.id)
-          .eq("file_category", "final")
-          .order("created_at", { ascending: false });
-
-        if (!active) return;
-        if (fileError) throw fileError;
-
-        const signedFiles = await Promise.all(
-          (fileData || []).map(async (file) => {
-            const { data: signedData, error: signedError } =
-              await supabase.storage
-                .from("pajara-files")
-                .createSignedUrl(file.file_path, 3600);
-
-            return {
-              ...file,
-              url: signedError ? "" : signedData?.signedUrl || "",
-            } as FinalFile;
-          })
-        );
-
-        if (active) setFiles(signedFiles);
+        setOrder(data as Order);
       } catch (err) {
-        console.error("Gagal memuat file final:", err);
+        console.error("Kesalahan memuat brief:", err);
 
         if (active) {
-          setError("File final gagal dimuat. Silakan coba lagi.");
+          setError("Brief pesanan gagal dimuat. Silakan coba lagi.");
         }
       } finally {
         if (active) setLoading(false);
       }
     }
 
-    loadFiles();
+    void loadOrder();
 
     return () => {
       active = false;
     };
   }, [id]);
 
-  function formatSize(bytes: number | null) {
-    if (bytes == null || bytes < 0) {
-      return "Ukuran tidak tersedia";
-    }
-
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  }
-
-  function formatDate(value: string) {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return "Tanggal tidak tersedia";
-    }
-
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  }
-
   const backHref = id
     ? `/orders?id=${encodeURIComponent(id)}`
     : "/orders";
 
-  const cardStyle: CSSProperties = {
+  const cardStyle: React.CSSProperties = {
     background: "#FFFFFF",
     border: "1px solid rgba(33,77,50,.11)",
     borderRadius: 22,
@@ -281,7 +354,7 @@ function FinalFilesContent() {
     minWidth: 0,
   };
 
-  const eyebrowStyle: CSSProperties = {
+  const eyebrowStyle: React.CSSProperties = {
     color: "#8A6A4A",
     fontSize: 10,
     fontWeight: 700,
@@ -290,28 +363,16 @@ function FinalFilesContent() {
     margin: "0 0 8px",
   };
 
-  const backStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 14,
-    width: "100%",
-    minHeight: 58,
-    padding: "13px 16px",
-    marginBottom: 28,
-    boxSizing: "border-box",
-    background: "#FFFFFF",
-    color: "#214D32",
-    border: "1px solid rgba(33,77,50,.12)",
-    borderRadius: 15,
-    boxShadow: "0 6px 20px rgba(33,77,50,.035)",
-    textDecoration: "none",
+  const valueStyle: React.CSSProperties = {
     fontSize: 14,
-    fontWeight: 700,
-    lineHeight: 1.6,
+    lineHeight: 1.85,
+    color: "#34443A",
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
+    margin: 0,
   };
 
-  const primaryButtonStyle: CSSProperties = {
+  const primaryButtonStyle: React.CSSProperties = {
     display: "inline-flex",
     justifyContent: "center",
     alignItems: "center",
@@ -330,6 +391,22 @@ function FinalFilesContent() {
     cursor: "pointer",
   };
 
+  const backErrorStyle: React.CSSProperties = {
+    display: "inline-flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 48,
+    padding: "12px 16px",
+    boxSizing: "border-box",
+    border: "1px solid rgba(33,77,50,.14)",
+    borderRadius: 12,
+    background: "#FFFFFF",
+    color: "#214D32",
+    textDecoration: "none",
+    fontSize: 14,
+    fontWeight: 700,
+  };
+
   if (loading) return <PajaraLoading />;
 
   return (
@@ -344,6 +421,8 @@ function FinalFilesContent() {
         fontFamily: '"DM Sans", sans-serif',
       }}
     >
+      <BriefNavbar orderId={id || ""} />
+
       <section
         style={{
           width: "100%",
@@ -354,47 +433,7 @@ function FinalFilesContent() {
           boxSizing: "border-box",
         }}
       >
-        <Link href={backHref} style={backStyle}>
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              minWidth: 0,
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                display: "grid",
-                placeItems: "center",
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                background: "#F0F4EE",
-                color: "#2F6B45",
-                fontSize: 19,
-                flexShrink: 0,
-              }}
-            >
-              ←
-            </span>
-            <span>Kembali ke Pesanan</span>
-          </span>
-
-          <span
-            aria-hidden="true"
-            style={{
-              color: "#8A6A4A",
-              fontSize: 18,
-              flexShrink: 0,
-            }}
-          >
-            →
-          </span>
-        </Link>
-
-        <header style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 28 }}>
           <p style={eyebrowStyle}>RUANG PROJECT PAJARA</p>
 
           <h1
@@ -409,7 +448,7 @@ function FinalFilesContent() {
               overflowWrap: "break-word",
             }}
           >
-            File Final <span style={{ color: "#8A6A4A" }}>Anda.</span>
+            Brief <span style={{ color: "#8A6A4A" }}>Desain.</span>
           </h1>
 
           <p
@@ -421,59 +460,10 @@ function FinalFilesContent() {
               lineHeight: 1.9,
             }}
           >
-            Semua hasil desain final tersimpan di satu tempat, sehingga
-            perjalanan kita dalam menyelesaikan project tetap terarah.
+            Semua arahan dan informasi desain tersimpan di satu tempat agar
+            perjalanan kita dalam mengerjakan project tetap terarah.
           </p>
-        </header>
-
-        {order && (
-          <section
-            style={{
-              ...cardStyle,
-              marginBottom: 20,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 14,
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <p style={eyebrowStyle}>KODE PESANAN</p>
-
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: "clamp(21px, 4vw, 27px)",
-                  lineHeight: 1.4,
-                  overflowWrap: "anywhere",
-                }}
-              >
-                #{order.order_code}
-              </h2>
-            </div>
-
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                background: "#EDF4EB",
-                color: "#2F6B45",
-                borderRadius: 999,
-                padding: "8px 13px",
-                fontSize: 11,
-                lineHeight: 1.5,
-                fontWeight: 700,
-              }}
-            >
-              <FileIcon size={15} />
-              File Final
-            </span>
-          </section>
-        )}
+        </div>
 
         {error ? (
           <section style={cardStyle} aria-live="polite">
@@ -501,7 +491,7 @@ function FinalFilesContent() {
                 fontSize: 24,
               }}
             >
-              File belum tersedia
+              Brief belum tersedia
             </h2>
 
             <p
@@ -515,320 +505,328 @@ function FinalFilesContent() {
               {error}
             </p>
 
-            <button
-              onClick={() => window.location.reload()}
-              style={primaryButtonStyle}
-            >
-              Coba Lagi
-            </button>
-          </section>
-        ) : files.length === 0 ? (
-          <section
-            style={{
-              ...cardStyle,
-              textAlign: "center",
-              padding: "clamp(30px, 7vw, 46px) 22px",
-            }}
-          >
-            <div
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 18,
-                background: "#EDF4EB",
-                color: "#2F6B45",
-                display: "grid",
-                placeItems: "center",
-                margin: "0 auto 20px",
-              }}
-            >
-              <FileIcon size={27} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={primaryButtonStyle}
+              >
+                Coba Lagi
+              </button>
+
+              <Link href={backHref} style={backErrorStyle}>
+                Kembali ke Pesanan
+              </Link>
             </div>
-
-            <p style={eyebrowStyle}>HASIL DESAIN</p>
-
-            <h2
-              style={{
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                color: "#214D32",
-                fontSize: 25,
-                lineHeight: 1.35,
-                margin: "0 0 12px",
-              }}
-            >
-              Belum Ada File Final
-            </h2>
-
-            <p
-              style={{
-                color: "#70766F",
-                fontSize: 14,
-                lineHeight: 1.9,
-                maxWidth: 440,
-                margin: "0 auto",
-              }}
-            >
-              File hasil desain akan muncul di sini setelah diunggah oleh tim
-              Pajara Studio. Silakan periksa kembali halaman ini nanti.
-            </p>
           </section>
-        ) : (
-          <div style={{ display: "grid", gap: 16 }}>
-            <div style={{ marginBottom: 2 }}>
-              <p style={eyebrowStyle}>DOKUMEN PROJECT</p>
+        ) : order ? (
+          <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
+            <section style={cardStyle}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 14,
+                  flexWrap: "wrap",
+                  paddingBottom: 22,
+                  borderBottom: "1px solid #EEEAE3",
+                  marginBottom: 24,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <p style={eyebrowStyle}>KODE PESANAN</p>
+
+                  <h2
+                    style={{
+                      margin: 0,
+                      color: "#214D32",
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      fontSize: "clamp(21px, 4vw, 27px)",
+                      lineHeight: 1.4,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    #{order.order_code}
+                  </h2>
+                </div>
+
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    maxWidth: "100%",
+                    padding: "8px 13px",
+                    borderRadius: 999,
+                    background: "#EDF4EB",
+                    color: "#2F6B45",
+                    fontSize: 11,
+                    lineHeight: 1.5,
+                    fontWeight: 700,
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {getStatusLabel(order.status)}
+                </span>
+              </div>
+
+              <p style={eyebrowStyle}>RINGKASAN PROJECT</p>
 
               <h2
                 style={{
-                  margin: 0,
+                  margin: "0 0 22px",
                   color: "#214D32",
                   fontFamily: 'Georgia, "Times New Roman", serif',
                   fontSize: 24,
-                  lineHeight: 1.4,
+                  lineHeight: 1.35,
                 }}
               >
-                Hasil Desain
+                Informasi Desain
+              </h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
+                  gap: 12,
+                }}
+              >
+                {[
+                  {
+                    label: "Layanan",
+                    value: order.service_name || "Belum ditentukan",
+                  },
+                  {
+                    label: "Jenis Desain",
+                    value: order.design_type || "Belum ditentukan",
+                  },
+                  {
+                    label: "Jumlah Desain",
+                    value: `${order.quantity ?? "—"} desain`,
+                  },
+                  {
+                    label: "Deadline",
+                    value: formatDeadline(order.deadline),
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      padding: 17,
+                      minWidth: 0,
+                      border: "1px solid #EEEAE3",
+                      borderRadius: 14,
+                      background: "#FCFBF8",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <p style={eyebrowStyle}>{item.label}</p>
+
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#34443A",
+                        fontSize: 14,
+                        lineHeight: 1.8,
+                        fontWeight: 600,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section style={cardStyle}>
+              <p style={eyebrowStyle}>ARAHAN DESAIN</p>
+
+              <h2
+                style={{
+                  margin: "0 0 10px",
+                  color: "#214D32",
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 27,
+                  lineHeight: 1.35,
+                }}
+              >
+                Brief Utama
               </h2>
 
               <p
                 style={{
-                  margin: "8px 0 0",
+                  margin: "0 0 20px",
                   color: "#70766F",
                   fontSize: 13,
                   lineHeight: 1.8,
                 }}
               >
-                {files.length} file tersedia untuk pesanan ini.
+                Arahan utama sebagai acuan pengerjaan desain Anda.
               </p>
-            </div>
 
-            {files.map((file) => {
-              const isImage =
-                /\.(png|jpe?g|webp|gif|svg)$/i.test(file.file_name) ||
-                (file.file_type || "").startsWith("image/");
+              <div
+                style={{
+                  ...valueStyle,
+                  padding: 20,
+                  minHeight: 110,
+                  boxSizing: "border-box",
+                  border: "1px solid #EAE7DF",
+                  borderRadius: 15,
+                  background: "#FAF9F6",
+                }}
+              >
+                {order.brief?.trim() ||
+                  "Belum ada brief utama yang tercatat."}
+              </div>
 
-              return (
-                <article key={file.id} style={cardStyle}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 14,
-                      minWidth: 0,
-                    }}
-                  >
-                    <div
-                      style={{
-                        flexShrink: 0,
-                        width: 48,
-                        height: 48,
-                        borderRadius: 14,
-                        background: "#EDF4EB",
-                        color: "#2F6B45",
-                        display: "grid",
-                        placeItems: "center",
-                      }}
-                    >
-                      <FileIcon />
-                    </div>
+              <div
+                style={{
+                  height: 1,
+                  margin: "26px 0",
+                  background: "#EEEAE3",
+                }}
+              />
 
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <h3
-                        style={{
-                          color: "#214D32",
-                          fontSize: 15,
-                          lineHeight: 1.7,
-                          fontWeight: 700,
-                          margin: "0 0 6px",
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        {file.file_name}
-                      </h3>
+              <p style={eyebrowStyle}>INFORMASI TAMBAHAN</p>
 
-                      <p
-                        style={{
-                          color: "#70766F",
-                          fontSize: 12,
-                          lineHeight: 1.8,
-                          margin: "0 0 16px",
-                        }}
-                      >
-                        {formatSize(file.file_size)}
-                        {" · "}
-                        {formatDate(file.created_at)}
-                      </p>
+              <h2
+                style={{
+                  margin: "0 0 16px",
+                  color: "#214D32",
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: 23,
+                  lineHeight: 1.4,
+                }}
+              >
+                Catatan Tambahan
+              </h2>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 9,
-                        }}
-                      >
-                        {file.url ? (
-                          <>
-                            <a
-                              href={file.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={primaryButtonStyle}
-                            >
-                              <FileIcon size={16} />
-                              Lihat File
-                            </a>
-
-                            <a
-                              href={file.url}
-                              download={file.file_name}
-                              style={{
-                                ...primaryButtonStyle,
-                                background: "#FFFFFF",
-                                color: "#214D32",
-                                border: "1px solid rgba(33,77,50,.16)",
-                              }}
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.8"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
-                              >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <path d="m7 10 5 5 5-5M12 15V3" />
-                              </svg>
-                              Unduh File
-                            </a>
-                          </>
-                        ) : (
-                          <p
-                            style={{
-                              color: "#A13B32",
-                              fontSize: 12,
-                              lineHeight: 1.8,
-                              margin: 0,
-                            }}
-                          >
-                            Tautan file tidak tersedia. Silakan muat ulang
-                            halaman untuk mencoba lagi.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {isImage && file.url && (
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`Lihat pratinjau ${file.file_name}`}
-                      style={{
-                        display: "block",
-                        marginTop: 20,
-                        overflow: "hidden",
-                        border: "1px solid #EEEAE3",
-                        borderRadius: 15,
-                        background: "#FAF9F6",
-                      }}
-                    >
-                      <img
-                        src={file.url}
-                        alt={file.file_name}
-                        loading="lazy"
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          maxHeight: 440,
-                          objectFit: "contain",
-                        }}
-                      />
-                    </a>
-                  )}
-                </article>
-              );
-            })}
+              <div
+                style={{
+                  ...valueStyle,
+                  padding: 20,
+                  minHeight: 76,
+                  boxSizing: "border-box",
+                  border: "1px solid #EAE7DF",
+                  borderRadius: 15,
+                  background: "#FAF9F6",
+                }}
+              >
+                {order.notes?.trim() || "Tidak ada catatan tambahan."}
+              </div>
+            </section>
           </div>
-        )}
+        ) : null}
+
+        {/* FOOTER */}
 
         <footer
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 13,
             borderTop: "1px solid #e4ddd1",
             paddingTop: 22,
             marginTop: 36,
           }}
         >
-          <img
-            src={LOGO}
-            alt="Logo Pajara Studio"
-            width={43}
-            height={43}
+          <div
             style={{
-              display: "block",
-              width: 43,
-              height: 43,
-              flexShrink: 0,
-              objectFit: "contain",
-              borderRadius: 10,
-              background: "#fff",
+              display: "flex",
+              alignItems: "center",
+              gap: 13,
             }}
-          />
-
-          <div>
-            <strong
+          >
+            <Image
+              src={LOGO}
+              alt="Logo Pajara Studio"
+              width={43}
+              height={43}
+              unoptimized
               style={{
-                display: "block",
-                color: "#214d32",
-                fontSize: 13,
-                lineHeight: 1.5,
+                width: 43,
+                height: 43,
+                flexShrink: 0,
+                objectFit: "contain",
+                borderRadius: 10,
+                background: "#fff",
               }}
-            >
-              Pajara Studio
-            </strong>
+            />
 
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "#8a6a4a",
-                fontSize: 11,
-                lineHeight: 1.5,
-              }}
-            >
-              Berakar di Tanah Pasundan.
-            </p>
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  color: "#214d32",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                }}
+              >
+                Pajara Studio
+              </strong>
 
-            <p
-              style={{
-                margin: "3px 0 0",
-                color: "#999387",
-                fontSize: 10,
-                lineHeight: 1.5,
-              }}
-            >
-              Desain yang punya arah.
-            </p>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  color: "#8a6a4a",
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                }}
+              >
+                Berakar di Tanah Pasundan.
+              </p>
+            </div>
           </div>
+
+          <p
+            style={{
+              margin: "20px 0 0",
+              paddingTop: 14,
+              borderTop: "1px solid #e9e3d9",
+              color: "#999387",
+              fontSize: 10,
+              lineHeight: 1.7,
+            }}
+          >
+            © 2026 Pajara Studio. Desain yang punya arah.
+          </p>
         </footer>
       </section>
+
+      <style>{`
+        @keyframes pajara-brief-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @media (max-width: 420px) {
+          .brief-navbar-inner {
+            gap: 8px !important;
+            padding: 0 13px !important;
+          }
+
+          .brief-navbar-inner a:first-child {
+            gap: 8px !important;
+            font-size: 13px !important;
+          }
+
+          .brief-navbar-inner a:last-child {
+            padding: 9px 10px !important;
+            font-size: 10px !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
-export default function FinalFilesPage() {
+export default function BriefPage() {
   return (
     <Suspense
       fallback={
-        <PajaraLoading message="Memuat halaman file final..." />
+        <PajaraLoading message="Memuat halaman brief..." />
       }
     >
-      <FinalFilesContent />
+      <BriefContent />
     </Suspense>
   );
 }
