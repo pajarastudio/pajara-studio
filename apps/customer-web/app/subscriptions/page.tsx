@@ -1,212 +1,128 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
-import CustomerBottomNav from "../components/CustomerBottomNav";
-
-type Order = {
-  id: string;
-  order_code: string;
-  service_name: string | null;
-  design_type: string | null;
-  quantity: number | null;
-  status: string | null;
-  deadline: string | null;
-};
-
-type Subscription = {
-  id: string;
-  plan_id: string;
-  expires_at: string | null;
-  quota_total: number;
-  quota_used: number;
-  status: string;
-};
 
 type SubscriptionPlan = {
   id: string;
   name: string;
+  description: string | null;
+  price: number;
+  duration_days: number;
+  quota_total: number;
 };
 
-const logo =
-  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+const logo = "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
-export default function CustomerDashboard() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+const COLORS = {
+  green: "#2f6b45",
+  darkGreen: "#214d32",
+  brown: "#8a6a4a",
+  cream: "#f7f4ee",
+  white: "#ffffff",
+  text: "#243329",
+  muted: "#778078",
+  border: "rgba(33,77,50,.11)",
+};
+
+export default function SubscriptionsPage() {
+  const router = useRouter();
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [customerName, setCustomerName] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadPlans = useCallback(async () => {
+    setLoading(true);
+    setError("");
 
-    const loadDashboard = async () => {
-      setLoading(true);
-      setError("");
+    try {
+      const { data, error: queryError } = await supabase
+        .from("subscription_plans")
+        .select("id, name, description, price, duration_days, quota_total")
+        .eq("is_active", true)
+        .order("price", { ascending: true });
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        if (mounted) {
-          setError("Sesi login tidak ditemukan. Silakan login kembali.");
-          setLoading(false);
-        }
+      if (queryError) {
+        console.error("Gagal memuat paket:", queryError);
+        setError("Paket belum dapat dimuat. Silakan coba kembali.");
         return;
       }
 
-      if (mounted) {
-        setCustomerName(
-          user.user_metadata?.full_name ||
-            user.user_metadata?.name ||
-            "Pelanggan Pajara"
-        );
-      }
-
-      const [ordersResult, subscriptionsResult, plansResult] =
-        await Promise.all([
-          supabase
-            .from("orders")
-            .select(
-              "id, order_code, service_name, design_type, quantity, status, deadline"
-            )
-            .eq("customer_id", user.id)
-            .order("created_at", { ascending: false }),
-
-          supabase
-            .from("subscriptions")
-            .select(
-              "id, plan_id, expires_at, quota_total, quota_used, status"
-            )
-            .eq("customer_id", user.id)
-            .order("created_at", { ascending: false }),
-
-          supabase
-            .from("subscription_plans")
-            .select("id, name")
-            .eq("is_active", true)
-            .order("price", { ascending: true }),
-        ]);
-
-      if (!mounted) return;
-
-      if (ordersResult.error) {
-        setError("Pesanan belum dapat dimuat. Silakan muat ulang halaman.");
-      } else {
-        setOrders(ordersResult.data || []);
-      }
-
-      setSubscriptions(
-        subscriptionsResult.error ? [] : subscriptionsResult.data || []
-      );
-      setPlans(plansResult.error ? [] : plansResult.data || []);
-
+      setPlans((data || []) as SubscriptionPlan[]);
+    } catch (err) {
+      console.error("Kesalahan saat memuat paket:", err);
+      setError("Terjadi kendala koneksi. Silakan coba kembali.");
+    } finally {
       setLoading(false);
-    };
-
-    loadDashboard();
-
-    return () => {
-      mounted = false;
-    };
+    }
   }, []);
 
-  const statusLabel = (status: string | null) => {
-    switch (status) {
-      case "pending":
-        return "Pesanan Baru";
-      case "waiting_dp":
-        return "Menunggu Pembayaran DP";
-      case "processing":
-        return "Sedang Diproses";
-      case "revision":
-        return "Dalam Revisi";
-      case "waiting_payment":
-        return "Menunggu Pelunasan";
-      case "completed":
-        return "Selesai";
-      case "cancelled":
-        return "Dibatalkan";
-      default:
-        return status || "Menunggu";
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
+
+  function formatRupiah(value: number) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
+
+  async function choosePlan(planId: string) {
+    if (selecting !== null) return;
+
+    setSelecting(planId);
+    setError("");
+
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        setError("Silakan login terlebih dahulu.");
+        return;
+      }
+
+      const { data, error: rpcError } = await supabase.rpc(
+        "create_pending_subscription",
+        {
+          p_plan_id: planId,
+        }
+      );
+
+      if (rpcError) {
+        console.error("Gagal memilih paket:", rpcError);
+        setError(rpcError.message || "Gagal memilih paket.");
+        return;
+      }
+
+      if (!data) {
+        setError("ID langganan tidak ditemukan. Silakan coba kembali.");
+        return;
+      }
+
+      router.push(
+        `/subscriptions/payment?subscription=${encodeURIComponent(String(data))}`
+      );
+    } catch (err) {
+      console.error("Kesalahan saat memilih paket:", err);
+      setError("Terjadi kendala. Silakan coba kembali.");
+    } finally {
+      setSelecting(null);
     }
-  };
+  }
 
-  const statusClass = (status: string | null) => {
-    switch (status) {
-      case "completed":
-        return "status-completed";
-      case "processing":
-        return "status-processing";
-      case "revision":
-        return "status-revision";
-      case "cancelled":
-        return "status-cancelled";
-      case "waiting_payment":
-      case "waiting_dp":
-        return "status-payment";
-      default:
-        return "status-pending";
-    }
-  };
-
-  const formatDate = (date: string | null) => {
-    if (!date) return "Belum ditentukan";
-
-    return new Date(date).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const now = Date.now();
-
-  const currentSubscription =
-    subscriptions.find(
-      (item) =>
-        item.status === "active" &&
-        !!item.expires_at &&
-        new Date(item.expires_at).getTime() > now
-    ) ||
-    subscriptions.find((item) => item.status === "pending") ||
-    null;
-
-  const currentPlan = currentSubscription
-    ? plans.find((plan) => plan.id === currentSubscription.plan_id)
-    : undefined;
-
-  const isSubscriptionPending = currentSubscription?.status === "pending";
-
-  const isSubscriptionActive =
-    currentSubscription?.status === "active" &&
-    !!currentSubscription.expires_at &&
-    new Date(currentSubscription.expires_at).getTime() > now;
-
-  const remainingQuota = currentSubscription
-    ? Math.max(
-        0,
-        currentSubscription.quota_total - currentSubscription.quota_used
-      )
-    : 0;
-
-  const activeOrders = orders.filter(
-    (order) =>
-      order.status !== "completed" && order.status !== "cancelled"
-  );
-
-  const paymentOrders = orders.filter(
-    (order) =>
-      order.status === "waiting_dp" ||
-      order.status === "waiting_payment"
-  );
-
-  const latestOrder = orders[0] || null;
+  function isMonthly(plan: SubscriptionPlan) {
+    return plan.duration_days >= 30;
+  }
 
   if (loading) {
     return (
@@ -216,135 +132,88 @@ export default function CustomerDashboard() {
             position: fixed;
             inset: 0;
             z-index: 9999;
-            min-height: 100vh;
-            min-height: 100dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px 24px;
+            display: grid;
+            place-items: center;
             overflow: hidden;
+            padding: 24px;
             background:
               radial-gradient(
-                circle at 15% 18%,
-                rgba(47, 107, 69, 0.13),
-                transparent 36%
+                circle at 15% 15%,
+                rgba(138, 106, 74, 0.09),
+                transparent 35%
               ),
               radial-gradient(
-                circle at 85% 78%,
-                rgba(138, 106, 74, 0.13),
-                transparent 34%
+                circle at 85% 85%,
+                rgba(47, 107, 69, 0.12),
+                transparent 38%
               ),
               #f7f4ee;
-            color: #214d32;
             font-family: "DM Sans", Arial, sans-serif;
-            text-align: center;
-          }
-
-          .pajara-loading-screen *,
-          .pajara-loading-screen *::before,
-          .pajara-loading-screen *::after {
-            box-sizing: border-box;
           }
 
           .pajara-loading-orb {
             position: absolute;
-            border: 1px solid rgba(47, 107, 69, 0.1);
+            width: 280px;
+            height: 280px;
+            border: 1px solid rgba(47, 107, 69, 0.09);
             border-radius: 50%;
             pointer-events: none;
           }
 
-          .pajara-loading-orb-one {
-            top: -95px;
-            right: -85px;
-            width: 270px;
-            height: 270px;
+          .pajara-loading-orb.one {
+            top: -145px;
+            right: -100px;
           }
 
-          .pajara-loading-orb-two {
-            bottom: -115px;
-            left: -100px;
-            width: 310px;
-            height: 310px;
+          .pajara-loading-orb.two {
+            bottom: -175px;
+            left: -120px;
+            width: 340px;
+            height: 340px;
           }
 
-          .pajara-loading-orb-three {
-            top: 18%;
-            left: -45px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.15);
-            filter: blur(2px);
-          }
-
-          .pajara-loading-glass {
+          .pajara-loading-card {
             position: relative;
             z-index: 1;
-            width: 100%;
-            max-width: 370px;
-            padding: 38px 27px 25px;
             display: flex;
+            width: min(100%, 350px);
             flex-direction: column;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.78);
-            border-radius: 27px;
-            background: rgba(255, 255, 255, 0.48);
-            -webkit-backdrop-filter: blur(24px) saturate(160%);
-            backdrop-filter: blur(24px) saturate(160%);
-            box-shadow:
-              0 22px 70px rgba(33, 77, 50, 0.12),
-              0 5px 18px rgba(33, 77, 50, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.85);
-            animation: pajaraLoadingAppear 650ms ease both;
-          }
-
-          .pajara-loading-logo-wrap {
-            width: 94px;
-            height: 94px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-radius: 23px;
+            padding: 42px 25px;
+            border: 1px solid rgba(33, 77, 50, 0.09);
+            border-radius: 26px;
             background: rgba(255, 255, 255, 0.76);
-            box-shadow:
-              0 9px 26px rgba(33, 77, 50, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 1);
+            box-shadow: 0 18px 55px rgba(33, 77, 50, 0.07);
+            text-align: center;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
           }
 
           .pajara-loading-logo {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 15px;
+            width: 65px;
+            height: 65px;
+            margin-bottom: 25px;
+            border-radius: 17px;
             object-fit: contain;
-          }
-
-          .pajara-loading-brand {
-            margin: 0 0 10px;
-            color: #8a6a4a;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 3px;
+            background: white;
+            box-shadow: 0 7px 22px rgba(33, 77, 50, 0.08);
           }
 
           .pajara-loading-title {
             margin: 0;
             color: #214d32;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 29px;
+            font-family: Georgia, serif;
+            font-size: 25px;
             font-weight: 500;
-            letter-spacing: -0.8px;
-            line-height: 1.25;
+            letter-spacing: -0.5px;
           }
 
           .pajara-loading-description {
-            max-width: 270px;
-            margin: 12px 0 0;
-            color: #777d73;
-            font-size: 12px;
-            line-height: 1.9;
+            max-width: 260px;
+            margin: 11px 0 0;
+            color: #778078;
+            font-size: 11px;
+            line-height: 1.8;
           }
 
           .pajara-loading-track {
@@ -369,28 +238,13 @@ export default function CustomerDashboard() {
             animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
           }
 
-          .pajara-loading-footer {
-            position: static;
-            z-index: 1;
-            margin-top: 27px;
-            padding-top: 17px;
-            border-top: 1px solid rgba(47, 107, 69, 0.13);
-            color: #9b978c;
+          .pajara-loading-caption {
+            margin: 13px 0 0;
+            color: #a09a8e;
             font-size: 9px;
             font-weight: 700;
-            letter-spacing: 1.5px;
-            text-align: center;
-          }
-
-          @keyframes pajaraLoadingAppear {
-            from {
-              opacity: 0;
-              transform: translateY(13px) scale(0.98);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
           }
 
           @keyframes pajaraLoadingProgress {
@@ -402,219 +256,212 @@ export default function CustomerDashboard() {
             }
           }
 
-          @media (max-width: 380px) {
-            .pajara-loading-glass {
-              padding: 32px 21px 25px;
-              border-radius: 23px;
-            }
-
-            .pajara-loading-title {
-              font-size: 26px;
-            }
-
-            .pajara-loading-logo-wrap {
-              width: 84px;
-              height: 84px;
-            }
-          }
-
           @media (prefers-reduced-motion: reduce) {
-            .pajara-loading-glass,
             .pajara-loading-progress {
-              animation: none !important;
+              animation: none;
+              width: 100%;
             }
           }
         `}</style>
 
-        <div className="pajara-loading-orb pajara-loading-orb-one" />
-        <div className="pajara-loading-orb pajara-loading-orb-two" />
-        <div className="pajara-loading-orb pajara-loading-orb-three" />
+        <div className="pajara-loading-orb one" />
+        <div className="pajara-loading-orb two" />
 
-        <div className="pajara-loading-glass">
-          <div className="pajara-loading-logo-wrap">
-            <img
-              src={logo}
-              alt="Pajara Studio"
-              className="pajara-loading-logo"
-            />
-          </div>
-
-          <p className="pajara-loading-brand">PAJARA STUDIO</p>
+        <div className="pajara-loading-card">
+          <img
+            src={logo}
+            alt="Logo Pajara Studio"
+            className="pajara-loading-logo"
+          />
 
           <h1 className="pajara-loading-title">
-            Menyiapkan Dashboard
+            Menyiapkan Paket Desain
           </h1>
 
           <p className="pajara-loading-description">
-            Sebentar, kami sedang menyiapkan ruang pelanggan Kang/Teh.
+            Sebentar, kami sedang menyiapkan pilihan paket untuk Kang/Teh.
           </p>
 
           <div className="pajara-loading-track">
             <div className="pajara-loading-progress" />
           </div>
 
-          <div className="pajara-loading-footer">
-            DESAIN YANG PUNYA ARAH.
-          </div>
+          <p className="pajara-loading-caption">PAJARA STUDIO</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="dashboard-page">
-      <style jsx global>{`
-        .dashboard-page {
+    <main className="subscriptions-page">
+      <style jsx>{`
+        .subscriptions-page {
           min-height: 100vh;
-          padding-bottom: 90px;
-          background: #f7f4ee;
-          color: #243b2c;
+          padding: 0 16px 40px;
+          background: ${COLORS.cream};
+          color: ${COLORS.text};
           font-family: "DM Sans", Arial, sans-serif;
         }
 
-        .dashboard-page *,
-        .dashboard-page *::before,
-        .dashboard-page *::after {
-          box-sizing: border-box;
-        }
+        /* NAVBAR */
 
-        .dashboard-page a {
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .dashboard-container {
-          width: min(100% - 32px, 680px);
-          margin: 0 auto;
-        }
-
-        .dashboard-header {
+        .dashboard-navbar {
           position: sticky;
           top: 0;
           z-index: 100;
+          margin: 0 -16px;
           border-bottom: 1px solid rgba(47, 107, 69, 0.1);
           background: rgba(247, 244, 238, 0.88);
-          -webkit-backdrop-filter: blur(22px) saturate(160%);
           backdrop-filter: blur(22px) saturate(160%);
-          transition: background 0.3s ease;
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
         }
 
-        .dashboard-header-inner {
+        .dashboard-navbar-inner {
+          position: relative;
           display: flex;
+          width: min(100% - 32px, 680px);
           min-height: 70px;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
+          margin: 0 auto;
         }
 
         .dashboard-brand {
-          display: inline-flex;
+          display: flex;
           min-width: 0;
           align-items: center;
           gap: 10px;
-          color: #214d32;
-          font-size: 15px;
-          font-weight: 800;
+          color: ${COLORS.darkGreen};
           text-decoration: none;
         }
 
-        .dashboard-logo {
-          display: block !important;
-          width: 39px !important;
-          height: 39px !important;
-          min-width: 39px !important;
-          max-width: 39px !important;
-          min-height: 39px !important;
-          max-height: 39px !important;
-          flex: 0 0 39px !important;
+        .dashboard-brand-logo {
+          display: block;
+          width: 39px;
+          height: 39px;
+          flex: 0 0 39px;
           border-radius: 12px;
-          object-fit: cover;
+          object-fit: contain;
+          background: white;
         }
 
-        .dashboard-header-actions {
+        .dashboard-brand-name {
+          overflow: hidden;
+          color: ${COLORS.darkGreen};
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: -0.3px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .dashboard-navbar-actions {
           display: flex;
+          flex-shrink: 0;
           align-items: center;
           gap: 9px;
-          flex-shrink: 0;
         }
 
         .dashboard-menu-button {
           display: flex;
           width: 42px;
           height: 42px;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          flex-direction: column;
           gap: 5px;
-          border: 1px solid rgba(47, 107, 69, 0.2);
+          border: 1px solid rgba(33, 77, 50, 0.13);
           border-radius: 11px;
           background: rgba(255, 255, 255, 0.55);
           cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .dashboard-menu-button:hover {
-          border-color: #2f6b45;
-          background: #fff;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .dashboard-menu-button span {
           display: block;
           width: 17px;
           height: 2px;
-          border-radius: 5px;
-          background: #214d32;
-          transition: transform 0.2s ease;
+          border-radius: 3px;
+          background: ${COLORS.darkGreen};
+          transition: transform 180ms ease, opacity 180ms ease;
         }
 
-        .dashboard-menu-button.is-open span:first-child {
+        .dashboard-menu-button.open span:first-child {
           transform: translateY(3.5px) rotate(45deg);
         }
 
-        .dashboard-menu-button.is-open span:last-child {
+        .dashboard-menu-button.open span:last-child {
           transform: translateY(-3.5px) rotate(-45deg);
         }
 
-        .dashboard-header-link {
+        .dashboard-order-button {
           display: inline-flex;
+          min-height: 42px;
           align-items: center;
           justify-content: center;
-          gap: 7px;
-          flex-shrink: 0;
-          min-height: 42px;
           padding: 10px 14px;
-          border: 1px solid rgba(47, 107, 69, 0.2);
+          border: 1px solid ${COLORS.darkGreen};
           border-radius: 10px;
-          background: #214d32;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
+          background: ${COLORS.darkGreen};
+          color: white;
+          font-size: 11px;
+          font-weight: 800;
           text-decoration: none;
-          transition: all 0.25s ease;
+          white-space: nowrap;
+          transition: background 160ms ease, transform 160ms ease;
+          -webkit-tap-highlight-color: transparent;
         }
 
-        .dashboard-header-link:hover {
-          border-color: #2f6b45;
-          background: #2f6b45;
+        .dashboard-order-button:hover {
+          transform: translateY(-1px);
+          background: ${COLORS.green};
         }
 
         .dashboard-menu {
           position: absolute;
-          top: calc(100% + 8px);
+          top: calc(100% + 9px);
           left: 50%;
+          z-index: 110;
           width: min(680px, calc(100% - 32px));
           padding: 13px;
-          border: 1px solid rgba(47, 107, 69, 0.12);
+          border: 1px solid rgba(33, 77, 50, 0.1);
           border-radius: 15px;
           background: rgba(255, 255, 255, 0.97);
-          box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12);
+          box-shadow: 0 15px 40px rgba(33, 77, 50, 0.12);
           transform: translateX(-50%);
-          animation: dashboard-menu-in 0.18s ease;
+          animation: dashboard-menu-in 180ms ease both;
+        }
+
+        .dashboard-menu-label {
+          margin: 2px 8px 9px;
+          color: ${COLORS.brown};
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+        }
+
+        .dashboard-menu-link {
+          display: flex;
+          min-height: 43px;
+          align-items: center;
+          padding: 10px 11px;
+          border-radius: 9px;
+          color: ${COLORS.darkGreen};
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 150ms ease;
+        }
+
+        .dashboard-menu-link:hover {
+          background: #f0f4ee;
         }
 
         @keyframes dashboard-menu-in {
           from {
             opacity: 0;
-            transform: translate(-50%, -5px);
+            transform: translate(-50%, -6px);
           }
           to {
             opacity: 1;
@@ -622,364 +469,472 @@ export default function CustomerDashboard() {
           }
         }
 
-        .dashboard-menu-label {
-          margin: 2px 9px 9px;
-          color: #999487;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: 1.5px;
+        /* PAGE */
+
+        .page-container {
+          width: 100%;
+          max-width: 850px;
+          margin: 0 auto;
+          padding-top: 24px;
         }
 
-        .dashboard-menu a {
-          display: flex;
-          min-height: 43px;
-          align-items: center;
-          justify-content: space-between;
-          padding: 10px 11px;
-          border-radius: 9px;
-          color: #214d32;
-          font-size: 12px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: background 0.2s ease;
-        }
-
-        .dashboard-menu a:hover {
-          background: #f1f5ed;
-        }
-
-        .dashboard-menu a span:last-child {
-          color: #8a6a4a;
-        }
-
-        .dashboard-main {
-          padding-top: 22px;
-        }
-
-        .dashboard-welcome {
+        .hero {
           position: relative;
           overflow: hidden;
-          padding: 25px 22px;
-          border-radius: 22px;
-          background: linear-gradient(130deg, #214d32, #2f6b45 72%, #477b50);
-          color: #fff;
+          margin-bottom: 28px;
+          padding: 29px 25px;
+          border: 1px solid rgba(33, 77, 50, 0.08);
+          border-radius: 25px;
+          background: linear-gradient(135deg, #ffffff 0%, #f0f4ec 100%);
+          box-shadow: 0 8px 28px rgba(33, 77, 50, 0.035);
         }
 
-        .dashboard-welcome::after {
+        .hero::after {
           position: absolute;
-          top: -55px;
-          right: -55px;
-          width: 170px;
-          height: 170px;
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          top: -66px;
+          right: -54px;
+          width: 180px;
+          height: 180px;
+          border: 1px solid rgba(47, 107, 69, 0.10);
           border-radius: 50%;
           content: "";
           pointer-events: none;
         }
 
-        .dashboard-eyebrow {
+        .hero::before {
+          position: absolute;
+          top: -35px;
+          right: -23px;
+          width: 115px;
+          height: 115px;
+          border: 1px solid rgba(47, 107, 69, 0.10);
+          border-radius: 50%;
+          content: "";
+          pointer-events: none;
+        }
+
+        .eyebrow {
           position: relative;
           z-index: 1;
           margin: 0 0 12px;
-          color: #d8e7d8;
+          color: ${COLORS.brown};
           font-size: 10px;
           font-weight: 800;
-          letter-spacing: 1.6px;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
         }
 
-        .dashboard-welcome h1 {
+        .page-title {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(27px, 7vw, 35px);
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: clamp(34px, 7vw, 49px);
           font-weight: 500;
-          letter-spacing: -1px;
-          line-height: 1.2;
-          overflow-wrap: anywhere;
+          letter-spacing: -1.5px;
+          line-height: 1.12;
         }
 
-        .dashboard-welcome h1 span {
-          color: #d8e6bd;
+        .page-title span {
+          color: ${COLORS.green};
           font-style: italic;
         }
 
-        .dashboard-welcome p.description {
+        .hero-description {
           position: relative;
           z-index: 1;
-          margin: 11px 0 0;
-          color: #e0e9df;
-          font-size: 12px;
-          line-height: 1.8;
+          max-width: 560px;
+          margin: 15px 0 0;
+          color: #686c63;
+          font-size: 13px;
+          line-height: 1.9;
         }
 
-        .dashboard-welcome-actions {
+        .hero-note {
           position: relative;
           z-index: 1;
           display: flex;
-          flex-wrap: wrap;
+          align-items: flex-start;
           gap: 10px;
           margin-top: 20px;
+          padding-top: 17px;
+          border-top: 1px solid rgba(33, 77, 50, 0.10);
+          color: ${COLORS.darkGreen};
+          font-size: 11px;
+          line-height: 1.7;
         }
 
-        .dashboard-button {
-          display: inline-flex;
-          min-height: 42px;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 11px 14px;
-          border-radius: 11px;
-          background: #f7f4ee;
-          color: #214d32;
-          font-size: 12px;
-          font-weight: 800;
-          text-decoration: none;
+        .note-icon {
+          display: grid;
+          width: 25px;
+          height: 25px;
+          flex-shrink: 0;
+          place-items: center;
+          border-radius: 9px;
+          background: #e4eee3;
+          font-size: 13px;
         }
 
-        .dashboard-button.secondary {
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          background: transparent;
-          color: #fff;
-        }
-
-        .dashboard-section {
-          margin-top: 27px;
-        }
-
-        .dashboard-section-heading {
+        .section-heading {
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
           gap: 12px;
-          margin-bottom: 13px;
+          margin: 0 0 16px;
         }
 
-        .dashboard-section-heading h2 {
+        .section-title {
           margin: 0;
-          color: #214d32;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 23px;
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: 25px;
           font-weight: 500;
-          letter-spacing: -0.5px;
         }
 
-        .dashboard-section-heading p {
+        .section-caption {
           margin: 5px 0 0;
-          color: #7a8076;
+          color: ${COLORS.muted};
           font-size: 11px;
-          line-height: 1.6;
+          line-height: 1.7;
         }
 
-        .dashboard-text-link {
+        .plan-count {
           flex-shrink: 0;
-          color: #2f6b45;
-          font-size: 11px;
-          font-weight: 800;
-          text-decoration: none;
+          padding: 7px 10px;
+          border: 1px solid ${COLORS.border};
+          border-radius: 30px;
+          background: rgba(255, 255, 255, 0.65);
+          color: ${COLORS.muted};
+          font-size: 10px;
+          font-weight: 700;
         }
 
-        .dashboard-summary-grid {
+        .plan-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
+          align-items: stretch;
+          gap: 15px;
         }
 
-        .dashboard-summary-card {
+        .plan-card {
+          position: relative;
+          display: flex;
           min-width: 0;
-          padding: 17px;
-          border: 1px solid #e6e5dc;
-          border-radius: 17px;
-          background: #fff;
-          text-decoration: none;
-          color: inherit;
+          flex-direction: column;
+          padding: 21px;
+          border: 1px solid ${COLORS.border};
+          border-radius: 23px;
+          background: ${COLORS.white};
+          box-shadow: 0 8px 25px rgba(33, 77, 50, 0.045);
+          transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
         }
 
-        .dashboard-summary-label {
+        .plan-card:hover {
+          transform: translateY(-3px);
+          border-color: rgba(47, 107, 69, 0.25);
+          box-shadow: 0 14px 30px rgba(33, 77, 50, 0.075);
+        }
+
+        .plan-card.featured {
+          border-color: ${COLORS.darkGreen};
+          background: linear-gradient(155deg, #ffffff 0%, #f4f7f1 100%);
+        }
+
+        .featured-label {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          padding: 7px 9px;
+          border-radius: 30px;
+          background: ${COLORS.darkGreen};
+          color: white;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+        }
+
+        .plan-symbol {
+          display: grid;
+          width: 43px;
+          height: 43px;
+          place-items: center;
+          margin-bottom: 18px;
+          border: 1px solid rgba(47, 107, 69, 0.10);
+          border-radius: 14px;
+          background: #edf4ee;
+          color: ${COLORS.green};
+          font-family: Georgia, serif;
+          font-size: 21px;
+        }
+
+        .plan-label {
+          margin: 0 0 7px;
+          color: ${COLORS.brown};
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .plan-name {
           margin: 0;
-          color: #777d73;
+          padding-right: 4px;
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: clamp(22px, 4vw, 29px);
+          font-weight: 500;
+          line-height: 1.25;
+          overflow-wrap: anywhere;
+        }
+
+        .plan-description {
+          min-height: 40px;
+          margin: 9px 0 18px;
+          color: ${COLORS.muted};
+          font-size: 11px;
+          line-height: 1.8;
+        }
+
+        .price-area {
+          padding: 17px 0;
+          border-top: 1px solid ${COLORS.border};
+          border-bottom: 1px solid ${COLORS.border};
+        }
+
+        .price {
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: clamp(24px, 4vw, 31px);
+          font-weight: 500;
+          letter-spacing: -0.8px;
+          line-height: 1.25;
+          overflow-wrap: anywhere;
+        }
+
+        .price-period {
+          margin-top: 5px;
+          color: ${COLORS.muted};
+          font-size: 10px;
+        }
+
+        .benefits {
+          display: grid;
+          gap: 13px;
+          margin: 19px 0;
+          padding: 0;
+          list-style: none;
+        }
+
+        .benefit {
+          display: flex;
+          align-items: flex-start;
+          gap: 9px;
+          color: #555f55;
           font-size: 11px;
           line-height: 1.6;
         }
 
-        .dashboard-summary-value {
-          display: block;
-          margin-top: 7px;
-          color: #214d32;
-          font-size: 27px;
+        .check-icon {
+          display: grid;
+          width: 19px;
+          height: 19px;
+          flex-shrink: 0;
+          place-items: center;
+          border-radius: 7px;
+          background: #edf4ee;
+          color: ${COLORS.green};
+          font-size: 11px;
           font-weight: 800;
-          letter-spacing: -0.8px;
         }
 
-        .dashboard-summary-note {
-          margin: 6px 0 0;
-          color: #777d73;
-          font-size: 10px;
-          line-height: 1.7;
-        }
-
-        .dashboard-card {
-          padding: 18px;
-          border: 1px solid #e6e5dc;
-          border-radius: 18px;
-          background: #fff;
-        }
-
-        .dashboard-order-top {
+        .quota-box {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: space-between;
           gap: 10px;
+          margin-top: auto;
+          padding: 14px;
+          border: 1px solid rgba(33, 77, 50, 0.07);
+          border-radius: 15px;
+          background: ${COLORS.cream};
         }
 
-        .dashboard-order-code {
-          margin: 0;
-          color: #8a6a4a;
+        .quota-caption {
+          margin: 0 0 4px;
+          color: ${COLORS.muted};
           font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.7px;
-          overflow-wrap: anywhere;
         }
 
-        .dashboard-order-name {
-          margin: 8px 0 0;
-          color: #214d32;
-          font-size: 15px;
-          font-weight: 800;
-          line-height: 1.5;
-          overflow-wrap: anywhere;
+        .quota-number {
+          margin: 0;
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: 24px;
+          font-weight: 500;
+          line-height: 1.1;
         }
 
-        .dashboard-order-meta {
-          margin: 6px 0 0;
-          color: #777d73;
-          font-size: 11px;
+        .quota-unit {
+          flex-shrink: 0;
+          color: ${COLORS.muted};
+          font-size: 10px;
+          text-align: right;
+          line-height: 1.6;
+        }
+
+        .choose-button {
+          display: flex;
+          width: 100%;
+          min-height: 48px;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          margin-top: 15px;
+          padding: 13px 15px;
+          border: 1px solid ${COLORS.green};
+          border-radius: 14px;
+          background: ${COLORS.green};
+          color: white;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: background 160ms ease, transform 160ms ease, opacity 160ms ease;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .choose-button:hover:not(:disabled) {
+          background: ${COLORS.darkGreen};
+          transform: translateY(-1px);
+        }
+
+        .choose-button:active:not(:disabled) {
+          transform: scale(0.98);
+        }
+
+        .choose-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.65;
+        }
+
+        .button-arrow {
+          font-size: 17px;
+          line-height: 1;
+        }
+
+        .error-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          margin-bottom: 18px;
+          padding: 15px 16px;
+          border: 1px solid #e8caca;
+          border-radius: 15px;
+          background: #fff4f2;
+          color: #923f36;
+          font-size: 12px;
           line-height: 1.7;
         }
 
-        .dashboard-status {
-          display: inline-flex;
+        .error-icon {
+          display: grid;
+          width: 27px;
+          height: 27px;
           flex-shrink: 0;
-          max-width: 155px;
-          padding: 7px 9px;
-          border-radius: 8px;
-          font-size: 10px;
+          place-items: center;
+          border-radius: 9px;
+          background: #f9e4e1;
           font-weight: 800;
-          line-height: 1.5;
         }
 
-        .status-pending {
-          background: #f5eddb;
-          color: #86601e;
+        .state-card {
+          padding: 32px 22px;
+          border: 1px solid ${COLORS.border};
+          border-radius: 22px;
+          background: ${COLORS.white};
+          text-align: center;
+          box-shadow: 0 8px 25px rgba(33, 77, 50, 0.035);
         }
 
-        .status-payment {
-          background: #fff0d8;
-          color: #89591b;
+        .state-icon {
+          display: grid;
+          width: 53px;
+          height: 53px;
+          place-items: center;
+          margin: 0 auto 15px;
+          border-radius: 17px;
+          background: #edf4ee;
+          color: ${COLORS.green};
+          font-family: Georgia, serif;
+          font-size: 24px;
         }
 
-        .status-processing {
-          background: #e8efff;
-          color: #38588d;
+        .state-title {
+          margin: 0 0 8px;
+          color: ${COLORS.darkGreen};
+          font-family: Georgia, serif;
+          font-size: 23px;
+          font-weight: 500;
         }
 
-        .status-revision {
-          background: #f4e9fa;
-          color: #78508d;
-        }
-
-        .status-completed {
-          background: #e4f3e7;
-          color: #246238;
-        }
-
-        .status-cancelled {
-          background: #f8e8e6;
-          color: #9a4339;
-        }
-
-        .dashboard-card-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          margin-top: 15px;
-          color: #2f6b45;
-          font-size: 12px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .dashboard-empty {
-          padding: 19px;
-          border: 1px dashed #cbd9c8;
-          border-radius: 15px;
-          background: #fafbf8;
-        }
-
-        .dashboard-empty strong {
-          display: block;
-          color: #214d32;
-          font-size: 13px;
-        }
-
-        .dashboard-empty p {
-          margin: 7px 0 0;
-          color: #747970;
+        .state-description {
+          max-width: 360px;
+          margin: 0 auto 18px;
+          color: ${COLORS.muted};
           font-size: 12px;
           line-height: 1.8;
         }
 
-        .dashboard-subscription {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .dashboard-subscription-icon {
-          display: flex;
-          width: 46px;
-          height: 46px;
-          flex: 0 0 46px;
-          align-items: center;
-          justify-content: center;
-          border-radius: 14px;
-          background: #edf3e9;
-          color: #2f6b45;
-          font-family: Georgia, serif;
-          font-size: 23px;
-        }
-
-        .dashboard-subscription-content {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .dashboard-subscription-content strong {
-          display: block;
-          color: #214d32;
-          font-size: 14px;
-          line-height: 1.5;
-          overflow-wrap: anywhere;
-        }
-
-        .dashboard-subscription-content p {
-          margin: 5px 0 0;
-          color: #777d73;
-          font-size: 11px;
-          line-height: 1.7;
-        }
-
-        .dashboard-alert {
-          margin: 13px 0;
-          padding: 12px 13px;
-          border: 1px solid #f0d5a9;
-          border-radius: 11px;
-          background: #fff5e4;
-          color: #89591b;
+        .retry-button {
+          min-height: 43px;
+          padding: 11px 17px;
+          border: 0;
+          border-radius: 12px;
+          background: ${COLORS.green};
+          color: white;
           font-size: 12px;
-          line-height: 1.7;
+          font-weight: 800;
+          cursor: pointer;
         }
+
+        .policy-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 13px;
+          margin-top: 24px;
+          padding: 19px;
+          border: 1px solid rgba(138, 106, 74, 0.15);
+          border-radius: 19px;
+          background: rgba(255, 255, 255, 0.78);
+        }
+
+        .policy-icon {
+          display: grid;
+          width: 35px;
+          height: 35px;
+          flex-shrink: 0;
+          place-items: center;
+          border-radius: 12px;
+          background: #f2ebe2;
+          color: ${COLORS.brown};
+          font-size: 15px;
+        }
+
+        .policy-title {
+          margin: 0 0 5px;
+          color: ${COLORS.darkGreen};
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .policy-description {
+          margin: 0;
+          color: ${COLORS.muted};
+          font-size: 11px;
+          line-height: 1.8;
+        }
+
+        /* FOOTER */
 
         .dashboard-footer {
           display: flex;
@@ -1027,362 +982,389 @@ export default function CustomerDashboard() {
           line-height: 1.5;
         }
 
-        @media (max-width: 380px) {
-          .dashboard-container {
-            width: calc(100% - 24px);
+        @media (max-width: 600px) {
+          .subscriptions-page {
+            padding: 0 13px 32px;
           }
 
-          .dashboard-welcome {
-            padding: 22px 18px;
+          .dashboard-navbar {
+            margin: 0 -13px;
           }
 
-          .dashboard-summary-grid {
-            gap: 9px;
+          .dashboard-navbar-inner {
+            width: calc(100% - 26px);
           }
 
-          .dashboard-summary-card {
-            padding: 13px;
+          .page-container {
+            padding-top: 18px;
           }
 
-          .dashboard-summary-value {
-            font-size: 24px;
+          .hero {
+            padding: 24px 19px;
+            border-radius: 21px;
           }
 
-          .dashboard-card {
+          .hero-description {
+            font-size: 12px;
+          }
+
+          .section-heading {
+            align-items: flex-start;
+          }
+
+          .section-title {
+            font-size: 23px;
+          }
+
+          .plan-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 15px;
+          }
+
+          .plan-card {
+            padding: 21px;
+          }
+
+          .plan-card.featured {
+            border-width: 1.5px;
+          }
+
+          .plan-name {
+            font-size: 27px;
+          }
+
+          .price {
+            font-size: 30px;
+          }
+
+          .plan-description {
+            min-height: 0;
+          }
+
+          .quota-box {
             padding: 15px;
           }
 
-          .dashboard-status {
-            max-width: 120px;
-            font-size: 9px;
+          .policy-card {
+            padding: 16px;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .dashboard-navbar-inner {
+            width: calc(100% - 24px);
           }
 
-          .dashboard-subscription {
-            align-items: flex-start;
+          .dashboard-brand {
+            gap: 8px;
+          }
+
+          .dashboard-brand-name {
+            font-size: 13px;
+          }
+
+          .dashboard-order-button {
+            padding: 10px 11px;
+            font-size: 10px;
+          }
+
+          .dashboard-navbar-actions {
+            gap: 7px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .dashboard-page *,
-          .dashboard-page *::before,
-          .dashboard-page *::after {
-            animation-duration: 0.01ms !important;
-            transition-duration: 0.01ms !important;
+          .plan-card,
+          .choose-button,
+          .dashboard-menu-button span {
+            animation: none;
+            transition: none;
           }
         }
       `}</style>
 
-      <header className="dashboard-header">
-        <div className="dashboard-container dashboard-header-inner">
+      {/* NAVBAR */}
+
+      <nav className="dashboard-navbar">
+        <div className="dashboard-navbar-inner">
           <a href="/" className="dashboard-brand">
             <img
               src={logo}
               alt="Logo Pajara Studio"
-              className="dashboard-logo"
-              width={39}
-              height={39}
-              style={{
-                display: "block",
-                width: "39px",
-                height: "39px",
-                minWidth: "39px",
-                maxWidth: "39px",
-                minHeight: "39px",
-                maxHeight: "39px",
-                objectFit: "cover",
-                borderRadius: "12px",
-                flexShrink: 0,
-              }}
+              className="dashboard-brand-logo"
             />
-            <span>Pajara Studio</span>
+            <span className="dashboard-brand-name">Pajara Studio</span>
           </a>
 
-          <div className="dashboard-header-actions">
+          <div className="dashboard-navbar-actions">
             <button
               type="button"
-              className={`dashboard-menu-button ${
-                menuOpen ? "is-open" : ""
-              }`}
+              className={`dashboard-menu-button ${menuOpen ? "open" : ""}`}
+              onClick={() => setMenuOpen((previous) => !previous)}
               aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((current) => !current)}
             >
               <span />
               <span />
             </button>
 
-            <a href="/order" className="dashboard-header-link">
-              Pesan Desain <span aria-hidden="true">↗</span>
-            </a>
+            <button
+              type="button"
+              className="dashboard-order-button"
+              onClick={() => router.push("/order")}
+            >
+              Pesan Desain ↗
+            </button>
           </div>
-        </div>
 
-        {menuOpen && (
-          <nav className="dashboard-menu" aria-label="Navigasi dashboard">
-            <p className="dashboard-menu-label">MENU PELANGGAN</p>
+          {menuOpen && (
+            <div className="dashboard-menu">
+              <p className="dashboard-menu-label">MENU PELANGGAN</p>
 
-            <a href="/dashboard" onClick={() => setMenuOpen(false)}>
-              Dashboard <span>↗</span>
-            </a>
-
-            <a href="/orders/list" onClick={() => setMenuOpen(false)}>
-              Pesanan Saya <span>↗</span>
-            </a>
-
-            <a href="/subscriptions" onClick={() => setMenuOpen(false)}>
-              Paket Desain <span>↗</span>
-            </a>
-
-            <a href="/payments" onClick={() => setMenuOpen(false)}>
-              Pembayaran <span>↗</span>
-            </a>
-          </nav>
-        )}
-      </header>
-
-      <section className="dashboard-main">
-        <div className="dashboard-container">
-          <section className="dashboard-welcome">
-            <p className="dashboard-eyebrow">Ruang Pelanggan Pajara</p>
-
-            <h1>
-              Wilujeng sumping,
-              <br />
-              <span>{customerName}.</span>
-            </h1>
-
-            <p className="description">
-              Pantau pesanan dan kebutuhan desain Kang/Teh, semua dari satu
-              tempat.
-            </p>
-
-            <div className="dashboard-welcome-actions">
-              <a href="/order" className="dashboard-button">
-                Pesan Desain <span aria-hidden="true">↗</span>
-              </a>
-              <a href="/orders/list" className="dashboard-button secondary">
-                Lihat Pesanan
-              </a>
-            </div>
-          </section>
-
-          {error && (
-            <div className="dashboard-alert" role="alert">
-              {error}{" "}
               <a
-                href="/login"
-                style={{ color: "inherit", fontWeight: 800 }}
+                href="/dashboard"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
               >
-                Login kembali
+                Dashboard
+              </a>
+
+              <a
+                href="/orders/list"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Pesanan Saya
+              </a>
+
+              <a
+                href="/subscriptions"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Paket Desain
+              </a>
+
+              <a
+                href="/payments"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Pembayaran
               </a>
             </div>
           )}
-
-          <section className="dashboard-section">
-            <div className="dashboard-section-heading">
-              <div>
-                <h2>Ringkasan Anda</h2>
-                <p>Informasi penting tanpa perlu membuka banyak menu.</p>
-              </div>
-            </div>
-
-            <div className="dashboard-summary-grid">
-              <a href="/orders/list" className="dashboard-summary-card">
-                <p className="dashboard-summary-label">Pesanan aktif</p>
-                <strong className="dashboard-summary-value">
-                  {activeOrders.length}
-                </strong>
-                <p className="dashboard-summary-note">
-                  Pesanan yang masih berjalan
-                </p>
-              </a>
-
-              <a
-                href={
-                  paymentOrders[0]
-                    ? `/orders/payment?id=${encodeURIComponent(paymentOrders[0].id)}`
-                    : "/payments"
-                }
-                className="dashboard-summary-card"
-              >
-                <p className="dashboard-summary-label">Perlu pembayaran</p>
-                <strong className="dashboard-summary-value">
-                  {paymentOrders.length}
-                </strong>
-                <p className="dashboard-summary-note">
-                  Pesanan menunggu DP atau pelunasan
-                </p>
-              </a>
-            </div>
-          </section>
-
-          <section className="dashboard-section">
-            <div className="dashboard-section-heading">
-              <div>
-                <h2>Pesanan terbaru</h2>
-                <p>Lihat perkembangan pesanan terakhir Kang/Teh.</p>
-              </div>
-
-              <a href="/orders/list" className="dashboard-text-link">
-                Semua pesanan ↗
-              </a>
-            </div>
-
-            {latestOrder ? (
-              <article className="dashboard-card">
-                <div className="dashboard-order-top">
-                  <div>
-                    <p className="dashboard-order-code">
-                      {latestOrder.order_code}
-                    </p>
-                    <h3 className="dashboard-order-name">
-                      {latestOrder.service_name || "Layanan desain"}
-                    </h3>
-                  </div>
-
-                  <span
-                    className={`dashboard-status ${statusClass(
-                      latestOrder.status
-                    )}`}
-                  >
-                    {statusLabel(latestOrder.status)}
-                  </span>
-                </div>
-
-                <p className="dashboard-order-meta">
-                  {latestOrder.design_type || "Desain"} ·{" "}
-                  {latestOrder.quantity || 1} desain
-                </p>
-
-                <p className="dashboard-order-meta">
-                  Tenggat: {formatDate(latestOrder.deadline)}
-                </p>
-
-                <a
-                  href={`/orders?id=${encodeURIComponent(latestOrder.id)}`}
-                  className="dashboard-card-link"
-                >
-                  Lihat detail pesanan <span aria-hidden="true">↗</span>
-                </a>
-              </article>
-            ) : (
-              <div className="dashboard-empty">
-                <strong>Belum ada pesanan desain.</strong>
-                <p>
-                  Saat Kang/Teh siap, buat pesanan pertama dan pantau
-                  perkembangannya dari dashboard ini.
-                </p>
-                <a href="/order" className="dashboard-card-link">
-                  Buat pesanan pertama ↗
-                </a>
-              </div>
-            )}
-          </section>
-
-          <section className="dashboard-section">
-            <div className="dashboard-section-heading">
-              <div>
-                <h2>Paket desain</h2>
-                <p>Ringkasan langganan Kang/Teh.</p>
-              </div>
-
-              <a href="/subscriptions" className="dashboard-text-link">
-                Lihat paket ↗
-              </a>
-            </div>
-
-            <div className="dashboard-card">
-              {currentSubscription ? (
-                <div className="dashboard-subscription">
-                  <div className="dashboard-subscription-icon">✳</div>
-
-                  <div className="dashboard-subscription-content">
-                    <strong>
-                      {currentPlan?.name ||
-                        (isSubscriptionPending
-                          ? "Paket menunggu pembayaran"
-                          : "Paket langganan")}
-                    </strong>
-
-                    {isSubscriptionPending ? (
-                      <>
-                        <p>
-                          Paket belum aktif. Lanjutkan pembayaran agar dapat
-                          digunakan setelah diverifikasi.
-                        </p>
-                        <a
-                          href={`/subscriptions/payment?subscription=${encodeURIComponent(
-                            currentSubscription.id
-                          )}`}
-                          className="dashboard-card-link"
-                        >
-                          Lanjutkan pembayaran ↗
-                        </a>
-                      </>
-                    ) : isSubscriptionActive ? (
-                      <>
-                        <p>
-                          Sisa kuota: {remainingQuota} dari{" "}
-                          {currentSubscription.quota_total} desain.
-                        </p>
-                        <p>
-                          Berakhir: {formatDate(currentSubscription.expires_at)}
-                        </p>
-                        <a
-                          href="/subscriptions/request"
-                          className="dashboard-card-link"
-                        >
-                          Pesan desain dengan paket ↗
-                        </a>
-                      </>
-                    ) : (
-                      <p>
-                        Paket ini sudah tidak aktif. Lihat pilihan paket
-                        terbaru untuk melanjutkan.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="dashboard-subscription">
-                  <div className="dashboard-subscription-icon">✳</div>
-
-                  <div className="dashboard-subscription-content">
-                    <strong>Belum berlangganan paket</strong>
-                    <p>
-                      Paket mingguan dan bulanan tersedia untuk kebutuhan
-                      desain yang berkelanjutan.
-                    </p>
-                    <a href="/subscriptions" className="dashboard-card-link">
-                      Lihat pilihan paket ↗
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <footer className="dashboard-footer">
-            <img
-              src={logo}
-              alt="Logo Pajara Studio"
-              width={43}
-              height={43}
-              className="dashboard-footer-logo"
-            />
-
-            <div className="dashboard-footer-copy">
-              <strong>Pajara Studio</strong>
-              <p>Berakar di Tanah Pasundan.</p>
-              <small>
-                © 2026 Pajara Studio. Desain yang punya arah.
-              </small>
-            </div>
-          </footer>
         </div>
-      </section>
+      </nav>
 
-      <CustomerBottomNav />
+      <div className="page-container">
+        <header className="hero">
+          <p className="eyebrow">PAJARA STUDIO · MEMBERSHIP</p>
+
+          <h1 className="page-title">
+            Ruang untuk
+            <br />
+            <span>ide yang tumbuh.</span>
+          </h1>
+
+          <p className="hero-description">
+            Pilih paket desain yang sesuai dengan kebutuhan Kang/Teh.
+            Nikmati proses kreatif yang lebih terencana dengan kuota desain
+            dan masa aktif yang jelas.
+          </p>
+
+          <div className="hero-note">
+            <span className="note-icon" aria-hidden="true">
+              ✓
+            </span>
+            <span>
+              Pembayaran dilakukan penuh di awal. Masa aktif paket dimulai
+              setelah pembayaran diverifikasi oleh Admin Pajara Studio.
+            </span>
+          </div>
+        </header>
+
+        {error && (
+          <div className="error-card" role="alert">
+            <span className="error-icon" aria-hidden="true">
+              !
+            </span>
+            <div>{error}</div>
+          </div>
+        )}
+
+        <section>
+          <div className="section-heading">
+            <div>
+              <h2 className="section-title">Pilih paketmu</h2>
+              <p className="section-caption">
+                Sesuaikan dengan ritme dan kebutuhan desainmu.
+              </p>
+            </div>
+
+            {!loading && plans.length > 0 && (
+              <span className="plan-count">
+                {plans.length} paket tersedia
+              </span>
+            )}
+          </div>
+
+          {plans.length === 0 ? (
+            <div className="state-card">
+              <div className="state-icon">✳</div>
+              <h3 className="state-title">Paket belum tersedia</h3>
+              <p className="state-description">
+                Saat ini belum ada paket aktif yang dapat dipilih. Silakan
+                coba lagi beberapa saat nanti.
+              </p>
+              <button
+                type="button"
+                className="retry-button"
+                onClick={loadPlans}
+              >
+                Muat Ulang
+              </button>
+            </div>
+          ) : (
+            <div className="plan-grid">
+              {plans.map((plan) => {
+                const featured = isMonthly(plan);
+
+                return (
+                  <article
+                    key={plan.id}
+                    className={`plan-card ${featured ? "featured" : ""}`}
+                  >
+                    {featured && (
+                      <span className="featured-label">
+                        PILIHAN BULANAN
+                      </span>
+                    )}
+
+                    <div className="plan-symbol" aria-hidden="true">
+                      {featured ? "✳" : "◇"}
+                    </div>
+
+                    <p className="plan-label">
+                      {featured
+                        ? "Untuk kebutuhan rutin"
+                        : "Untuk mulai berkarya"}
+                    </p>
+
+                    <h3 className="plan-name">{plan.name}</h3>
+
+                    <p className="plan-description">
+                      {plan.description ||
+                        `Paket desain dengan ${plan.quota_total} kuota selama ${plan.duration_days} hari.`}
+                    </p>
+
+                    <div className="price-area">
+                      <div className="price">
+                        {formatRupiah(plan.price)}
+                      </div>
+                      <div className="price-period">
+                        untuk {plan.duration_days} hari
+                      </div>
+                    </div>
+
+                    <ul className="benefits">
+                      <li className="benefit">
+                        <span className="check-icon" aria-hidden="true">
+                          ✓
+                        </span>
+                        <span>
+                          Masa aktif {plan.duration_days} hari setelah
+                          pembayaran diverifikasi
+                        </span>
+                      </li>
+
+                      <li className="benefit">
+                        <span className="check-icon" aria-hidden="true">
+                          ✓
+                        </span>
+                        <span>
+                          {plan.quota_total} kuota output desain
+                        </span>
+                      </li>
+
+                      <li className="benefit">
+                        <span className="check-icon" aria-hidden="true">
+                          ✓
+                        </span>
+                        <span>
+                          Pembayaran satu kali di awal, tanpa sistem DP
+                        </span>
+                      </li>
+                    </ul>
+
+                    <div className="quota-box">
+                      <div>
+                        <p className="quota-caption">Kuota tersedia</p>
+                        <p className="quota-number">{plan.quota_total}</p>
+                      </div>
+                      <div className="quota-unit">
+                        kuota
+                        <br />
+                        desain
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="choose-button"
+                      onClick={() => choosePlan(plan.id)}
+                      disabled={selecting !== null}
+                    >
+                      {selecting === plan.id ? (
+                        "Memproses pilihan..."
+                      ) : selecting !== null ? (
+                        "Tunggu sebentar..."
+                      ) : (
+                        <>
+                          Pilih Paket
+                          <span className="button-arrow" aria-hidden="true">
+                            →
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <aside className="policy-card">
+          <span className="policy-icon" aria-hidden="true">
+            ◈
+          </span>
+          <div>
+            <h3 className="policy-title">Sebelum memilih paket</h3>
+            <p className="policy-description">
+              Setiap kuota berlaku untuk satu output desain, bukan satu
+              pesanan tanpa batas. Paket dibayar 100% di awal dan tidak
+              menggunakan sistem DP. Masa aktif dimulai setelah pembayaran
+              diverifikasi oleh Admin Pajara Studio.
+            </p>
+          </div>
+        </aside>
+
+        <footer className="dashboard-footer">
+          <img
+            src={logo}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            className="dashboard-footer-logo"
+          />
+          <div className="dashboard-footer-copy">
+            <strong>Pajara Studio</strong>
+            <p>Berakar di Tanah Pasundan.</p>
+            <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
+          </div>
+        </footer>
+      </div>
     </main>
   );
 }
