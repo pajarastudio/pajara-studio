@@ -4806,3 +4806,38 @@ line-height: 1.8;
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================
+   PAJARA 2.0 — HOMEPAGE FIX
+========================================= */
+
+/* Fix typography: heading layanan */
+.pajara-site #layanan .pajara-section-heading h2 {
+  font-family: "DM Sans", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -1.5px !important;
+  font-kerning: none;
+  font-variant-ligatures: none;
+}
+
+/* Fix visibility: founder name */
+.pajara-site .pajara-founder-heading {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.pajara-site .pajara-founder-heading h3 {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 2;
+  color: #ffffff !important;
+  font-family: "DM Sans", sans-serif !important;
+  font-size: clamp(28px, 4vw, 43px) !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -1.2px;
+  margin: 17px 0 7px !important;
+}
