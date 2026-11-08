@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -39,6 +38,7 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -241,7 +241,7 @@ export default function CustomerDashboard() {
           top: 0;
           z-index: 100;
           border-bottom: 1px solid rgba(47, 107, 69, 0.1);
-          background: rgba(247, 244, 238, 0.68);
+          background: rgba(247, 244, 238, 0.88);
           -webkit-backdrop-filter: blur(22px) saturate(160%);
           backdrop-filter: blur(22px) saturate(160%);
           transition: background 0.3s ease;
@@ -279,17 +279,62 @@ export default function CustomerDashboard() {
           object-fit: cover;
         }
 
+        .dashboard-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          flex-shrink: 0;
+        }
+
+        .dashboard-menu-button {
+          display: flex;
+          width: 42px;
+          height: 42px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 5px;
+          border: 1px solid rgba(47, 107, 69, 0.2);
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.55);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .dashboard-menu-button:hover {
+          border-color: #2f6b45;
+          background: #fff;
+        }
+
+        .dashboard-menu-button span {
+          display: block;
+          width: 17px;
+          height: 2px;
+          border-radius: 5px;
+          background: #214d32;
+          transition: transform 0.2s ease;
+        }
+
+        .dashboard-menu-button.is-open span:first-child {
+          transform: translateY(3.5px) rotate(45deg);
+        }
+
+        .dashboard-menu-button.is-open span:last-child {
+          transform: translateY(-3.5px) rotate(-45deg);
+        }
+
         .dashboard-header-link {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 7px;
           flex-shrink: 0;
+          min-height: 42px;
           padding: 10px 14px;
           border: 1px solid rgba(47, 107, 69, 0.2);
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.38);
-          color: #214d32;
+          background: #214d32;
+          color: #fff;
           font-size: 12px;
           font-weight: 700;
           text-decoration: none;
@@ -298,7 +343,62 @@ export default function CustomerDashboard() {
 
         .dashboard-header-link:hover {
           border-color: #2f6b45;
-          background: rgba(255, 255, 255, 0.75);
+          background: #2f6b45;
+        }
+
+        .dashboard-menu {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          width: min(680px, calc(100% - 32px));
+          padding: 13px;
+          border: 1px solid rgba(47, 107, 69, 0.12);
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.97);
+          box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12);
+          transform: translateX(-50%);
+          animation: dashboard-menu-in 0.18s ease;
+        }
+
+        @keyframes dashboard-menu-in {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -5px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        .dashboard-menu-label {
+          margin: 2px 9px 9px;
+          color: #999487;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+        }
+
+        .dashboard-menu a {
+          display: flex;
+          min-height: 43px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 11px;
+          border-radius: 9px;
+          color: #214d32;
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 0.2s ease;
+        }
+
+        .dashboard-menu a:hover {
+          background: #f1f5ed;
+        }
+
+        .dashboard-menu a span:last-child {
+          color: #8a6a4a;
         }
 
         .dashboard-main {
@@ -630,22 +730,52 @@ export default function CustomerDashboard() {
           line-height: 1.7;
         }
 
-        .dashboard-footer {
-          padding: 24px 0 20px;
-          color: #777c72;
-          font-size: 10px;
-        }
+        /* FOOTER */
 
-        .dashboard-footer-inner {
+        .dashboard-footer {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 8px;
+          gap: 13px;
+          border-top: 1px solid #e4ddd1;
+          padding-top: 22px;
+          margin-top: 36px;
+          margin-bottom: 20px;
         }
 
-        .dashboard-footer strong {
+        .dashboard-footer-logo {
+          display: block;
+          width: 43px;
+          height: 43px;
+          flex: 0 0 43px;
+          border-radius: 10px;
+          object-fit: contain;
+          background: #fff;
+        }
+
+        .dashboard-footer-copy {
+          min-width: 0;
+        }
+
+        .dashboard-footer-copy strong {
+          display: block;
           color: #214d32;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .dashboard-footer-copy p {
+          margin: 4px 0 0;
+          color: #8a6a4a;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .dashboard-footer-copy small {
+          display: block;
+          margin-top: 3px;
+          color: #999387;
+          font-size: 10px;
+          line-height: 1.5;
         }
 
         @media (max-width: 380px) {
@@ -718,10 +848,47 @@ export default function CustomerDashboard() {
             <span>Pajara Studio</span>
           </a>
 
-          <a href="/order" className="dashboard-header-link">
-            Pesan Desain <span aria-hidden="true">↗</span>
-          </a>
+          <div className="dashboard-header-actions">
+            <button
+              type="button"
+              className={`dashboard-menu-button ${
+                menuOpen ? "is-open" : ""
+              }`}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
+            >
+              <span />
+              <span />
+            </button>
+
+            <a href="/order" className="dashboard-header-link">
+              Pesan Desain <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
+
+        {menuOpen && (
+          <nav className="dashboard-menu" aria-label="Navigasi dashboard">
+            <p className="dashboard-menu-label">MENU PELANGGAN</p>
+
+            <a href="/dashboard" onClick={() => setMenuOpen(false)}>
+              Dashboard <span>↗</span>
+            </a>
+
+            <a href="/orders/list" onClick={() => setMenuOpen(false)}>
+              Pesanan Saya <span>↗</span>
+            </a>
+
+            <a href="/subscriptions" onClick={() => setMenuOpen(false)}>
+              Paket Desain <span>↗</span>
+            </a>
+
+            <a href="/payments" onClick={() => setMenuOpen(false)}>
+              Pembayaran <span>↗</span>
+            </a>
+          </nav>
+        )}
       </header>
 
       <section className="dashboard-main">
@@ -955,11 +1122,20 @@ export default function CustomerDashboard() {
           </section>
 
           <footer className="dashboard-footer">
-            <div className="dashboard-footer-inner">
-              <span>
-                © {new Date().getFullYear()} <strong>Pajara Studio</strong>
-              </span>
-              <span>Berakar di Tanah Pasundan.</span>
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              width={43}
+              height={43}
+              className="dashboard-footer-logo"
+            />
+
+            <div className="dashboard-footer-copy">
+              <strong>Pajara Studio</strong>
+              <p>Berakar di Tanah Pasundan.</p>
+              <small>
+                © 2026 Pajara Studio. Desain yang punya arah.
+              </small>
             </div>
           </footer>
         </div>
