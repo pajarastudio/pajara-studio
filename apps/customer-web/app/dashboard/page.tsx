@@ -208,6 +208,155 @@ export default function CustomerDashboard() {
 
   const latestOrder = orders[0] || null;
 
+  if (loading) {
+    return (
+      <main className="pajara-loading-screen">
+        <style jsx global>{`
+          .pajara-loading-screen {
+            position: relative;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 24px;
+            overflow: hidden;
+            background: #f7f4ee;
+            color: #214d32;
+            font-family: "DM Sans", Arial, sans-serif;
+            text-align: center;
+          }
+
+          .pajara-loading-content {
+            width: 100%;
+            max-width: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: pajaraLoadingAppear 600ms ease both;
+          }
+
+          .pajara-loading-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: cover;
+            border-radius: 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(33, 77, 50, 0.09);
+          }
+
+          .pajara-loading-brand {
+            margin: 0 0 9px;
+            color: #8a6a4a;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+          }
+
+          .pajara-loading-title {
+            margin: 0;
+            color: #214d32;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 29px;
+            font-weight: 500;
+            letter-spacing: -0.8px;
+          }
+
+          .pajara-loading-description {
+            max-width: 270px;
+            margin: 12px 0 0;
+            color: #85847b;
+            font-size: 12px;
+            line-height: 1.9;
+          }
+
+          .pajara-loading-track {
+            width: 155px;
+            height: 3px;
+            overflow: hidden;
+            margin-top: 34px;
+            border-radius: 10px;
+            background: #e5e7dc;
+          }
+
+          .pajara-loading-progress {
+            width: 40%;
+            height: 100%;
+            border-radius: 10px;
+            background: #2f6b45;
+            animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
+          }
+
+          .pajara-loading-footer {
+            position: absolute;
+            bottom: 30px;
+            color: #a19b8f;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+          }
+
+          @keyframes pajaraLoadingAppear {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          @keyframes pajaraLoadingProgress {
+            0% {
+              transform: translateX(-110%);
+            }
+            100% {
+              transform: translateX(260%);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .pajara-loading-content,
+            .pajara-loading-progress {
+              animation: none !important;
+            }
+          }
+        `}</style>
+
+        <div className="pajara-loading-content">
+          <img
+            src={logo}
+            alt="Pajara Studio"
+            className="pajara-loading-logo"
+          />
+
+          <p className="pajara-loading-brand">
+            PAJARA STUDIO
+          </p>
+
+          <h1 className="pajara-loading-title">
+            Menyiapkan Dashboard
+          </h1>
+
+          <p className="pajara-loading-description">
+            Sebentar, kami sedang menyiapkan ruang pelanggan
+            Kang/Teh.
+          </p>
+
+          <div className="pajara-loading-track">
+            <div className="pajara-loading-progress" />
+          </div>
+        </div>
+
+        <div className="pajara-loading-footer">
+          DESAIN YANG PUNYA ARAH.
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="dashboard-page">
       <style jsx global>{`
@@ -233,8 +382,6 @@ export default function CustomerDashboard() {
           width: min(100% - 32px, 680px);
           margin: 0 auto;
         }
-
-        /* GLASS NAVBAR */
 
         .dashboard-header {
           position: sticky;
@@ -730,8 +877,6 @@ export default function CustomerDashboard() {
           line-height: 1.7;
         }
 
-        /* FOOTER */
-
         .dashboard-footer {
           display: flex;
           align-items: center;
@@ -941,7 +1086,7 @@ export default function CustomerDashboard() {
               <a href="/orders/list" className="dashboard-summary-card">
                 <p className="dashboard-summary-label">Pesanan aktif</p>
                 <strong className="dashboard-summary-value">
-                  {loading ? "—" : activeOrders.length}
+                  {activeOrders.length}
                 </strong>
                 <p className="dashboard-summary-note">
                   Pesanan yang masih berjalan
@@ -958,7 +1103,7 @@ export default function CustomerDashboard() {
               >
                 <p className="dashboard-summary-label">Perlu pembayaran</p>
                 <strong className="dashboard-summary-value">
-                  {loading ? "—" : paymentOrders.length}
+                  {paymentOrders.length}
                 </strong>
                 <p className="dashboard-summary-note">
                   Pesanan menunggu DP atau pelunasan
@@ -979,11 +1124,7 @@ export default function CustomerDashboard() {
               </a>
             </div>
 
-            {loading ? (
-              <div className="dashboard-card">
-                <p className="dashboard-order-meta">Memuat pesanan...</p>
-              </div>
-            ) : latestOrder ? (
+            {latestOrder ? (
               <article className="dashboard-card">
                 <div className="dashboard-order-top">
                   <div>
@@ -1047,11 +1188,7 @@ export default function CustomerDashboard() {
             </div>
 
             <div className="dashboard-card">
-              {loading ? (
-                <p className="dashboard-order-meta">
-                  Memuat informasi paket...
-                </p>
-              ) : currentSubscription ? (
+              {currentSubscription ? (
                 <div className="dashboard-subscription">
                   <div className="dashboard-subscription-icon">✳</div>
 
