@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -13,6 +12,8 @@ type SubscriptionPlan = {
   duration_days: number;
   quota_total: number;
 };
+
+const logo = "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 const COLORS = {
   green: "#2f6b45",
@@ -32,6 +33,7 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const loadPlans = useCallback(async () => {
     setLoading(true);
@@ -130,53 +132,189 @@ export default function SubscriptionsPage() {
       <style jsx>{`
         .subscriptions-page {
           min-height: 100vh;
-          padding: 24px 16px 40px;
+          padding: 0 16px 40px;
           background: ${COLORS.cream};
           color: ${COLORS.text};
           font-family: "DM Sans", Arial, sans-serif;
         }
 
+        /* NAVBAR */
+
+        .dashboard-navbar {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          margin: 0 -16px;
+          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+          background: rgba(247, 244, 238, 0.88);
+          backdrop-filter: blur(22px) saturate(160%);
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
+        }
+
+        .dashboard-navbar-inner {
+          position: relative;
+          display: flex;
+          width: min(100% - 32px, 680px);
+          min-height: 70px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin: 0 auto;
+        }
+
+        .dashboard-brand {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 10px;
+          color: ${COLORS.darkGreen};
+          text-decoration: none;
+        }
+
+        .dashboard-brand-logo {
+          display: block;
+          width: 39px;
+          height: 39px;
+          flex: 0 0 39px;
+          border-radius: 12px;
+          object-fit: contain;
+          background: white;
+        }
+
+        .dashboard-brand-name {
+          overflow: hidden;
+          color: ${COLORS.darkGreen};
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: -0.3px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .dashboard-navbar-actions {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          gap: 9px;
+        }
+
+        .dashboard-menu-button {
+          display: flex;
+          width: 42px;
+          height: 42px;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          border: 1px solid rgba(33, 77, 50, 0.13);
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.55);
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .dashboard-menu-button span {
+          display: block;
+          width: 17px;
+          height: 2px;
+          border-radius: 3px;
+          background: ${COLORS.darkGreen};
+          transition:
+            transform 180ms ease,
+            opacity 180ms ease;
+        }
+
+        .dashboard-menu-button.open span:first-child {
+          transform: translateY(3.5px) rotate(45deg);
+        }
+
+        .dashboard-menu-button.open span:last-child {
+          transform: translateY(-3.5px) rotate(-45deg);
+        }
+
+        .dashboard-order-button {
+          display: inline-flex;
+          min-height: 42px;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 14px;
+          border: 1px solid ${COLORS.darkGreen};
+          border-radius: 10px;
+          background: ${COLORS.darkGreen};
+          color: white;
+          font-size: 11px;
+          font-weight: 800;
+          text-decoration: none;
+          white-space: nowrap;
+          transition:
+            background 160ms ease,
+            transform 160ms ease;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .dashboard-order-button:hover {
+          transform: translateY(-1px);
+          background: ${COLORS.green};
+        }
+
+        .dashboard-menu {
+          position: absolute;
+          top: calc(100% + 9px);
+          left: 50%;
+          z-index: 110;
+          width: min(680px, calc(100% - 32px));
+          padding: 13px;
+          border: 1px solid rgba(33, 77, 50, 0.1);
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.97);
+          box-shadow: 0 15px 40px rgba(33, 77, 50, 0.12);
+          transform: translateX(-50%);
+          animation: dashboard-menu-in 180ms ease both;
+        }
+
+        .dashboard-menu-label {
+          margin: 2px 8px 9px;
+          color: ${COLORS.brown};
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+        }
+
+        .dashboard-menu-link {
+          display: flex;
+          min-height: 43px;
+          align-items: center;
+          padding: 10px 11px;
+          border-radius: 9px;
+          color: ${COLORS.darkGreen};
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 150ms ease;
+        }
+
+        .dashboard-menu-link:hover {
+          background: #f0f4ee;
+        }
+
+        @keyframes dashboard-menu-in {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -6px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        /* PAGE */
+
         .page-container {
           width: 100%;
           max-width: 850px;
           margin: 0 auto;
-        }
-
-        .back-button {
-          display: inline-flex;
-          align-items: center;
-          gap: 11px;
-          margin: 0 0 29px;
-          padding: 10px 16px 10px 10px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 16px;
-          background: ${COLORS.white};
-          color: ${COLORS.darkGreen};
-          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.05);
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-          transition:
-            transform 160ms ease,
-            box-shadow 160ms ease;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .back-button:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 8px 22px rgba(33, 77, 50, 0.09);
-        }
-
-        .back-icon {
-          display: grid;
-          width: 32px;
-          height: 32px;
-          flex-shrink: 0;
-          place-items: center;
-          border-radius: 11px;
-          background: #edf4ee;
-          color: ${COLORS.green};
-          font-size: 19px;
+          padding-top: 24px;
         }
 
         .hero {
@@ -653,18 +791,52 @@ export default function SubscriptionsPage() {
           line-height: 1.8;
         }
 
-        .footer {
-          margin: 25px 0 0;
-          color: ${COLORS.muted};
-          font-size: 10px;
-          line-height: 1.9;
-          text-align: center;
+        /* FOOTER */
+
+        .dashboard-footer {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          border-top: 1px solid #e4ddd1;
+          padding-top: 22px;
+          margin-top: 36px;
+          margin-bottom: 20px;
         }
 
-        .footer-brand {
-          color: ${COLORS.darkGreen};
-          font-weight: 800;
-          letter-spacing: 0.14em;
+        .dashboard-footer-logo {
+          display: block;
+          width: 43px;
+          height: 43px;
+          flex: 0 0 43px;
+          border-radius: 10px;
+          object-fit: contain;
+          background: #fff;
+        }
+
+        .dashboard-footer-copy {
+          min-width: 0;
+        }
+
+        .dashboard-footer-copy strong {
+          display: block;
+          color: #214d32;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .dashboard-footer-copy p {
+          margin: 4px 0 0;
+          color: #8a6a4a;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .dashboard-footer-copy small {
+          display: block;
+          margin-top: 3px;
+          color: #999387;
+          font-size: 10px;
+          line-height: 1.5;
         }
 
         @keyframes pulse {
@@ -678,11 +850,19 @@ export default function SubscriptionsPage() {
 
         @media (max-width: 600px) {
           .subscriptions-page {
-            padding: 18px 13px 32px;
+            padding: 0 13px 32px;
           }
 
-          .back-button {
-            margin-bottom: 21px;
+          .dashboard-navbar {
+            margin: 0 -13px;
+          }
+
+          .dashboard-navbar-inner {
+            width: calc(100% - 26px);
+          }
+
+          .page-container {
+            padding-top: 18px;
           }
 
           .hero {
@@ -736,29 +916,115 @@ export default function SubscriptionsPage() {
           }
         }
 
+        @media (max-width: 380px) {
+          .dashboard-navbar-inner {
+            width: calc(100% - 24px);
+          }
+
+          .dashboard-brand {
+            gap: 8px;
+          }
+
+          .dashboard-brand-name {
+            font-size: 13px;
+          }
+
+          .dashboard-order-button {
+            padding: 10px 11px;
+            font-size: 10px;
+          }
+
+          .dashboard-navbar-actions {
+            gap: 7px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .back-button,
           .plan-card,
           .choose-button,
-          .skeleton {
+          .skeleton,
+          .dashboard-menu-button span {
             animation: none;
             transition: none;
           }
         }
       `}</style>
 
-      <div className="page-container">
-        <button
-          type="button"
-          className="back-button"
-          onClick={() => router.push("/dashboard")}
-        >
-          <span className="back-icon" aria-hidden="true">
-            ←
-          </span>
-          Kembali ke Beranda
-        </button>
+      {/* NAVBAR */}
 
+      <nav className="dashboard-navbar">
+        <div className="dashboard-navbar-inner">
+          <a href="/" className="dashboard-brand">
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              className="dashboard-brand-logo"
+            />
+            <span className="dashboard-brand-name">Pajara Studio</span>
+          </a>
+
+          <div className="dashboard-navbar-actions">
+            <button
+              type="button"
+              className={`dashboard-menu-button ${menuOpen ? "open" : ""}`}
+              onClick={() => setMenuOpen((previous) => !previous)}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+            >
+              <span />
+              <span />
+            </button>
+
+            <button
+              type="button"
+              className="dashboard-order-button"
+              onClick={() => router.push("/")}
+            >
+              Pesan Desain ↗
+            </button>
+          </div>
+
+          {menuOpen && (
+            <div className="dashboard-menu">
+              <p className="dashboard-menu-label">MENU PELANGGAN</p>
+
+              <a
+                href="/dashboard"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Dashboard
+              </a>
+
+              <a
+                href="/orders/list"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Pesanan Saya
+              </a>
+
+              <a
+                href="/subscriptions"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Paket Desain
+              </a>
+
+              <a
+                href="/payments"
+                className="dashboard-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Pembayaran
+              </a>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <div className="page-container">
         <header className="hero">
           <p className="eyebrow">PAJARA STUDIO · MEMBERSHIP</p>
 
@@ -859,7 +1125,9 @@ export default function SubscriptionsPage() {
                     </div>
 
                     <p className="plan-label">
-                      {featured ? "Untuk kebutuhan rutin" : "Untuk mulai berkarya"}
+                      {featured
+                        ? "Untuk kebutuhan rutin"
+                        : "Untuk mulai berkarya"}
                     </p>
 
                     <h3 className="plan-name">{plan.name}</h3>
@@ -959,9 +1227,19 @@ export default function SubscriptionsPage() {
           </div>
         </aside>
 
-        <footer className="footer">
-          <div className="footer-brand">PAJARA STUDIO</div>
-          <div>Berakar di Tanah Pasundan.</div>
+        <footer className="dashboard-footer">
+          <img
+            src={logo}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            className="dashboard-footer-logo"
+          />
+          <div className="dashboard-footer-copy">
+            <strong>Pajara Studio</strong>
+            <p>Berakar di Tanah Pasundan.</p>
+            <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
+          </div>
         </footer>
       </div>
     </main>
