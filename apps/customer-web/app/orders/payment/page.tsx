@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -82,9 +83,40 @@ function getPaymentStatus(payment: Payment | null) {
   }
 }
 
+function PaymentNavbar({ orderId = "" }: { orderId?: string }) {
+  return (
+    <nav style={navbarStyle}>
+      <div style={navbarInnerStyle}>
+        <a href="/dashboard" style={navbarBrandStyle}>
+          <Image
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={39}
+            height={39}
+            priority
+            unoptimized
+            style={navbarLogoStyle}
+          />
+          <span>Pajara Studio</span>
+        </a>
+
+        <a
+          href={orderId ? `/orders?id=${orderId}` : "/orders"}
+          style={navbarBackStyle}
+        >
+          <span aria-hidden="true">←</span>
+          Kembali ke Pesanan
+        </a>
+      </div>
+    </nav>
+  );
+}
+
 function PaymentLoading() {
   return (
     <main style={pageStyle}>
+      <PaymentNavbar />
+
       <section style={loadingCardStyle}>
         <div style={loadingLogoFrameStyle}>
           <Image
@@ -136,37 +168,6 @@ function PaymentLoading() {
         }
       `}</style>
     </main>
-  );
-}
-
-function BackToOrders({ orderId }: { orderId: string }) {
-  return (
-    <a href={orderId ? `/orders?id=${orderId}` : "/orders"} style={backCardStyle}>
-      <span style={backIconStyle} aria-hidden="true">
-        <svg
-          width="19"
-          height="19"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m15 18-6-6 6-6" />
-          <path d="M9 12h11" />
-        </svg>
-      </span>
-
-      <span style={{ flex: 1 }}>
-        <span style={backCaptionStyle}>NAVIGASI PESANAN</span>
-        <span style={backTitleStyle}>Kembali ke Pesanan</span>
-      </span>
-
-      <span style={backArrowStyle} aria-hidden="true">
-        →
-      </span>
-    </a>
   );
 }
 
@@ -724,9 +725,9 @@ function PaymentContent() {
   if (!id || !order) {
     return (
       <main style={pageStyle}>
-        <div style={containerStyle}>
-          <BackToOrders orderId="" />
+        <PaymentNavbar />
 
+        <div style={containerStyle}>
           <section style={cardStyle}>
             <h1 style={pageHeadingStyle}>Pesanan tidak ditemukan</h1>
             <p style={bodyTextStyle}>
@@ -744,9 +745,9 @@ function PaymentContent() {
   if (isSubscriptionOrder) {
     return (
       <main style={pageStyle}>
-        <div style={containerStyle}>
-          <BackToOrders orderId={order.id} />
+        <PaymentNavbar orderId={order.id} />
 
+        <div style={containerStyle}>
           <section style={cardStyle}>
             <p style={eyebrowStyle}>PAJARA PACKAGE</p>
             <h1 style={pageHeadingStyle}>Pesanan Paket</h1>
@@ -773,9 +774,9 @@ function PaymentContent() {
 
   return (
     <main style={pageStyle}>
-      <div style={containerStyle}>
-        <BackToOrders orderId={order.id} />
+      <PaymentNavbar orderId={order.id} />
 
+      <div style={containerStyle}>
         <header style={pageHeaderStyle}>
           <p style={eyebrowStyle}>
             <span style={eyebrowDotStyle} />
@@ -1141,20 +1142,27 @@ function PaymentContent() {
         )}
 
         <footer style={footerStyle}>
-          <Image
-            src={LOGO}
-            alt="Logo Pajara Studio"
-            width={43}
-            height={43}
-            unoptimized
-            style={footerLogoStyle}
-          />
+          <div style={footerBrandRowStyle}>
+            <Image
+              src={LOGO}
+              alt="Logo Pajara Studio"
+              width={43}
+              height={43}
+              unoptimized
+              style={footerLogoStyle}
+            />
 
-          <div>
-            <strong style={footerTitleStyle}>Pajara Studio</strong>
-            <p style={footerTaglineStyle}>Berakar di Tanah Pasundan.</p>
-            <p style={footerSmallStyle}>Desain yang punya arah.</p>
+            <div>
+              <strong style={footerTitleStyle}>Pajara Studio</strong>
+              <p style={footerTaglineStyle}>
+                Berakar di Tanah Pasundan.
+              </p>
+            </div>
           </div>
+
+          <p style={footerCopyrightStyle}>
+            © 2026 Pajara Studio. Desain yang punya arah.
+          </p>
         </footer>
       </div>
 
@@ -1181,6 +1189,12 @@ function PaymentContent() {
           }
         }
 
+        @media (max-width: 420px) {
+          :global(.payment-navbar-inner) {
+            gap: 8px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -1197,7 +1211,7 @@ function PaymentContent() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "var(--cream, #f7f4ee)",
-  padding: "30px 18px 55px",
+  padding: "0 18px 55px",
   boxSizing: "border-box",
   color: "var(--text, #1d2a22)",
   fontFamily: '"DM Sans", Arial, sans-serif',
@@ -1207,6 +1221,73 @@ const containerStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: "760px",
   margin: "0 auto",
+  paddingTop: "30px",
+};
+
+const navbarStyle: React.CSSProperties = {
+  position: "sticky",
+  top: 0,
+  zIndex: 50,
+  width: "calc(100% + 36px)",
+  marginLeft: "-18px",
+  borderBottom: "1px solid rgba(47,107,69,.10)",
+  background: "rgba(247,244,238,.88)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+};
+
+const navbarInnerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "796px",
+  minHeight: "66px",
+  padding: "0 18px",
+  margin: "0 auto",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "12px",
+  boxSizing: "border-box",
+};
+
+const navbarBrandStyle: React.CSSProperties = {
+  display: "inline-flex",
+  minWidth: 0,
+  alignItems: "center",
+  gap: "10px",
+  color: "#214d32",
+  fontSize: "15px",
+  fontWeight: 800,
+  textDecoration: "none",
+};
+
+const navbarLogoStyle: React.CSSProperties = {
+  display: "block",
+  width: "39px",
+  height: "39px",
+  minWidth: "39px",
+  maxWidth: "39px",
+  minHeight: "39px",
+  maxHeight: "39px",
+  flex: "0 0 39px",
+  borderRadius: "12px",
+  objectFit: "cover",
+};
+
+const navbarBackStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "7px",
+  flexShrink: 0,
+  padding: "10px 13px",
+  border: "1px solid rgba(47,107,69,.16)",
+  borderRadius: "10px",
+  background: "rgba(255,255,255,.72)",
+  color: "#214d32",
+  fontSize: "11px",
+  fontWeight: 800,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
 };
 
 const loadingCardStyle: React.CSSProperties = {
@@ -1289,53 +1370,6 @@ const loadingTaglineStyle: React.CSSProperties = {
   color: "#8a6a4a",
   fontSize: "11px",
   fontWeight: 600,
-};
-
-const backCardStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-  padding: "13px 15px",
-  marginBottom: "28px",
-  border: "1px solid rgba(33,77,50,.12)",
-  borderRadius: "16px",
-  background: "#fff",
-  boxShadow: "0 5px 18px rgba(33,77,50,.045)",
-  color: "#214d32",
-  textDecoration: "none",
-  boxSizing: "border-box",
-};
-
-const backIconStyle: React.CSSProperties = {
-  width: "39px",
-  height: "39px",
-  display: "grid",
-  placeItems: "center",
-  flexShrink: 0,
-  borderRadius: "12px",
-  background: "#edf4ee",
-  color: "#2f6b45",
-};
-
-const backCaptionStyle: React.CSSProperties = {
-  display: "block",
-  marginBottom: "3px",
-  color: "#8a6a4a",
-  fontSize: "9px",
-  fontWeight: 800,
-  letterSpacing: "0.13em",
-};
-
-const backTitleStyle: React.CSSProperties = {
-  display: "block",
-  color: "#214d32",
-  fontSize: "13px",
-  fontWeight: 700,
-};
-
-const backArrowStyle: React.CSSProperties = {
-  color: "#8a6a4a",
-  fontSize: "18px",
 };
 
 const pageHeaderStyle: React.CSSProperties = {
@@ -1692,12 +1726,15 @@ const noticeHeadingStyle: React.CSSProperties = {
 };
 
 const footerStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "13px",
   borderTop: "1px solid #e4ddd1",
   paddingTop: "22px",
   marginTop: "36px",
+};
+
+const footerBrandRowStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "13px",
 };
 
 const footerLogoStyle: React.CSSProperties = {
@@ -1720,10 +1757,13 @@ const footerTaglineStyle: React.CSSProperties = {
   fontSize: "11px",
 };
 
-const footerSmallStyle: React.CSSProperties = {
-  margin: "3px 0 0",
+const footerCopyrightStyle: React.CSSProperties = {
+  margin: "20px 0 0",
+  paddingTop: "14px",
+  borderTop: "1px solid #e9e3d9",
   color: "#999387",
   fontSize: "10px",
+  lineHeight: 1.7,
 };
 
 function PaymentFallback() {
