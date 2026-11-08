@@ -88,6 +88,7 @@ export default function OrderListPage() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,7 +145,6 @@ export default function OrderListPage() {
 
         if (authError || !user) {
           setError("Sesi Anda tidak ditemukan. Silakan login kembali.");
-          setLoading(false);
           return;
         }
 
@@ -170,7 +170,10 @@ export default function OrderListPage() {
           setError("Terjadi kendala koneksi. Silakan coba kembali.");
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          setPageLoading(false);
+        }
       }
     }
 
@@ -195,6 +198,191 @@ export default function OrderListPage() {
       : filter === "completed"
         ? completedOrders
         : orders;
+
+  if (pageLoading) {
+    return (
+      <main className="pajara-loading-screen">
+        <style jsx global>{`
+          .pajara-loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            min-height: 100vh;
+            min-height: 100dvh;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 24px;
+            overflow: hidden;
+            background:
+              radial-gradient(
+                circle at 15% 20%,
+                rgba(47, 107, 69, 0.09),
+                transparent 35%
+              ),
+              radial-gradient(
+                circle at 85% 80%,
+                rgba(138, 106, 74, 0.09),
+                transparent 35%
+              ),
+              rgba(247, 244, 238, 0.82);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            backdrop-filter: blur(22px) saturate(160%);
+            color: #214d32;
+            font-family: "DM Sans", Arial, sans-serif;
+            text-align: center;
+            animation: pajaraLoadingAppear 0.45s ease both;
+          }
+
+          .pajara-loading-glass {
+            width: 100%;
+            max-width: 390px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 42px 28px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.48);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            backdrop-filter: blur(22px) saturate(160%);
+            box-shadow:
+              0 18px 50px rgba(33, 77, 50, 0.09),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            animation: pajaraLoadingContent 0.6s ease both;
+          }
+
+          .pajara-loading-logo {
+            display: block;
+            width: 90px;
+            height: 90px;
+            padding: 9px;
+            object-fit: contain;
+            border: 1px solid rgba(47, 107, 69, 0.2);
+            border-radius: 23px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 8px 25px rgba(33, 77, 50, 0.1);
+            margin-bottom: 25px;
+          }
+
+          .pajara-loading-brand {
+            margin: 0 0 9px;
+            color: #8a6a4a;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+          }
+
+          .pajara-loading-title {
+            margin: 0;
+            color: #214d32;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 29px;
+            font-weight: 500;
+            letter-spacing: -0.8px;
+          }
+
+          .pajara-loading-description {
+            max-width: 270px;
+            margin: 12px 0 0;
+            color: #85847b;
+            font-size: 12px;
+            line-height: 1.9;
+          }
+
+          .pajara-loading-track {
+            width: 155px;
+            height: 3px;
+            overflow: hidden;
+            margin-top: 34px;
+            border-radius: 10px;
+            background: rgba(47, 107, 69, 0.12);
+          }
+
+          .pajara-loading-progress {
+            width: 40%;
+            height: 100%;
+            border-radius: 10px;
+            background: #2f6b45;
+            animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
+          }
+
+          .pajara-loading-footer {
+            margin-top: 35px;
+            color: #a19b8f;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+          }
+
+          @keyframes pajaraLoadingAppear {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+
+          @keyframes pajaraLoadingContent {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          @keyframes pajaraLoadingProgress {
+            0% {
+              transform: translateX(-110%);
+            }
+            100% {
+              transform: translateX(260%);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .pajara-loading-screen,
+            .pajara-loading-glass,
+            .pajara-loading-progress {
+              animation: none !important;
+            }
+          }
+        `}</style>
+
+        <div className="pajara-loading-glass">
+          <img
+            src={logo}
+            alt="Pajara Studio"
+            className="pajara-loading-logo"
+          />
+
+          <p className="pajara-loading-brand">
+            PAJARA STUDIO
+          </p>
+
+          <h1 className="pajara-loading-title">
+            Menyiapkan Pesanan
+          </h1>
+
+          <p className="pajara-loading-description">
+            Sebentar, kami sedang menyiapkan ruang pesanan Kang/Teh.
+          </p>
+
+          <div className="pajara-loading-track">
+            <div className="pajara-loading-progress" />
+          </div>
+
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH.
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="order-page">
