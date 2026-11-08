@@ -704,17 +704,61 @@ export default function CreateOrder() {
                   </>
                 )}
               </button>
-
-              <Link href="/dashboard" className="order-cancel-link">
-                Kembali ke Dashboard
-              </Link>
             </div>
           </form>
         </section>
 
         <footer className="order-footer">
-          <span>Pajara Studio</span>
-          <span>Berakar di Tanah Pasundan.</span>
+          <img
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            style={{
+              display: "block",
+              width: 43,
+              height: 43,
+              flexShrink: 0,
+              objectFit: "contain",
+              borderRadius: 10,
+              background: "#fff",
+            }}
+          />
+
+          <div>
+            <strong
+              style={{
+                display: "block",
+                color: "#214d32",
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+            >
+              Pajara Studio
+            </strong>
+
+            <p
+              style={{
+                margin: "4px 0 0",
+                color: "#8a6a4a",
+                fontSize: 11,
+                lineHeight: 1.5,
+              }}
+            >
+              Berakar di Tanah Pasundan.
+            </p>
+
+            <p
+              style={{
+                margin: "3px 0 0",
+                color: "#999387",
+                fontSize: 10,
+                lineHeight: 1.5,
+              }}
+            >
+              © 2026 Pajara Studio. Desain yang punya arah.
+            </p>
+          </div>
         </footer>
       </div>
 
@@ -1319,17 +1363,6 @@ export default function CreateOrder() {
           }
         }
 
-        .order-cancel-link {
-          padding: 5px;
-          color: #77796f;
-          font-size: 11px;
-          text-decoration: none;
-        }
-
-        .order-cancel-link:hover {
-          color: var(--green);
-        }
-
         .order-alert {
           display: flex;
           align-items: flex-start;
@@ -1385,18 +1418,10 @@ export default function CreateOrder() {
         .order-footer {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-          padding: 28px 0 5px;
-          color: #8b8b80;
-          font-size: 10px;
-        }
-
-        .order-footer span:first-child {
-          color: var(--green-dark);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 14px;
-          font-weight: 700;
+          gap: 13px;
+          border-top: 1px solid #e4ddd1;
+          padding-top: 22px;
+          margin-top: 36px;
         }
 
         @media (max-width: 600px) {
@@ -1514,10 +1539,6 @@ export default function CreateOrder() {
 
           .order-upload-area {
             padding: 23px 13px;
-          }
-
-          .order-footer {
-            font-size: 9px;
           }
         }
 
