@@ -219,7 +219,6 @@ export default function CustomerDashboard() {
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 30px 24px;
@@ -249,7 +248,7 @@ export default function CustomerDashboard() {
 
           .pajara-loading-orb {
             position: absolute;
-            border: 1px solid rgba(47, 107, 69, 0.10);
+            border: 1px solid rgba(47, 107, 69, 0.1);
             border-radius: 50%;
             pointer-events: none;
           }
@@ -282,7 +281,7 @@ export default function CustomerDashboard() {
             z-index: 1;
             width: 100%;
             max-width: 370px;
-            padding: 38px 27px 35px;
+            padding: 38px 27px 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -310,7 +309,7 @@ export default function CustomerDashboard() {
             border-radius: 23px;
             background: rgba(255, 255, 255, 0.76);
             box-shadow:
-              0 9px 26px rgba(33, 77, 50, 0.10),
+              0 9px 26px rgba(33, 77, 50, 0.1),
               inset 0 1px 0 rgba(255, 255, 255, 1);
           }
 
@@ -371,13 +370,16 @@ export default function CustomerDashboard() {
           }
 
           .pajara-loading-footer {
-            position: absolute;
-            bottom: 30px;
+            position: static;
             z-index: 1;
+            margin-top: 27px;
+            padding-top: 17px;
+            border-top: 1px solid rgba(47, 107, 69, 0.13);
             color: #9b978c;
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 1.5px;
+            text-align: center;
           }
 
           @keyframes pajaraLoadingAppear {
@@ -402,7 +404,7 @@ export default function CustomerDashboard() {
 
           @media (max-width: 380px) {
             .pajara-loading-glass {
-              padding: 32px 21px 30px;
+              padding: 32px 21px 25px;
               border-radius: 23px;
             }
 
@@ -450,10 +452,10 @@ export default function CustomerDashboard() {
           <div className="pajara-loading-track">
             <div className="pajara-loading-progress" />
           </div>
-        </div>
 
-        <div className="pajara-loading-footer">
-          DESAIN YANG PUNYA ARAH.
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH.
+          </div>
         </div>
       </main>
     );
