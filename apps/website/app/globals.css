@@ -4831,3 +4831,21 @@ line-height: 1.8;
   letter-spacing: -1px !important;
   color: #ffffff !important;
 }
+/* PAJARA 2.0 — SECTION SPACING */
+.pajara-site .pajara-section {
+  padding-block: clamp(72px, 8vw, 108px);
+}
+
+.pajara-site .pajara-section-heading {
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+@media (max-width: 680px) {
+  .pajara-site .pajara-section {
+    padding-block: 64px;
+  }
+
+  .pajara-site .pajara-section-heading {
+    margin-bottom: 30px;
+  }
+}
