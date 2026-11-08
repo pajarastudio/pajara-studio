@@ -7,6 +7,9 @@ export const metadata = {
     "Pelajari bagaimana Pajara Studio mengelola dan menjaga informasi pengunjung serta pelanggan.",
 };
 
+const logo =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+
 const policies = [
   {
     number: "01",
@@ -46,12 +49,17 @@ export default function PrivacyPolicyPage() {
       <nav className="pajara-nav" aria-label="Navigasi halaman">
         <div className="pajara-container pajara-navbar-inner">
           <Link href="/" className="pajara-brand">
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              className="pajara-logo pajara-navbar-logo-mark"
+              style={{
+                display: "block",
+                objectFit: "contain",
+                maxWidth: "100%",
+              }}
+            />
             <span className="pajara-brand-name">Pajara Studio</span>
-          </Link>
-
-          <Link href="/" className="pajara-legal-back">
-            <span aria-hidden="true">←</span>
-            Kembali ke Beranda
           </Link>
         </div>
       </nav>
@@ -137,6 +145,24 @@ export default function PrivacyPolicyPage() {
                 <p>Desain yang punya arah.</p>
               </div>
             </article>
+          </div>
+
+          <div className="pajara-legal-back-card">
+            <div>
+              <span className="pajara-legal-back-kicker">
+                PAJARA STUDIO
+              </span>
+              <h2>Kembali menjelajahi Pajara.</h2>
+              <p>
+                Lanjutkan perjalananmu dan temukan informasi lainnya
+                melalui halaman utama Pajara Studio.
+              </p>
+            </div>
+
+            <Link href="/" className="pajara-legal-back-button">
+              <span aria-hidden="true">←</span>
+              Kembali ke Beranda
+            </Link>
           </div>
         </div>
       </section>
