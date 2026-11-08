@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -213,7 +214,9 @@ export default function CustomerDashboard() {
       <main className="pajara-loading-screen">
         <style jsx global>{`
           .pajara-loading-screen {
-            position: relative;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
@@ -222,36 +225,106 @@ export default function CustomerDashboard() {
             justify-content: center;
             padding: 30px 24px;
             overflow: hidden;
-            background: #f7f4ee;
+            background:
+              radial-gradient(
+                circle at 15% 18%,
+                rgba(47, 107, 69, 0.13),
+                transparent 36%
+              ),
+              radial-gradient(
+                circle at 85% 78%,
+                rgba(138, 106, 74, 0.13),
+                transparent 34%
+              ),
+              #f7f4ee;
             color: #214d32;
             font-family: "DM Sans", Arial, sans-serif;
             text-align: center;
           }
 
-          .pajara-loading-content {
+          .pajara-loading-screen *,
+          .pajara-loading-screen *::before,
+          .pajara-loading-screen *::after {
+            box-sizing: border-box;
+          }
+
+          .pajara-loading-orb {
+            position: absolute;
+            border: 1px solid rgba(47, 107, 69, 0.10);
+            border-radius: 50%;
+            pointer-events: none;
+          }
+
+          .pajara-loading-orb-one {
+            top: -95px;
+            right: -85px;
+            width: 270px;
+            height: 270px;
+          }
+
+          .pajara-loading-orb-two {
+            bottom: -115px;
+            left: -100px;
+            width: 310px;
+            height: 310px;
+          }
+
+          .pajara-loading-orb-three {
+            top: 18%;
+            left: -45px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            filter: blur(2px);
+          }
+
+          .pajara-loading-glass {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 340px;
+            max-width: 370px;
+            padding: 38px 27px 35px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: pajaraLoadingAppear 600ms ease both;
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            border-radius: 27px;
+            background: rgba(255, 255, 255, 0.48);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            backdrop-filter: blur(24px) saturate(160%);
+            box-shadow:
+              0 22px 70px rgba(33, 77, 50, 0.12),
+              0 5px 18px rgba(33, 77, 50, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.85);
+            animation: pajaraLoadingAppear 650ms ease both;
+          }
+
+          .pajara-loading-logo-wrap {
+            width: 94px;
+            height: 94px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 23px;
+            background: rgba(255, 255, 255, 0.76);
+            box-shadow:
+              0 9px 26px rgba(33, 77, 50, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 1);
           }
 
           .pajara-loading-logo {
             display: block;
-            width: 90px;
-            height: 90px;
-            padding: 9px;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
             object-fit: contain;
-            border: 1px solid rgba(47, 107, 69, 0.2);
-            border-radius: 23px;
-            background: #ffffff;
-            box-shadow: 0 8px 25px rgba(33, 77, 50, 0.10);
-            margin-bottom: 25px;
           }
 
           .pajara-loading-brand {
-            margin: 0 0 9px;
+            margin: 0 0 10px;
             color: #8a6a4a;
             font-size: 10px;
             font-weight: 800;
@@ -265,12 +338,13 @@ export default function CustomerDashboard() {
             font-size: 29px;
             font-weight: 500;
             letter-spacing: -0.8px;
+            line-height: 1.25;
           }
 
           .pajara-loading-description {
             max-width: 270px;
             margin: 12px 0 0;
-            color: #85847b;
+            color: #777d73;
             font-size: 12px;
             line-height: 1.9;
           }
@@ -279,23 +353,29 @@ export default function CustomerDashboard() {
             width: 155px;
             height: 3px;
             overflow: hidden;
-            margin-top: 34px;
+            margin-top: 31px;
             border-radius: 10px;
-            background: #e5e7dc;
+            background: rgba(47, 107, 69, 0.13);
           }
 
           .pajara-loading-progress {
             width: 40%;
             height: 100%;
             border-radius: 10px;
-            background: #2f6b45;
+            background: linear-gradient(
+              90deg,
+              #214d32,
+              #477b50,
+              #8a6a4a
+            );
             animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
           }
 
           .pajara-loading-footer {
             position: absolute;
             bottom: 30px;
-            color: #a19b8f;
+            z-index: 1;
+            color: #9b978c;
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 1.5px;
@@ -304,11 +384,11 @@ export default function CustomerDashboard() {
           @keyframes pajaraLoadingAppear {
             from {
               opacity: 0;
-              transform: translateY(10px);
+              transform: translateY(13px) scale(0.98);
             }
             to {
               opacity: 1;
-              transform: translateY(0);
+              transform: translateY(0) scale(1);
             }
           }
 
@@ -321,20 +401,42 @@ export default function CustomerDashboard() {
             }
           }
 
+          @media (max-width: 380px) {
+            .pajara-loading-glass {
+              padding: 32px 21px 30px;
+              border-radius: 23px;
+            }
+
+            .pajara-loading-title {
+              font-size: 26px;
+            }
+
+            .pajara-loading-logo-wrap {
+              width: 84px;
+              height: 84px;
+            }
+          }
+
           @media (prefers-reduced-motion: reduce) {
-            .pajara-loading-content,
+            .pajara-loading-glass,
             .pajara-loading-progress {
               animation: none !important;
             }
           }
         `}</style>
 
-        <div className="pajara-loading-content">
-          <img
-            src={logo}
-            alt="Pajara Studio"
-            className="pajara-loading-logo"
-          />
+        <div className="pajara-loading-orb pajara-loading-orb-one" />
+        <div className="pajara-loading-orb pajara-loading-orb-two" />
+        <div className="pajara-loading-orb pajara-loading-orb-three" />
+
+        <div className="pajara-loading-glass">
+          <div className="pajara-loading-logo-wrap">
+            <img
+              src={logo}
+              alt="Pajara Studio"
+              className="pajara-loading-logo"
+            />
+          </div>
 
           <p className="pajara-loading-brand">
             PAJARA STUDIO
