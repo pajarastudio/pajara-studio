@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -19,6 +20,9 @@ type Order = {
   deadline: string | null;
   created_at: string | null;
 };
+
+const LOGO =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 function formatRupiah(amount: number | null) {
   return `Rp ${(amount || 0).toLocaleString("id-ID")}`;
@@ -86,7 +90,7 @@ function PajaraLoading() {
         }}
       >
         <img
-          src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+          src={LOGO}
           alt="Pajara Studio"
           style={{
             width: 66,
@@ -163,6 +167,7 @@ function OrderDetailContent() {
   const [isSubscriptionOrder, setIsSubscriptionOrder] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -354,159 +359,90 @@ function OrderDetailContent() {
   }
 
   return (
-    <main style={{ minWidth: 0, width: "100%", overflowX: "clip" }}>
+    <main className="pajara-detail-page">
       <header className="pajara-header">
         <div className="pajara-container pajara-header-inner">
-          <a
-            href="/dashboard"
-            className="pajara-brand"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              minWidth: 0,
-              textDecoration: "none",
-            }}
-          >
+          <a href="/dashboard" className="pajara-brand">
             <img
-              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              src={LOGO}
               alt="Logo Pajara Studio"
-              style={{
-                width: 42,
-                height: 42,
-                objectFit: "contain",
-                borderRadius: 10,
-                flexShrink: 0,
-              }}
+              className="pajara-header-logo"
             />
             <span>Pajara Studio</span>
           </a>
 
-          <nav className="pajara-nav">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/order" className="pajara-nav-cta">
-              Pesan Desain
-            </a>
-          </nav>
+          <div className="pajara-menu-wrapper">
+            <button
+              type="button"
+              className={`pajara-menu-toggle ${menuOpen ? "is-open" : ""}`}
+              aria-label={menuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+              aria-expanded={menuOpen}
+              aria-controls="pajara-detail-menu"
+              onClick={() => setMenuOpen((current) => !current)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+
+            {menuOpen && (
+              <>
+                <button
+                  type="button"
+                  className="pajara-menu-backdrop"
+                  aria-label="Tutup menu"
+                  onClick={() => setMenuOpen(false)}
+                />
+
+                <nav
+                  id="pajara-detail-menu"
+                  className="pajara-dropdown-menu"
+                  aria-label="Navigasi utama"
+                >
+                  <a
+                    href="/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span>Dashboard</span>
+                    <span className="pajara-menu-arrow">↗</span>
+                  </a>
+
+                  <a
+                    href="/order"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span>Pesan Desain</span>
+                    <span className="pajara-menu-arrow">↗</span>
+                  </a>
+                </nav>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      <section
-        className="pajara-order-detail"
-        style={{
-          width: "100%",
-          boxSizing: "border-box",
-          overflowX: "clip",
-        }}
-      >
-        <div
-          className="pajara-container"
-          style={{
-            width: "100%",
-            maxWidth: 1160,
-            marginInline: "auto",
-            paddingInline: "clamp(18px, 4vw, 28px)",
-            boxSizing: "border-box",
-            minWidth: 0,
-          }}
-        >
-          <div
-            className="pajara-order-detail-header"
-            style={{
-              display: "block",
-              width: "100%",
-              maxWidth: "100%",
-              minWidth: 0,
-              height: "auto",
-              boxSizing: "border-box",
-              margin: "0 0 28px",
-              padding: 0,
-              textAlign: "left",
-              overflowWrap: "break-word",
-            }}
-          >
-            <p
-              className="pajara-eyebrow"
-              style={{
-                display: "block",
-                margin: "0 0 12px",
-                fontSize: 11,
-                lineHeight: 1.6,
-                letterSpacing: 2,
-              }}
-            >
-              DETAIL PESANAN
-            </p>
+      <section className="pajara-order-detail">
+        <div className="pajara-container pajara-detail-container">
+          <div className="pajara-order-detail-header">
+            <p className="pajara-eyebrow">DETAIL PESANAN</p>
 
-            <h1
-              style={{
-                display: "block",
-                width: "100%",
-                maxWidth: "100%",
-                margin: "0 0 12px",
-                padding: 0,
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                fontSize: "clamp(30px, 5vw, 46px)",
-                lineHeight: 1.2,
-                fontWeight: 600,
-                overflowWrap: "normal",
-                wordBreak: "normal",
-              }}
-            >
+            <h1>
               Pesanan <span>Pajara.</span>
             </h1>
 
-            <p
-              style={{
-                display: "block",
-                width: "100%",
-                maxWidth: 560,
-                margin: 0,
-                fontSize: 14,
-                lineHeight: 1.8,
-                overflowWrap: "break-word",
-              }}
-            >
+            <p className="pajara-detail-description">
               Pantau status project, revisi, dan file desain Anda dari satu
               tempat.
             </p>
           </div>
 
-          <div
-            className="pajara-order-detail-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)",
-              gap: 24,
-              alignItems: "start",
-              width: "100%",
-              minWidth: 0,
-              boxSizing: "border-box",
-            }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gap: 20,
-                minWidth: 0,
-              }}
-            >
-              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    gap: 16,
-                    flexWrap: "wrap",
-                    minWidth: 0,
-                  }}
-                >
-                  <div style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+          <div className="pajara-order-detail-grid">
+            <div className="pajara-detail-column">
+              <div className="pajara-order-detail-card">
+                <div className="pajara-order-id-row">
+                  <div className="pajara-order-id-info">
                     <p className="pajara-eyebrow">ID PESANAN</p>
-                    <h2 style={{ marginTop: 8, marginBottom: 0 }}>
-                      #{order.order_code}
-                    </h2>
+                    <h2>#{order.order_code}</h2>
                   </div>
 
                   <span className="pajara-order-status">
@@ -515,34 +451,18 @@ function OrderDetailContent() {
                 </div>
               </div>
 
-              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
+              <div className="pajara-order-detail-card">
                 <p className="pajara-eyebrow">RINGKASAN</p>
                 <h2>Informasi Pesanan</h2>
 
                 {isSubscriptionOrder && (
-                  <div
-                    style={{
-                      marginTop: 16,
-                      padding: 14,
-                      borderRadius: 12,
-                      background: "var(--soft)",
-                      color: "var(--green)",
-                      fontSize: 14,
-                      lineHeight: 1.7,
-                    }}
-                  >
+                  <div className="pajara-subscription-notice">
                     Pesanan ini menggunakan kuota paket Anda. Tidak ada
                     pembayaran tambahan per desain.
                   </div>
                 )}
 
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 16,
-                    marginTop: 22,
-                  }}
-                >
+                <div className="pajara-information-list">
                   <div>
                     <p className="pajara-eyebrow">LAYANAN</p>
                     <strong>{order.service_name || "Belum ditentukan"}</strong>
@@ -571,42 +491,23 @@ function OrderDetailContent() {
               </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 20,
-                alignContent: "start",
-                minWidth: 0,
-              }}
-            >
-              <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
+            <div className="pajara-detail-column">
+              <div className="pajara-order-detail-card">
                 <p className="pajara-eyebrow">AKSES PESANAN</p>
                 <h2>Kelola Project</h2>
 
-                <p
-                  className="pajara-consistent-text"
-                  style={{ marginTop: 10 }}
-                >
+                <p className="pajara-consistent-text pajara-access-description">
                   Buka informasi project dan file desain Anda saat diperlukan.
                 </p>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "minmax(0, 1fr)",
-                    gap: 12,
-                    marginTop: 22,
-                    width: "100%",
-                    minWidth: 0,
-                  }}
-                >
+                <div className="pajara-access-list">
                   {!isSubscriptionOrder && (
                     <a
                       href={`/orders/payment?id=${encodeURIComponent(order.id)}`}
                       className="pajara-access-button"
                       style={accessButtonStyle}
                     >
-                      <span style={{ minWidth: 0 }}>Pembayaran</span>
+                      <span>Pembayaran</span>
                       <span style={accessArrowStyle}>→</span>
                     </a>
                   )}
@@ -616,7 +517,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span style={{ minWidth: 0 }}>Revisi</span>
+                    <span>Revisi</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -625,7 +526,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span style={{ minWidth: 0 }}>Lihat Brief Desain</span>
+                    <span>Lihat Brief Desain</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -634,7 +535,7 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span style={{ minWidth: 0 }}>Lihat File Final Anda</span>
+                    <span>Lihat File Final Anda</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
 
@@ -643,61 +544,31 @@ function OrderDetailContent() {
                     className="pajara-access-button"
                     style={accessButtonStyle}
                   >
-                    <span style={{ minWidth: 0 }}>File Referensi Pesanan</span>
+                    <span>File Referensi Pesanan</span>
                     <span style={accessArrowStyle}>→</span>
                   </a>
                 </div>
               </div>
 
               {!isSubscriptionOrder && (
-                <div className="pajara-order-detail-card" style={{ minWidth: 0 }}>
+                <div className="pajara-order-detail-card">
                   <p className="pajara-eyebrow">PEMBAYARAN</p>
                   <h2>Ringkasan Biaya</h2>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: 14,
-                      marginTop: 20,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 12,
-                        fontSize: 14,
-                      }}
-                    >
-                      <span className="pajara-consistent-text">Total</span>
+                  <div className="pajara-payment-list">
+                    <div>
+                      <span>Total</span>
                       <strong>{formatRupiah(order.total_amount)}</strong>
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 12,
-                        fontSize: 14,
-                      }}
-                    >
-                      <span className="pajara-consistent-text">DP</span>
+                    <div>
+                      <span>DP</span>
                       <strong>{formatRupiah(order.dp_amount)}</strong>
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        gap: 12,
-                        paddingTop: 14,
-                        borderTop: "1px solid var(--line)",
-                        fontSize: 14,
-                      }}
-                    >
-                      <span className="pajara-consistent-text">Sisa</span>
-                      <strong style={{ color: "var(--green)" }}>
+                    <div className="pajara-payment-remaining">
+                      <span>Sisa</span>
+                      <strong>
                         {formatRupiah(order.remaining_amount)}
                       </strong>
                     </div>
@@ -710,14 +581,361 @@ function OrderDetailContent() {
       </section>
 
       <style>{`
-        .pajara-order-detail-grid > * {
+        .pajara-detail-page {
+          min-width: 0;
+          width: 100%;
+          overflow-x: clip;
+          background: var(--cream, #F7F4EE);
+          color: var(--text, #243329);
+          font-family: "DM Sans", Arial, sans-serif;
+        }
+
+        .pajara-detail-page,
+        .pajara-detail-page * {
+          font-family: "DM Sans", Arial, sans-serif;
+        }
+
+        .pajara-detail-page h1,
+        .pajara-detail-page h2,
+        .pajara-detail-page h3 {
+          font-family: Georgia, "Times New Roman", serif;
+          font-weight: 500;
+        }
+
+        .pajara-header {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+          background: rgba(247, 244, 238, 0.86);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+        }
+
+        .pajara-header-inner {
+          display: flex;
+          min-height: 68px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          position: relative;
+        }
+
+        .pajara-brand {
+          display: inline-flex !important;
+          min-width: 0;
+          align-items: center;
+          gap: 10px;
+          color: #214D32;
+          font-size: 15px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .pajara-header-logo {
+          display: block !important;
+          width: 39px !important;
+          height: 39px !important;
+          min-width: 39px !important;
+          max-width: 39px !important;
+          min-height: 39px !important;
+          max-height: 39px !important;
+          flex: 0 0 39px !important;
+          border-radius: 12px;
+          object-fit: cover;
+        }
+
+        .pajara-menu-wrapper {
+          position: relative;
+          z-index: 52;
+        }
+
+        .pajara-menu-toggle {
+          display: flex;
+          width: 43px;
+          height: 43px;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          padding: 0;
+          border: 1px solid rgba(47, 107, 69, 0.14);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          transition: background .2s ease, border-color .2s ease;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .pajara-menu-toggle:hover {
+          border-color: rgba(47, 107, 69, 0.35);
+          background: #fff;
+        }
+
+        .pajara-menu-toggle span {
+          display: block;
+          width: 18px;
+          height: 2px;
+          border-radius: 5px;
+          background: #214D32;
+          transition: transform .2s ease, opacity .2s ease;
+        }
+
+        .pajara-menu-toggle.is-open span:first-child {
+          transform: translateY(7px) rotate(45deg);
+        }
+
+        .pajara-menu-toggle.is-open span:nth-child(2) {
+          opacity: 0;
+        }
+
+        .pajara-menu-toggle.is-open span:last-child {
+          transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .pajara-menu-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          width: 100vw;
+          height: 100vh;
+          border: 0;
+          background: transparent;
+          cursor: default;
+        }
+
+        .pajara-dropdown-menu {
+          position: absolute;
+          top: calc(100% + 12px);
+          right: 0;
+          z-index: 55;
+          width: 220px;
+          padding: 8px;
+          border: 1px solid rgba(33, 77, 50, 0.1);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.97);
+          box-shadow: 0 16px 40px rgba(33, 77, 50, 0.12);
+          animation: pajara-menu-in .18s ease-out;
+        }
+
+        .pajara-dropdown-menu a {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 13px 12px;
+          border-radius: 10px;
+          color: #214D32;
+          font-size: 13px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background .2s ease;
+        }
+
+        .pajara-dropdown-menu a:hover {
+          background: #F1F5F0;
+        }
+
+        .pajara-menu-arrow {
+          color: #8A6A4A;
+          font-size: 15px;
+        }
+
+        @keyframes pajara-menu-in {
+          from {
+            opacity: 0;
+            transform: translateY(-5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .pajara-order-detail {
+          width: 100%;
+          box-sizing: border-box;
+          overflow-x: clip;
+        }
+
+        .pajara-detail-container {
+          width: 100%;
+          max-width: 1160px;
+          margin-inline: auto;
+          padding: 32px clamp(18px, 4vw, 28px) 48px;
+          box-sizing: border-box;
+          min-width: 0;
+        }
+
+        .pajara-order-detail-header {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+          margin: 0 0 28px;
+          padding: 0;
+          text-align: left;
+          overflow-wrap: break-word;
+        }
+
+        .pajara-detail-page .pajara-eyebrow {
+          display: block;
+          margin: 0 0 10px;
+          color: #8A6A4A;
+          font-family: "DM Sans", Arial, sans-serif;
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1.6;
+          letter-spacing: 0.16em;
+        }
+
+        .pajara-order-detail-header h1 {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          margin: 0 0 12px;
+          padding: 0;
+          color: #243329;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(32px, 5vw, 46px);
+          line-height: 1.2;
+          font-weight: 500;
+          letter-spacing: -1px;
+        }
+
+        .pajara-order-detail-header h1 span {
+          color: #2F6B45;
+          font-style: italic;
+        }
+
+        .pajara-detail-description {
+          display: block;
+          width: 100%;
+          max-width: 560px;
+          margin: 0;
+          color: var(--muted, #778078);
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .pajara-order-detail-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+          gap: 24px;
+          align-items: start;
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+
+        .pajara-detail-column {
+          display: grid;
+          gap: 20px;
           min-width: 0;
         }
 
         .pajara-order-detail-card {
           box-sizing: border-box;
           min-width: 0;
+          padding: 26px;
           overflow-wrap: break-word;
+          border: 1px solid var(--line, rgba(33,77,50,.10));
+          border-radius: 18px;
+          background: rgba(255,255,255,.88);
+          box-shadow: 0 7px 25px rgba(33,77,50,.035);
+        }
+
+        .pajara-order-detail-card h2 {
+          margin: 0;
+          color: var(--green, #2F6B45);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 23px;
+          line-height: 1.35;
+          font-weight: 500;
+        }
+
+        .pajara-order-id-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+
+        .pajara-order-id-info {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .pajara-order-id-info h2 {
+          margin-top: 8px;
+          overflow-wrap: anywhere;
+        }
+
+        .pajara-order-status {
+          display: inline-flex;
+          align-items: center;
+          max-width: 100%;
+          padding: 9px 13px;
+          border-radius: 30px;
+          background: #EDF4EE;
+          color: #2F6B45;
+          font-size: 11px;
+          font-weight: 800;
+          line-height: 1.5;
+        }
+
+        .pajara-subscription-notice {
+          margin-top: 16px;
+          padding: 14px;
+          border-radius: 12px;
+          background: var(--soft, #EDF4EE);
+          color: var(--green, #2F6B45);
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .pajara-information-list {
+          display: grid;
+          gap: 18px;
+          margin-top: 22px;
+        }
+
+        .pajara-information-list > div {
+          min-width: 0;
+        }
+
+        .pajara-information-list .pajara-eyebrow {
+          margin-bottom: 5px;
+        }
+
+        .pajara-information-list strong {
+          color: #243329;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.7;
+          overflow-wrap: anywhere;
+        }
+
+        .pajara-consistent-text,
+        .pajara-access-description {
+          color: var(--muted, #778078);
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .pajara-access-description {
+          margin: 10px 0 0;
+        }
+
+        .pajara-access-list {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 12px;
+          width: 100%;
+          min-width: 0;
+          margin-top: 22px;
         }
 
         .pajara-access-button {
@@ -731,29 +949,98 @@ function OrderDetailContent() {
           min-width: 0;
         }
 
+        .pajara-payment-list {
+          display: grid;
+          gap: 14px;
+          margin-top: 20px;
+        }
+
+        .pajara-payment-list > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
+          font-size: 13px;
+        }
+
+        .pajara-payment-list span {
+          color: var(--muted, #778078);
+          line-height: 1.7;
+        }
+
+        .pajara-payment-list strong {
+          color: #243329;
+          text-align: right;
+          line-height: 1.7;
+        }
+
+        .pajara-payment-list .pajara-payment-remaining {
+          padding-top: 14px;
+          border-top: 1px solid var(--line, rgba(33,77,50,.10));
+        }
+
+        .pajara-payment-remaining strong {
+          color: var(--green, #2F6B45);
+        }
+
         @media (max-width: 760px) {
           .pajara-order-detail-grid {
-            grid-template-columns: minmax(0, 1fr) !important;
-            gap: 18px !important;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 18px;
           }
 
-          .pajara-order-detail-grid > * {
+          .pajara-detail-column {
             width: 100%;
             min-width: 0;
           }
 
           .pajara-order-detail-card {
             width: 100%;
-            padding: clamp(20px, 5vw, 28px) !important;
+            padding: clamp(20px, 5vw, 26px);
           }
 
           .pajara-order-detail-header h1 {
-            font-size: clamp(30px, 8vw, 38px) !important;
+            font-size: clamp(32px, 8vw, 40px);
+          }
+        }
+
+        @media (max-width: 420px) {
+          .pajara-header-inner {
+            min-height: 64px;
           }
 
-          .pajara-access-button {
-            width: 100%;
-            min-height: 54px;
+          .pajara-brand {
+            gap: 8px;
+            font-size: 14px;
+          }
+
+          .pajara-header-logo {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            max-width: 36px !important;
+            min-height: 36px !important;
+            max-height: 36px !important;
+            flex-basis: 36px !important;
+          }
+
+          .pajara-menu-toggle {
+            width: 40px;
+            height: 40px;
+          }
+
+          .pajara-detail-container {
+            padding-top: 26px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .pajara-menu-toggle,
+          .pajara-menu-toggle span,
+          .pajara-dropdown-menu,
+          .pajara-dropdown-menu a {
+            animation: none;
+            transition: none;
           }
         }
       `}</style>
