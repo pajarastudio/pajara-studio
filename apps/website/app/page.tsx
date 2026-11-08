@@ -195,7 +195,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("testimonials")
-          .select("id, customer_nam, content, rating, created_at")
+          .select("id, customer_name, content, rating, created_at")
           .eq("is_published", true)
           .order("created_at", { ascending: false })
           .limit(3);
@@ -208,7 +208,7 @@ export default function Home() {
         if (!cancelled) {
           const items: TestimonialItem[] = (data || []).map((item) => ({
             id: item.id,
-            customer_name: item.customer_nam || null,
+            customer_name: item.customer_name || null,
             content: item.content || "",
             rating: item.rating ?? null,
             created_at: item.created_at,
