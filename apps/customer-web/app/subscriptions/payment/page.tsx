@@ -1,6 +1,8 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
@@ -28,150 +30,32 @@ type SubscriptionPlan = {
 
 type PaymentMethod = "QRIS" | "DANA" | "GoPay" | "SeaBank";
 
+const LOGO =
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
+
 function DashboardNavbar() {
   return (
-    <>
-      <header className="payment-navbar">
-        <div className="payment-navbar-inner">
-          <Link href="/dashboard" className="payment-brand">
-            <img
-              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-              alt="Pajara Studio"
-              className="payment-brand-logo"
-            />
+    <header className="payment-navbar">
+      <div className="payment-navbar-inner">
+        <Link href="/dashboard" className="payment-brand">
+          <img
+            src={LOGO}
+            alt="Logo Pajara Studio"
+            className="payment-brand-logo"
+          />
 
-            <span className="payment-brand-copy">
-              <strong>Pajara Studio</strong>
-              <small>Berakar di Tanah Pasundan.</small>
-            </span>
-          </Link>
+          <span className="payment-brand-copy">
+            <strong>Pajara Studio</strong>
+            <span>Berakar di Tanah Pasundan.</span>
+          </span>
+        </Link>
 
-          <Link href="/dashboard" className="payment-dashboard-link">
-            Dashboard
-            <span aria-hidden="true">↗</span>
-          </Link>
-        </div>
-      </header>
-
-      <style jsx>{`
-        .payment-navbar {
-          width: 100%;
-          position: relative;
-          z-index: 10;
-          background: #ffffff;
-          border-bottom: 1px solid #e9e7df;
-          box-shadow: 0 4px 20px rgba(33, 77, 50, 0.035);
-          font-family: Arial, sans-serif;
-        }
-
-        .payment-navbar-inner {
-          width: min(1120px, calc(100% - 24px));
-          min-height: 74px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-
-        .payment-brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 0;
-          text-decoration: none;
-        }
-
-        .payment-brand-logo {
-          display: block;
-          width: 40px;
-          height: 40px;
-          flex-shrink: 0;
-          object-fit: cover;
-          border-radius: 11px;
-          border: 1px solid #e6e8df;
-          background: #ffffff;
-        }
-
-        .payment-brand-copy {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          min-width: 0;
-        }
-
-        .payment-brand-copy strong {
-          color: #214d32;
-          font-family: Georgia, serif;
-          font-size: 16px;
-          font-weight: 700;
-          line-height: 1.2;
-        }
-
-        .payment-brand-copy small {
-          color: #8a6a4a;
-          font-size: 9px;
-          line-height: 1.3;
-        }
-
-        .payment-dashboard-link {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          min-height: 42px;
-          box-sizing: border-box;
-          padding: 9px 14px;
-          border: 1px solid #d5e2cf;
-          border-radius: 13px;
-          background: #edf3e9;
-          color: #214d32;
-          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
-          font-family: Arial, sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .payment-dashboard-link span {
-          font-size: 14px;
-          line-height: 1;
-        }
-
-        @media (max-width: 600px) {
-          .payment-brand-logo {
-            width: 38px;
-            height: 38px;
-          }
-
-          .payment-brand {
-            gap: 8px;
-          }
-        }
-
-        @media (max-width: 360px) {
-          .payment-brand-logo {
-            width: 32px;
-            height: 32px;
-          }
-
-          .payment-brand-copy strong {
-            font-size: 14px;
-          }
-
-          .payment-brand-copy small {
-            font-size: 8px;
-          }
-
-          .payment-dashboard-link {
-            min-height: 38px;
-            padding: 8px 10px;
-            font-size: 11px;
-          }
-        }
-      `}</style>
-    </>
+        <Link href="/dashboard" className="payment-dashboard-link">
+          <span>Dashboard</span>
+          <span aria-hidden="true">↗</span>
+        </Link>
+      </div>
+    </header>
   );
 }
 
@@ -179,8 +63,8 @@ function PajaraFooter() {
   return (
     <footer className="payment-footer">
       <img
-        src="/755809946_17926162029385149_3739923509439876817_n.jpg"
-        alt="Pajara Studio"
+        src={LOGO}
+        alt="Logo Pajara Studio"
         className="payment-footer-logo"
       />
 
@@ -189,51 +73,6 @@ function PajaraFooter() {
         <span>Berakar di Tanah Pasundan.</span>
         <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
       </div>
-
-      <style jsx>{`
-        .payment-footer {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          margin-top: 36px;
-          padding-top: 22px;
-          border-top: 1px solid #e4ddd1;
-          font-family: Arial, sans-serif;
-        }
-
-        .payment-footer-logo {
-          display: block;
-          width: 43px;
-          height: 43px;
-          flex-shrink: 0;
-          object-fit: contain;
-          border-radius: 10px;
-          background: #ffffff;
-        }
-
-        .payment-footer-copy {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .payment-footer-copy strong {
-          color: #214d32;
-          font-size: 13px;
-          font-weight: 700;
-        }
-
-        .payment-footer-copy span {
-          color: #8a6a4a;
-          font-size: 11px;
-        }
-
-        .payment-footer-copy small {
-          color: #858585;
-          font-size: 10px;
-          line-height: 1.5;
-        }
-      `}</style>
     </footer>
   );
 }
@@ -345,7 +184,7 @@ function PaymentPageContent() {
   }
 
   function handleFileChange(
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) {
     setError("");
     const file = event.target.files?.[0] || null;
@@ -529,93 +368,6 @@ function PaymentPageContent() {
     }
   }
 
-  const backCard = (
-    <button
-      type="button"
-      onClick={() => router.push("/subscriptions")}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 14,
-        width: "100%",
-        minHeight: 76,
-        boxSizing: "border-box",
-        padding: "14px 16px",
-        margin: "0 0 20px",
-        border: "1px solid #d5e5d8",
-        borderRadius: 18,
-        backgroundColor: "#ffffff",
-        color: "#214d32",
-        boxShadow: "0 6px 18px rgba(33,77,50,0.12)",
-        textAlign: "left",
-        cursor: "pointer",
-        fontFamily: "Arial, sans-serif",
-        appearance: "none",
-        WebkitAppearance: "none",
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          width: 44,
-          height: 44,
-          borderRadius: 14,
-          backgroundColor: "#e3f0e6",
-          color: "#2f6b45",
-          fontSize: 26,
-          fontWeight: 700,
-        }}
-      >
-        ←
-      </span>
-
-      <span
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 5,
-          flex: 1,
-        }}
-      >
-        <span
-          style={{
-            display: "block",
-            color: "#214d32",
-            fontSize: 15,
-            fontWeight: 800,
-          }}
-        >
-          Kembali ke Paket
-        </span>
-        <span
-          style={{
-            display: "block",
-            color: "#66736a",
-            fontSize: 12,
-            fontWeight: 400,
-          }}
-        >
-          Lihat pilihan paket Pajara Studio
-        </span>
-      </span>
-
-      <span
-        aria-hidden="true"
-        style={{
-          color: "#2f6b45",
-          fontSize: 25,
-          fontWeight: 400,
-        }}
-      >
-        ›
-      </span>
-    </button>
-  );
-
   if (loading) {
     return (
       <CustomerLoading
@@ -627,542 +379,1274 @@ function PaymentPageContent() {
 
   if (!subscription || !plan) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#f7f4ee",
-          fontFamily: "Arial, sans-serif",
-          paddingBottom: 30,
-        }}
-      >
+      <main className="payment-page">
         <DashboardNavbar />
 
-        <div
-          style={{
-            maxWidth: 760,
-            margin: "0 auto",
-            padding: "24px 16px 0",
-            boxSizing: "border-box",
-          }}
-        >
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: 24,
-              padding: 28,
-              boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
-            }}
-          >
-            <h1
-              style={{
-                margin: "0 0 10px",
-                color: "#214d32",
-                fontSize: 28,
-              }}
-            >
-              Pembayaran Paket
-            </h1>
-
-            {error && (
-              <div
-                style={{
-                  background: "#fff1f1",
-                  color: "#a12b2b",
-                  border: "1px solid #f0caca",
-                  borderRadius: 14,
-                  padding: 14,
-                  lineHeight: 1.5,
-                }}
-              >
-                {error}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => router.push("/subscriptions")}
-              style={{
-                marginTop: 20,
-                width: "100%",
-                border: "none",
-                borderRadius: 14,
-                padding: "14px 18px",
-                background: "#2f6b45",
-                color: "#ffffff",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Kembali ke Paket
-            </button>
+        <div className="payment-container">
+          <div className="payment-breadcrumb">
+            <Link href="/dashboard">Dashboard</Link>
+            <span>/</span>
+            <Link href="/subscriptions">Paket</Link>
+            <span>/</span>
+            <span>Pembayaran</span>
           </div>
+
+          <section className="payment-error-card">
+            <div className="payment-eyebrow">
+              <span className="payment-eyebrow-dot" />
+              PAJARA STUDIO · PEMBAYARAN
+            </div>
+
+            <h1>Pembayaran Paket</h1>
+
+            <div className="payment-alert payment-alert-error">
+              <span className="payment-alert-symbol">!</span>
+              <span>{error}</span>
+            </div>
+
+            <Link
+              href="/subscriptions"
+              className="payment-primary-button"
+            >
+              Lihat Pilihan Paket <span>↗</span>
+            </Link>
+          </section>
 
           <PajaraFooter />
         </div>
+
+        <PaymentStyles />
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f7f4ee",
-        paddingBottom: 30,
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
+    <main className="payment-page">
       <DashboardNavbar />
 
-      <div
-        style={{
-          maxWidth: 760,
-          margin: "0 auto",
-          padding: "24px 16px 0",
-          boxSizing: "border-box",
-        }}
-      >
-        {backCard}
+      <div className="payment-container">
+        <div className="payment-breadcrumb">
+          <Link href="/dashboard">Dashboard</Link>
+          <span>/</span>
+          <Link href="/subscriptions">Paket</Link>
+          <span>/</span>
+          <span>Pembayaran</span>
+        </div>
 
-        <section
-          style={{
-            background: "#ffffff",
-            borderRadius: 24,
-            padding: 24,
-            marginBottom: 16,
-            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
-          }}
-        >
-          <p
-            style={{
-              margin: "0 0 7px",
-              color: "#8a6a4a",
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: 0.5,
-              textTransform: "uppercase",
-            }}
-          >
-            Pembayaran Paket
-          </p>
+        <section className="payment-intro">
+          <div className="payment-eyebrow">
+            <span className="payment-eyebrow-dot" />
+            PAJARA STUDIO · SUBSCRIPTION
+          </div>
 
-          <h1
-            style={{
-              margin: "0 0 12px",
-              color: "#214d32",
-              fontSize: 30,
-              lineHeight: 1.2,
-            }}
-          >
-            {plan.name}
+          <h1>
+            Selesaikan
+            <br />
+            <span>perjalanan paket Anda.</span>
           </h1>
 
+          <p>
+            Satu langkah lagi untuk memulai perjalanan kreatif bersama
+            Pajara Studio. Silakan periksa detail paket dan selesaikan
+            pembayaran Anda.
+          </p>
+
+          <div className="payment-intro-note">
+            <span aria-hidden="true">✳</span>
+            Desain yang punya arah.
+          </div>
+        </section>
+
+        <section className="payment-card">
+          <div className="payment-section-heading">
+            <div>
+              <span className="payment-section-number">
+                01 / DETAIL PAKET
+              </span>
+              <h2>{plan.name}</h2>
+              <p>Periksa kembali informasi paket pilihan Anda.</p>
+            </div>
+          </div>
+
           {plan.description && (
-            <p
-              style={{
-                margin: "0 0 18px",
-                color: "#66736a",
-                lineHeight: 1.6,
-              }}
-            >
+            <p className="payment-plan-description">
               {plan.description}
             </p>
           )}
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-              gap: 10,
-            }}
-          >
-            {[
-              { label: "Harga", value: formatRupiah(plan.price) },
-              {
-                label: "Masa Aktif",
-                value: `${plan.duration_days} hari`,
-              },
-              {
-                label: "Kuota",
-                value: `${plan.quota_total} desain`,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  background: "#f7f4ee",
-                  borderRadius: 16,
-                  padding: 15,
-                }}
-              >
-                <div
-                  style={{
-                    color: "#6d776f",
-                    fontSize: 12,
-                    marginBottom: 5,
-                  }}
-                >
-                  {item.label}
-                </div>
-                <strong style={{ color: "#214d32", fontSize: 17 }}>
-                  {item.value}
-                </strong>
-              </div>
-            ))}
+          <div className="payment-plan-grid">
+            <div className="payment-plan-item">
+              <span>Harga Paket</span>
+              <strong>{formatRupiah(plan.price)}</strong>
+            </div>
+
+            <div className="payment-plan-item">
+              <span>Masa Aktif</span>
+              <strong>{plan.duration_days} hari</strong>
+            </div>
+
+            <div className="payment-plan-item">
+              <span>Kuota Desain</span>
+              <strong>{plan.quota_total} desain</strong>
+            </div>
           </div>
 
-          <div
-            style={{
-              marginTop: 16,
-              background: "#edf5ef",
-              borderRadius: 14,
-              padding: 14,
-              color: "#214d32",
-              lineHeight: 1.5,
-              fontSize: 14,
-            }}
-          >
+          <div className="payment-info-note">
             Pembayaran paket dilakukan <strong>100% di awal</strong>.
             Setelah pembayaran diverifikasi Admin, paket akan aktif.
           </div>
-        </section>
 
-        <section
-          style={{
-            background: "#ffffff",
-            borderRadius: 24,
-            padding: 24,
-            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 18px",
-              color: "#214d32",
-              fontSize: 21,
-            }}
-          >
-            Pilih Metode Pembayaran
-          </h2>
+          <div className="payment-divider" />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-              gap: 10,
-              marginBottom: 20,
-            }}
-          >
-            {(["QRIS", "DANA", "GoPay", "SeaBank"] as PaymentMethod[]).map(
-              (method) => {
-                const active = paymentMethod === method;
+          <div className="payment-section-heading">
+            <div>
+              <span className="payment-section-number">
+                02 / METODE PEMBAYARAN
+              </span>
+              <h2>Pilih metode pembayaran</h2>
+              <p>
+                Gunakan salah satu metode pembayaran yang tersedia.
+              </p>
+            </div>
+          </div>
 
-                return (
-                  <button
-                    key={method}
-                    type="button"
-                    onClick={() => {
-                      setPaymentMethod(method);
-                      setError("");
-                    }}
-                    style={{
-                      border: active
-                        ? "2px solid #2f6b45"
-                        : "1px solid #d8dfd9",
-                      borderRadius: 14,
-                      padding: "13px 10px",
-                      background: active ? "#edf5ef" : "#ffffff",
-                      color: "#214d32",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {method}
-                  </button>
-                );
-              }
-            )}
+          <div className="payment-method-grid">
+            {(
+              ["QRIS", "DANA", "GoPay", "SeaBank"] as PaymentMethod[]
+            ).map((method) => (
+              <button
+                key={method}
+                type="button"
+                onClick={() => {
+                  setPaymentMethod(method);
+                  setError("");
+                }}
+                className={`payment-method-option ${
+                  paymentMethod === method ? "is-selected" : ""
+                }`}
+              >
+                <span className="payment-method-radio" />
+                <span className="payment-method-copy">
+                  <strong>{method}</strong>
+                  <small>
+                    {method === "QRIS"
+                      ? "Pembayaran melalui kode QR."
+                      : method === "SeaBank"
+                        ? "Transfer melalui rekening bank."
+                        : "Pembayaran melalui e-wallet."}
+                  </small>
+                </span>
+              </button>
+            ))}
           </div>
 
           {paymentMethod === "QRIS" && (
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: 18,
-                padding: 18,
-                textAlign: "center",
-                marginBottom: 20,
-              }}
-            >
-              <p
-                style={{
-                  margin: "0 0 14px",
-                  color: "#214d32",
-                  fontWeight: 700,
-                }}
-              >
-                Scan QRIS Pajara Studio
-              </p>
+            <div className="payment-instruction">
+              <div className="payment-instruction-heading">
+                <span className="payment-section-number">
+                  INSTRUKSI PEMBAYARAN
+                </span>
+                <h3>Scan QRIS Pajara Studio</h3>
+                <p>
+                  Pindai kode QR berikut melalui aplikasi pembayaran
+                  yang mendukung QRIS.
+                </p>
+              </div>
+
               <img
                 src="/qr_ID1026470184411_08.10.26_1791447334_1791447334905.jpeg"
                 alt="QRIS Pajara Studio"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: 340,
-                  margin: "0 auto",
-                  borderRadius: 14,
-                  background: "#ffffff",
-                }}
+                className="payment-qris-image"
               />
-              <p
-                style={{
-                  margin: "14px 0 0",
-                  color: "#6d776f",
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                }}
-              >
+
+              <p className="payment-instruction-note">
                 Pastikan nominal pembayaran sesuai dengan harga paket.
               </p>
             </div>
           )}
 
-          {(paymentMethod === "DANA" || paymentMethod === "GoPay") && (
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: 18,
-                padding: 20,
-                marginBottom: 20,
-              }}
-            >
-              <div
-                style={{
-                  color: "#6d776f",
-                  fontSize: 13,
-                  marginBottom: 7,
-                }}
-              >
-                {paymentMethod}
-              </div>
-              <div
-                style={{
-                  color: "#214d32",
-                  fontSize: 22,
-                  fontWeight: 800,
-                  letterSpacing: 0.5,
-                }}
-              >
+          {(paymentMethod === "DANA" ||
+            paymentMethod === "GoPay") && (
+            <div className="payment-instruction">
+              <span className="payment-section-number">
+                INSTRUKSI PEMBAYARAN
+              </span>
+              <h3>{paymentMethod}</h3>
+              <div className="payment-account-number">
                 0858-8242-1145
               </div>
-              <div style={{ marginTop: 5, color: "#6d776f", fontSize: 14 }}>
-                A/N TUTI
-              </div>
+              <p className="payment-account-name">A/N TUTI</p>
             </div>
           )}
 
           {paymentMethod === "SeaBank" && (
-            <div
-              style={{
-                background: "#f7f4ee",
-                borderRadius: 18,
-                padding: 20,
-                marginBottom: 20,
-              }}
-            >
-              <div
-                style={{
-                  color: "#6d776f",
-                  fontSize: 13,
-                  marginBottom: 7,
-                }}
-              >
-                SeaBank
-              </div>
-              <div
-                style={{
-                  color: "#214d32",
-                  fontSize: 22,
-                  fontWeight: 800,
-                  letterSpacing: 0.5,
-                }}
-              >
+            <div className="payment-instruction">
+              <span className="payment-section-number">
+                INSTRUKSI PEMBAYARAN
+              </span>
+              <h3>SeaBank</h3>
+              <div className="payment-account-number">
                 901052450932
               </div>
-              <div style={{ marginTop: 5, color: "#6d776f", fontSize: 14 }}>
-                A/N TUTI
-              </div>
+              <p className="payment-account-name">A/N TUTI</p>
             </div>
           )}
 
-          <div style={{ marginBottom: 18 }}>
-            <label
-              htmlFor="transaction-id"
-              style={{
-                display: "block",
-                color: "#214d32",
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              ID Transaksi
-              <span
-                style={{
-                  color: "#8a6a4a",
-                  fontWeight: 400,
-                  marginLeft: 6,
-                }}
-              >
-                (opsional)
+          <div className="payment-divider" />
+
+          <div className="payment-section-heading">
+            <div>
+              <span className="payment-section-number">
+                03 / KONFIRMASI
               </span>
+              <h2>Konfirmasi pembayaran</h2>
+              <p>
+                Lengkapi informasi berikut setelah melakukan pembayaran.
+              </p>
+            </div>
+          </div>
+
+          <div className="payment-field">
+            <label htmlFor="transaction-id">
+              ID Transaksi
+              <span className="payment-optional">(opsional)</span>
             </label>
+
             <input
               id="transaction-id"
               type="text"
               value={transactionId}
-              onChange={(event) => setTransactionId(event.target.value)}
+              onChange={(event) =>
+                setTransactionId(event.target.value)
+              }
               placeholder="Masukkan ID transaksi jika ada"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                border: "1px solid #d8dfd9",
-                borderRadius: 14,
-                padding: "13px 14px",
-                outline: "none",
-                color: "#214d32",
-                background: "#ffffff",
-              }}
             />
           </div>
 
-          <div style={{ marginBottom: 18 }}>
-            <label
-              htmlFor="proof-file"
-              style={{
-                display: "block",
-                color: "#214d32",
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              Bukti Pembayaran
+          <div className="payment-field">
+            <label htmlFor="proof-file">
+              Bukti Pembayaran <span>*</span>
             </label>
+
+            <label htmlFor="proof-file" className="payment-upload-area">
+              <span className="payment-upload-icon">↑</span>
+              <strong>Pilih bukti pembayaran</strong>
+              <span>
+                Tekan untuk memilih gambar atau PDF dari perangkat Anda.
+              </span>
+              <small>
+                JPG, PNG, WEBP, atau PDF · Maks. 10 MB
+              </small>
+            </label>
+
             <input
               id="proof-file"
+              className="payment-file-input"
               type="file"
               accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
               onChange={handleFileChange}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                border: "1px solid #d8dfd9",
-                borderRadius: 14,
-                padding: 10,
-                background: "#ffffff",
-                color: "#214d32",
-              }}
             />
-            <p
-              style={{
-                margin: "8px 0 0",
-                color: "#7a837d",
-                fontSize: 12,
-                lineHeight: 1.5,
-              }}
-            >
-              JPG, PNG, WEBP, atau PDF. Maksimal 10 MB.
-            </p>
 
             {proofFile && (
-              <div
-                style={{
-                  marginTop: 10,
-                  background: "#edf5ef",
-                  borderRadius: 12,
-                  padding: 11,
-                  color: "#214d32",
-                  fontSize: 13,
-                }}
-              >
-                File dipilih: <strong>{proofFile.name}</strong>
+              <div className="payment-selected-file">
+                <span className="payment-file-icon">↗</span>
+                <span className="payment-file-info">
+                  <strong>{proofFile.name}</strong>
+                  <small>
+                    {(proofFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </small>
+                </span>
+                <button
+                  type="button"
+                  className="payment-remove-file"
+                  aria-label="Hapus bukti pembayaran"
+                  onClick={() => {
+                    setProofFile(null);
+                    const input = document.getElementById(
+                      "proof-file"
+                    ) as HTMLInputElement | null;
+                    if (input) input.value = "";
+                  }}
+                >
+                  ×
+                </button>
               </div>
             )}
           </div>
 
           {error && (
-            <div
-              style={{
-                marginBottom: 16,
-                background: "#fff1f1",
-                border: "1px solid #f0caca",
-                borderRadius: 14,
-                padding: 14,
-                color: "#a12b2b",
-                lineHeight: 1.5,
-                fontSize: 14,
-              }}
-            >
-              {error}
+            <div className="payment-alert payment-alert-error">
+              <span className="payment-alert-symbol">!</span>
+              <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div
-              style={{
-                marginBottom: 16,
-                background: "#edf5ef",
-                border: "1px solid #c9dfce",
-                borderRadius: 14,
-                padding: 14,
-                color: "#214d32",
-                lineHeight: 1.5,
-                fontSize: 14,
-              }}
-            >
-              {success}
+            <div className="payment-alert payment-alert-success">
+              <span className="payment-alert-symbol">✓</span>
+              <span>{success}</span>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={submitPayment}
-            disabled={submitting || !!success}
-            style={{
-              width: "100%",
-              border: "none",
-              borderRadius: 15,
-              padding: "15px 18px",
-              background:
-                submitting || !!success ? "#9aae9e" : "#2f6b45",
-              color: "#ffffff",
-              fontWeight: 800,
-              fontSize: 15,
-              cursor: submitting || !!success ? "not-allowed" : "pointer",
-            }}
-          >
-            {submitting
-              ? "Mengirim Pembayaran..."
-              : "Kirim Bukti Pembayaran"}
-          </button>
+          <div className="payment-submit-area">
+            <p>
+              Pastikan bukti pembayaran yang dikirim sudah benar.
+              Admin akan memeriksa pembayaran sebelum paket diaktifkan.
+            </p>
 
-          <p
-            style={{
-              margin: "14px 0 0",
-              textAlign: "center",
-              color: "#7a837d",
-              fontSize: 12,
-              lineHeight: 1.5,
-            }}
-          >
-            Setelah dikirim, Admin akan memeriksa pembayaran sebelum paket
-            diaktifkan.
-          </p>
+            <button
+              type="button"
+              onClick={submitPayment}
+              disabled={submitting || !!success}
+              className="payment-submit-button"
+            >
+              {submitting ? (
+                <>
+                  <span className="payment-spinner" />
+                  Mengirim pembayaran...
+                </>
+              ) : (
+                <>
+                  Kirim Bukti Pembayaran
+                  <span aria-hidden="true">↗</span>
+                </>
+              )}
+            </button>
+          </div>
         </section>
 
         <PajaraFooter />
       </div>
+
+      <PaymentStyles />
     </main>
+  );
+}
+
+function PaymentStyles() {
+  return (
+    <style jsx global>{`
+      .payment-page {
+        --green: #2f6b45;
+        --green-dark: #214d32;
+        --brown: #8a6a4a;
+        --cream: #f7f4ee;
+        --ink: #252820;
+        --muted: #77796f;
+        min-height: 100vh;
+        padding-bottom: 30px;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .payment-page *,
+      .payment-error-card * {
+        box-sizing: border-box;
+      }
+
+      .payment-navbar {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        background: #fff;
+        border-bottom: 1px solid #e9e7df;
+        box-shadow: 0 4px 20px rgba(33, 77, 50, 0.035);
+      }
+
+      .payment-navbar-inner {
+        width: min(1120px, calc(100% - 24px));
+        min-height: 74px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .payment-brand {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1 1 auto;
+        color: var(--green-dark);
+        text-decoration: none;
+      }
+
+      .payment-brand-logo {
+        display: block;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        flex: 0 0 40px;
+        object-fit: cover;
+        border-radius: 11px;
+        border: 1px solid #e6e8df;
+        background: #fff;
+      }
+
+      .payment-brand-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        min-width: 0;
+        flex: 1 1 auto;
+        gap: 4px;
+        text-align: left;
+      }
+
+      .payment-brand-copy strong {
+        display: block;
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.3px;
+      }
+
+      .payment-brand-copy span {
+        display: block;
+        color: #85877c;
+        font-size: 9px;
+        line-height: 1.4;
+      }
+
+      .payment-dashboard-link {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex: 0 0 auto;
+        min-height: 42px;
+        padding: 9px 14px;
+        border: 1px solid #d5e2cf;
+        border-radius: 13px;
+        background: #edf3e9;
+        color: var(--green-dark);
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
+        transition:
+          background 0.2s ease,
+          border-color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .payment-dashboard-link:hover {
+        background: #e3eddd;
+        border-color: #b9ceb0;
+        transform: translateY(-1px);
+      }
+
+      .payment-container {
+        width: min(850px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .payment-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 27px 0 20px;
+        color: #93948a;
+        font-size: 12px;
+      }
+
+      .payment-breadcrumb a {
+        color: var(--green);
+        text-decoration: none;
+      }
+
+      .payment-intro {
+        padding: 21px 0 32px;
+      }
+
+      .payment-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 17px;
+        color: var(--green);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+      }
+
+      .payment-eyebrow-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--brown);
+      }
+
+      .payment-intro h1 {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(35px, 6vw, 54px);
+        line-height: 1.12;
+        letter-spacing: -1.8px;
+        font-weight: 500;
+      }
+
+      .payment-intro h1 span {
+        color: var(--green);
+        font-style: italic;
+      }
+
+      .payment-intro > p {
+        max-width: 550px;
+        margin: 18px 0 0;
+        color: #77796f;
+        font-size: 14px;
+        line-height: 1.9;
+      }
+
+      .payment-intro-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        padding: 9px 13px;
+        border: 1px solid #e6e4d9;
+        border-radius: 999px;
+        color: #6e715f;
+        background: rgba(255, 255, 255, 0.52);
+        font-size: 11px;
+      }
+
+      .payment-intro-note span {
+        color: var(--brown);
+        font-size: 15px;
+      }
+
+      .payment-card,
+      .payment-error-card {
+        padding: 35px;
+        background: #fff;
+        border: 1px solid #e9e7df;
+        border-radius: 23px;
+        box-shadow: 0 15px 55px rgba(42, 48, 34, 0.045);
+      }
+
+      .payment-section-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 24px;
+      }
+
+      .payment-section-number {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--brown);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+      }
+
+      .payment-section-heading h2 {
+        margin: 0;
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        line-height: 1.25;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+      }
+
+      .payment-section-heading p {
+        margin: 9px 0 0;
+        color: #83847b;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .payment-plan-description {
+        margin: -8px 0 20px;
+        color: #77796f;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .payment-plan-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .payment-plan-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        padding: 17px;
+        border: 1px solid #eeede7;
+        border-radius: 14px;
+        background: #f7f4ee;
+      }
+
+      .payment-plan-item span {
+        color: #77796f;
+        font-size: 11px;
+      }
+
+      .payment-plan-item strong {
+        color: var(--green-dark);
+        font-size: 16px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      .payment-info-note {
+        margin-top: 16px;
+        padding: 15px;
+        border: 1px solid #dce8d8;
+        border-radius: 13px;
+        background: #f3f7f0;
+        color: var(--green-dark);
+        font-size: 12px;
+        line-height: 1.8;
+      }
+
+      .payment-divider {
+        width: 100%;
+        height: 1px;
+        margin: 31px 0;
+        background: #eeede7;
+      }
+
+      .payment-method-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+
+      .payment-method-option {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+        padding: 15px;
+        border: 1px solid #e5e5dc;
+        border-radius: 13px;
+        background: #fff;
+        color: var(--ink);
+        text-align: left;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .payment-method-option.is-selected {
+        border-color: #85a98a;
+        background: #f3f7f0;
+      }
+
+      .payment-method-option:focus-visible {
+        outline: 2px solid #80a68a;
+        outline-offset: 2px;
+      }
+
+      .payment-method-radio {
+        display: grid;
+        width: 17px;
+        height: 17px;
+        flex: 0 0 17px;
+        place-items: center;
+        border: 1px solid #c9cbbf;
+        border-radius: 50%;
+      }
+
+      .payment-method-option.is-selected .payment-method-radio {
+        border: 5px solid var(--green);
+      }
+
+      .payment-method-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 0;
+      }
+
+      .payment-method-copy strong {
+        color: #373d32;
+        font-size: 12px;
+      }
+
+      .payment-method-copy small {
+        color: #87897e;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .payment-instruction {
+        margin-bottom: 20px;
+        padding: 23px;
+        border: 1px solid #eeede7;
+        border-radius: 16px;
+        background: #f8f7f2;
+      }
+
+      .payment-instruction h3 {
+        margin: 0 0 9px;
+        color: var(--green-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 22px;
+        font-weight: 500;
+      }
+
+      .payment-instruction-heading p {
+        margin: 0 0 18px;
+        color: #85877c;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .payment-qris-image {
+        display: block;
+        width: 100%;
+        max-width: 340px;
+        margin: 0 auto;
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .payment-instruction-note {
+        margin: 15px 0 0;
+        color: #77796f;
+        font-size: 11px;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      .payment-account-number {
+        color: var(--green-dark);
+        font-size: 23px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        overflow-wrap: anywhere;
+      }
+
+      .payment-account-name {
+        margin: 7px 0 0;
+        color: #77796f;
+        font-size: 12px;
+      }
+
+      .payment-field {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 22px;
+      }
+
+      .payment-field > label:first-child {
+        color: #373b32;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .payment-field label span:not(.payment-optional) {
+        color: #a66b45;
+      }
+
+      .payment-optional {
+        margin-left: 6px;
+        color: #929387;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .payment-field input[type="text"] {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: 49px;
+        padding: 14px 15px;
+        border: 1px solid #e3e3d9;
+        border-radius: 12px;
+        outline: none;
+        background: #fcfcfa;
+        color: #292d25;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .payment-field input[type="text"]:focus {
+        border-color: #80a68a;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(47, 107, 69, 0.09);
+      }
+
+      .payment-field input::placeholder {
+        color: #a1a197;
+      }
+
+      .payment-upload-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 26px 18px;
+        border: 1px dashed #c9d6c1;
+        border-radius: 15px;
+        background: #f8faf6;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .payment-upload-area:hover {
+        border-color: var(--green);
+        background: #f1f6ed;
+      }
+
+      .payment-upload-icon {
+        display: grid;
+        width: 43px;
+        height: 43px;
+        place-items: center;
+        margin-bottom: 13px;
+        border: 1px solid #e0e9da;
+        border-radius: 14px;
+        background: #fff;
+        color: var(--green);
+        font-size: 23px;
+      }
+
+      .payment-upload-area strong {
+        margin-bottom: 7px;
+        color: #344733;
+        font-size: 13px;
+      }
+
+      .payment-upload-area > span:not(.payment-upload-icon) {
+        color: #85877c;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .payment-upload-area small {
+        margin-top: 12px;
+        color: #929387;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .payment-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
+
+      .payment-file-input:focus-visible + .payment-selected-file {
+        outline: 2px solid var(--green);
+      }
+
+      .payment-selected-file {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid #e8e8df;
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .payment-file-icon {
+        display: grid;
+        width: 35px;
+        height: 35px;
+        flex: 0 0 35px;
+        place-items: center;
+        border-radius: 10px;
+        background: #edf3e9;
+        color: var(--green);
+      }
+
+      .payment-file-info {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .payment-file-info strong {
+        overflow-wrap: anywhere;
+        color: #414439;
+        font-size: 11px;
+      }
+
+      .payment-file-info small {
+        color: #8b8d82;
+        font-size: 10px;
+      }
+
+      .payment-remove-file {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        border: 0;
+        border-radius: 9px;
+        background: #f7eeea;
+        color: #925e4b;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .payment-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 13px;
+        font-size: 12px;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+      }
+
+      .payment-alert-error {
+        border: 1px solid #ecd4ca;
+        background: #fff6f2;
+        color: #884d3b;
+      }
+
+      .payment-alert-success {
+        border: 1px solid #d3e4cf;
+        background: #f2f8ef;
+        color: #345d38;
+      }
+
+      .payment-alert-symbol {
+        display: grid;
+        width: 25px;
+        height: 25px;
+        flex: 0 0 25px;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(47, 107, 69, 0.1);
+        font-weight: 700;
+      }
+
+      .payment-submit-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #eeede7;
+      }
+
+      .payment-submit-area > p {
+        max-width: 490px;
+        margin: 0;
+        color: #87887f;
+        font-size: 10px;
+        line-height: 1.8;
+        text-align: center;
+      }
+
+      .payment-submit-button,
+      .payment-primary-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 13px;
+        width: 100%;
+        min-height: 53px;
+        padding: 15px 20px;
+        border: 1px solid var(--green);
+        border-radius: 13px;
+        background: var(--green);
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .payment-submit-button:hover:not(:disabled),
+      .payment-primary-button:hover {
+        background: var(--green-dark);
+        transform: translateY(-1px);
+      }
+
+      .payment-submit-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .payment-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: payment-spin 0.8s linear infinite;
+      }
+
+      @keyframes payment-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .payment-error-card h1 {
+        margin: 0 0 20px;
+        color: var(--green-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34px;
+        font-weight: 500;
+      }
+
+      .payment-error-card .payment-alert {
+        margin-bottom: 20px;
+      }
+
+      .payment-footer {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        border-top: 1px solid #e4ddd1;
+        padding-top: 22px;
+        margin-top: 36px;
+      }
+
+      .payment-footer-logo {
+        display: block;
+        width: 43px;
+        height: 43px;
+        flex-shrink: 0;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .payment-footer-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .payment-footer-copy strong {
+        display: block;
+        color: var(--green-dark);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .payment-footer-copy span {
+        color: var(--brown);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .payment-footer-copy small {
+        color: #999387;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 600px) {
+        .payment-navbar-inner {
+          width: calc(100% - 24px);
+          min-height: 74px;
+          gap: 8px;
+        }
+
+        .payment-brand {
+          gap: 8px;
+        }
+
+        .payment-brand-logo {
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
+          flex-basis: 38px;
+        }
+
+        .payment-brand-copy {
+          gap: 4px;
+        }
+
+        .payment-brand-copy strong {
+          font-size: 15px;
+          letter-spacing: -0.3px;
+        }
+
+        .payment-brand-copy span {
+          max-width: 150px;
+          font-size: 8px;
+          line-height: 1.3;
+        }
+
+        .payment-dashboard-link {
+          gap: 8px;
+          min-height: 40px;
+          padding: 8px 11px;
+          border-radius: 11px;
+          font-size: 11px;
+        }
+
+        .payment-container {
+          width: calc(100% - 28px);
+        }
+
+        .payment-breadcrumb {
+          padding: 22px 0 15px;
+          font-size: 11px;
+        }
+
+        .payment-intro {
+          padding: 19px 0 26px;
+        }
+
+        .payment-intro h1 {
+          font-size: clamp(34px, 9vw, 46px);
+          letter-spacing: -1.2px;
+        }
+
+        .payment-intro > p {
+          font-size: 12px;
+          line-height: 1.85;
+        }
+
+        .payment-card,
+        .payment-error-card {
+          padding: 23px 17px;
+          border-radius: 19px;
+        }
+
+        .payment-section-heading {
+          margin-bottom: 24px;
+        }
+
+        .payment-section-heading h2 {
+          font-size: 25px;
+        }
+
+        .payment-section-heading p {
+          font-size: 11px;
+        }
+
+        .payment-plan-grid {
+          grid-template-columns: 1fr;
+          gap: 9px;
+        }
+
+        .payment-plan-item {
+          padding: 14px;
+        }
+
+        .payment-plan-item strong {
+          font-size: 15px;
+        }
+
+        .payment-divider {
+          margin: 25px 0;
+        }
+
+        .payment-method-grid {
+          grid-template-columns: 1fr;
+          gap: 9px;
+        }
+
+        .payment-method-option {
+          padding: 13px;
+        }
+
+        .payment-instruction {
+          padding: 18px 14px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .payment-navbar-inner {
+          width: calc(100% - 16px);
+          gap: 5px;
+        }
+
+        .payment-brand {
+          gap: 6px;
+        }
+
+        .payment-brand-logo {
+          width: 32px;
+          height: 32px;
+          min-width: 32px;
+          flex-basis: 32px;
+          border-radius: 9px;
+        }
+
+        .payment-brand-copy strong {
+          font-size: 13px;
+        }
+
+        .payment-brand-copy span {
+          max-width: 112px;
+          font-size: 7px;
+        }
+
+        .payment-dashboard-link {
+          gap: 6px;
+          padding: 7px 9px;
+          font-size: 10px;
+        }
+
+        .payment-container {
+          width: calc(100% - 22px);
+        }
+
+        .payment-card,
+        .payment-error-card {
+          padding: 19px 13px;
+        }
+
+        .payment-account-number {
+          font-size: 20px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .payment-page *,
+        .payment-page *::before,
+        .payment-page *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `}</style>
   );
 }
 
