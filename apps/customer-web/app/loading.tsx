@@ -1,4 +1,3 @@
-
 import CustomerLoading from "./components/CustomerLoading";
 
 export default function Loading() {
