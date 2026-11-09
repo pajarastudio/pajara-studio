@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../../../components/CustomerLoading";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Subscription = {
   id: string;
