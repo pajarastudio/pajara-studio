@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -114,10 +113,10 @@ const navbarStyle: CSSProperties = {
   zIndex: 50,
   width: "calc(100% + 36px)",
   marginLeft: -18,
-  borderBottom: "1px solid rgba(47,107,69,.10)",
+  borderBottom: "1px solid rgba(47,107,69,.1)",
   background: "rgba(247,244,238,.88)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  backdropFilter: "blur(22px) saturate(160%)",
+  WebkitBackdropFilter: "blur(22px) saturate(160%)",
 };
 
 const navbarInnerStyle: CSSProperties = {
@@ -388,74 +387,91 @@ function RevisionNavbar({ orderId = "" }: { orderId?: string }) {
 
 function RevisionLoading() {
   return (
-    <main style={pageStyle}>
-      <RevisionNavbar />
-
+    <main
+      style={{
+        ...pageStyle,
+        minHeight: "100vh",
+        padding: 18,
+        display: "grid",
+        placeItems: "center",
+        background: "rgba(247,244,238,.78)",
+        backdropFilter: "blur(22px) saturate(160%)",
+        WebkitBackdropFilter: "blur(22px) saturate(160%)",
+      }}
+    >
       <section
         style={{
           width: "100%",
-          maxWidth: 390,
+          maxWidth: 370,
           boxSizing: "border-box",
-          padding: "34px 24px 28px",
-          margin: "min(12vh, 90px) auto 0",
+          padding: "38px 25px 30px",
           borderRadius: 24,
-          background: "#fff",
-          border: "1px solid rgba(33,77,50,.12)",
-          boxShadow: "0 18px 45px rgba(33,77,50,.08)",
+          background: "rgba(255,255,255,.48)",
+          border: "1px solid rgba(255,255,255,.85)",
+          boxShadow: "0 20px 60px rgba(33,77,50,.09)",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            width: 86,
-            height: 86,
-            margin: "0 auto 20px",
+            width: 100,
+            height: 100,
+            margin: "0 auto 23px",
             display: "grid",
             placeItems: "center",
-            overflow: "hidden",
-            borderRadius: 20,
-            background: "#f7f4ee",
-            border: "1px solid #e8e2d8",
+            borderRadius: 25,
+            background: "rgba(255,255,255,.7)",
+            border: "1px solid rgba(47,107,69,.08)",
+            boxShadow: "0 8px 24px rgba(33,77,50,.05)",
           }}
         >
           <Image
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={76}
-            height={76}
+            width={90}
+            height={90}
             priority
             unoptimized
-            style={{ objectFit: "contain" }}
+            style={{
+              width: 90,
+              height: 90,
+              objectFit: "contain",
+              borderRadius: 18,
+            }}
           />
         </div>
 
-        <p style={sectionEyebrowStyle}>PAJARA STUDIO</p>
+        <p
+          style={{
+            margin: "0 0 10px",
+            color: "#8a6a4a",
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: ".2em",
+          }}
+        >
+          PAJARA STUDIO
+        </p>
 
         <h1
           style={{
-            margin: "0 0 23px",
+            margin: "0 0 12px",
             color: "#214d32",
             fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: 25,
+            fontSize: 26,
             lineHeight: 1.35,
             fontWeight: 600,
           }}
         >
-          Menyiapkan revisi
+          Menyiapkan Revisi
         </h1>
-
-        <div
-          className="revision-spinner"
-          role="status"
-          aria-label="Memuat"
-        />
 
         <p
           style={{
-            margin: "17px auto 0",
+            margin: "0 auto",
             maxWidth: 270,
             color: "#747d74",
-            fontSize: 13,
+            fontSize: 12,
             lineHeight: 1.8,
           }}
         >
@@ -464,16 +480,35 @@ function RevisionLoading() {
 
         <div
           style={{
-            width: 42,
-            height: 2,
-            margin: "22px auto 14px",
-            background: "#d8e4d7",
-            borderRadius: 10,
+            width: 155,
+            height: 3,
+            margin: "25px auto 20px",
+            overflow: "hidden",
+            borderRadius: 99,
+            background: "rgba(47,107,69,.12)",
           }}
-        />
+        >
+          <div
+            className="revision-loading-progress"
+            style={{
+              width: "55%",
+              height: "100%",
+              borderRadius: 99,
+              background: "#2f6b45",
+            }}
+          />
+        </div>
 
-        <p style={{ margin: 0, color: "#8a6a4a", fontSize: 11 }}>
-          Berakar di Tanah Pasundan.
+        <p
+          style={{
+            margin: 0,
+            color: "#8a6a4a",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: ".12em",
+          }}
+        >
+          DESAIN YANG PUNYA ARAH
         </p>
       </section>
 
@@ -493,14 +528,8 @@ function RevisionGlobalStyles() {
         box-sizing: border-box;
       }
 
-      .revision-spinner {
-        width: 30px;
-        height: 30px;
-        margin: 0 auto;
-        border: 3px solid #e4ebe2;
-        border-top-color: #2f6b45;
-        border-radius: 50%;
-        animation: revisionSpin 800ms linear infinite;
+      .revision-loading-progress {
+        animation: revisionLoading 1.3s ease-in-out infinite alternate;
       }
 
       .revision-quota-grid {
@@ -583,16 +612,21 @@ function RevisionGlobalStyles() {
         transform: scale(.99);
       }
 
+      @keyframes revisionLoading {
+        from {
+          width: 20%;
+          opacity: .65;
+        }
+        to {
+          width: 100%;
+          opacity: 1;
+        }
+      }
+
       @media (hover: hover) {
         .revision-page button:hover:not(:disabled),
         .revision-page a:hover {
           box-shadow: 0 7px 20px rgba(33,77,50,.08);
-        }
-      }
-
-      @keyframes revisionSpin {
-        to {
-          transform: rotate(360deg);
         }
       }
 
@@ -1255,12 +1289,10 @@ function RevisionContent() {
   const revisionLocked = !canSubmit || selectedSource === "none";
 
   return (
-    <main style={pageStyle} className="revision-page">
+    <main className="revision-page" style={pageStyle}>
       <RevisionNavbar orderId={order.id} />
 
       <div style={containerStyle} className="revision-container">
-        {/* PAGE HEADER */}
-
         <header style={pageHeaderStyle}>
           <p style={eyebrowStyle}>
             <span style={eyebrowDotStyle} />
@@ -1274,8 +1306,6 @@ function RevisionContent() {
             ini.
           </p>
         </header>
-
-        {/* ORDER IDENTITY */}
 
         <section
           style={{
@@ -1349,8 +1379,6 @@ function RevisionContent() {
           </div>
         </section>
 
-        {/* FEEDBACK */}
-
         {error && (
           <div style={errorStyle} role="alert">
             <strong>Perlu diperhatikan</strong>
@@ -1365,16 +1393,15 @@ function RevisionContent() {
           </div>
         )}
 
-        {/* QUOTA SUMMARY */}
-
         <section style={cardStyle} className="revision-card">
           <p style={sectionEyebrowStyle}>RINGKASAN</p>
           <h2 style={sectionHeadingStyle}>Kuota Revisi</h2>
 
           <p style={bodyTextStyle}>
-            Paket saat ini: <strong style={{ color: "#214d32" }}>{planLabel}</strong>.
-            Setiap desain memiliki kuota revisi masing-masing. Kuota gratis
-            digunakan terlebih dahulu.
+            Paket saat ini:{" "}
+            <strong style={{ color: "#214d32" }}>{planLabel}</strong>. Setiap
+            desain memiliki kuota revisi masing-masing. Kuota gratis digunakan
+            terlebih dahulu.
           </p>
 
           <div className="revision-quota-grid">
@@ -1482,8 +1509,6 @@ function RevisionContent() {
             </p>
           </div>
         </section>
-
-        {/* REVISION FORM */}
 
         <section style={cardStyle} className="revision-card">
           <p style={sectionEyebrowStyle}>LANGKAH 01</p>
@@ -1652,8 +1677,6 @@ function RevisionContent() {
                 : "Ajukan Revisi →"}
           </button>
         </section>
-
-        {/* EXTRA QUOTA PURCHASE */}
 
         <section style={cardStyle} className="revision-card">
           <p style={sectionEyebrowStyle}>LANGKAH 02 · OPSIONAL</p>
@@ -1913,8 +1936,6 @@ function RevisionContent() {
           </div>
         </section>
 
-        {/* ACTIVE REVISION */}
-
         {activeRevision && (
           <section
             style={{
@@ -1926,9 +1947,7 @@ function RevisionContent() {
           >
             <p style={sectionEyebrowStyle}>STATUS SAAT INI</p>
 
-            <h2 style={sectionHeadingStyle}>
-              Revisi Sedang Diproses
-            </h2>
+            <h2 style={sectionHeadingStyle}>Revisi Sedang Diproses</h2>
 
             <p style={bodyTextStyle}>
               Revisi #{activeRevision.revision_number}
@@ -1956,8 +1975,6 @@ function RevisionContent() {
           </section>
         )}
 
-        {/* REVISION HISTORY */}
-
         <section style={cardStyle} className="revision-card">
           <p style={sectionEyebrowStyle}>AKTIVITAS PESANAN</p>
           <h2 style={sectionHeadingStyle}>Riwayat Revisi</h2>
@@ -1967,10 +1984,7 @@ function RevisionContent() {
           </p>
 
           {revisions.length === 0 ? (
-            <div
-              className="revision-empty"
-              style={{ marginTop: 20 }}
-            >
+            <div className="revision-empty" style={{ marginTop: 20 }}>
               <strong style={{ color: "#214d32", fontSize: 13 }}>
                 Belum ada revisi
               </strong>
@@ -2113,8 +2127,6 @@ function RevisionContent() {
             </div>
           )}
         </section>
-
-        {/* FOOTER */}
 
         <footer style={footerStyle}>
           <div style={footerBrandRowStyle}>
