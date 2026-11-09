@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../../components/CustomerLoading";
+import CustomerLoading from "../../../components/CustomerLoading";
 
 type Subscription = {
   id: string;
@@ -28,86 +29,211 @@ type SubscriptionPlan = {
 type PaymentMethod = "QRIS" | "DANA" | "GoPay" | "SeaBank";
 
 function DashboardNavbar() {
-  const router = useRouter();
-
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        padding: "14px 0",
-        marginBottom: 24,
-        background: "rgba(247,244,238,0.72)",
-        backdropFilter: "blur(22px) saturate(160%)",
-        WebkitBackdropFilter: "blur(22px) saturate(160%)",
-        borderBottom: "1px solid rgba(47,107,69,0.1)",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => router.push("/dashboard")}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-          border: "none",
-          borderRadius: 13,
-          padding: "11px 17px",
-          background: "#214d32",
-          color: "#ffffff",
-          fontSize: 13,
-          fontWeight: 700,
-          cursor: "pointer",
-          boxShadow: "0 5px 14px rgba(33,77,50,0.16)",
-          fontFamily: "Arial, sans-serif",
-        }}
-      >
-        <span aria-hidden="true" style={{ fontSize: 17 }}>
-          ←
-        </span>
-        Dashboard
-      </button>
-    </header>
+    <>
+      <header className="payment-navbar">
+        <div className="payment-navbar-inner">
+          <Link href="/dashboard" className="payment-brand">
+            <img
+              src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+              alt="Pajara Studio"
+              className="payment-brand-logo"
+            />
+
+            <span className="payment-brand-copy">
+              <strong>Pajara Studio</strong>
+              <small>Berakar di Tanah Pasundan.</small>
+            </span>
+          </Link>
+
+          <Link href="/dashboard" className="payment-dashboard-link">
+            Dashboard
+            <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
+      </header>
+
+      <style jsx>{`
+        .payment-navbar {
+          width: 100%;
+          position: relative;
+          z-index: 10;
+          background: #ffffff;
+          border-bottom: 1px solid #e9e7df;
+          box-shadow: 0 4px 20px rgba(33, 77, 50, 0.035);
+          font-family: Arial, sans-serif;
+        }
+
+        .payment-navbar-inner {
+          width: min(1120px, calc(100% - 24px));
+          min-height: 74px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .payment-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+          text-decoration: none;
+        }
+
+        .payment-brand-logo {
+          display: block;
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          object-fit: cover;
+          border-radius: 11px;
+          border: 1px solid #e6e8df;
+          background: #ffffff;
+        }
+
+        .payment-brand-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          min-width: 0;
+        }
+
+        .payment-brand-copy strong {
+          color: #214d32;
+          font-family: Georgia, serif;
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.2;
+        }
+
+        .payment-brand-copy small {
+          color: #8a6a4a;
+          font-size: 9px;
+          line-height: 1.3;
+        }
+
+        .payment-dashboard-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 42px;
+          box-sizing: border-box;
+          padding: 9px 14px;
+          border: 1px solid #d5e2cf;
+          border-radius: 13px;
+          background: #edf3e9;
+          color: #214d32;
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
+          font-family: Arial, sans-serif;
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .payment-dashboard-link span {
+          font-size: 14px;
+          line-height: 1;
+        }
+
+        @media (max-width: 600px) {
+          .payment-brand-logo {
+            width: 38px;
+            height: 38px;
+          }
+
+          .payment-brand {
+            gap: 8px;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .payment-brand-logo {
+            width: 32px;
+            height: 32px;
+          }
+
+          .payment-brand-copy strong {
+            font-size: 14px;
+          }
+
+          .payment-brand-copy small {
+            font-size: 8px;
+          }
+
+          .payment-dashboard-link {
+            min-height: 38px;
+            padding: 8px 10px;
+            font-size: 11px;
+          }
+        }
+      `}</style>
+    </>
   );
 }
 
 function PajaraFooter() {
   return (
-    <footer
-      style={{
-        maxWidth: 760,
-        margin: "38px auto 0",
-        padding: "22px 0 8px",
-        borderTop: "1px solid rgba(47,107,69,0.14)",
-        textAlign: "center",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <p
-        style={{
-          margin: "0 0 7px",
-          color: "#214d32",
-          fontSize: 13,
-          fontWeight: 700,
-          letterSpacing: 0.2,
-        }}
-      >
-        Berakar di Tanah Pasundan.
-      </p>
-      <p
-        style={{
-          margin: 0,
-          color: "#8a6a4a",
-          fontSize: 11,
-          lineHeight: 1.6,
-        }}
-      >
-        © 2026 Pajara Studio. Desain yang punya arah.
-      </p>
+    <footer className="payment-footer">
+      <img
+        src="/755809946_17926162029385149_3739923509439876817_n.jpg"
+        alt="Pajara Studio"
+        className="payment-footer-logo"
+      />
+
+      <div className="payment-footer-copy">
+        <strong>Pajara Studio</strong>
+        <span>Berakar di Tanah Pasundan.</span>
+        <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
+      </div>
+
+      <style jsx>{`
+        .payment-footer {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          margin-top: 36px;
+          padding-top: 22px;
+          border-top: 1px solid #e4ddd1;
+          font-family: Arial, sans-serif;
+        }
+
+        .payment-footer-logo {
+          display: block;
+          width: 43px;
+          height: 43px;
+          flex-shrink: 0;
+          object-fit: contain;
+          border-radius: 10px;
+          background: #ffffff;
+        }
+
+        .payment-footer-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .payment-footer-copy strong {
+          color: #214d32;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .payment-footer-copy span {
+          color: #8a6a4a;
+          font-size: 11px;
+        }
+
+        .payment-footer-copy small {
+          color: #858585;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+      `}</style>
     </footer>
   );
 }
@@ -505,13 +631,20 @@ function PaymentPageContent() {
         style={{
           minHeight: "100vh",
           background: "#f7f4ee",
-          padding: "0 16px 30px",
           fontFamily: "Arial, sans-serif",
+          paddingBottom: 30,
         }}
       >
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <DashboardNavbar />
+        <DashboardNavbar />
 
+        <div
+          style={{
+            maxWidth: 760,
+            margin: "0 auto",
+            padding: "24px 16px 0",
+            boxSizing: "border-box",
+          }}
+        >
           <div
             style={{
               background: "#ffffff",
@@ -575,13 +708,20 @@ function PaymentPageContent() {
       style={{
         minHeight: "100vh",
         background: "#f7f4ee",
-        padding: "0 16px 30px",
+        paddingBottom: 30,
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <DashboardNavbar />
+      <DashboardNavbar />
 
+      <div
+        style={{
+          maxWidth: 760,
+          margin: "0 auto",
+          padding: "24px 16px 0",
+          boxSizing: "border-box",
+        }}
+      >
         {backCard}
 
         <section
@@ -638,8 +778,14 @@ function PaymentPageContent() {
           >
             {[
               { label: "Harga", value: formatRupiah(plan.price) },
-              { label: "Masa Aktif", value: `${plan.duration_days} hari` },
-              { label: "Kuota", value: `${plan.quota_total} desain` },
+              {
+                label: "Masa Aktif",
+                value: `${plan.duration_days} hari`,
+              },
+              {
+                label: "Kuota",
+                value: `${plan.quota_total} desain`,
+              },
             ].map((item) => (
               <div
                 key={item.label}
@@ -791,7 +937,13 @@ function PaymentPageContent() {
                 marginBottom: 20,
               }}
             >
-              <div style={{ color: "#6d776f", fontSize: 13, marginBottom: 7 }}>
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 13,
+                  marginBottom: 7,
+                }}
+              >
                 {paymentMethod}
               </div>
               <div
@@ -819,7 +971,13 @@ function PaymentPageContent() {
                 marginBottom: 20,
               }}
             >
-              <div style={{ color: "#6d776f", fontSize: 13, marginBottom: 7 }}>
+              <div
+                style={{
+                  color: "#6d776f",
+                  fontSize: 13,
+                  marginBottom: 7,
+                }}
+              >
                 SeaBank
               </div>
               <div
