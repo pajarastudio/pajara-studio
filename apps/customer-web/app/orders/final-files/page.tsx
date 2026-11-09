@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -64,62 +65,71 @@ function getStatusLabel(status: string | null) {
 const navbarStyle: React.CSSProperties = {
   position: "sticky",
   top: 0,
-  zIndex: 50,
+  zIndex: 100,
   width: "100%",
-  borderBottom: "1px solid rgba(47,107,69,.10)",
-  background: "rgba(247,244,238,.88)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  background: "rgba(247,244,238,.76)",
+  backdropFilter: "blur(18px) saturate(160%)",
+  WebkitBackdropFilter: "blur(18px) saturate(160%)",
+  borderBottom: "1px solid rgba(33,77,50,.10)",
+  boxShadow: "0 4px 20px rgba(33,77,50,.035)",
 };
 
 const navbarInnerStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 796,
-  minHeight: 66,
-  padding: "0 18px",
+  width: "min(1120px, calc(100% - 24px))",
+  minHeight: 74,
   margin: "0 auto",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 12,
+  gap: 16,
   boxSizing: "border-box",
 };
 
 const navbarBrandStyle: React.CSSProperties = {
   display: "inline-flex",
-  minWidth: 0,
   alignItems: "center",
-  gap: 10,
-  color: "#214d32",
-  fontSize: 15,
-  fontWeight: 800,
+  gap: 11,
+  minWidth: 0,
+  color: "#214D32",
   textDecoration: "none",
 };
 
 const navbarLogoStyle: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  minWidth: 40,
   display: "block",
-  width: 39,
-  height: 39,
-  minWidth: 39,
-  borderRadius: 12,
-  objectFit: "cover",
+  objectFit: "contain",
+  borderRadius: 10,
+};
+
+const navbarBrandTextStyle: React.CSSProperties = {
+  color: "#214D32",
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontSize: 17,
+  fontWeight: 700,
+  letterSpacing: "-.3px",
+  whiteSpace: "nowrap",
 };
 
 const navbarBackStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: 7,
+  gap: 8,
   flexShrink: 0,
-  padding: "10px 13px",
-  border: "1px solid rgba(47,107,69,.16)",
+  minHeight: 40,
+  padding: "9px 15px",
+  border: "1px solid rgba(33,77,50,.13)",
   borderRadius: 10,
-  background: "rgba(255,255,255,.72)",
-  color: "#214d32",
-  fontSize: 11,
-  fontWeight: 800,
+  background: "rgba(255,255,255,.75)",
+  color: "#214D32",
+  fontFamily: "Arial, sans-serif",
+  fontSize: 12,
+  fontWeight: 700,
   textDecoration: "none",
   whiteSpace: "nowrap",
+  transition: "background .2s ease",
 };
 
 function BriefNavbar({ orderId = "" }: { orderId?: string }) {
@@ -129,18 +139,19 @@ function BriefNavbar({ orderId = "" }: { orderId?: string }) {
 
   return (
     <nav style={navbarStyle}>
-      <div style={navbarInnerStyle} className="brief-navbar-inner">
+      <div className="brief-navbar-inner" style={navbarInnerStyle}>
         <Link href="/dashboard" style={navbarBrandStyle}>
           <Image
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={39}
-            height={39}
+            width={40}
+            height={40}
             priority
             unoptimized
             style={navbarLogoStyle}
           />
-          <span>Pajara Studio</span>
+
+          <span style={navbarBrandTextStyle}>Pajara Studio</span>
         </Link>
 
         <Link href={backHref} style={navbarBackStyle}>
@@ -149,116 +160,6 @@ function BriefNavbar({ orderId = "" }: { orderId?: string }) {
         </Link>
       </div>
     </nav>
-  );
-}
-
-/* =========================
-   LOADING
-========================= */
-
-function PajaraLoading({
-  message = "Menyiapkan brief desainmu...",
-}: {
-  message?: string;
-}) {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-        background: "#F7F4EE",
-        fontFamily: '"DM Sans", sans-serif',
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          padding: "38px 24px",
-          boxSizing: "border-box",
-          textAlign: "center",
-          border: "1px solid rgba(33,77,50,.12)",
-          borderRadius: 24,
-          background: "rgba(255,255,255,.9)",
-          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
-        }}
-      >
-        <Image
-          src={LOGO}
-          alt="Pajara Studio"
-          width={66}
-          height={66}
-          priority
-          unoptimized
-          style={{
-            width: 66,
-            height: 66,
-            objectFit: "contain",
-            borderRadius: 16,
-            marginBottom: 18,
-          }}
-        />
-
-        <p
-          style={{
-            margin: 0,
-            color: "#214D32",
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            fontSize: 25,
-          }}
-        >
-          Pajara Studio
-        </p>
-
-        <p
-          style={{
-            margin: "10px 0 24px",
-            color: "#70766F",
-            fontSize: 13,
-            lineHeight: 1.8,
-          }}
-        >
-          {message}
-        </p>
-
-        <div
-          role="status"
-          aria-label="Memuat"
-          style={{
-            width: 30,
-            height: 30,
-            margin: "0 auto",
-            border: "3px solid #DCE5DC",
-            borderTopColor: "#2F6B45",
-            borderRadius: "50%",
-            animation: "pajara-brief-spin .8s linear infinite",
-          }}
-        />
-
-        <p
-          style={{
-            margin: "22px 0 0",
-            color: "#8A6A4A",
-            fontSize: 10,
-            letterSpacing: 2,
-            fontWeight: 700,
-          }}
-        >
-          DESAIN YANG PUNYA ARAH
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes pajara-brief-spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
-    </main>
   );
 }
 
@@ -346,10 +247,10 @@ function BriefContent() {
 
   const cardStyle: React.CSSProperties = {
     background: "#FFFFFF",
-    border: "1px solid rgba(33,77,50,.11)",
-    borderRadius: 22,
-    padding: "clamp(20px, 5vw, 30px)",
-    boxShadow: "0 12px 35px rgba(33,77,50,.045)",
+    border: "1px solid rgba(33,77,50,.09)",
+    borderRadius: 23,
+    padding: 24,
+    boxShadow: "0 10px 35px rgba(33,77,50,.08)",
     boxSizing: "border-box",
     minWidth: 0,
   };
@@ -358,12 +259,13 @@ function BriefContent() {
     color: "#8A6A4A",
     fontSize: 10,
     fontWeight: 700,
-    letterSpacing: 1.8,
+    letterSpacing: 1.7,
     lineHeight: 1.7,
     margin: "0 0 8px",
   };
 
   const valueStyle: React.CSSProperties = {
+    fontFamily: "Arial, sans-serif",
     fontSize: 14,
     lineHeight: 1.85,
     color: "#34443A",
@@ -377,16 +279,16 @@ function BriefContent() {
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    minHeight: 48,
+    minHeight: 46,
     padding: "12px 18px",
     boxSizing: "border-box",
-    borderRadius: 12,
+    borderRadius: 11,
     border: "none",
-    background: "#2F6B45",
+    background: "#214D32",
     color: "#FFFFFF",
     textDecoration: "none",
-    fontFamily: "inherit",
-    fontSize: 14,
+    fontFamily: "Arial, sans-serif",
+    fontSize: 13,
     fontWeight: 700,
     cursor: "pointer",
   };
@@ -395,19 +297,27 @@ function BriefContent() {
     display: "inline-flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: 48,
+    minHeight: 46,
     padding: "12px 16px",
     boxSizing: "border-box",
     border: "1px solid rgba(33,77,50,.14)",
-    borderRadius: 12,
+    borderRadius: 11,
     background: "#FFFFFF",
     color: "#214D32",
     textDecoration: "none",
-    fontSize: 14,
+    fontFamily: "Arial, sans-serif",
+    fontSize: 13,
     fontWeight: 700,
   };
 
-  if (loading) return <PajaraLoading />;
+  if (loading) {
+    return (
+      <CustomerLoading
+        title="Menyiapkan Brief"
+        description="Sebentar, kami sedang menyiapkan halaman brief pesanan Kang/Teh."
+      />
+    );
+  }
 
   return (
     <main
@@ -418,52 +328,24 @@ function BriefContent() {
         boxSizing: "border-box",
         background: "#F7F4EE",
         color: "#26352A",
-        fontFamily: '"DM Sans", sans-serif',
+        fontFamily: "Arial, sans-serif",
       }}
     >
       <BriefNavbar orderId={id || ""} />
 
-      <section
-        style={{
-          width: "100%",
-          maxWidth: 1160,
-          margin: "0 auto",
-          padding:
-            "clamp(26px, 5vw, 48px) clamp(18px, 4vw, 28px) 34px",
-          boxSizing: "border-box",
-        }}
-      >
-        <div style={{ marginBottom: 28 }}>
+      <div className="brief-container">
+        <header className="brief-header">
           <p style={eyebrowStyle}>RUANG PROJECT PAJARA</p>
 
-          <h1
-            style={{
-              margin: "0 0 12px",
-              color: "#214D32",
-              fontFamily: 'Georgia, "Times New Roman", serif',
-              fontSize: "clamp(32px, 6vw, 46px)",
-              fontWeight: 600,
-              lineHeight: 1.18,
-              letterSpacing: "-.7px",
-              overflowWrap: "break-word",
-            }}
-          >
-            Brief <span style={{ color: "#8A6A4A" }}>Desain.</span>
+          <h1 className="brief-page-title">
+            Brief <span>Desain.</span>
           </h1>
 
-          <p
-            style={{
-              maxWidth: 590,
-              margin: 0,
-              color: "#70766F",
-              fontSize: 14,
-              lineHeight: 1.9,
-            }}
-          >
+          <p className="brief-description">
             Semua arahan dan informasi desain tersimpan di satu tempat agar
             perjalanan kita dalam mengerjakan project tetap terarah.
           </p>
-        </div>
+        </header>
 
         {error ? (
           <section style={cardStyle} aria-live="polite">
@@ -471,26 +353,20 @@ function BriefContent() {
               style={{
                 display: "grid",
                 placeItems: "center",
-                width: 48,
-                height: 48,
+                width: 46,
+                height: 46,
                 marginBottom: 18,
-                borderRadius: 15,
+                borderRadius: 14,
                 background: "#F9EFEB",
                 color: "#A13B32",
-                fontSize: 22,
+                fontSize: 21,
+                fontWeight: 700,
               }}
             >
               !
             </div>
 
-            <h2
-              style={{
-                margin: "0 0 10px",
-                color: "#214D32",
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                fontSize: 24,
-              }}
-            >
+            <h2 className="brief-section-title">
               Brief belum tersedia
             </h2>
 
@@ -498,14 +374,20 @@ function BriefContent() {
               style={{
                 margin: "0 0 20px",
                 color: "#70766F",
-                fontSize: 14,
+                fontSize: 13,
                 lineHeight: 1.8,
               }}
             >
               {error}
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+              }}
+            >
               <button
                 onClick={() => window.location.reload()}
                 style={primaryButtonStyle}
@@ -521,76 +403,27 @@ function BriefContent() {
         ) : order ? (
           <div style={{ display: "grid", gap: 20, minWidth: 0 }}>
             <section style={cardStyle}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: 14,
-                  flexWrap: "wrap",
-                  paddingBottom: 22,
-                  borderBottom: "1px solid #EEEAE3",
-                  marginBottom: 24,
-                }}
-              >
+              <div className="brief-order-heading">
                 <div style={{ minWidth: 0 }}>
                   <p style={eyebrowStyle}>KODE PESANAN</p>
 
-                  <h2
-                    style={{
-                      margin: 0,
-                      color: "#214D32",
-                      fontFamily: 'Georgia, "Times New Roman", serif',
-                      fontSize: "clamp(21px, 4vw, 27px)",
-                      lineHeight: 1.4,
-                      overflowWrap: "anywhere",
-                    }}
-                  >
+                  <h2 className="brief-order-code">
                     #{order.order_code}
                   </h2>
                 </div>
 
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    maxWidth: "100%",
-                    padding: "8px 13px",
-                    borderRadius: 999,
-                    background: "#EDF4EB",
-                    color: "#2F6B45",
-                    fontSize: 11,
-                    lineHeight: 1.5,
-                    fontWeight: 700,
-                    overflowWrap: "anywhere",
-                  }}
-                >
+                <span className="brief-status">
                   {getStatusLabel(order.status)}
                 </span>
               </div>
 
               <p style={eyebrowStyle}>RINGKASAN PROJECT</p>
 
-              <h2
-                style={{
-                  margin: "0 0 22px",
-                  color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: 24,
-                  lineHeight: 1.35,
-                }}
-              >
+              <h2 className="brief-section-title">
                 Informasi Desain
               </h2>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
-                  gap: 12,
-                }}
-              >
+              <div className="brief-info-grid">
                 {[
                   {
                     label: "Layanan",
@@ -609,29 +442,10 @@ function BriefContent() {
                     value: formatDeadline(order.deadline),
                   },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      padding: 17,
-                      minWidth: 0,
-                      border: "1px solid #EEEAE3",
-                      borderRadius: 14,
-                      background: "#FCFBF8",
-                      boxSizing: "border-box",
-                    }}
-                  >
+                  <div key={item.label} className="brief-info-item">
                     <p style={eyebrowStyle}>{item.label}</p>
 
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "#34443A",
-                        fontSize: 14,
-                        lineHeight: 1.8,
-                        fontWeight: 600,
-                        overflowWrap: "anywhere",
-                      }}
-                    >
+                    <p className="brief-info-value">
                       {item.value}
                     </p>
                   </div>
@@ -642,99 +456,36 @@ function BriefContent() {
             <section style={cardStyle}>
               <p style={eyebrowStyle}>ARAHAN DESAIN</p>
 
-              <h2
-                style={{
-                  margin: "0 0 10px",
-                  color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: 27,
-                  lineHeight: 1.35,
-                }}
-              >
+              <h2 className="brief-section-title">
                 Brief Utama
               </h2>
 
-              <p
-                style={{
-                  margin: "0 0 20px",
-                  color: "#70766F",
-                  fontSize: 13,
-                  lineHeight: 1.8,
-                }}
-              >
+              <p className="brief-section-description">
                 Arahan utama sebagai acuan pengerjaan desain Anda.
               </p>
 
-              <div
-                style={{
-                  ...valueStyle,
-                  padding: 20,
-                  minHeight: 110,
-                  boxSizing: "border-box",
-                  border: "1px solid #EAE7DF",
-                  borderRadius: 15,
-                  background: "#FAF9F6",
-                }}
-              >
+              <div className="brief-text-box brief-main-text">
                 {order.brief?.trim() ||
                   "Belum ada brief utama yang tercatat."}
               </div>
 
-              <div
-                style={{
-                  height: 1,
-                  margin: "26px 0",
-                  background: "#EEEAE3",
-                }}
-              />
+              <div className="brief-divider" />
 
               <p style={eyebrowStyle}>INFORMASI TAMBAHAN</p>
 
-              <h2
-                style={{
-                  margin: "0 0 16px",
-                  color: "#214D32",
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: 23,
-                  lineHeight: 1.4,
-                }}
-              >
+              <h2 className="brief-subtitle">
                 Catatan Tambahan
               </h2>
 
-              <div
-                style={{
-                  ...valueStyle,
-                  padding: 20,
-                  minHeight: 76,
-                  boxSizing: "border-box",
-                  border: "1px solid #EAE7DF",
-                  borderRadius: 15,
-                  background: "#FAF9F6",
-                }}
-              >
+              <div className="brief-text-box brief-notes-text">
                 {order.notes?.trim() || "Tidak ada catatan tambahan."}
               </div>
             </section>
           </div>
         ) : null}
 
-        {/* FOOTER */}
-
-        <footer
-          style={{
-            borderTop: "1px solid #e4ddd1",
-            paddingTop: 22,
-            marginTop: 36,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 13,
-            }}
-          >
+        <footer className="brief-footer">
+          <div className="brief-footer-brand">
             <Image
               src={LOGO}
               alt="Logo Pajara Studio"
@@ -747,71 +498,298 @@ function BriefContent() {
                 flexShrink: 0,
                 objectFit: "contain",
                 borderRadius: 10,
-                background: "#fff",
+                background: "#FFFFFF",
               }}
             />
 
             <div>
-              <strong
-                style={{
-                  display: "block",
-                  color: "#214d32",
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                }}
-              >
-                Pajara Studio
-              </strong>
+              <strong>Pajara Studio</strong>
 
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  color: "#8a6a4a",
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                }}
-              >
-                Berakar di Tanah Pasundan.
-              </p>
+              <p>Berakar di Tanah Pasundan.</p>
             </div>
           </div>
 
-          <p
-            style={{
-              margin: "20px 0 0",
-              paddingTop: 14,
-              borderTop: "1px solid #e9e3d9",
-              color: "#999387",
-              fontSize: 10,
-              lineHeight: 1.7,
-            }}
-          >
+          <p className="brief-footer-copyright">
             © 2026 Pajara Studio. Desain yang punya arah.
           </p>
         </footer>
-      </section>
+      </div>
 
-      <style>{`
-        @keyframes pajara-brief-spin {
-          to {
-            transform: rotate(360deg);
+      <style jsx>{`
+        .brief-container {
+          width: min(850px, calc(100% - 40px));
+          margin: 0 auto;
+          padding: 42px 0 34px;
+          box-sizing: border-box;
+        }
+
+        .brief-header {
+          margin-bottom: 30px;
+        }
+
+        .brief-page-title {
+          margin: 0 0 12px;
+          color: #214d32;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 42px;
+          font-weight: 600;
+          line-height: 1.2;
+          letter-spacing: -0.8px;
+        }
+
+        .brief-page-title span {
+          color: #8a6a4a;
+        }
+
+        .brief-description {
+          max-width: 590px;
+          margin: 0;
+          color: #70766f;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          line-height: 1.9;
+        }
+
+        .brief-order-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 14px;
+          flex-wrap: wrap;
+          padding-bottom: 22px;
+          border-bottom: 1px solid #eeeae3;
+          margin-bottom: 24px;
+        }
+
+        .brief-order-code {
+          margin: 0;
+          color: #214d32;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 26px;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+
+        .brief-status {
+          display: inline-flex;
+          align-items: center;
+          max-width: 100%;
+          padding: 8px 13px;
+          border-radius: 999px;
+          background: #edf4eb;
+          color: #2f6b45;
+          font-size: 11px;
+          line-height: 1.5;
+          font-weight: 700;
+          overflow-wrap: anywhere;
+        }
+
+        .brief-section-title {
+          margin: 0 0 20px;
+          color: #214d32;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 25px;
+          font-weight: 600;
+          line-height: 1.4;
+        }
+
+        .brief-section-description {
+          margin: -10px 0 20px;
+          color: #70766f;
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .brief-info-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .brief-info-item {
+          padding: 17px;
+          min-width: 0;
+          border: 1px solid #eeeae3;
+          border-radius: 13px;
+          background: #fcfbf8;
+          box-sizing: border-box;
+        }
+
+        .brief-info-value {
+          margin: 0;
+          color: #34443a;
+          font-size: 13px;
+          line-height: 1.8;
+          font-weight: 600;
+          overflow-wrap: anywhere;
+        }
+
+        .brief-text-box {
+          color: #34443a;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          line-height: 1.9;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          padding: 20px;
+          box-sizing: border-box;
+          border: 1px solid #eae7df;
+          border-radius: 14px;
+          background: #faf9f6;
+        }
+
+        .brief-main-text {
+          min-height: 110px;
+        }
+
+        .brief-notes-text {
+          min-height: 76px;
+        }
+
+        .brief-divider {
+          height: 1px;
+          margin: 26px 0;
+          background: #eeeae3;
+        }
+
+        .brief-subtitle {
+          margin: 0 0 16px;
+          color: #214d32;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 22px;
+          font-weight: 600;
+          line-height: 1.4;
+        }
+
+        .brief-footer {
+          border-top: 1px solid #e4ddd1;
+          padding-top: 22px;
+          margin-top: 36px;
+        }
+
+        .brief-footer-brand {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+        }
+
+        .brief-footer-brand strong {
+          display: block;
+          color: #214d32;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .brief-footer-brand p {
+          margin: 4px 0 0;
+          color: #8a6a4a;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .brief-footer-copyright {
+          margin: 20px 0 0;
+          padding-top: 14px;
+          border-top: 1px solid #e9e3d9;
+          color: #999387;
+          font-size: 10px;
+          line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+          .brief-container {
+            width: calc(100% - 28px);
+            padding-top: 30px;
+          }
+
+          .brief-page-title {
+            font-size: 35px;
+          }
+
+          .brief-description {
+            font-size: 12px;
+          }
+
+          .brief-info-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .brief-order-code {
+            font-size: 23px;
+          }
+
+          .brief-section-title {
+            font-size: 23px;
+          }
+
+          .brief-subtitle {
+            font-size: 21px;
+          }
+
+          .brief-text-box {
+            padding: 17px;
+            font-size: 12px;
           }
         }
 
         @media (max-width: 420px) {
           .brief-navbar-inner {
             gap: 8px !important;
-            padding: 0 13px !important;
           }
 
           .brief-navbar-inner a:first-child {
             gap: 8px !important;
-            font-size: 13px !important;
+          }
+
+          .brief-navbar-inner a:first-child img {
+            width: 38px !important;
+            height: 38px !important;
+          }
+
+          .brief-navbar-inner a:first-child span {
+            font-size: 15px !important;
           }
 
           .brief-navbar-inner a:last-child {
             padding: 9px 10px !important;
             font-size: 10px !important;
+          }
+
+          .brief-container {
+            width: calc(100% - 28px);
+          }
+        }
+
+        @media (max-width: 360px) {
+          .brief-navbar-inner a:first-child img {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+          }
+
+          .brief-navbar-inner a:first-child span {
+            font-size: 13px !important;
+          }
+
+          .brief-navbar-inner a:last-child {
+            gap: 5px !important;
+            padding: 8px !important;
+            font-size: 9px !important;
+          }
+
+          .brief-page-title {
+            font-size: 32px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
           }
         }
       `}</style>
@@ -823,7 +801,10 @@ export default function BriefPage() {
   return (
     <Suspense
       fallback={
-        <PajaraLoading message="Memuat halaman brief..." />
+        <CustomerLoading
+          title="Menyiapkan Brief"
+          description="Sebentar, kami sedang menyiapkan halaman brief pesanan Kang/Teh."
+        />
       }
     >
       <BriefContent />
