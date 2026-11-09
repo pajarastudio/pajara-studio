@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../../components/CustomerLoading";
+import CustomerLoading from "../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -221,55 +221,38 @@ function OrderDetailContent() {
 
   if (error || !order) {
     return (
-      <main
-        className="pajara-error-page"
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          padding: 24,
-          background: "#F7F4EE",
-          fontFamily: '"DM Sans", sans-serif',
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          className="pajara-order-detail-card"
-          style={{
-            width: "100%",
-            maxWidth: 460,
-            boxSizing: "border-box",
-            textAlign: "center",
-          }}
-        >
+      <main className="pajara-error-page">
+        <div className="pajara-order-detail-card">
           <p className="pajara-eyebrow">PAJARA STUDIO</p>
 
-          <h1 style={{ color: "var(--green)" }}>
-            Pesanan tidak dapat ditemukan
-          </h1>
+          <h1>Pesanan tidak dapat ditemukan</h1>
 
-          <p
-            style={{
-              color: "var(--muted)",
-              fontSize: 14,
-              lineHeight: 1.8,
-            }}
-          >
+          <p className="pajara-error-description">
             {error || "Pesanan tidak tersedia."}
           </p>
 
-          <a
-            href="/dashboard"
-            className="pajara-button pajara-button-primary"
-            style={{ marginTop: 16 }}
-          >
+          <a href="/dashboard" className="pajara-error-button">
             Kembali ke Dashboard
           </a>
         </div>
 
         <style>{`
+          .pajara-error-page {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: #F7F4EE;
+            font-family: "DM Sans", Arial, sans-serif;
+            box-sizing: border-box;
+          }
+
           .pajara-error-page .pajara-order-detail-card {
+            width: 100%;
+            max-width: 460px;
             padding: 28px;
+            box-sizing: border-box;
+            text-align: center;
             border: 1px solid rgba(33,77,50,.10);
             border-radius: 20px;
             background: rgba(255,255,255,.9);
@@ -284,16 +267,24 @@ function OrderDetailContent() {
           }
 
           .pajara-error-page h1 {
-            font-family: Georgia, "Times New Roman", serif;
+            color: #2F6B45;
+            font-family: Georgia, serif;
             font-size: 27px;
             font-weight: 500;
           }
 
-          .pajara-error-page .pajara-button {
+          .pajara-error-description {
+            color: #778078;
+            font-size: 14px;
+            line-height: 1.8;
+          }
+
+          .pajara-error-button {
             display: inline-flex;
             min-height: 46px;
             align-items: center;
             justify-content: center;
+            margin-top: 16px;
             padding: 0 18px;
             border-radius: 12px;
             background: #2F6B45;
@@ -447,7 +438,7 @@ function OrderDetailContent() {
                 <p className="pajara-eyebrow">AKSES PESANAN</p>
                 <h2>Kelola Project</h2>
 
-                <p className="pajara-consistent-text pajara-access-description">
+                <p className="pajara-access-description">
                   Buka informasi project dan file desain Anda saat diperlukan.
                 </p>
 
@@ -911,15 +902,11 @@ function OrderDetailContent() {
           overflow-wrap: anywhere;
         }
 
-        .pajara-consistent-text,
         .pajara-access-description {
+          margin: 10px 0 0;
           color: var(--muted);
           font-size: 13px;
           line-height: 1.8;
-        }
-
-        .pajara-access-description {
-          margin: 10px 0 0;
         }
 
         .pajara-access-list {
