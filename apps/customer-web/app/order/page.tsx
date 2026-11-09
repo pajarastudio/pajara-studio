@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -93,23 +92,7 @@ export default function CreateOrder() {
   const [paymentType, setPaymentType] = useState("");
 
   useEffect(() => {
-    let active = true;
-
-    async function initializePage() {
-      try {
-        await supabase.auth.getSession();
-      } finally {
-        if (active) {
-          setPageLoading(false);
-        }
-      }
-    }
-
-    initializePage();
-
-    return () => {
-      active = false;
-    };
+    setPageLoading(false);
   }, []);
 
   function handleFileSelection(files: File[]) {
