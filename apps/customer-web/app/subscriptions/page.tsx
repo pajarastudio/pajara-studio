@@ -1,9 +1,9 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../components/CustomerLoading";
 
 type SubscriptionPlan = {
   id: string;
@@ -126,169 +126,10 @@ export default function SubscriptionsPage() {
 
   if (loading) {
     return (
-      <main className="pajara-loading-screen">
-        <style jsx global>{`
-          .pajara-loading-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            padding: 24px;
-            background:
-              radial-gradient(
-                circle at 15% 15%,
-                rgba(138, 106, 74, 0.09),
-                transparent 35%
-              ),
-              radial-gradient(
-                circle at 85% 85%,
-                rgba(47, 107, 69, 0.12),
-                transparent 38%
-              ),
-              #f7f4ee;
-            font-family: "DM Sans", Arial, sans-serif;
-          }
-
-          .pajara-loading-orb {
-            position: absolute;
-            width: 280px;
-            height: 280px;
-            border: 1px solid rgba(47, 107, 69, 0.09);
-            border-radius: 50%;
-            pointer-events: none;
-          }
-
-          .pajara-loading-orb.one {
-            top: -145px;
-            right: -100px;
-          }
-
-          .pajara-loading-orb.two {
-            bottom: -175px;
-            left: -120px;
-            width: 340px;
-            height: 340px;
-          }
-
-          .pajara-loading-card {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            width: min(100%, 350px);
-            flex-direction: column;
-            align-items: center;
-            padding: 42px 25px;
-            border: 1px solid rgba(33, 77, 50, 0.09);
-            border-radius: 26px;
-            background: rgba(255, 255, 255, 0.76);
-            box-shadow: 0 18px 55px rgba(33, 77, 50, 0.07);
-            text-align: center;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-          }
-
-          .pajara-loading-logo {
-            width: 65px;
-            height: 65px;
-            margin-bottom: 25px;
-            border-radius: 17px;
-            object-fit: contain;
-            background: white;
-            box-shadow: 0 7px 22px rgba(33, 77, 50, 0.08);
-          }
-
-          .pajara-loading-title {
-            margin: 0;
-            color: #214d32;
-            font-family: Georgia, serif;
-            font-size: 25px;
-            font-weight: 500;
-            letter-spacing: -0.5px;
-          }
-
-          .pajara-loading-description {
-            max-width: 260px;
-            margin: 11px 0 0;
-            color: #778078;
-            font-size: 11px;
-            line-height: 1.8;
-          }
-
-          .pajara-loading-track {
-            width: 155px;
-            height: 3px;
-            overflow: hidden;
-            margin-top: 31px;
-            border-radius: 10px;
-            background: rgba(47, 107, 69, 0.13);
-          }
-
-          .pajara-loading-progress {
-            width: 40%;
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(
-              90deg,
-              #214d32,
-              #477b50,
-              #8a6a4a
-            );
-            animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
-          }
-
-          .pajara-loading-caption {
-            margin: 13px 0 0;
-            color: #a09a8e;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-          }
-
-          @keyframes pajaraLoadingProgress {
-            0% {
-              transform: translateX(-110%);
-            }
-            100% {
-              transform: translateX(260%);
-            }
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .pajara-loading-progress {
-              animation: none;
-              width: 100%;
-            }
-          }
-        `}</style>
-
-        <div className="pajara-loading-orb one" />
-        <div className="pajara-loading-orb two" />
-
-        <div className="pajara-loading-card">
-          <img
-            src={logo}
-            alt="Logo Pajara Studio"
-            className="pajara-loading-logo"
-          />
-
-          <h1 className="pajara-loading-title">
-            Menyiapkan Paket Desain
-          </h1>
-
-          <p className="pajara-loading-description">
-            Sebentar, kami sedang menyiapkan pilihan paket untuk Kang/Teh.
-          </p>
-
-          <div className="pajara-loading-track">
-            <div className="pajara-loading-progress" />
-          </div>
-
-          <p className="pajara-loading-caption">PAJARA STUDIO</p>
-        </div>
-      </main>
+      <CustomerLoading
+        title="Menyiapkan Paket Desain"
+        description="Sebentar, kami sedang menyiapkan pilihan paket untuk Kang/Teh."
+      />
     );
   }
 
