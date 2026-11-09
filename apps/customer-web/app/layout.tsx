@@ -1,7 +1,9 @@
+
 import "./globals.css";
 import type { Metadata } from "next";
 import Script from "next/script";
 import CustomerNavigation from "./components/CustomerNavigation";
+import GlobalCustomerLoading from "./components/GlobalCustomerLoading";
 
 export const metadata: Metadata = {
   title: "Pajara Studio — Customer",
@@ -16,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body>
-        {children}
+        <GlobalCustomerLoading>
+          {children}
+        </GlobalCustomerLoading>
+
         <CustomerNavigation />
 
         <Script
