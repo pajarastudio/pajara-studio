@@ -1,9 +1,9 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -61,102 +61,6 @@ function getStatusLabel(status: string | null) {
     default:
       return status || "Menunggu";
   }
-}
-
-function PajaraLoading() {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-        background: "#F7F4EE",
-        fontFamily: '"DM Sans", sans-serif',
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          padding: "38px 24px",
-          boxSizing: "border-box",
-          textAlign: "center",
-          border: "1px solid rgba(33,77,50,.12)",
-          borderRadius: 24,
-          background: "rgba(255,255,255,.85)",
-          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
-        }}
-      >
-        <img
-          src={LOGO}
-          alt="Pajara Studio"
-          style={{
-            width: 66,
-            height: 66,
-            objectFit: "contain",
-            borderRadius: 16,
-            marginBottom: 18,
-          }}
-        />
-
-        <p
-          style={{
-            margin: 0,
-            color: "#214D32",
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            fontSize: 25,
-          }}
-        >
-          Pajara Studio
-        </p>
-
-        <p
-          style={{
-            margin: "10px 0 24px",
-            color: "#70766F",
-            fontSize: 13,
-            lineHeight: 1.8,
-          }}
-        >
-          Menyiapkan detail pesananmu...
-        </p>
-
-        <div
-          role="status"
-          aria-label="Memuat"
-          style={{
-            width: 30,
-            height: 30,
-            margin: "0 auto",
-            border: "3px solid #DCE5DC",
-            borderTopColor: "#2F6B45",
-            borderRadius: "50%",
-            animation: "pajara-spin .8s linear infinite",
-          }}
-        />
-
-        <p
-          style={{
-            margin: "22px 0 0",
-            color: "#8A6A4A",
-            fontSize: 10,
-            letterSpacing: 2,
-            fontWeight: 700,
-          }}
-        >
-          DESAIN YANG PUNYA ARAH
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes pajara-spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </main>
-  );
 }
 
 function OrderDetailContent() {
@@ -306,11 +210,19 @@ function OrderDetailContent() {
     fontWeight: 500,
   };
 
-  if (loading) return <PajaraLoading />;
+  if (loading) {
+    return (
+      <CustomerLoading
+        title="Menyiapkan Detail Pesanan"
+        description="Sebentar, kami sedang menyiapkan informasi pesanan Kang/Teh."
+      />
+    );
+  }
 
   if (error || !order) {
     return (
       <main
+        className="pajara-error-page"
         style={{
           minHeight: "100vh",
           display: "grid",
@@ -354,6 +266,43 @@ function OrderDetailContent() {
             Kembali ke Dashboard
           </a>
         </div>
+
+        <style>{`
+          .pajara-error-page .pajara-order-detail-card {
+            padding: 28px;
+            border: 1px solid rgba(33,77,50,.10);
+            border-radius: 20px;
+            background: rgba(255,255,255,.9);
+            box-shadow: 0 12px 35px rgba(33,77,50,.06);
+          }
+
+          .pajara-error-page .pajara-eyebrow {
+            color: #8A6A4A;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .16em;
+          }
+
+          .pajara-error-page h1 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 27px;
+            font-weight: 500;
+          }
+
+          .pajara-error-page .pajara-button {
+            display: inline-flex;
+            min-height: 46px;
+            align-items: center;
+            justify-content: center;
+            padding: 0 18px;
+            border-radius: 12px;
+            background: #2F6B45;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+          }
+        `}</style>
       </main>
     );
   }
@@ -375,7 +324,9 @@ function OrderDetailContent() {
             <button
               type="button"
               className={`pajara-menu-toggle ${menuOpen ? "is-open" : ""}`}
-              aria-label={menuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+              aria-label={
+                menuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"
+              }
               aria-expanded={menuOpen}
               aria-controls="pajara-detail-menu"
               onClick={() => setMenuOpen((current) => !current)}
@@ -580,18 +531,52 @@ function OrderDetailContent() {
         </div>
       </section>
 
+      <footer className="pajara-footer">
+        <div className="pajara-container pajara-footer-inner">
+          <div className="pajara-footer-brand">
+            <img
+              src={LOGO}
+              alt="Logo Pajara Studio"
+              className="pajara-footer-logo"
+            />
+
+            <div className="pajara-footer-copy">
+              <strong>Pajara Studio</strong>
+              <p>Berakar di Tanah Pasundan.</p>
+              <small>
+                © 2026 Pajara Studio. Desain yang punya arah.
+              </small>
+            </div>
+          </div>
+
+          <a href="/dashboard" className="pajara-footer-link">
+            Kembali ke Dashboard <span>↗</span>
+          </a>
+        </div>
+      </footer>
+
       <style>{`
         .pajara-detail-page {
+          --cream: #F7F4EE;
+          --green: #2F6B45;
+          --dark-green: #214D32;
+          --brown: #8A6A4A;
+          --text: #243329;
+          --muted: #778078;
+          --line: rgba(33,77,50,.10);
+          --soft: #EDF4EE;
+
           min-width: 0;
           width: 100%;
           overflow-x: clip;
-          background: var(--cream, #F7F4EE);
-          color: var(--text, #243329);
+          background: var(--cream);
+          color: var(--text);
           font-family: "DM Sans", Arial, sans-serif;
         }
 
         .pajara-detail-page,
         .pajara-detail-page * {
+          box-sizing: border-box;
           font-family: "DM Sans", Arial, sans-serif;
         }
 
@@ -602,14 +587,24 @@ function OrderDetailContent() {
           font-weight: 500;
         }
 
+        .pajara-container {
+          width: 100%;
+          max-width: 1160px;
+          margin-inline: auto;
+          padding-inline: clamp(18px, 4vw, 28px);
+        }
+
+        /* NAVBAR GLASS */
+
         .pajara-header {
           position: sticky;
           top: 0;
           z-index: 50;
-          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
-          background: rgba(247, 244, 238, 0.86);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
+          border-bottom: 1px solid rgba(47,107,69,.10);
+          background: rgba(247,244,238,.62);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          box-shadow: 0 5px 24px rgba(33,77,50,.025);
         }
 
         .pajara-header-inner {
@@ -659,17 +654,17 @@ function OrderDetailContent() {
           justify-content: center;
           gap: 5px;
           padding: 0;
-          border: 1px solid rgba(47, 107, 69, 0.14);
+          border: 1px solid rgba(47,107,69,.16);
           border-radius: 12px;
-          background: rgba(255, 255, 255, 0.7);
+          background: rgba(255,255,255,.48);
           cursor: pointer;
           transition: background .2s ease, border-color .2s ease;
           -webkit-tap-highlight-color: transparent;
         }
 
         .pajara-menu-toggle:hover {
-          border-color: rgba(47, 107, 69, 0.35);
-          background: #fff;
+          border-color: rgba(47,107,69,.35);
+          background: rgba(255,255,255,.85);
         }
 
         .pajara-menu-toggle span {
@@ -711,10 +706,12 @@ function OrderDetailContent() {
           z-index: 55;
           width: 220px;
           padding: 8px;
-          border: 1px solid rgba(33, 77, 50, 0.1);
+          border: 1px solid rgba(33,77,50,.1);
           border-radius: 16px;
-          background: rgba(255, 255, 255, 0.97);
-          box-shadow: 0 16px 40px rgba(33, 77, 50, 0.12);
+          background: rgba(255,255,255,.94);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          box-shadow: 0 16px 40px rgba(33,77,50,.12);
           animation: pajara-menu-in .18s ease-out;
         }
 
@@ -752,6 +749,8 @@ function OrderDetailContent() {
           }
         }
 
+        /* DETAIL PESANAN */
+
         .pajara-order-detail {
           width: 100%;
           box-sizing: border-box;
@@ -759,11 +758,8 @@ function OrderDetailContent() {
         }
 
         .pajara-detail-container {
-          width: 100%;
-          max-width: 1160px;
-          margin-inline: auto;
-          padding: 32px clamp(18px, 4vw, 28px) 48px;
-          box-sizing: border-box;
+          padding-top: 32px;
+          padding-bottom: 48px;
           min-width: 0;
         }
 
@@ -782,11 +778,10 @@ function OrderDetailContent() {
           display: block;
           margin: 0 0 10px;
           color: #8A6A4A;
-          font-family: "DM Sans", Arial, sans-serif;
           font-size: 10px;
           font-weight: 800;
           line-height: 1.6;
-          letter-spacing: 0.16em;
+          letter-spacing: .16em;
         }
 
         .pajara-order-detail-header h1 {
@@ -813,7 +808,7 @@ function OrderDetailContent() {
           width: 100%;
           max-width: 560px;
           margin: 0;
-          color: var(--muted, #778078);
+          color: var(--muted);
           font-size: 13px;
           line-height: 1.8;
         }
@@ -825,7 +820,6 @@ function OrderDetailContent() {
           align-items: start;
           width: 100%;
           min-width: 0;
-          box-sizing: border-box;
         }
 
         .pajara-detail-column {
@@ -835,11 +829,10 @@ function OrderDetailContent() {
         }
 
         .pajara-order-detail-card {
-          box-sizing: border-box;
           min-width: 0;
           padding: 26px;
           overflow-wrap: break-word;
-          border: 1px solid var(--line, rgba(33,77,50,.10));
+          border: 1px solid var(--line);
           border-radius: 18px;
           background: rgba(255,255,255,.88);
           box-shadow: 0 7px 25px rgba(33,77,50,.035);
@@ -847,7 +840,7 @@ function OrderDetailContent() {
 
         .pajara-order-detail-card h2 {
           margin: 0;
-          color: var(--green, #2F6B45);
+          color: var(--green);
           font-family: Georgia, "Times New Roman", serif;
           font-size: 23px;
           line-height: 1.35;
@@ -890,8 +883,8 @@ function OrderDetailContent() {
           margin-top: 16px;
           padding: 14px;
           border-radius: 12px;
-          background: var(--soft, #EDF4EE);
-          color: var(--green, #2F6B45);
+          background: var(--soft);
+          color: var(--green);
           font-size: 13px;
           line-height: 1.8;
         }
@@ -920,7 +913,7 @@ function OrderDetailContent() {
 
         .pajara-consistent-text,
         .pajara-access-description {
-          color: var(--muted, #778078);
+          color: var(--muted);
           font-size: 13px;
           line-height: 1.8;
         }
@@ -964,7 +957,7 @@ function OrderDetailContent() {
         }
 
         .pajara-payment-list span {
-          color: var(--muted, #778078);
+          color: var(--muted);
           line-height: 1.7;
         }
 
@@ -976,11 +969,92 @@ function OrderDetailContent() {
 
         .pajara-payment-list .pajara-payment-remaining {
           padding-top: 14px;
-          border-top: 1px solid var(--line, rgba(33,77,50,.10));
+          border-top: 1px solid var(--line);
         }
 
         .pajara-payment-remaining strong {
-          color: var(--green, #2F6B45);
+          color: var(--green);
+        }
+
+        /* FOOTER PAJARA */
+
+        .pajara-footer {
+          width: 100%;
+          border-top: 1px solid rgba(33,77,50,.10);
+          background: rgba(255,255,255,.32);
+        }
+
+        .pajara-footer-inner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          padding-top: 23px;
+          padding-bottom: 23px;
+        }
+
+        .pajara-footer-brand {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 13px;
+        }
+
+        .pajara-footer-logo {
+          display: block;
+          width: 43px;
+          height: 43px;
+          flex: 0 0 43px;
+          border-radius: 11px;
+          object-fit: cover;
+          background: #fff;
+        }
+
+        .pajara-footer-copy {
+          min-width: 0;
+        }
+
+        .pajara-footer-copy strong {
+          display: block;
+          color: #214D32;
+          font-size: 13px;
+          font-weight: 800;
+          line-height: 1.5;
+        }
+
+        .pajara-footer-copy p {
+          margin: 3px 0 0;
+          color: #8A6A4A;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .pajara-footer-copy small {
+          display: block;
+          margin-top: 4px;
+          color: #999387;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+
+        .pajara-footer-link {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          gap: 7px;
+          color: #2F6B45;
+          font-size: 11px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .pajara-footer-link span {
+          color: #8A6A4A;
+          font-size: 15px;
+        }
+
+        .pajara-footer-link:hover {
+          color: #214D32;
         }
 
         @media (max-width: 760px) {
@@ -1001,6 +1075,14 @@ function OrderDetailContent() {
 
           .pajara-order-detail-header h1 {
             font-size: clamp(32px, 8vw, 40px);
+          }
+        }
+
+        @media (max-width: 520px) {
+          .pajara-footer-inner {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 17px;
           }
         }
 
@@ -1049,7 +1131,12 @@ function OrderDetailContent() {
 }
 
 function OrderDetailFallback() {
-  return <PajaraLoading />;
+  return (
+    <CustomerLoading
+      title="Menyiapkan Detail Pesanan"
+      description="Sebentar, kami sedang menyiapkan informasi pesanan Kang/Teh."
+    />
+  );
 }
 
 export default function OrderDetailPage() {
