@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../../components/CustomerLoading";
+import CustomerLoading from "../components/CustomerLoading";
 
 const LOGO =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
@@ -666,7 +666,6 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
-        /* Sticky glass navbar */
         .order-navbar {
           position: sticky;
           top: 0;
