@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../components/CustomerLoading";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
