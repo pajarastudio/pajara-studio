@@ -153,8 +153,8 @@ export default function SubscriptionsPage() {
           margin: 0 -16px;
           border-bottom: 1px solid rgba(47, 107, 69, 0.1);
           background: rgba(247, 244, 238, 0.88);
-          backdrop-filter: blur(22px) saturate(160%);
-          -webkit-backdrop-filter: blur(22px) saturate(160%);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
         }
 
         .dashboard-navbar-inner {
