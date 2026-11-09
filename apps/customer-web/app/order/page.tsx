@@ -92,7 +92,11 @@ export default function CreateOrder() {
   const [paymentType, setPaymentType] = useState("");
 
   useEffect(() => {
-    setPageLoading(false);
+    const timer = window.setTimeout(() => {
+      setPageLoading(false);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   function handleFileSelection(files: File[]) {
