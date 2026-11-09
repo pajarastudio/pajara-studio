@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../components/CustomerLoading";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -174,6 +175,15 @@ export default function AccountPage() {
         .toUpperCase()
     : email.slice(0, 1).toUpperCase() || "P";
 
+  if (loading) {
+    return (
+      <CustomerLoading
+        title="Menyiapkan Akun"
+        description="Sebentar, kami sedang menyiapkan informasi akun Kang/Teh."
+      />
+    );
+  }
+
   return (
     <main style={styles.page}>
       <nav className="customer-navbar">
@@ -278,255 +288,244 @@ export default function AccountPage() {
           </div>
         )}
 
-        {loading ? (
-          <div style={styles.loadingCard}>
-            <div style={styles.spinner} />
-            <p style={styles.loadingText}>
-              Memuat informasi akun...
+        <section style={styles.profileHero}>
+          <div style={styles.avatar}>{initials}</div>
+
+          <div style={styles.profileIdentity}>
+            <span style={styles.memberLabel}>
+              CUSTOMER PAJARA
+            </span>
+            <h2 style={styles.profileName}>
+              {fullName || "Customer Pajara"}
+            </h2>
+            <p style={styles.profileEmail}>
+              {email || "Email tidak tersedia"}
             </p>
           </div>
-        ) : (
-          <>
-            <section style={styles.profileHero}>
-              <div style={styles.avatar}>{initials}</div>
 
-              <div style={styles.profileIdentity}>
-                <span style={styles.memberLabel}>
-                  CUSTOMER PAJARA
-                </span>
-                <h2 style={styles.profileName}>
-                  {fullName || "Customer Pajara"}
-                </h2>
-                <p style={styles.profileEmail}>
-                  {email || "Email tidak tersedia"}
-                </p>
-              </div>
+          <div style={styles.verifiedBadge}>
+            <span style={styles.verifiedDot} />
+            Akun
+          </div>
+        </section>
 
-              <div style={styles.verifiedBadge}>
-                <span style={styles.verifiedDot} />
-                Akun
-              </div>
-            </section>
-
-            <section style={styles.section}>
-              <div style={styles.sectionHeader}>
-                <div>
-                  <div style={styles.sectionEyebrow}>
-                    INFORMASI PERSONAL
-                  </div>
-                  <h2 style={styles.sectionTitle}>
-                    Detail Profil
-                  </h2>
-                </div>
-
-                {!editing && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditing(true);
-                      setError("");
-                      setSuccess("");
-                    }}
-                    style={styles.editButton}
-                  >
-                    Edit Profil
-                  </button>
-                )}
-              </div>
-
-              <form onSubmit={saveProfile} style={styles.form}>
-                <label style={styles.label} htmlFor="fullName">
-                  Nama Lengkap
-                </label>
-                <input
-                  id="fullName"
-                  type="text"
-                  autoComplete="name"
-                  value={fullName}
-                  onChange={(event) =>
-                    setFullName(event.target.value)
-                  }
-                  placeholder="Masukkan nama lengkap"
-                  disabled={!editing || saving}
-                  required
-                  maxLength={100}
-                  style={{
-                    ...styles.input,
-                    ...(editing ? styles.inputEditing : {}),
-                  }}
-                />
-
-                <label style={styles.label} htmlFor="email">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  readOnly
-                  disabled
-                  style={styles.input}
-                />
-                <p style={styles.fieldHint}>
-                  Email akun ditampilkan sebagai informasi dan tidak
-                  bisa diubah dari halaman ini.
-                </p>
-
-                <label style={styles.label} htmlFor="phone">
-                  Nomor WhatsApp
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(event) =>
-                    setPhone(event.target.value)
-                  }
-                  placeholder="Contoh: 08xxxxxxxxxx"
-                  disabled={!editing || saving}
-                  maxLength={25}
-                  style={{
-                    ...styles.input,
-                    ...(editing ? styles.inputEditing : {}),
-                  }}
-                />
-
-                {editing && (
-                  <div style={styles.formActions}>
-                    <button
-                      type="button"
-                      onClick={cancelEditing}
-                      disabled={saving}
-                      style={styles.cancelButton}
-                    >
-                      Batal
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      style={{
-                        ...styles.saveButton,
-                        opacity: saving ? 0.7 : 1,
-                      }}
-                    >
-                      {saving ? "Menyimpan..." : "Simpan Perubahan"}
-                    </button>
-                  </div>
-                )}
-              </form>
-            </section>
-
-            <section style={styles.section}>
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <div>
               <div style={styles.sectionEyebrow}>
-                AKTIVITAS AKUN
+                INFORMASI PERSONAL
               </div>
               <h2 style={styles.sectionTitle}>
-                Layanan Pajara
+                Detail Profil
               </h2>
-
-              <div style={styles.menuList}>
-                <button
-                  type="button"
-                  onClick={() => router.push("/orders/list")}
-                  style={styles.menuItem}
-                >
-                  <span style={styles.menuIcon}>▤</span>
-                  <span style={styles.menuText}>
-                    <strong>Pesanan Saya</strong>
-                    <small>Lihat status pesanan desain</small>
-                  </span>
-                  <span style={styles.menuArrow}>→</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.push("/payments")}
-                  style={styles.menuItem}
-                >
-                  <span style={styles.menuIcon}>◇</span>
-                  <span style={styles.menuText}>
-                    <strong>Pembayaran</strong>
-                    <small>Lihat tagihan dan pembayaran</small>
-                  </span>
-                  <span style={styles.menuArrow}>→</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.push("/files")}
-                  style={styles.menuItem}
-                >
-                  <span style={styles.menuIcon}>▧</span>
-                  <span style={styles.menuText}>
-                    <strong>File Desain</strong>
-                    <small>Buka file final pesananmu</small>
-                  </span>
-                  <span style={styles.menuArrow}>→</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.push("/subscriptions")}
-                  style={styles.menuItem}
-                >
-                  <span style={styles.menuIcon}>▣</span>
-                  <span style={styles.menuText}>
-                    <strong>Paket Pajara</strong>
-                    <small>Lihat paket mingguan dan bulanan</small>
-                  </span>
-                  <span style={styles.menuArrow}>→</span>
-                </button>
-              </div>
-            </section>
-
-            <section style={styles.accountCard}>
-              <div>
-                <h3 style={styles.accountTitle}>Keluar dari Akun</h3>
-                <p style={styles.accountDescription}>
-                  Akhiri sesi login pada perangkat ini.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void handleSignOut()}
-                disabled={signingOut}
-                style={styles.logoutButton}
-              >
-                {signingOut ? "Memproses..." : "Keluar"}
-              </button>
-            </section>
-
-            <div style={styles.accountId}>
-              ID akun: {userId.slice(0, 8)}…
             </div>
 
-            <footer style={styles.footer}>
-              <Image
-                src={logo}
-                alt="Logo Pajara Studio"
-                width={43}
-                height={43}
-                unoptimized
-                style={styles.footerLogo}
-              />
+            {!editing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(true);
+                  setError("");
+                  setSuccess("");
+                }}
+                style={styles.editButton}
+              >
+                Edit Profil
+              </button>
+            )}
+          </div>
 
-              <div>
-                <strong style={styles.footerTitle}>
-                  Pajara Studio
-                </strong>
-                <p style={styles.footerText}>
-                  Berakar di Tanah Pasundan.
-                </p>
-                <p style={styles.footerCopyright}>
-                  © 2026 Pajara Studio. Desain yang punya arah.
-                </p>
+          <form onSubmit={saveProfile} style={styles.form}>
+            <label style={styles.label} htmlFor="fullName">
+              Nama Lengkap
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              onChange={(event) =>
+                setFullName(event.target.value)
+              }
+              placeholder="Masukkan nama lengkap"
+              disabled={!editing || saving}
+              required
+              maxLength={100}
+              style={{
+                ...styles.input,
+                ...(editing ? styles.inputEditing : {}),
+              }}
+            />
+
+            <label style={styles.label} htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              readOnly
+              disabled
+              style={styles.input}
+            />
+            <p style={styles.fieldHint}>
+              Email akun ditampilkan sebagai informasi dan tidak
+              bisa diubah dari halaman ini.
+            </p>
+
+            <label style={styles.label} htmlFor="phone">
+              Nomor WhatsApp
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(event) =>
+                setPhone(event.target.value)
+              }
+              placeholder="Contoh: 08xxxxxxxxxx"
+              disabled={!editing || saving}
+              maxLength={25}
+              style={{
+                ...styles.input,
+                ...(editing ? styles.inputEditing : {}),
+              }}
+            />
+
+            {editing && (
+              <div style={styles.formActions}>
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  disabled={saving}
+                  style={styles.cancelButton}
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  style={{
+                    ...styles.saveButton,
+                    opacity: saving ? 0.7 : 1,
+                  }}
+                >
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
               </div>
-            </footer>
-          </>
-        )}
+            )}
+          </form>
+        </section>
+
+        <section style={styles.section}>
+          <div style={styles.sectionEyebrow}>
+            AKTIVITAS AKUN
+          </div>
+          <h2 style={styles.sectionTitle}>
+            Layanan Pajara
+          </h2>
+
+          <div style={styles.menuList}>
+            <button
+              type="button"
+              onClick={() => router.push("/orders/list")}
+              style={styles.menuItem}
+            >
+              <span style={styles.menuIcon}>▤</span>
+              <span style={styles.menuText}>
+                <strong>Pesanan Saya</strong>
+                <small>Lihat status pesanan desain</small>
+              </span>
+              <span style={styles.menuArrow}>→</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/payments")}
+              style={styles.menuItem}
+            >
+              <span style={styles.menuIcon}>◇</span>
+              <span style={styles.menuText}>
+                <strong>Pembayaran</strong>
+                <small>Lihat tagihan dan pembayaran</small>
+              </span>
+              <span style={styles.menuArrow}>→</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/files")}
+              style={styles.menuItem}
+            >
+              <span style={styles.menuIcon}>▧</span>
+              <span style={styles.menuText}>
+                <strong>File Desain</strong>
+                <small>Buka file final pesananmu</small>
+              </span>
+              <span style={styles.menuArrow}>→</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/subscriptions")}
+              style={styles.menuItem}
+            >
+              <span style={styles.menuIcon}>▣</span>
+              <span style={styles.menuText}>
+                <strong>Paket Pajara</strong>
+                <small>Lihat paket mingguan dan bulanan</small>
+              </span>
+              <span style={styles.menuArrow}>→</span>
+            </button>
+          </div>
+        </section>
+
+        <section style={styles.accountCard}>
+          <div>
+            <h3 style={styles.accountTitle}>Keluar dari Akun</h3>
+            <p style={styles.accountDescription}>
+              Akhiri sesi login pada perangkat ini.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            disabled={signingOut}
+            style={styles.logoutButton}
+          >
+            {signingOut ? "Memproses..." : "Keluar"}
+          </button>
+        </section>
+
+        <div style={styles.accountId}>
+          ID akun: {userId.slice(0, 8)}…
+        </div>
+
+        <footer style={styles.footer}>
+          <Image
+            src={logo}
+            alt="Logo Pajara Studio"
+            width={43}
+            height={43}
+            unoptimized
+            style={styles.footerLogo}
+          />
+
+          <div>
+            <strong style={styles.footerTitle}>
+              Pajara Studio
+            </strong>
+            <p style={styles.footerText}>
+              Berakar di Tanah Pasundan.
+            </p>
+            <p style={styles.footerCopyright}>
+              © 2026 Pajara Studio. Desain yang punya arah.
+            </p>
+          </div>
+        </footer>
       </div>
 
       <style jsx>{`
@@ -652,24 +651,6 @@ export default function AccountPage() {
             opacity: 1;
             transform: translateY(0);
           }
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        button {
-          -webkit-tap-highlight-color: transparent;
-          transition:
-            transform 160ms ease,
-            opacity 160ms ease,
-            background 160ms ease;
-        }
-
-        button:active:not(:disabled) {
-          transform: scale(0.985);
         }
 
         @media (max-width: 480px) {
@@ -980,27 +961,6 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: "center",
     overflowWrap: "anywhere",
     marginTop: "18px",
-  },
-  loadingCard: {
-    padding: "55px 20px",
-    textAlign: "center",
-    background: "#fff",
-    border: "1px solid #e8e2d8",
-    borderRadius: "18px",
-  },
-  spinner: {
-    width: "28px",
-    height: "28px",
-    border: "3px solid #dce5da",
-    borderTopColor: "var(--green, #2f6b45)",
-    borderRadius: "50%",
-    margin: "0 auto 13px",
-    animation: "spin 800ms linear infinite",
-  },
-  loadingText: {
-    color: "#777970",
-    fontSize: "13px",
-    margin: 0,
   },
   error: {
     padding: "15px",
