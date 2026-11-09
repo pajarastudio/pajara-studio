@@ -34,17 +34,17 @@ const navbarStyle: CSSProperties = {
   top: 0,
   zIndex: 50,
   width: "100%",
-  borderBottom: "1px solid rgba(47,107,69,.10)",
-  background: "rgba(247,244,238,.88)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  borderBottom: "1px solid rgba(47,107,69,0.1)",
+  background: "rgba(247,244,238,0.72)",
+  backdropFilter: "blur(22px) saturate(160%)",
+  WebkitBackdropFilter: "blur(22px) saturate(160%)",
 };
 
 const navbarInnerStyle: CSSProperties = {
   width: "100%",
-  maxWidth: 796,
-  minHeight: 66,
-  padding: "0 18px",
+  maxWidth: 1120,
+  minHeight: 74,
+  padding: "0 20px",
   margin: "0 auto",
   display: "flex",
   alignItems: "center",
@@ -59,16 +59,17 @@ const navbarBrandStyle: CSSProperties = {
   alignItems: "center",
   gap: 10,
   color: "#214d32",
-  fontSize: 15,
-  fontWeight: 800,
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontSize: 16,
+  fontWeight: 700,
   textDecoration: "none",
 };
 
 const navbarLogoStyle: CSSProperties = {
   display: "block",
-  width: 39,
-  height: 39,
-  minWidth: 39,
+  width: 40,
+  height: 40,
+  minWidth: 40,
   borderRadius: 12,
   objectFit: "cover",
 };
@@ -80,9 +81,9 @@ const navbarBackStyle: CSSProperties = {
   gap: 7,
   flexShrink: 0,
   padding: "10px 13px",
-  border: "1px solid rgba(47,107,69,.16)",
+  border: "1px solid rgba(47,107,69,0.16)",
   borderRadius: 10,
-  background: "rgba(255,255,255,.72)",
+  background: "rgba(255,255,255,0.72)",
   color: "#214d32",
   fontSize: 11,
   fontWeight: 800,
@@ -102,10 +103,11 @@ function FinalFilesNavbar({ orderId = "" }: { orderId?: string }) {
           <Image
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={39}
-            height={39}
+            width={40}
+            height={40}
             priority
             unoptimized
+            className="final-navbar-logo"
             style={navbarLogoStyle}
           />
           <span>Pajara Studio</span>
@@ -121,7 +123,7 @@ function FinalFilesNavbar({ orderId = "" }: { orderId?: string }) {
 }
 
 /* =========================
-   LOADING
+   PAJARA LOADING
 ========================= */
 
 function PajaraLoading({
@@ -133,6 +135,7 @@ function PajaraLoading({
     <main
       style={{
         minHeight: "100vh",
+        width: "100%",
         display: "grid",
         placeItems: "center",
         padding: 24,
@@ -148,10 +151,10 @@ function PajaraLoading({
           padding: "38px 24px",
           boxSizing: "border-box",
           textAlign: "center",
-          border: "1px solid rgba(33,77,50,.12)",
+          border: "1px solid rgba(33,77,50,0.12)",
           borderRadius: 24,
-          background: "rgba(255,255,255,.9)",
-          boxShadow: "0 20px 55px rgba(33,77,50,.07)",
+          background: "rgba(255,255,255,0.9)",
+          boxShadow: "0 20px 55px rgba(33,77,50,0.07)",
         }}
       >
         <Image
@@ -202,7 +205,7 @@ function PajaraLoading({
             border: "3px solid #DCE5DC",
             borderTopColor: "#2F6B45",
             borderRadius: "50%",
-            animation: "pajara-files-spin .8s linear infinite",
+            animation: "pajara-files-spin 0.8s linear infinite",
           }}
         />
 
@@ -221,7 +224,9 @@ function PajaraLoading({
 
       <style>{`
         @keyframes pajara-files-spin {
-          to { transform: rotate(360deg); }
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </main>
@@ -358,6 +363,7 @@ function FinalFilesContent() {
     }
 
     if (bytes < 1024) return `${bytes} B`;
+
     if (bytes < 1024 * 1024) {
       return `${(bytes / 1024).toFixed(1)} KB`;
     }
@@ -379,16 +385,12 @@ function FinalFilesContent() {
     });
   }
 
-  const backHref = id
-    ? `/orders?id=${encodeURIComponent(id)}`
-    : "/orders";
-
   const cardStyle: CSSProperties = {
     background: "#FFFFFF",
-    border: "1px solid rgba(33,77,50,.11)",
+    border: "1px solid rgba(33,77,50,0.11)",
     borderRadius: 22,
     padding: "clamp(20px, 5vw, 30px)",
-    boxShadow: "0 12px 35px rgba(33,77,50,.045)",
+    boxShadow: "0 12px 35px rgba(33,77,50,0.045)",
     boxSizing: "border-box",
     minWidth: 0,
   };
@@ -421,7 +423,9 @@ function FinalFilesContent() {
     cursor: "pointer",
   };
 
-  if (loading) return <PajaraLoading />;
+  if (loading) {
+    return <PajaraLoading message="Menyiapkan file final Anda..." />;
+  }
 
   return (
     <main
@@ -458,7 +462,7 @@ function FinalFilesContent() {
               fontSize: "clamp(32px, 6vw, 46px)",
               fontWeight: 600,
               lineHeight: 1.18,
-              letterSpacing: "-.7px",
+              letterSpacing: "-0.7px",
               overflowWrap: "break-word",
             }}
           >
@@ -737,7 +741,7 @@ function FinalFilesContent() {
                                 ...primaryButtonStyle,
                                 background: "#FFFFFF",
                                 color: "#214D32",
-                                border: "1px solid rgba(33,77,50,.16)",
+                                border: "1px solid rgba(33,77,50,0.16)",
                               }}
                             >
                               <svg
@@ -890,18 +894,40 @@ function FinalFilesContent() {
 
           .final-navbar-inner a:first-child {
             gap: 8px !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
           }
 
           .final-navbar-inner a:last-child {
             padding: 9px 10px !important;
             font-size: 10px !important;
           }
+
+          .final-navbar-logo {
+            width: 38px !important;
+            height: 38px !important;
+            min-width: 38px !important;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .final-navbar-logo {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+          }
+
+          .final-navbar-inner a:first-child {
+            font-size: 13px !important;
+          }
         }
       `}</style>
     </main>
   );
 }
+
+/* =========================
+   PAGE
+========================= */
 
 export default function FinalFilesPage() {
   return (
