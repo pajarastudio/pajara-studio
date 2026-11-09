@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -745,13 +744,21 @@ function PaymentStyles() {
         box-sizing: border-box;
       }
 
+      /* Sticky glass navbar */
       .payment-navbar {
-        position: relative;
-        z-index: 10;
+        position: sticky;
+        top: 0;
+        z-index: 100;
         width: 100%;
-        background: #fff;
-        border-bottom: 1px solid #e9e7df;
-        box-shadow: 0 4px 20px rgba(33, 77, 50, 0.035);
+        background: rgba(247, 244, 238, 0.76);
+        border-bottom: 1px solid rgba(220, 220, 208, 0.65);
+        box-shadow: 0 5px 24px rgba(33, 77, 50, 0.055);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        backdrop-filter: blur(18px) saturate(160%);
+        transition:
+          background 0.25s ease,
+          box-shadow 0.25s ease,
+          border-color 0.25s ease;
       }
 
       .payment-navbar-inner {
@@ -784,8 +791,8 @@ function PaymentStyles() {
         flex: 0 0 40px;
         object-fit: cover;
         border-radius: 11px;
-        border: 1px solid #e6e8df;
-        background: #fff;
+        border: 1px solid rgba(230, 232, 223, 0.9);
+        background: rgba(255, 255, 255, 0.8);
       }
 
       .payment-brand-copy {
@@ -825,15 +832,15 @@ function PaymentStyles() {
         flex: 0 0 auto;
         min-height: 42px;
         padding: 9px 14px;
-        border: 1px solid #d5e2cf;
+        border: 1px solid rgba(213, 226, 207, 0.85);
         border-radius: 13px;
-        background: #edf3e9;
+        background: rgba(237, 243, 233, 0.76);
         color: var(--green-dark);
         font-size: 12px;
         font-weight: 700;
         text-decoration: none;
         white-space: nowrap;
-        box-shadow: 0 3px 10px rgba(33, 77, 50, 0.08);
+        box-shadow: 0 3px 10px rgba(33, 77, 50, 0.06);
         transition:
           background 0.2s ease,
           border-color 0.2s ease,
@@ -841,7 +848,7 @@ function PaymentStyles() {
       }
 
       .payment-dashboard-link:hover {
-        background: #e3eddd;
+        background: rgba(227, 237, 221, 0.95);
         border-color: #b9ceb0;
         transform: translateY(-1px);
       }
