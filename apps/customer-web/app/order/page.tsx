@@ -298,15 +298,6 @@ export default function CreateOrder() {
     );
   }
 
-  if (submitting) {
-    return (
-      <CustomerLoading
-        title="Mengirim Pesanan"
-        description="Sebentar, kami sedang memproses pesanan desain Kang/Teh."
-      />
-    );
-  }
-
   return (
     <main className="order-page">
       <header className="order-navbar">
@@ -652,8 +643,17 @@ export default function CreateOrder() {
                 className="order-submit-button"
                 disabled={submitting}
               >
-                Kirim Pesanan
-                <span aria-hidden="true">↗</span>
+                {submitting ? (
+                  <>
+                    <span className="order-spinner" />
+                    Mengirim pesanan...
+                  </>
+                ) : (
+                  <>
+                    Kirim Pesanan
+                    <span aria-hidden="true">↗</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -698,7 +698,7 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
-        /* NAVBAR — disamakan dengan halaman Pembayaran Paket */
+        /* NAVBAR — mengikuti halaman Pembayaran Paket */
 
         .order-navbar {
           position: sticky;
@@ -1279,6 +1279,23 @@ export default function CreateOrder() {
         .order-submit-button:disabled {
           opacity: 0.7;
           cursor: wait;
+        }
+
+        .order-spinner {
+          display: inline-block;
+          width: 15px;
+          height: 15px;
+          flex: 0 0 15px;
+          border: 2px solid rgba(255, 255, 255, 0.35);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: order-spin 0.7s linear infinite;
+        }
+
+        @keyframes order-spin {
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .order-alert {
