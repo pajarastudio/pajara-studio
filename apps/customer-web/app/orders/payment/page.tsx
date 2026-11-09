@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -114,16 +113,14 @@ function PaymentNavbar({ orderId = "" }: { orderId?: string }) {
 
 function PaymentLoading() {
   return (
-    <main style={pageStyle}>
-      <PaymentNavbar />
-
-      <section style={loadingCardStyle}>
+    <main style={loadingPageStyle}>
+      <section style={loadingGlassStyle}>
         <div style={loadingLogoFrameStyle}>
           <Image
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={76}
-            height={76}
+            width={90}
+            height={90}
             priority
             unoptimized
             style={loadingLogoStyle}
@@ -131,29 +128,39 @@ function PaymentLoading() {
         </div>
 
         <p style={loadingEyebrowStyle}>PAJARA STUDIO</p>
-        <h1 style={loadingTitleStyle}>Menyiapkan pembayaran</h1>
-        <div style={loadingSpinnerStyle} />
+
+        <h1 style={loadingTitleStyle}>Menyiapkan Pembayaran</h1>
+
+        <div style={loadingProgressTrackStyle}>
+          <div style={loadingProgressStyle} />
+        </div>
 
         <p style={loadingTextStyle}>
           Sebentar, kami sedang menyiapkan informasi pembayaranmu.
         </p>
 
-        <div style={loadingDividerStyle} />
-
-        <p style={loadingTaglineStyle}>Berakar di Tanah Pasundan.</p>
+        <p style={loadingTaglineStyle}>
+          BERAKAR DI TANAH PASUNDAN
+        </p>
       </section>
 
       <style jsx>{`
-        @keyframes paymentSpin {
-          to {
-            transform: rotate(360deg);
+        @keyframes pajara-loading {
+          0% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(100%);
           }
         }
 
-        @keyframes paymentFade {
+        @keyframes pajara-fade {
           from {
             opacity: 0;
-            transform: translateY(9px);
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -162,7 +169,9 @@ function PaymentLoading() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          * {
+          *,
+          *::before,
+          *::after {
             animation-duration: 0.01ms !important;
           }
         }
@@ -1231,9 +1240,9 @@ const navbarStyle: React.CSSProperties = {
   width: "calc(100% + 36px)",
   marginLeft: "-18px",
   borderBottom: "1px solid rgba(47,107,69,.10)",
-  background: "rgba(247,244,238,.88)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  background: "rgba(247,244,238,.72)",
+  backdropFilter: "blur(22px) saturate(160%)",
+  WebkitBackdropFilter: "blur(22px) saturate(160%)",
 };
 
 const navbarInnerStyle: React.CSSProperties = {
@@ -1282,7 +1291,7 @@ const navbarBackStyle: React.CSSProperties = {
   padding: "10px 13px",
   border: "1px solid rgba(47,107,69,.16)",
   borderRadius: "10px",
-  background: "rgba(255,255,255,.72)",
+  background: "rgba(255,255,255,.48)",
   color: "#214d32",
   fontSize: "11px",
   fontWeight: 800,
@@ -1290,86 +1299,99 @@ const navbarBackStyle: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-const loadingCardStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "390px",
+const loadingPageStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 9999,
+  display: "grid",
+  placeItems: "center",
   boxSizing: "border-box",
-  padding: "34px 24px 28px",
-  margin: "min(12vh, 90px) auto 0",
+  padding: "24px",
+  background: "rgba(247,244,238,.78)",
+  backdropFilter: "blur(22px) saturate(160%)",
+  WebkitBackdropFilter: "blur(22px) saturate(160%)",
+  fontFamily: '"DM Sans", Arial, sans-serif',
+};
+
+const loadingGlassStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "370px",
+  boxSizing: "border-box",
+  padding: "38px 25px 30px",
   borderRadius: "24px",
-  background: "#fff",
-  border: "1px solid rgba(33,77,50,.12)",
-  boxShadow: "0 18px 45px rgba(33,77,50,.08)",
+  background: "rgba(255,255,255,.48)",
+  border: "1px solid rgba(255,255,255,.85)",
+  boxShadow: "0 18px 45px rgba(33,77,50,.09)",
   textAlign: "center",
-  animation: "paymentFade 400ms ease both",
+  animation: "pajara-fade 450ms ease both",
 };
 
 const loadingLogoFrameStyle: React.CSSProperties = {
-  width: "86px",
-  height: "86px",
-  margin: "0 auto 20px",
+  width: "100px",
+  height: "100px",
+  margin: "0 auto 22px",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  borderRadius: "20px",
-  background: "#f7f4ee",
-  border: "1px solid #e8e2d8",
+  borderRadius: "22px",
+  background: "rgba(247,244,238,.8)",
+  border: "1px solid rgba(47,107,69,.08)",
 };
 
 const loadingLogoStyle: React.CSSProperties = {
-  width: "76px",
-  height: "76px",
+  width: "90px",
+  height: "90px",
   objectFit: "contain",
 };
 
 const loadingEyebrowStyle: React.CSSProperties = {
-  margin: "0 0 9px",
+  margin: "0 0 10px",
   color: "#8a6a4a",
   fontSize: "10px",
   fontWeight: 800,
-  letterSpacing: "0.2em",
+  letterSpacing: "0.22em",
 };
 
 const loadingTitleStyle: React.CSSProperties = {
-  margin: "0 0 23px",
+  margin: "0 0 25px",
   color: "#214d32",
   fontFamily: '"Playfair Display", Georgia, serif',
   fontSize: "25px",
-  lineHeight: 1.35,
+  lineHeight: 1.4,
   fontWeight: 600,
 };
 
-const loadingSpinnerStyle: React.CSSProperties = {
-  width: "30px",
-  height: "30px",
-  margin: "0 auto 17px",
-  border: "3px solid #e4ebe2",
-  borderTopColor: "#2f6b45",
-  borderRadius: "50%",
-  animation: "paymentSpin 800ms linear infinite",
+const loadingProgressTrackStyle: React.CSSProperties = {
+  width: "155px",
+  height: "3px",
+  margin: "0 auto 20px",
+  overflow: "hidden",
+  borderRadius: "10px",
+  background: "rgba(47,107,69,.13)",
+};
+
+const loadingProgressStyle: React.CSSProperties = {
+  width: "55%",
+  height: "100%",
+  borderRadius: "10px",
+  background: "#2f6b45",
+  animation: "pajara-loading 1.3s ease-in-out infinite",
 };
 
 const loadingTextStyle: React.CSSProperties = {
   margin: "0 auto",
   maxWidth: "270px",
   color: "#747d74",
-  fontSize: "13px",
+  fontSize: "12px",
   lineHeight: 1.8,
 };
 
-const loadingDividerStyle: React.CSSProperties = {
-  width: "42px",
-  height: "2px",
-  margin: "22px auto 14px",
-  background: "#d8e4d7",
-  borderRadius: "10px",
-};
-
 const loadingTaglineStyle: React.CSSProperties = {
-  margin: 0,
+  margin: "25px 0 0",
   color: "#8a6a4a",
-  fontSize: "11px",
-  fontWeight: 600,
+  fontSize: "9px",
+  fontWeight: 800,
+  letterSpacing: "0.18em",
 };
 
 const pageHeaderStyle: React.CSSProperties = {
