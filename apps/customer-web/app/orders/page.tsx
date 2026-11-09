@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -539,10 +540,6 @@ function OrderDetailContent() {
               </small>
             </div>
           </div>
-
-          <a href="/dashboard" className="pajara-footer-link">
-            Kembali ke Dashboard <span>↗</span>
-          </a>
         </div>
       </footer>
 
@@ -750,7 +747,7 @@ function OrderDetailContent() {
 
         .pajara-detail-container {
           padding-top: 32px;
-          padding-bottom: 48px;
+          padding-bottom: 24px;
           min-width: 0;
         }
 
@@ -974,7 +971,7 @@ function OrderDetailContent() {
         .pajara-footer-inner {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-start;
           gap: 20px;
           padding-top: 23px;
           padding-bottom: 23px;
@@ -1022,26 +1019,6 @@ function OrderDetailContent() {
           color: #999387;
           font-size: 10px;
           line-height: 1.5;
-        }
-
-        .pajara-footer-link {
-          display: inline-flex;
-          flex-shrink: 0;
-          align-items: center;
-          gap: 7px;
-          color: #2F6B45;
-          font-size: 11px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .pajara-footer-link span {
-          color: #8A6A4A;
-          font-size: 15px;
-        }
-
-        .pajara-footer-link:hover {
-          color: #214D32;
         }
 
         @media (max-width: 760px) {
