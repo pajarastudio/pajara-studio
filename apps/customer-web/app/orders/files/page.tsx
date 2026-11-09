@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -6,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -119,117 +121,6 @@ function FinalFilesNavbar({ orderId = "" }: { orderId?: string }) {
         </Link>
       </div>
     </nav>
-  );
-}
-
-/* =========================
-   PAJARA LOADING
-========================= */
-
-function PajaraLoading({
-  message = "Menyiapkan file final Anda...",
-}: {
-  message?: string;
-}) {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-        background: "#F7F4EE",
-        fontFamily: '"DM Sans", sans-serif',
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          padding: "38px 24px",
-          boxSizing: "border-box",
-          textAlign: "center",
-          border: "1px solid rgba(33,77,50,0.12)",
-          borderRadius: 24,
-          background: "rgba(255,255,255,0.9)",
-          boxShadow: "0 20px 55px rgba(33,77,50,0.07)",
-        }}
-      >
-        <Image
-          src={LOGO}
-          alt="Pajara Studio"
-          width={66}
-          height={66}
-          priority
-          unoptimized
-          style={{
-            width: 66,
-            height: 66,
-            objectFit: "contain",
-            borderRadius: 16,
-            marginBottom: 18,
-          }}
-        />
-
-        <p
-          style={{
-            margin: 0,
-            color: "#214D32",
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            fontSize: 25,
-          }}
-        >
-          Pajara Studio
-        </p>
-
-        <p
-          style={{
-            margin: "10px 0 24px",
-            color: "#70766F",
-            fontSize: 13,
-            lineHeight: 1.8,
-          }}
-        >
-          {message}
-        </p>
-
-        <div
-          role="status"
-          aria-label="Memuat"
-          style={{
-            width: 30,
-            height: 30,
-            margin: "0 auto",
-            border: "3px solid #DCE5DC",
-            borderTopColor: "#2F6B45",
-            borderRadius: "50%",
-            animation: "pajara-files-spin 0.8s linear infinite",
-          }}
-        />
-
-        <p
-          style={{
-            margin: "22px 0 0",
-            color: "#8A6A4A",
-            fontSize: 10,
-            letterSpacing: 2,
-            fontWeight: 700,
-          }}
-        >
-          DESAIN YANG PUNYA ARAH
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes pajara-files-spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
-    </main>
   );
 }
 
@@ -424,7 +315,7 @@ function FinalFilesContent() {
   };
 
   if (loading) {
-    return <PajaraLoading message="Menyiapkan file final Anda..." />;
+    return <CustomerLoading />;
   }
 
   return (
@@ -931,11 +822,7 @@ function FinalFilesContent() {
 
 export default function FinalFilesPage() {
   return (
-    <Suspense
-      fallback={
-        <PajaraLoading message="Memuat halaman file final..." />
-      }
-    >
+    <Suspense fallback={<CustomerLoading />}>
       <FinalFilesContent />
     </Suspense>
   );
