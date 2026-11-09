@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -663,23 +664,18 @@ export default function CreateOrder() {
           <img
             src={LOGO}
             alt="Logo Pajara Studio"
-            width={43}
-            height={43}
+            className="order-footer-logo"
           />
 
-          <div>
+          <div className="order-footer-copy">
             <strong>Pajara Studio</strong>
-            <p className="order-footer-tagline">
-              Berakar di Tanah Pasundan.
-            </p>
-            <p className="order-footer-copyright">
-              © 2026 Pajara Studio. Desain yang punya arah.
-            </p>
+            <span>Berakar di Tanah Pasundan.</span>
+            <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
           </div>
         </footer>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .order-page {
           --green: #2f6b45;
           --green-dark: #214d32;
@@ -694,11 +690,11 @@ export default function CreateOrder() {
           font-family: Arial, Helvetica, sans-serif;
         }
 
-        .order-page * {
+        .order-page *,
+        .order-page *::before,
+        .order-page *::after {
           box-sizing: border-box;
         }
-
-        /* NAVBAR — mengikuti halaman Pembayaran Paket */
 
         .order-navbar {
           position: sticky;
@@ -771,7 +767,7 @@ export default function CreateOrder() {
           letter-spacing: -0.3px;
         }
 
-        .order-brand-copy > span {
+        .order-brand-copy span {
           display: block;
           color: #85877c;
           font-size: 9px;
@@ -1278,18 +1274,16 @@ export default function CreateOrder() {
 
         .order-submit-button:disabled {
           opacity: 0.7;
-          cursor: wait;
+          cursor: not-allowed;
         }
 
         .order-spinner {
-          display: inline-block;
-          width: 15px;
-          height: 15px;
-          flex: 0 0 15px;
-          border: 2px solid rgba(255, 255, 255, 0.35);
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.4);
           border-top-color: #fff;
           border-radius: 50%;
-          animation: order-spin 0.7s linear infinite;
+          animation: order-spin 0.8s linear infinite;
         }
 
         @keyframes order-spin {
@@ -1359,7 +1353,7 @@ export default function CreateOrder() {
           margin-top: 36px;
         }
 
-        .order-footer img {
+        .order-footer-logo {
           display: block;
           width: 43px;
           height: 43px;
@@ -1369,23 +1363,26 @@ export default function CreateOrder() {
           background: #fff;
         }
 
-        .order-footer strong {
+        .order-footer-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .order-footer-copy strong {
           display: block;
-          color: #214d32;
-          font-family: Georgia, "Times New Roman", serif;
+          color: var(--green-dark);
           font-size: 13px;
           line-height: 1.5;
         }
 
-        .order-footer-tagline {
-          margin: 4px 0 0;
-          color: #8a6a4a;
+        .order-footer-copy span {
+          color: var(--brown);
           font-size: 11px;
           line-height: 1.5;
         }
 
-        .order-footer-copyright {
-          margin: 3px 0 0;
+        .order-footer-copy small {
           color: #999387;
           font-size: 10px;
           line-height: 1.5;
@@ -1418,7 +1415,7 @@ export default function CreateOrder() {
             letter-spacing: -0.3px;
           }
 
-          .order-brand-copy > span {
+          .order-brand-copy span {
             max-width: 150px;
             font-size: 8px;
             line-height: 1.3;
@@ -1531,7 +1528,7 @@ export default function CreateOrder() {
             font-size: 13px;
           }
 
-          .order-brand-copy > span {
+          .order-brand-copy span {
             max-width: 112px;
             font-size: 7px;
           }
