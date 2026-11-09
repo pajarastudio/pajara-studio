@@ -92,11 +92,23 @@ export default function CreateOrder() {
   const [paymentType, setPaymentType] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setPageLoading(false);
-    }, 300);
+    let active = true;
 
-    return () => window.clearTimeout(timer);
+    async function initializePage() {
+      try {
+        await supabase.auth.getUser();
+      } finally {
+        if (active) {
+          setPageLoading(false);
+        }
+      }
+    }
+
+    initializePage();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   function handleFileSelection(files: File[]) {
