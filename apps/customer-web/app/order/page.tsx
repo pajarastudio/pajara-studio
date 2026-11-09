@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@pajara/supabase";
 import CustomerLoading from "../components/CustomerLoading";
@@ -76,7 +76,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_FILES = 10;
 
 export default function CreateOrder() {
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -88,6 +90,26 @@ export default function CreateOrder() {
   const [brief, setBrief] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentType, setPaymentType] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function initializePage() {
+      try {
+        await supabase.auth.getSession();
+      } finally {
+        if (active) {
+          setPageLoading(false);
+        }
+      }
+    }
+
+    initializePage();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function handleFileSelection(files: File[]) {
     setError("");
@@ -117,6 +139,7 @@ export default function CreateOrder() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setError("");
     setSuccess("");
 
@@ -150,7 +173,7 @@ export default function CreateOrder() {
       }
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       const {
@@ -262,11 +285,20 @@ export default function CreateOrder() {
           : "Terjadi kesalahan. Silakan coba kembali."
       );
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
-  if (loading) {
+  if (pageLoading) {
+    return (
+      <CustomerLoading
+        title="Menyiapkan Halaman"
+        description="Sebentar, kami sedang menyiapkan halaman pemesanan desain untuk Kang/Teh."
+      />
+    );
+  }
+
+  if (submitting) {
     return (
       <CustomerLoading
         title="Mengirim Pesanan"
@@ -618,7 +650,7 @@ export default function CreateOrder() {
               <button
                 type="submit"
                 className="order-submit-button"
-                disabled={loading}
+                disabled={submitting}
               >
                 Kirim Pesanan
                 <span aria-hidden="true">↗</span>
@@ -666,16 +698,22 @@ export default function CreateOrder() {
           box-sizing: border-box;
         }
 
+        /* NAVBAR — disamakan dengan halaman Pembayaran Paket */
+
         .order-navbar {
           position: sticky;
           top: 0;
           z-index: 100;
           width: 100%;
-          background: rgba(255, 255, 255, 0.76);
-          border-bottom: 1px solid rgba(226, 226, 216, 0.72);
+          background: rgba(247, 244, 238, 0.76);
+          border-bottom: 1px solid rgba(220, 220, 208, 0.65);
           box-shadow: 0 5px 24px rgba(33, 77, 50, 0.055);
-          -webkit-backdrop-filter: blur(18px) saturate(150%);
-          backdrop-filter: blur(18px) saturate(150%);
+          -webkit-backdrop-filter: blur(18px) saturate(160%);
+          backdrop-filter: blur(18px) saturate(160%);
+          transition:
+            background 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease;
         }
 
         .order-navbar-inner {
@@ -683,6 +721,7 @@ export default function CreateOrder() {
           min-height: 74px;
           margin: 0 auto;
           display: flex;
+          flex-direction: row;
           align-items: center;
           justify-content: space-between;
           gap: 8px;
@@ -690,6 +729,7 @@ export default function CreateOrder() {
 
         .order-brand {
           display: flex;
+          flex-direction: row;
           align-items: center;
           gap: 10px;
           min-width: 0;
@@ -706,8 +746,8 @@ export default function CreateOrder() {
           flex: 0 0 40px;
           object-fit: cover;
           border-radius: 11px;
-          border: 1px solid #e6e8df;
-          background: #fff;
+          border: 1px solid rgba(230, 232, 223, 0.9);
+          background: rgba(255, 255, 255, 0.8);
         }
 
         .order-brand-copy {
@@ -716,6 +756,7 @@ export default function CreateOrder() {
           align-items: flex-start;
           justify-content: center;
           min-width: 0;
+          flex: 1 1 auto;
           gap: 4px;
           text-align: left;
         }
@@ -739,21 +780,22 @@ export default function CreateOrder() {
 
         .order-dashboard-link {
           display: inline-flex;
+          flex-direction: row;
           align-items: center;
           justify-content: center;
           gap: 10px;
           flex: 0 0 auto;
           min-height: 42px;
           padding: 9px 14px;
-          border: 1px solid rgba(213, 226, 207, 0.9);
+          border: 1px solid rgba(213, 226, 207, 0.85);
           border-radius: 13px;
-          background: rgba(237, 243, 233, 0.82);
+          background: rgba(237, 243, 233, 0.76);
           color: var(--green-dark);
           font-size: 12px;
           font-weight: 700;
           text-decoration: none;
           white-space: nowrap;
-          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.07);
+          box-shadow: 0 3px 10px rgba(33, 77, 50, 0.06);
           transition:
             background 0.2s ease,
             border-color 0.2s ease,
@@ -761,7 +803,7 @@ export default function CreateOrder() {
         }
 
         .order-dashboard-link:hover {
-          background: #e3eddd;
+          background: rgba(227, 237, 221, 0.95);
           border-color: #b9ceb0;
           transform: translateY(-1px);
         }
