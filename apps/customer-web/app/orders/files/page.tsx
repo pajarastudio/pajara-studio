@@ -315,7 +315,12 @@ function FinalFilesContent() {
   };
 
   if (loading) {
-    return <CustomerLoading />;
+    return (
+      <CustomerLoading
+        title="Menyiapkan File Final"
+        description="Mohon tunggu, kami sedang menyiapkan file final pesanan Anda."
+      />
+    );
   }
 
   return (
@@ -822,7 +827,14 @@ function FinalFilesContent() {
 
 export default function FinalFilesPage() {
   return (
-    <Suspense fallback={<CustomerLoading />}>
+    <Suspense
+      fallback={
+        <CustomerLoading
+          title="Memuat File Final"
+          description="Mohon tunggu, halaman file final Pajara Studio sedang disiapkan."
+        />
+      }
+    >
       <FinalFilesContent />
     </Suspense>
   );
