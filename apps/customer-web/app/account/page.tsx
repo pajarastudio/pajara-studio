@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -194,14 +195,17 @@ export default function AccountPage() {
             onClick={() => router.push("/dashboard")}
             aria-label="Pajara Studio - Beranda"
           >
-            <Image
-              src={logo}
-              alt="Logo Pajara Studio"
-              width={39}
-              height={39}
-              unoptimized
-              className="navbar-logo"
-            />
+            <span className="navbar-logo-wrap">
+              <Image
+                src={logo}
+                alt="Logo Pajara Studio"
+                width={39}
+                height={39}
+                unoptimized
+                className="navbar-logo"
+              />
+            </span>
+
             <span>Pajara Studio</span>
           </button>
 
@@ -565,10 +569,22 @@ export default function AccountPage() {
           cursor: pointer;
         }
 
-        .navbar-logo {
+        .navbar-logo-wrap {
+          display: block;
           width: 39px;
           height: 39px;
-          object-fit: contain;
+          min-width: 39px;
+          flex-shrink: 0;
+          overflow: hidden;
+          border-radius: 12px;
+          background: #f7f4ee;
+        }
+
+        .navbar-logo {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
           border-radius: 12px;
         }
 
