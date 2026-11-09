@@ -1,9 +1,9 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Subscription = {
   id: string;
@@ -26,6 +26,91 @@ type SubscriptionPlan = {
 };
 
 type PaymentMethod = "QRIS" | "DANA" | "GoPay" | "SeaBank";
+
+function DashboardNavbar() {
+  const router = useRouter();
+
+  return (
+    <header
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        padding: "14px 0",
+        marginBottom: 24,
+        background: "rgba(247,244,238,0.72)",
+        backdropFilter: "blur(22px) saturate(160%)",
+        WebkitBackdropFilter: "blur(22px) saturate(160%)",
+        borderBottom: "1px solid rgba(47,107,69,0.1)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => router.push("/dashboard")}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
+          border: "none",
+          borderRadius: 13,
+          padding: "11px 17px",
+          background: "#214d32",
+          color: "#ffffff",
+          fontSize: 13,
+          fontWeight: 700,
+          cursor: "pointer",
+          boxShadow: "0 5px 14px rgba(33,77,50,0.16)",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <span aria-hidden="true" style={{ fontSize: 17 }}>
+          ←
+        </span>
+        Dashboard
+      </button>
+    </header>
+  );
+}
+
+function PajaraFooter() {
+  return (
+    <footer
+      style={{
+        maxWidth: 760,
+        margin: "38px auto 0",
+        padding: "22px 0 8px",
+        borderTop: "1px solid rgba(47,107,69,0.14)",
+        textAlign: "center",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <p
+        style={{
+          margin: "0 0 7px",
+          color: "#214d32",
+          fontSize: 13,
+          fontWeight: 700,
+          letterSpacing: 0.2,
+        }}
+      >
+        Berakar di Tanah Pasundan.
+      </p>
+      <p
+        style={{
+          margin: 0,
+          color: "#8a6a4a",
+          fontSize: 11,
+          lineHeight: 1.6,
+        }}
+      >
+        © 2026 Pajara Studio. Desain yang punya arah.
+      </p>
+    </footer>
+  );
+}
 
 function PaymentPageContent() {
   const router = useRouter();
@@ -407,29 +492,10 @@ function PaymentPageContent() {
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#f7f4ee",
-          padding: "32px 16px",
-          fontFamily: "Arial, sans-serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            background: "#ffffff",
-            borderRadius: 24,
-            padding: 28,
-            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
-          }}
-        >
-          <p style={{ margin: 0, color: "#214d32", fontSize: 16 }}>
-            Memuat pembayaran...
-          </p>
-        </div>
-      </main>
+      <CustomerLoading
+        title="Menyiapkan Pembayaran"
+        description="Sebentar, kami sedang menyiapkan halaman pembayaran paket Kang/Teh."
+      />
     );
   }
 
@@ -439,62 +505,66 @@ function PaymentPageContent() {
         style={{
           minHeight: "100vh",
           background: "#f7f4ee",
-          padding: "32px 16px",
+          padding: "0 16px 30px",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            background: "#ffffff",
-            borderRadius: 24,
-            padding: 28,
-            boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
-          }}
-        >
-          <h1
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <DashboardNavbar />
+
+          <div
             style={{
-              margin: "0 0 10px",
-              color: "#214d32",
-              fontSize: 28,
+              background: "#ffffff",
+              borderRadius: 24,
+              padding: 28,
+              boxShadow: "0 10px 35px rgba(33,77,50,0.08)",
             }}
           >
-            Pembayaran Paket
-          </h1>
-
-          {error && (
-            <div
+            <h1
               style={{
-                background: "#fff1f1",
-                color: "#a12b2b",
-                border: "1px solid #f0caca",
-                borderRadius: 14,
-                padding: 14,
-                lineHeight: 1.5,
+                margin: "0 0 10px",
+                color: "#214d32",
+                fontSize: 28,
               }}
             >
-              {error}
-            </div>
-          )}
+              Pembayaran Paket
+            </h1>
 
-          <button
-            type="button"
-            onClick={() => router.push("/subscriptions")}
-            style={{
-              marginTop: 20,
-              width: "100%",
-              border: "none",
-              borderRadius: 14,
-              padding: "14px 18px",
-              background: "#2f6b45",
-              color: "#ffffff",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Kembali ke Paket
-          </button>
+            {error && (
+              <div
+                style={{
+                  background: "#fff1f1",
+                  color: "#a12b2b",
+                  border: "1px solid #f0caca",
+                  borderRadius: 14,
+                  padding: 14,
+                  lineHeight: 1.5,
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => router.push("/subscriptions")}
+              style={{
+                marginTop: 20,
+                width: "100%",
+                border: "none",
+                borderRadius: 14,
+                padding: "14px 18px",
+                background: "#2f6b45",
+                color: "#ffffff",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Kembali ke Paket
+            </button>
+          </div>
+
+          <PajaraFooter />
         </div>
       </main>
     );
@@ -505,11 +575,13 @@ function PaymentPageContent() {
       style={{
         minHeight: "100vh",
         background: "#f7f4ee",
-        padding: "28px 16px 50px",
+        padding: "0 16px 30px",
         fontFamily: "Arial, sans-serif",
       }}
     >
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <DashboardNavbar />
+
         {backCard}
 
         <section
@@ -929,6 +1001,8 @@ function PaymentPageContent() {
             diaktifkan.
           </p>
         </section>
+
+        <PajaraFooter />
       </div>
     </main>
   );
@@ -938,26 +1012,10 @@ export default function SubscriptionPaymentPage() {
   return (
     <Suspense
       fallback={
-        <main
-          style={{
-            minHeight: "100vh",
-            background: "#f7f4ee",
-            padding: "32px 16px",
-            fontFamily: "Arial, sans-serif",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 720,
-              margin: "0 auto",
-              background: "#ffffff",
-              borderRadius: 24,
-              padding: 28,
-            }}
-          >
-            Memuat pembayaran...
-          </div>
-        </main>
+        <CustomerLoading
+          title="Menyiapkan Pembayaran"
+          description="Sebentar, kami sedang menyiapkan halaman pembayaran paket Kang/Teh."
+        />
       }
     >
       <PaymentPageContent />
