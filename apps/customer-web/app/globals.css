@@ -1680,3 +1680,175 @@ textarea::placeholder {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* =========================================
+   PAJARA STUDIO — INITIAL PAGE LOADING
+========================================= */
+
+/* Kunci scroll sebelum aplikasi siap */
+html:not([data-pajara-ready="true"]) body {
+  overflow: hidden !important;
+}
+
+/* Sembunyikan konten sebelum React siap */
+html:not([data-pajara-ready="true"]) #pajara-customer-content {
+  visibility: hidden !important;
+}
+
+/* Loading statis sebelum hydration */
+#pajara-initial-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 15% 18%,
+      rgba(47, 107, 69, 0.13),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 85% 78%,
+      rgba(138, 106, 74, 0.13),
+      transparent 34%
+    ),
+    #f7f4ee;
+  color: #214d32;
+  font-family: "DM Sans", Arial, sans-serif;
+  text-align: center;
+}
+
+html:not([data-pajara-ready="true"]) #pajara-initial-loading {
+  display: flex;
+}
+
+.pajara-initial-card {
+  width: 100%;
+  max-width: 390px;
+  padding: 38px 28px 30px;
+  border: 1px solid rgba(33, 77, 50, 0.10);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow:
+    0 24px 70px rgba(33, 77, 50, 0.09),
+    0 4px 16px rgba(33, 77, 50, 0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.pajara-initial-logo {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 19px;
+  overflow: hidden;
+  border-radius: 19px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(33, 77, 50, 0.10);
+}
+
+.pajara-initial-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pajara-initial-brand {
+  margin-bottom: 24px;
+  color: #2f6b45;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.pajara-initial-title {
+  margin-bottom: 9px;
+  color: #214d32;
+  font-family: Georgia, serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.pajara-initial-description {
+  max-width: 290px;
+  margin: 0 auto;
+  color: #6d756f;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.pajara-initial-track {
+  width: 100%;
+  height: 4px;
+  margin-top: 29px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(47, 107, 69, 0.12);
+}
+
+.pajara-initial-progress {
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #214d32,
+    #2f6b45,
+    #8a6a4a
+  );
+  animation: pajaraInitialProgress 1.5s ease-in-out infinite;
+}
+
+.pajara-initial-footer {
+  margin-top: 24px;
+  color: #8a6a4a;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+}
+
+@keyframes pajaraInitialProgress {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(290%);
+  }
+}
+
+/* Tampilan perangkat kecil */
+@media (max-width: 480px) {
+  .pajara-initial-card {
+    max-width: 340px;
+    padding: 34px 23px 27px;
+    border-radius: 23px;
+  }
+
+  .pajara-initial-logo {
+    width: 68px;
+    height: 68px;
+  }
+
+  .pajara-initial-title {
+    font-size: 23px;
+  }
+
+  .pajara-initial-description {
+    font-size: 12px;
+  }
+}
+
+/* Aksesibilitas */
+@media (prefers-reduced-motion: reduce) {
+  .pajara-initial-progress {
+    animation: none;
+    width: 100%;
+  }
+}
