@@ -1857,3 +1857,55 @@ html:not([data-pajara-ready="true"]) #pajara-initial-loading {
 #pajara-initial-loading {
   display: none !important;
 }
+
+/* =========================================
+   PAJARA — CRITICAL LOGO FIX
+   Mencegah logo membesar sebelum CSS halaman dimuat
+========================================= */
+
+.pajara-header-logo {
+  display: block !important;
+  width: 39px !important;
+  height: 39px !important;
+  min-width: 39px !important;
+  min-height: 39px !important;
+  max-width: 39px !important;
+  max-height: 39px !important;
+  flex: 0 0 39px !important;
+  object-fit: cover !important;
+  border-radius: 10px;
+}
+
+.pajara-footer-logo {
+  display: block !important;
+  width: 43px !important;
+  height: 43px !important;
+  min-width: 43px !important;
+  min-height: 43px !important;
+  max-width: 43px !important;
+  max-height: 43px !important;
+  flex: 0 0 43px !important;
+  object-fit: cover !important;
+  border-radius: 10px;
+}
+
+.pajara-header-logo img,
+.pajara-footer-logo img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 420px) {
+  .pajara-header-logo {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    flex-basis: 36px !important;
+  }
+}
