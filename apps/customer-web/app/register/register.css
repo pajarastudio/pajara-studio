@@ -1,0 +1,573 @@
+.register-page {
+  min-height: 100vh;
+  overflow-x: clip;
+  background: #f7f4ee;
+  color: #26352a;
+  font-family: "DM Sans", sans-serif;
+}
+
+.register-page,
+.register-page * {
+  box-sizing: border-box;
+}
+
+/* NAVBAR */
+.register-page .register-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background: rgba(247, 244, 238, 0.78);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-bottom: 1px solid rgba(47, 107, 69, 0.1);
+}
+
+.register-page .navbar-inner {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  min-height: 74px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.register-page .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  color: #214d32;
+  text-decoration: none;
+}
+
+.register-page .brand-logo-wrap {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f1ece6;
+  border: 1px solid rgba(47, 107, 69, 0.08);
+}
+
+.register-page .brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.register-page .brand-name {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.register-page .navbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.register-page .menu-toggle {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(33, 77, 50, 0.12);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #214d32;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.register-page .menu-toggle:hover {
+  background: #fff;
+  border-color: rgba(47, 107, 69, 0.3);
+}
+
+.register-page .menu-overlay {
+  position: fixed;
+  inset: 74px 0 0;
+  z-index: 51;
+  width: 100%;
+  border: none;
+  background: rgba(25, 39, 29, 0.12);
+}
+
+.register-page .navbar-dropdown {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 24px;
+  z-index: 52;
+  width: 220px;
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(33, 77, 50, 0.1);
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(33, 77, 50, 0.12);
+  animation: registerMenuEnter 180ms ease both;
+}
+
+.register-page .navbar-dropdown a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: #34483a;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 160ms ease;
+}
+
+.register-page .navbar-dropdown a:hover {
+  background: #f1f5ef;
+  color: #214d32;
+}
+
+.register-page .navbar-dropdown a span {
+  color: #8a6a4a;
+  font-size: 15px;
+}
+
+/* HERO */
+.register-page .register-hero {
+  padding: 68px 22px 38px;
+  text-align: center;
+}
+
+.register-page .hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.register-page .eyebrow {
+  margin: 0 0 13px;
+  color: #8a6a4a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1.6;
+}
+
+.register-page .register-hero h1 {
+  margin: 0;
+  color: #214d32;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 700;
+  line-height: 1.13;
+  letter-spacing: -1.3px;
+}
+
+.register-page .register-hero h1 span {
+  color: #8a6a4a;
+}
+
+.register-page .hero-description {
+  max-width: 650px;
+  margin: 24px auto 0;
+  color: #777970;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+/* FORM CARD */
+.register-page .register-section {
+  width: 100%;
+  padding: 0 20px 48px;
+}
+
+.register-page .register-card {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 36px);
+  border: 1px solid rgba(33, 77, 50, 0.09);
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgba(33, 77, 50, 0.045);
+}
+
+.register-page .card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 34px;
+}
+
+.register-page .card-heading .eyebrow {
+  margin-bottom: 8px;
+  font-size: 10px;
+}
+
+.register-page .card-heading h2 {
+  margin: 0;
+  color: #214d32;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(29px, 5vw, 38px);
+  line-height: 1.2;
+}
+
+.register-page .card-description {
+  margin: 10px 0 0;
+  color: #85847b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.register-page .card-logo-wrap {
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid rgba(47, 107, 69, 0.08);
+  border-radius: 23px;
+  background: #f4f6f1;
+}
+
+.register-page .card-logo-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.register-page form {
+  display: grid;
+  gap: 21px;
+}
+
+.register-page .form-field {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.register-page .form-field label {
+  color: #454c43;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.register-page .form-field input {
+  width: 100%;
+  min-height: 58px;
+  padding: 0 17px;
+  border: 1px solid #e5e3dc;
+  border-radius: 16px;
+  outline: none;
+  background: #f8f7f3;
+  color: #26352a;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.register-page .form-field input::placeholder {
+  color: #a5a49d;
+}
+
+.register-page .form-field input:focus {
+  border-color: #82a68a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 69, 0.08);
+}
+
+.register-page .form-field input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-page .form-field small {
+  color: #96958c;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* FEEDBACK */
+.register-page .feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 15px;
+  border-radius: 13px;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.register-page .error {
+  border: 1px solid rgba(160, 50, 50, 0.15);
+  background: #fbf0ed;
+  color: #8b3030;
+}
+
+.register-page .success {
+  border: 1px solid rgba(47, 107, 69, 0.14);
+  background: #edf5eb;
+  color: #285c32;
+}
+
+.register-page .feedback-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* BUTTON */
+.register-page .submit-button {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 3px;
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  border-radius: 14px;
+  background: #2f6b45;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.register-page .submit-button:hover:not(:disabled) {
+  background: #214d32;
+  transform: translateY(-1px);
+}
+
+.register-page .submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-page .submit-button span:not(.button-spinner) {
+  font-size: 17px;
+}
+
+.register-page .button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: registerSpin 700ms linear infinite;
+}
+
+/* LOGIN PROMPT */
+.register-page .login-prompt {
+  margin-top: 27px;
+  padding-top: 22px;
+  border-top: 1px solid #eeeae3;
+  text-align: center;
+}
+
+.register-page .login-prompt p {
+  margin: 0;
+  color: #777970;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.register-page .login-prompt a {
+  color: #2f6b45;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.register-page .login-prompt a:hover {
+  text-decoration: underline;
+}
+
+/* FOOTER */
+.register-page .register-footer {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 22px 30px;
+}
+
+.register-page .footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.register-page .footer-brand img {
+  display: block;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.register-page .footer-brand strong {
+  display: block;
+  color: #214d32;
+  font-size: 13px;
+}
+
+.register-page .footer-brand p {
+  margin: 4px 0 0;
+  color: #8a6a4a;
+  font-size: 11px;
+}
+
+.register-page .footer-copyright {
+  margin: 20px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid #e4ddd1;
+  color: #999387;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* ANIMATION */
+@keyframes registerSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes registerMenuEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .register-page .navbar-inner {
+    min-height: 68px;
+    padding: 0 17px;
+  }
+
+  .register-page .brand-logo-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+
+  .register-page .brand-name {
+    font-size: 16px;
+  }
+
+  .register-page .menu-toggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .register-page .menu-overlay {
+    top: 68px;
+  }
+
+  .register-page .navbar-dropdown {
+    right: 17px;
+  }
+
+  .register-page .register-hero {
+    padding: 54px 20px 32px;
+  }
+
+  .register-page .register-hero h1 {
+    font-size: clamp(34px, 9vw, 43px);
+    letter-spacing: -0.9px;
+  }
+
+  .register-page .hero-description {
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.9;
+  }
+
+  .register-page .register-section {
+    padding: 0 15px 38px;
+  }
+
+  .register-page .register-card {
+    border-radius: 23px;
+  }
+
+  .register-page .card-logo-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+  }
+
+  .register-page .form-field input {
+    min-height: 56px;
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .register-page .navbar-inner {
+    padding: 0 13px;
+  }
+
+  .register-page .brand-name {
+    font-size: 14px;
+  }
+
+  .register-page .brand-logo-wrap {
+    width: 37px;
+    height: 37px;
+  }
+
+  .register-page .card-heading {
+    gap: 10px;
+  }
+
+  .register-page .card-logo-wrap {
+    width: 58px;
+    height: 58px;
+    padding: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .register-page *,
+  .register-page *::before,
+  .register-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
