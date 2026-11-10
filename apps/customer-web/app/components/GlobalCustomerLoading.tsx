@@ -15,6 +15,8 @@ export default function GlobalCustomerLoading({
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
+    document.documentElement.dataset.pajaraReady = "true";
+
     setIsReady(true);
     setIsNavigating(false);
   }, [pathname]);
@@ -32,7 +34,6 @@ export default function GlobalCustomerLoading({
       }
 
       const target = event.target;
-
       if (!(target instanceof Element)) return;
 
       const link = target.closest("a");
@@ -46,7 +47,6 @@ export default function GlobalCustomerLoading({
       }
 
       const href = link.getAttribute("href");
-
       if (!href || href.startsWith("#")) return;
 
       try {
