@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -5,45 +6,46 @@ import { supabase } from "@pajara/supabase";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [ready, setReady] = useState(false);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+
+      if (event === "PASSWORD_RECOVERY" && session) {
+        setReady(true);
+        setCheckingSession(false);
+        setError("");
+      }
+    });
+
     const checkSession = async () => {
-      const { data } =
+      const { data, error: sessionError } =
         await supabase.auth.getSession();
 
-      if (
-        mounted &&
-        data.session
-      ) {
+      if (!mounted) return;
+
+      if (data.session) {
         setReady(true);
+      } else if (sessionError) {
+        setError("Sesi pemulihan tidak dapat diperiksa. Silakan buka kembali link dari email.");
       }
+
+      setCheckingSession(false);
     };
 
     checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted) return;
-
-        if (
-          event === "PASSWORD_RECOVERY" &&
-          session
-        ) {
-          setReady(true);
-        }
-      }
-    );
 
     return () => {
       mounted = false;
@@ -60,39 +62,41 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     if (password.length < 6) {
-      setError(
-        "Password baru minimal 6 karakter."
-      );
+      setError("Password baru minimal 6 karakter.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(
-        "Konfirmasi password tidak cocok."
-      );
+      setError("Konfirmasi password tidak cocok.");
       return;
     }
 
     setLoading(true);
 
-    const { error: updateError } =
-      await supabase.auth.updateUser({
-        password,
-      });
+    try {
+      const { error: updateError } =
+        await supabase.auth.updateUser({
+          password,
+        });
 
-    setLoading(false);
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
 
-    if (updateError) {
-      setError(updateError.message);
-      return;
+      setPassword("");
+      setConfirmPassword("");
+
+      setMessage(
+        "Password berhasil diperbarui. Silakan login kembali menggunakan password baru."
+      );
+    } catch {
+      setError(
+        "Terjadi kesalahan saat memperbarui password. Silakan coba kembali."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setPassword("");
-    setConfirmPassword("");
-
-    setMessage(
-      "Password berhasil diperbarui. Silakan login kembali."
-    );
   };
 
   return (
@@ -105,19 +109,12 @@ export default function ResetPasswordPage() {
               alt="Pajara Studio"
               className="pajara-brand-logo"
             />
-
             <span>Pajara Studio</span>
           </a>
 
           <nav className="pajara-nav">
-            <a href="/">
-              Website
-            </a>
-
-            <a
-              href="/login"
-              className="pajara-nav-cta"
-            >
+            <a href="/">Website</a>
+            <a href="/login" className="pajara-nav-cta">
               Login
             </a>
           </nav>
@@ -126,12 +123,10 @@ export default function ResetPasswordPage() {
 
       <section
         style={{
-          minHeight:
-            "calc(100vh - 80px)",
+          minHeight: "calc(100vh - 80px)",
           display: "flex",
           alignItems: "center",
-          padding:
-            "64px 0",
+          padding: "64px 0",
         }}
       >
         <div className="pajara-container">
@@ -142,16 +137,13 @@ export default function ResetPasswordPage() {
               margin: "0 auto",
             }}
           >
-            <div
-              className="pajara-order-detail-card"
-            >
+            <div className="pajara-order-detail-card">
               <p className="pajara-eyebrow">
                 KEAMANAN AKUN
               </p>
 
               <h1>
-                Reset Password{" "}
-                <span>Pajara.</span>
+                Reset Password <span>Pajara.</span>
               </h1>
 
               <p
@@ -159,48 +151,91 @@ export default function ResetPasswordPage() {
                   marginTop: "12px",
                   color: "var(--muted)",
                   fontSize: "14px",
-                  lineHeight: 1.7,
+                  lineHeight: 1.8,
                 }}
               >
-                Buat password baru untuk akun
-                Pajara Studio Anda.
+                Perbarui password akun Kang/Teh untuk
+                menjaga keamanan dan akses ke layanan
+                Pajara Studio.
               </p>
 
-              {!ready ? (
+              {checkingSession ? (
                 <div
                   style={{
-                    marginTop: "24px",
-                    padding: "18px 20px",
-                    borderRadius: "14px",
-                    border:
-                      "1px solid var(--line)",
-                    background:
-                      "rgba(47, 107, 69, 0.04)",
+                    marginTop: "28px",
+                    padding: "22px",
+                    borderRadius: "16px",
+                    border: "1px solid var(--line)",
+                    background: "rgba(47, 107, 69, 0.04)",
+                    textAlign: "center",
                   }}
                 >
-                  <strong
+                  <div
                     style={{
-                      color:
-                        "var(--green-dark)",
+                      width: "28px",
+                      height: "28px",
+                      margin: "0 auto 14px",
+                      border: "3px solid rgba(47, 107, 69, 0.15)",
+                      borderTopColor: "var(--green)",
+                      borderRadius: "50%",
+                      animation: "pajaraResetSpin 0.8s linear infinite",
                     }}
-                  >
-                    Menunggu sesi pemulihan...
+                  />
+
+                  <strong style={{ color: "var(--green-dark)" }}>
+                    Memeriksa Sesi
                   </strong>
 
                   <p
                     style={{
-                      margin:
-                        "8px 0 0",
-                      color:
-                        "var(--muted)",
-                      fontSize: "14px",
+                      margin: "8px 0 0",
+                      color: "var(--muted)",
+                      fontSize: "13px",
                       lineHeight: 1.7,
                     }}
                   >
-                    Buka halaman ini melalui
-                    link reset password yang
-                    dikirim ke email Anda.
+                    Mohon tunggu, kami sedang memeriksa
+                    akses pemulihan akun Kang/Teh.
                   </p>
+                </div>
+              ) : !ready ? (
+                <div
+                  style={{
+                    marginTop: "28px",
+                    padding: "20px",
+                    borderRadius: "16px",
+                    border: "1px solid rgba(160, 50, 50, 0.15)",
+                    background: "rgba(160, 50, 50, 0.05)",
+                  }}
+                >
+                  <strong style={{ color: "#8b3030" }}>
+                    Sesi Pemulihan Tidak Ditemukan
+                  </strong>
+
+                  <p
+                    style={{
+                      margin: "9px 0 0",
+                      color: "var(--muted)",
+                      fontSize: "13px",
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    {error ||
+                      "Silakan buka halaman ini melalui link reset password yang dikirim ke email Kang/Teh."}
+                  </p>
+
+                  <a
+                    href="/forgot-password"
+                    className="pajara-button pajara-button-primary"
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginTop: "18px",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Minta Link Reset Baru
+                  </a>
                 </div>
               ) : (
                 <form
@@ -222,12 +257,11 @@ export default function ResetPasswordPage() {
                       type="password"
                       value={password}
                       onChange={(event) =>
-                        setPassword(
-                          event.target.value
-                        )
+                        setPassword(event.target.value)
                       }
                       placeholder="Masukkan password baru"
                       autoComplete="new-password"
+                      minLength={6}
                       required
                     />
                   </div>
@@ -241,36 +275,28 @@ export default function ResetPasswordPage() {
                       id="confirm-password"
                       name="confirm-password"
                       type="password"
-                      value={
-                        confirmPassword
-                      }
+                      value={confirmPassword}
                       onChange={(event) =>
-                        setConfirmPassword(
-                          event.target.value
-                        )
+                        setConfirmPassword(event.target.value)
                       }
                       placeholder="Ulangi password baru"
                       autoComplete="new-password"
+                      minLength={6}
                       required
                     />
                   </div>
 
                   {error && (
                     <div
+                      role="alert"
                       style={{
-                        padding:
-                          "14px 16px",
-                        borderRadius:
-                          "12px",
-                        background:
-                          "rgba(160, 50, 50, 0.07)",
-                        border:
-                          "1px solid rgba(160, 50, 50, 0.15)",
-                        color:
-                          "#8b3030",
-                        fontSize:
-                          "14px",
-                        lineHeight: 1.6,
+                        padding: "14px 16px",
+                        borderRadius: "12px",
+                        background: "rgba(160, 50, 50, 0.07)",
+                        border: "1px solid rgba(160, 50, 50, 0.15)",
+                        color: "#8b3030",
+                        fontSize: "13px",
+                        lineHeight: 1.7,
                       }}
                     >
                       {error}
@@ -279,20 +305,15 @@ export default function ResetPasswordPage() {
 
                   {message && (
                     <div
+                      role="status"
                       style={{
-                        padding:
-                          "14px 16px",
-                        borderRadius:
-                          "12px",
-                        background:
-                          "rgba(47, 107, 69, 0.07)",
-                        border:
-                          "1px solid var(--line)",
-                        color:
-                          "var(--green-dark)",
-                        fontSize:
-                          "14px",
-                        lineHeight: 1.6,
+                        padding: "14px 16px",
+                        borderRadius: "12px",
+                        background: "rgba(47, 107, 69, 0.07)",
+                        border: "1px solid var(--line)",
+                        color: "var(--green-dark)",
+                        fontSize: "13px",
+                        lineHeight: 1.7,
                       }}
                     >
                       {message}
@@ -305,12 +326,12 @@ export default function ResetPasswordPage() {
                     disabled={loading}
                     style={{
                       width: "100%",
-                      opacity:
-                        loading ? 0.7 : 1,
+                      opacity: loading ? 0.7 : 1,
+                      cursor: loading ? "wait" : "pointer",
                     }}
                   >
                     {loading
-                      ? "Memperbarui..."
+                      ? "Memperbarui Password..."
                       : "Simpan Password Baru"}
                   </button>
                 </form>
@@ -318,29 +339,48 @@ export default function ResetPasswordPage() {
 
               <div
                 style={{
-                  marginTop: "24px",
+                  marginTop: "26px",
                   paddingTop: "20px",
-                  borderTop:
-                    "1px solid var(--line)",
+                  borderTop: "1px solid var(--line)",
                 }}
               >
                 <a
                   href="/login"
                   style={{
-                    color:
-                      "var(--green)",
-                    fontSize:
-                      "14px",
+                    color: "var(--green)",
+                    fontSize: "14px",
                     fontWeight: 700,
+                    textDecoration: "none",
                   }}
                 >
                   ← Kembali ke Login
                 </a>
               </div>
             </div>
+
+            <p
+              style={{
+                marginTop: "20px",
+                textAlign: "center",
+                color: "var(--muted)",
+                fontSize: "11px",
+                letterSpacing: "1.5px",
+                fontWeight: 600,
+              }}
+            >
+              DESAIN YANG PUNYA ARAH.
+            </p>
           </div>
         </div>
       </section>
+
+      <style jsx global>{`
+        @keyframes pajaraResetSpin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </main>
   );
 }
