@@ -1853,11 +1853,6 @@ html:not([data-pajara-ready="true"]) #pajara-initial-loading {
   }
 }
 
-/* NONAKTIFKAN LOADING LAMA */
-#pajara-initial-loading {
-  display: none !important;
-}
-
 /* =========================================
    PAJARA — CRITICAL LOGO FIX
    Mencegah logo membesar sebelum CSS halaman dimuat
