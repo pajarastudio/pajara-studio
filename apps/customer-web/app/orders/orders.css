@@ -785,108 +785,238 @@
 
 
 /* =========================================
-   FINAL FIX — SPACING & PAJARA FOOTER
+   RESTORE — ORIGINAL PAJARA DETAIL ORDER
 ========================================= */
 
-/* Jarak antar kartu */
-.pajara-detail-page .pajara-detail-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px !important;
+/* TYPOGRAPHY */
+.pajara-detail-page {
+  font-family: "DM Sans", Arial, sans-serif;
+}
+
+.pajara-detail-page .pajara-eyebrow {
+  margin-bottom: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+}
+
+.pajara-detail-page .pajara-order-detail-header h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1.2;
+  letter-spacing: -1px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.pajara-detail-page .pajara-detail-description {
+  font-size: 15px;
+  line-height: 1.8;
+  text-align: left;
+}
+
+.pajara-detail-page .pajara-order-detail-card h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  line-height: 1.35;
+  font-weight: 500;
+  text-align: left;
+}
+
+.pajara-detail-page .pajara-information-list strong {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* CONTENT SPACING */
+.pajara-detail-page .pajara-order-detail {
+  padding: 48px 0 58px;
+}
+
+.pajara-detail-page .pajara-order-detail-header {
+  margin-bottom: 30px;
 }
 
 .pajara-detail-page .pajara-order-detail-grid {
-  row-gap: 20px;
-  column-gap: 22px;
+  gap: 24px;
+  align-items: start;
 }
 
-.pajara-detail-page .pajara-detail-column > .pajara-order-detail-card {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
+.pajara-detail-page .pajara-detail-column {
+  gap: 20px !important;
 }
 
-/* Footer khas Pajara Studio */
+.pajara-detail-page .pajara-order-detail-card {
+  margin: 0 !important;
+  padding: 26px;
+  border-radius: 20px;
+}
+
+.pajara-detail-page .pajara-information-list {
+  gap: 18px;
+}
+
+/* ACCESS BUTTONS */
+.pajara-detail-page .pajara-access-list {
+  gap: 10px;
+}
+
+.pajara-detail-page .pajara-access-button {
+  min-height: 64px;
+  padding: 15px 18px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+
+/* PAYMENT */
+.pajara-detail-page .pajara-payment-list {
+  gap: 10px;
+}
+
+.pajara-detail-page .pajara-payment-list > div {
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.pajara-detail-page .pajara-payment-list strong {
+  text-align: right;
+}
+
+/* =========================================
+   ORIGINAL PAJARA FOOTER
+========================================= */
+
 .pajara-detail-page .pajara-footer {
   width: 100%;
-  min-height: 350px;
-  padding: 80px 0 65px;
-  background: #214d32;
-  color: #ffffff;
+  min-height: auto;
+  padding: 23px 0;
+  background: #f7f4ee;
+  color: #20372a;
+  border-top: 1px solid rgba(33, 77, 50, 0.12);
 }
 
 .pajara-detail-page .pajara-footer-inner {
-  display: block;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .pajara-detail-page .pajara-footer-brand {
   width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 17px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 13px;
 }
 
-/* Logo berada di tengah */
 .pajara-detail-page .pajara-footer-logo {
   display: block !important;
-  width: 70px !important;
-  height: 70px !important;
-  min-width: 70px !important;
-  min-height: 70px !important;
-  max-width: 70px !important;
-  max-height: 70px !important;
-  flex: 0 0 70px !important;
-  margin: 0 auto 2px !important;
+  width: 43px !important;
+  height: 43px !important;
+  min-width: 43px !important;
+  min-height: 43px !important;
+  max-width: 43px !important;
+  max-height: 43px !important;
+  flex: 0 0 43px !important;
+  margin: 0 !important;
+  border-radius: 10px;
   object-fit: cover !important;
-  border-radius: 15px;
 }
 
-/* Informasi brand rata kiri */
 .pajara-detail-page .pajara-footer-copy {
-  width: 100%;
+  min-width: 0;
+  width: auto;
   text-align: left;
 }
 
 .pajara-detail-page .pajara-footer-copy strong {
   display: block;
-  margin: 0 0 6px;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.5;
+  margin: 0 0 3px;
+  color: #214d32;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .pajara-detail-page .pajara-footer-copy p {
-  margin: 0 0 8px;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 17px;
-  line-height: 1.6;
+  margin: 0 0 3px;
+  color: #8a6a4a;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .pajara-detail-page .pajara-footer-copy small {
   display: block;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
-  line-height: 1.7;
+  color: #777d78;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-/* Mobile */
+/* MOBILE */
 @media (max-width: 768px) {
-  .pajara-detail-page .pajara-detail-column {
-    gap: 16px !important;
+  .pajara-detail-page .pajara-order-detail {
+    padding: 48px 0 55px;
   }
 
   .pajara-detail-page .pajara-order-detail-grid {
-    row-gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .pajara-detail-page .pajara-detail-column {
+    gap: 20px !important;
+  }
+
+  .pajara-detail-page .pajara-order-detail-header {
+    margin-bottom: 30px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-header h1 {
+    font-size: 36px;
   }
 
   .pajara-detail-page .pajara-order-detail-card {
-    margin: 0 !important;
+    padding: 26px;
+    border-radius: 20px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-card h2 {
+    font-size: 25px;
   }
 
   .pajara-detail-page .pajara-footer {
-    min-height: 350px;
-    padding: 80px 0 65px;
+    padding: 23px 0;
+  }
+
+  .pajara-detail-page .pajara-footer-brand {
+    flex-direction: row;
+    align-items: center;
+    gap: 13px;
+  }
+
+  .pajara-detail-page .pajara-footer-logo {
+    width: 43px !important;
+    height: 43px !important;
+    min-width: 43px !important;
+    min-height: 43px !important;
+    max-width: 43px !important;
+    max-height: 43px !important;
+    flex-basis: 43px !important;
   }
 }
+
+@media (max-width: 380px) {
+  .pajara-detail-page .pajara-footer-copy strong {
+    font-size: 14px;
+  }
+
+  .pajara-detail-page .pajara-footer-copy p {
+    font-size: 12px;
+  }
+
+  .pajara-detail-page .pajara-footer-copy small {
+    font-size: 10px;
+  }
+}
+
