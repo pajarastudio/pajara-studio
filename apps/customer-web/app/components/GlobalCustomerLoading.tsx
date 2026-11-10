@@ -11,6 +11,7 @@ export default function GlobalCustomerLoading({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
   const [isReady, setIsReady] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -34,6 +35,7 @@ export default function GlobalCustomerLoading({
       }
 
       const target = event.target;
+
       if (!(target instanceof Element)) return;
 
       const link = target.closest("a");
@@ -47,14 +49,21 @@ export default function GlobalCustomerLoading({
       }
 
       const href = link.getAttribute("href");
+
       if (!href || href.startsWith("#")) return;
 
       try {
-        const destination = new URL(href, window.location.href);
+        const destination = new URL(
+          href,
+          window.location.href
+        );
 
         if (
           destination.origin === window.location.origin &&
-          destination.pathname !== window.location.pathname
+          (
+            destination.pathname !== window.location.pathname ||
+            destination.search !== window.location.search
+          )
         ) {
           setIsNavigating(true);
         }
