@@ -1852,3 +1852,8 @@ html:not([data-pajara-ready="true"]) #pajara-initial-loading {
     width: 100%;
   }
 }
+
+/* NONAKTIFKAN LOADING LAMA */
+#pajara-initial-loading {
+  display: none !important;
+}
