@@ -1,18 +1,26 @@
 
-.pajara-error-page,
+/* =========================================
+   PAJARA STUDIO — DETAIL PESANAN
+========================================= */
+
 .pajara-detail-page,
 .pajara-detail-page * {
   box-sizing: border-box;
 }
 
-/* BASE */
 .pajara-detail-page {
-  min-height: 100vh;
+  --green: #214d32;
+  --green-light: #2f6b45;
+  --brown: #8a6a4a;
+  --cream: #f7f4ee;
+  --line: rgba(33, 77, 50, 0.12);
+
   width: 100%;
-  overflow-x: hidden;
-  font-family: "DM Sans", Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--cream);
   color: #20372a;
-  background: #f7f4ee;
+  font-family: "DM Sans", Arial, sans-serif;
 }
 
 .pajara-detail-page button,
@@ -29,8 +37,418 @@
   font-weight: 500;
 }
 
-/* ERROR PAGE */
+/* =========================================
+   CONTAINER
+========================================= */
+
+.pajara-detail-page .pajara-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.pajara-detail-page .pajara-header {
+  position: relative;
+  z-index: 100;
+  width: 100%;
+  min-height: 76px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+}
+
+.pajara-detail-page .pajara-header-inner {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pajara-detail-page .pajara-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: var(--green);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.pajara-detail-page .pajara-header-logo {
+  display: block !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex: 0 0 40px !important;
+  object-fit: cover !important;
+  border-radius: 11px;
+}
+
+/* =========================================
+   MENU
+========================================= */
+
+.pajara-detail-page .pajara-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pajara-detail-page .pajara-menu-toggle {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid rgba(33, 77, 50, 0.2);
+  border-radius: 11px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.pajara-detail-page .pajara-menu-toggle span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  min-height: 2px;
+  border-radius: 10px;
+  background: var(--green);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.pajara-detail-page .pajara-menu-toggle.is-open span:first-child {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.pajara-detail-page .pajara-menu-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.pajara-detail-page .pajara-menu-toggle.is-open span:last-child {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.pajara-detail-page .pajara-menu-backdrop {
+  position: fixed;
+  z-index: 101;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.pajara-detail-page .pajara-dropdown-menu {
+  position: absolute;
+  z-index: 102;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 220px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(33, 77, 50, 0.12);
+}
+
+.pajara-detail-page .pajara-dropdown-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 12px;
+  border-radius: 9px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pajara-detail-page .pajara-dropdown-menu a:hover {
+  background: var(--cream);
+}
+
+.pajara-detail-page .pajara-menu-arrow {
+  color: var(--brown);
+}
+
+/* =========================================
+   MAIN SECTION
+========================================= */
+
+.pajara-detail-page .pajara-order-detail {
+  width: 100%;
+  padding: 68px 0 80px;
+}
+
+.pajara-detail-page .pajara-detail-container {
+  max-width: 1200px;
+}
+
+.pajara-detail-page .pajara-order-detail-header {
+  max-width: 760px;
+  margin-bottom: 44px;
+}
+
+.pajara-detail-page .pajara-eyebrow {
+  margin: 0 0 15px;
+  color: #777d78;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.pajara-detail-page .pajara-order-detail-header .pajara-eyebrow {
+  color: var(--brown);
+}
+
+.pajara-detail-page .pajara-order-detail-header h1 {
+  margin: 0;
+  color: var(--green);
+  font-size: clamp(36px, 6vw, 58px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.pajara-detail-page .pajara-order-detail-header h1 span {
+  color: var(--green-light);
+}
+
+.pajara-detail-page .pajara-detail-description {
+  max-width: 650px;
+  margin: 22px 0 0;
+  color: #777d78;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* =========================================
+   CONTENT GRID
+========================================= */
+
+.pajara-detail-page .pajara-order-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.pajara-detail-page .pajara-detail-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* =========================================
+   CARDS
+========================================= */
+
+.pajara-detail-page .pajara-order-detail-card {
+  width: 100%;
+  min-width: 0;
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(33, 77, 50, 0.035);
+}
+
+.pajara-detail-page .pajara-order-detail-card h2 {
+  margin: 0 0 20px;
+  color: var(--green);
+  font-size: 29px;
+  line-height: 1.3;
+}
+
+.pajara-detail-page .pajara-order-detail-card > .pajara-eyebrow {
+  margin-bottom: 16px;
+}
+
+/* =========================================
+   ORDER ID
+========================================= */
+
+.pajara-detail-page .pajara-order-id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pajara-detail-page .pajara-order-id-info {
+  min-width: 0;
+}
+
+.pajara-detail-page .pajara-order-id-info .pajara-eyebrow {
+  margin-bottom: 12px;
+}
+
+.pajara-detail-page .pajara-order-id-info h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--green);
+  font-size: clamp(25px, 4vw, 36px);
+  line-height: 1.3;
+}
+
+.pajara-detail-page .pajara-order-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 10px 17px;
+  border: 1px solid rgba(47, 107, 69, 0.12);
+  border-radius: 999px;
+  background: #edf4ee;
+  color: var(--green-light);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* =========================================
+   ORDER INFORMATION
+========================================= */
+
+.pajara-detail-page .pajara-information-list {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+}
+
+.pajara-detail-page .pajara-information-list > div {
+  min-width: 0;
+}
+
+.pajara-detail-page .pajara-information-list .pajara-eyebrow {
+  margin-bottom: 7px;
+}
+
+.pajara-detail-page .pajara-information-list strong {
+  display: block;
+  color: #263b30;
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.pajara-detail-page .pajara-subscription-notice {
+  margin-bottom: 22px;
+  padding: 15px;
+  border: 1px solid rgba(47, 107, 69, 0.15);
+  border-radius: 12px;
+  background: #f1f6f1;
+  color: var(--green);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   PROJECT ACCESS
+========================================= */
+
+.pajara-detail-page .pajara-access-description {
+  margin: -7px 0 22px;
+  color: #777d78;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.pajara-detail-page .pajara-access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.pajara-detail-page .pajara-access-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #ffffff;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.pajara-detail-page .pajara-access-button:hover {
+  border-color: rgba(47, 107, 69, 0.35);
+  background: #f7f9f6;
+}
+
+/* =========================================
+   PAYMENT
+========================================= */
+
+.pajara-detail-page .pajara-payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.pajara-detail-page .pajara-payment-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: #4d5b52;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pajara-detail-page .pajara-payment-list strong {
+  color: #263b30;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.pajara-detail-page .pajara-payment-remaining {
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+/* =========================================
+   ERROR
+========================================= */
+
 .pajara-error-page {
+  box-sizing: border-box;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -40,319 +458,327 @@
   font-family: "DM Sans", Arial, sans-serif;
 }
 
-.pajara-error-card {
+.pajara-error-page *,
+.pajara-error-page *::before,
+.pajara-error-page *::after {
+  box-sizing: border-box;
+}
+
+.pajara-error-page .pajara-order-detail-card {
   width: 100%;
-  max-width: 440px;
-  padding: 32px 24px;
-  border: 1px solid rgba(33, 77, 50, 0.1);
+  max-width: 460px;
+  padding: 30px;
+  border: 1px solid var(--line);
   border-radius: 20px;
   background: #ffffff;
   text-align: center;
-  box-shadow: 0 12px 35px rgba(33, 77, 50, 0.06);
 }
 
-/* HEADER */
-.pajara-detail-header {
-  position: relative;
-  z-index: 5;
-  width: 100%;
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 5%;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(33, 77, 50, 0.08);
-}
-
-.pajara-detail-brand {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.pajara-header-logo {
-  display: block !important;
-  width: 39px !important;
-  height: 39px !important;
-  min-width: 39px !important;
-  min-height: 39px !important;
-  max-width: 39px !important;
-  max-height: 39px !important;
-  flex: 0 0 39px !important;
-  object-fit: cover !important;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.pajara-detail-brand-text {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.pajara-detail-brand-name {
-  margin: 0;
+.pajara-error-page h1 {
   color: #214d32;
-  font-size: 15px;
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
-.pajara-detail-brand-caption {
-  margin: 0;
-  color: #8a6a4a;
-  font-size: 10px;
-  line-height: 1.4;
-  letter-spacing: 0.12em;
-}
-
-.pajara-detail-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* CONTENT */
-.pajara-detail-content {
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 36px 24px 64px;
-}
-
-.pajara-detail-title {
-  margin: 0 0 8px;
-  color: #214d32;
-  font-size: clamp(25px, 4vw, 36px);
-  line-height: 1.2;
-}
-
-.pajara-detail-description {
-  margin: 0;
+.pajara-error-description {
   color: #777;
   font-size: 14px;
   line-height: 1.7;
 }
 
-/* CARD */
-.pajara-detail-card {
-  width: 100%;
-  min-width: 0;
-  margin-top: 24px;
-  padding: 24px;
-  border: 1px solid rgba(33, 77, 50, 0.09);
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 8px 28px rgba(33, 77, 50, 0.045);
-}
-
-.pajara-detail-card h2,
-.pajara-detail-card h3 {
-  margin-top: 0;
-  color: #214d32;
-}
-
-.pajara-detail-card p {
-  color: #555;
-  line-height: 1.7;
-}
-
-/* INFORMATION */
-.pajara-detail-info {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.pajara-detail-info-item {
-  min-width: 0;
-  padding: 15px;
-  border-radius: 12px;
-  background: #f7f4ee;
-}
-
-.pajara-detail-info-label {
-  display: block;
-  margin-bottom: 6px;
-  color: #8a6a4a;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.pajara-detail-info-value {
-  display: block;
-  overflow-wrap: anywhere;
-  color: #214d32;
-  font-size: 14px;
-  line-height: 1.6;
-  font-weight: 600;
-}
-
-/* STATUS */
-.pajara-detail-status {
+.pajara-error-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #edf4ee;
-  color: #214d32;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-/* BUTTONS */
-.pajara-detail-page button {
-  max-width: 100%;
-  cursor: pointer;
-}
-
-.pajara-detail-button {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border: 1px solid transparent;
+  min-height: 44px;
+  margin-top: 15px;
+  padding: 11px 20px;
   border-radius: 10px;
   background: #214d32;
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.pajara-detail-button:hover {
-  background: #2f6b45;
-}
+/* =========================================
+   FOOTER
+========================================= */
 
-.pajara-detail-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.pajara-detail-button-secondary {
-  border-color: rgba(33, 77, 50, 0.2);
-  background: #ffffff;
-  color: #214d32;
-}
-
-.pajara-detail-button-secondary:hover {
-  background: #f7f4ee;
-}
-
-/* FOOTER */
-.pajara-detail-footer {
+.pajara-detail-page .pajara-footer {
   width: 100%;
-  padding: 28px 20px;
-  border-top: 1px solid rgba(33, 77, 50, 0.08);
-  background: #ffffff;
-  text-align: center;
+  padding: 55px 0;
+  background: #214d32;
+  color: #ffffff;
 }
 
-.pajara-footer-logo {
+.pajara-detail-page .pajara-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pajara-detail-page .pajara-footer-brand {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.pajara-detail-page .pajara-footer-logo {
   display: block !important;
-  width: 43px !important;
-  height: 43px !important;
-  min-width: 43px !important;
-  min-height: 43px !important;
-  max-width: 43px !important;
-  max-height: 43px !important;
-  flex: 0 0 43px !important;
-  margin: 0 auto 10px;
+  width: 70px !important;
+  height: 70px !important;
+  min-width: 70px !important;
+  min-height: 70px !important;
+  max-width: 70px !important;
+  max-height: 70px !important;
+  flex: 0 0 70px !important;
   object-fit: cover !important;
-  border-radius: 10px;
-  overflow: hidden;
+  border-radius: 15px;
 }
 
-.pajara-detail-footer p {
-  margin: 5px 0;
-  color: #777;
-  font-size: 11px;
+.pajara-detail-page .pajara-footer-copy {
+  min-width: 0;
+}
+
+.pajara-detail-page .pajara-footer-copy strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.pajara-detail-page .pajara-footer-copy p {
+  margin: 0 0 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 15px;
   line-height: 1.6;
 }
 
-/* IMAGE CONTROL */
+.pajara-detail-page .pajara-footer-copy small {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   IMAGE SAFETY
+========================================= */
+
 .pajara-detail-page img {
   max-width: 100%;
 }
 
 .pajara-detail-page .pajara-header-logo,
 .pajara-detail-page .pajara-footer-logo {
+  overflow: hidden;
   object-fit: cover !important;
 }
 
-/* RESPONSIVE */
-@media (max-width: 640px) {
-  .pajara-detail-header {
-    min-height: 66px;
-    padding: 10px 16px;
+/* =========================================
+   TABLET & MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+  .pajara-detail-page .pajara-order-detail {
+    padding: 54px 0 64px;
   }
 
-  .pajara-header-logo {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    flex-basis: 36px !important;
+  .pajara-detail-page .pajara-order-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
 
-  .pajara-detail-brand-name {
-    font-size: 13px;
+  .pajara-detail-page .pajara-detail-column {
+    gap: 0;
   }
 
-  .pajara-detail-brand-caption {
-    font-size: 9px;
+  .pajara-detail-page .pajara-detail-column > .pajara-order-detail-card {
+    margin-bottom: 0;
   }
 
-  .pajara-detail-content {
-    padding: 26px 16px 48px;
+  .pajara-detail-page .pajara-order-detail-header {
+    margin-bottom: 36px;
   }
 
-  .pajara-detail-card {
-    padding: 18px;
-    border-radius: 15px;
+  .pajara-detail-page .pajara-order-detail-header h1 {
+    font-size: clamp(34px, 9vw, 48px);
   }
 
-  .pajara-detail-info {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .pajara-detail-page .pajara-detail-description {
+    margin-top: 18px;
+    font-size: 15px;
   }
 
-  .pajara-detail-title {
-    font-size: 27px;
+  .pajara-detail-page .pajara-order-detail-card {
+    padding: 25px;
+    border-radius: 20px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-card h2 {
+    font-size: 26px;
+  }
+
+  .pajara-detail-page .pajara-footer {
+    padding: 48px 0;
   }
 }
 
-@media (max-width: 380px) {
-  .pajara-detail-header {
-    gap: 8px;
-    padding-right: 12px;
-    padding-left: 12px;
+@media (max-width: 480px) {
+  .pajara-detail-page .pajara-container {
+    padding-right: 23px;
+    padding-left: 23px;
   }
 
-  .pajara-detail-brand {
-    gap: 8px;
+  .pajara-detail-page .pajara-header,
+  .pajara-detail-page .pajara-header-inner {
+    min-height: 76px;
   }
 
-  .pajara-detail-brand-name {
+  .pajara-detail-page .pajara-header-logo {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  .pajara-detail-page .pajara-brand {
+    gap: 12px;
+    font-size: 15px;
+  }
+
+  .pajara-detail-page .pajara-menu-toggle {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .pajara-detail-page .pajara-order-detail {
+    padding: 70px 0 65px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-header {
+    margin-bottom: 46px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-header .pajara-eyebrow {
+    margin-bottom: 22px;
     font-size: 12px;
   }
 
-  .pajara-detail-brand-caption {
-    font-size: 8px;
+  .pajara-detail-page .pajara-order-detail-header h1 {
+    font-size: 42px;
+    line-height: 1.2;
+  }
+
+  .pajara-detail-page .pajara-detail-description {
+    margin-top: 23px;
+    font-size: 15px;
+    line-height: 1.85;
+  }
+
+  .pajara-detail-page .pajara-order-detail-grid {
+    gap: 0;
+  }
+
+  .pajara-detail-page .pajara-detail-column {
+    gap: 0;
+  }
+
+  .pajara-detail-page .pajara-order-detail-card {
+    padding: 30px 34px;
+    border-radius: 22px;
+    margin-bottom: 0;
+  }
+
+  .pajara-detail-page .pajara-order-detail-card + .pajara-order-detail-card {
+    margin-top: 0;
+  }
+
+  .pajara-detail-page .pajara-order-id-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pajara-detail-page .pajara-order-id-info h2 {
+    font-size: 36px;
+  }
+
+  .pajara-detail-page .pajara-order-status {
+    padding: 10px 17px;
+  }
+
+  .pajara-detail-page .pajara-information-list {
+    gap: 17px;
+  }
+
+  .pajara-detail-page .pajara-information-list strong {
+    font-size: 15px;
+  }
+
+  .pajara-detail-page .pajara-access-button {
+    min-height: 98px;
+    padding: 18px 27px;
+    border-radius: 24px;
+    font-size: 14px;
+  }
+
+  .pajara-detail-page .pajara-payment-list {
+    gap: 0;
+  }
+
+  .pajara-detail-page .pajara-payment-list > div {
+    justify-content: flex-start;
+    gap: 5px;
+    font-size: 14px;
+  }
+
+  .pajara-detail-page .pajara-payment-list strong {
+    text-align: left;
+  }
+
+  .pajara-detail-page .pajara-footer {
+    padding: 80px 0 65px;
+  }
+
+  .pajara-detail-page .pajara-footer-inner {
+    justify-content: flex-start;
+  }
+
+  .pajara-detail-page .pajara-footer-brand {
+    align-items: flex-start;
+  }
+
+  .pajara-detail-page .pajara-footer-logo {
+    width: 70px !important;
+    height: 70px !important;
+    min-width: 70px !important;
+    min-height: 70px !important;
+    max-width: 70px !important;
+    max-height: 70px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .pajara-detail-page .pajara-container {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-card {
+    padding: 23px;
+  }
+
+  .pajara-detail-page .pajara-order-detail-header h1 {
+    font-size: 36px;
   }
 }
