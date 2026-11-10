@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 const logo = "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
@@ -82,40 +83,6 @@ const facilities = [
 
 export default function CustomerHome() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [visible, setVisible] = useState<number[]>([]);
-  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
-
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible([0, 1, 2, 3]);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number(
-              (entry.target as HTMLElement).dataset.revealIndex
-            );
-
-            setVisible((current) =>
-              current.includes(index) ? current : [...current, index]
-            );
-
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-
-    sectionRefs.current.forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <main className="pajara-home">
@@ -130,20 +97,6 @@ export default function CustomerHome() {
           --pajara-line: rgba(33, 77, 50, 0.13);
         }
 
-        * {
-          box-sizing: border-box;
-        }
-
-        html {
-          scroll-behavior: smooth;
-          scroll-padding-top: 88px;
-        }
-
-        body {
-          margin: 0;
-          background: var(--pajara-cream);
-        }
-
         .pajara-home {
           min-height: 100vh;
           overflow: clip;
@@ -152,12 +105,18 @@ export default function CustomerHome() {
           font-family: "DM Sans", "Segoe UI", sans-serif;
         }
 
-        .pajara-container {
+        .pajara-home *,
+        .pajara-home *::before,
+        .pajara-home *::after {
+          box-sizing: border-box;
+        }
+
+        .pajara-home .pajara-container {
           width: min(1120px, calc(100% - 48px));
           margin-inline: auto;
         }
 
-        .pajara-navbar {
+        .pajara-home .pajara-navbar {
           position: sticky;
           top: 0;
           z-index: 100;
@@ -168,7 +127,7 @@ export default function CustomerHome() {
           -webkit-backdrop-filter: blur(16px);
         }
 
-        .pajara-navbar-inner {
+        .pajara-home .pajara-navbar-inner {
           min-height: 76px;
           display: flex;
           align-items: center;
@@ -176,7 +135,7 @@ export default function CustomerHome() {
           gap: 24px;
         }
 
-        .pajara-brand {
+        .pajara-home .pajara-brand {
           display: inline-flex;
           align-items: center;
           gap: 11px;
@@ -187,20 +146,20 @@ export default function CustomerHome() {
           text-decoration: none;
         }
 
-        .pajara-brand-logo {
+        .pajara-home .pajara-brand-logo {
           width: 40px;
           height: 40px;
           object-fit: cover;
           border-radius: 12px;
         }
 
-        .pajara-nav {
+        .pajara-home .pajara-nav {
           display: flex;
           align-items: center;
           gap: 25px;
         }
 
-        .pajara-nav a {
+        .pajara-home .pajara-nav a {
           color: var(--pajara-ink);
           font-size: 13px;
           font-weight: 600;
@@ -208,11 +167,11 @@ export default function CustomerHome() {
           transition: color 180ms ease;
         }
 
-        .pajara-nav a:hover {
+        .pajara-home .pajara-nav a:hover {
           color: var(--pajara-green);
         }
 
-        .pajara-nav .pajara-nav-cta {
+        .pajara-home .pajara-nav .pajara-nav-cta {
           padding: 11px 18px;
           color: white;
           background: var(--pajara-green);
@@ -222,13 +181,13 @@ export default function CustomerHome() {
             transform 180ms ease;
         }
 
-        .pajara-nav .pajara-nav-cta:hover {
+        .pajara-home .pajara-nav .pajara-nav-cta:hover {
           color: white;
           background: var(--pajara-deep);
           transform: translateY(-1px);
         }
 
-        .pajara-menu-toggle {
+        .pajara-home .pajara-menu-toggle {
           display: none;
           width: 42px;
           height: 42px;
@@ -242,7 +201,7 @@ export default function CustomerHome() {
           cursor: pointer;
         }
 
-        .pajara-hero {
+        .pajara-home .pajara-hero {
           position: relative;
           padding: 94px 0 86px;
           background:
@@ -258,20 +217,20 @@ export default function CustomerHome() {
             );
         }
 
-        .pajara-hero-grid {
+        .pajara-home .pajara-hero-grid {
           display: grid;
           grid-template-columns: 1.1fr 0.9fr;
           align-items: center;
           gap: 66px;
         }
 
-        .pajara-hero-content {
+        .pajara-home .pajara-hero-content {
           position: relative;
           z-index: 2;
           animation: pajara-rise 700ms ease both;
         }
 
-        .pajara-eyebrow {
+        .pajara-home .pajara-eyebrow {
           display: inline-flex;
           align-items: center;
           gap: 9px;
@@ -283,14 +242,14 @@ export default function CustomerHome() {
           text-transform: uppercase;
         }
 
-        .pajara-eyebrow::before {
+        .pajara-home .pajara-eyebrow::before {
           width: 25px;
           height: 1px;
           background: var(--pajara-brown);
           content: "";
         }
 
-        .pajara-hero h1 {
+        .pajara-home .pajara-hero h1 {
           max-width: 620px;
           margin: 0;
           color: var(--pajara-deep);
@@ -301,12 +260,12 @@ export default function CustomerHome() {
           letter-spacing: -2.8px;
         }
 
-        .pajara-hero h1 span {
+        .pajara-home .pajara-hero h1 span {
           color: var(--pajara-brown);
           font-style: italic;
         }
 
-        .pajara-hero-description {
+        .pajara-home .pajara-hero-description {
           max-width: 465px;
           margin: 23px 0 0;
           color: var(--pajara-muted);
@@ -314,14 +273,14 @@ export default function CustomerHome() {
           line-height: 1.95;
         }
 
-        .pajara-hero-actions {
+        .pajara-home .pajara-hero-actions {
           display: flex;
           flex-wrap: wrap;
           gap: 12px;
           margin-top: 32px;
         }
 
-        .pajara-button {
+        .pajara-home .pajara-button {
           display: inline-flex;
           min-height: 49px;
           align-items: center;
@@ -339,31 +298,31 @@ export default function CustomerHome() {
             border-color 180ms ease;
         }
 
-        .pajara-button:hover {
+        .pajara-home .pajara-button:hover {
           transform: translateY(-2px);
         }
 
-        .pajara-button-primary {
+        .pajara-home .pajara-button-primary {
           color: white;
           background: var(--pajara-green);
         }
 
-        .pajara-button-primary:hover {
+        .pajara-home .pajara-button-primary:hover {
           background: var(--pajara-deep);
         }
 
-        .pajara-button-secondary {
+        .pajara-home .pajara-button-secondary {
           color: var(--pajara-deep);
           border-color: var(--pajara-line);
           background: rgba(255, 255, 255, 0.4);
         }
 
-        .pajara-button-secondary:hover {
+        .pajara-home .pajara-button-secondary:hover {
           border-color: var(--pajara-green);
           background: white;
         }
 
-        .pajara-hero-note {
+        .pajara-home .pajara-hero-note {
           display: flex;
           align-items: center;
           gap: 10px;
@@ -373,7 +332,7 @@ export default function CustomerHome() {
           line-height: 1.7;
         }
 
-        .pajara-note-dot {
+        .pajara-home .pajara-note-dot {
           width: 7px;
           height: 7px;
           flex: 0 0 7px;
@@ -382,9 +341,7 @@ export default function CustomerHome() {
           box-shadow: 0 0 0 4px rgba(47, 107, 69, 0.1);
         }
 
-        /* HERO ART */
-
-        .pajara-hero-art {
+        .pajara-home .pajara-hero-art {
           position: relative;
           isolation: isolate;
           min-height: 410px;
@@ -394,7 +351,7 @@ export default function CustomerHome() {
           animation: pajara-rise 850ms 100ms ease both;
         }
 
-        .pajara-art-card {
+        .pajara-home .pajara-art-card {
           position: relative;
           z-index: 3;
           width: min(100%, 300px);
@@ -418,7 +375,7 @@ export default function CustomerHome() {
           will-change: transform;
         }
 
-        .pajara-art-card::before {
+        .pajara-home .pajara-art-card::before {
           position: absolute;
           top: 0;
           right: 24px;
@@ -429,7 +386,7 @@ export default function CustomerHome() {
           pointer-events: none;
         }
 
-        .pajara-art-card::after {
+        .pajara-home .pajara-art-card::after {
           position: absolute;
           top: -76px;
           right: -68px;
@@ -444,7 +401,7 @@ export default function CustomerHome() {
           pointer-events: none;
         }
 
-        .pajara-art-card-label {
+        .pajara-home .pajara-art-card-label {
           position: relative;
           z-index: 2;
           display: inline-flex;
@@ -457,7 +414,7 @@ export default function CustomerHome() {
           text-transform: uppercase;
         }
 
-        .pajara-art-card-label::before {
+        .pajara-home .pajara-art-card-label::before {
           width: 6px;
           height: 6px;
           border-radius: 50%;
@@ -466,7 +423,7 @@ export default function CustomerHome() {
           content: "";
         }
 
-        .pajara-art-logo-frame {
+        .pajara-home .pajara-art-logo-frame {
           position: relative;
           z-index: 2;
           display: flex;
@@ -488,19 +445,19 @@ export default function CustomerHome() {
             box-shadow 350ms ease;
         }
 
-        .pajara-art-logo {
+        .pajara-home .pajara-art-logo {
           display: block;
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .pajara-art-card:hover .pajara-art-logo-frame {
+        .pajara-home .pajara-art-card:hover .pajara-art-logo-frame {
           transform: rotate(0deg) scale(1.04);
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.17);
         }
 
-        .pajara-art-card h2 {
+        .pajara-home .pajara-art-card h2 {
           position: relative;
           z-index: 2;
           margin: 0;
@@ -511,7 +468,7 @@ export default function CustomerHome() {
           letter-spacing: -0.7px;
         }
 
-        .pajara-art-card p {
+        .pajara-home .pajara-art-card p {
           position: relative;
           z-index: 2;
           margin: 10px 0 0;
@@ -520,7 +477,7 @@ export default function CustomerHome() {
           line-height: 1.8;
         }
 
-        .pajara-art-shape {
+        .pajara-home .pajara-art-shape {
           position: absolute;
           display: block;
           pointer-events: none;
@@ -528,7 +485,7 @@ export default function CustomerHome() {
           will-change: transform;
         }
 
-        .pajara-art-shape-one {
+        .pajara-home .pajara-art-shape-one {
           z-index: 1;
           top: 52px;
           right: 24px;
@@ -545,7 +502,7 @@ export default function CustomerHome() {
           animation: pajara-sheet-one 7s ease-in-out infinite;
         }
 
-        .pajara-art-shape-two {
+        .pajara-home .pajara-art-shape-two {
           z-index: 2;
           top: 72px;
           left: 14px;
@@ -562,7 +519,7 @@ export default function CustomerHome() {
           animation: pajara-sheet-two 8s ease-in-out infinite;
         }
 
-        .pajara-art-shape-three {
+        .pajara-home .pajara-art-shape-three {
           z-index: 0;
           right: 32px;
           bottom: 31px;
@@ -579,9 +536,9 @@ export default function CustomerHome() {
           animation: pajara-sheet-three 6s ease-in-out infinite;
         }
 
-        .pajara-art-shape-one::before,
-        .pajara-art-shape-two::before,
-        .pajara-art-shape-three::before {
+        .pajara-home .pajara-art-shape-one::before,
+        .pajara-home .pajara-art-shape-two::before,
+        .pajara-home .pajara-art-shape-three::before {
           position: absolute;
           top: 18px;
           right: 18px;
@@ -591,16 +548,16 @@ export default function CustomerHome() {
           content: "";
         }
 
-        .pajara-art-shape-two::before {
+        .pajara-home .pajara-art-shape-two::before {
           background: rgba(47, 107, 69, 0.27);
         }
 
-        .pajara-art-shape-three::before {
+        .pajara-home .pajara-art-shape-three::before {
           background: rgba(138, 106, 74, 0.4);
         }
 
-        .pajara-art-shape-one::after,
-        .pajara-art-shape-two::after {
+        .pajara-home .pajara-art-shape-one::after,
+        .pajara-home .pajara-art-shape-two::after {
           position: absolute;
           top: 30px;
           right: 18px;
@@ -612,32 +569,32 @@ export default function CustomerHome() {
           content: "";
         }
 
-        .pajara-art-shape-two::after {
+        .pajara-home .pajara-art-shape-two::after {
           color: rgba(47, 107, 69, 0.35);
         }
 
-        .pajara-trust-strip {
+        .pajara-home .pajara-trust-strip {
           border-top: 1px solid var(--pajara-line);
           border-bottom: 1px solid var(--pajara-line);
           background: rgba(255, 255, 255, 0.27);
         }
 
-        .pajara-trust-inner {
+        .pajara-home .pajara-trust-inner {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           padding-block: 23px;
         }
 
-        .pajara-trust-item {
+        .pajara-home .pajara-trust-item {
           padding: 5px 20px;
           text-align: center;
         }
 
-        .pajara-trust-item + .pajara-trust-item {
+        .pajara-home .pajara-trust-item + .pajara-trust-item {
           border-left: 1px solid var(--pajara-line);
         }
 
-        .pajara-trust-item strong {
+        .pajara-home .pajara-trust-item strong {
           display: block;
           color: var(--pajara-deep);
           font-family: Georgia, "Times New Roman", serif;
@@ -645,7 +602,7 @@ export default function CustomerHome() {
           font-weight: 500;
         }
 
-        .pajara-trust-item span {
+        .pajara-home .pajara-trust-item span {
           display: block;
           margin-top: 5px;
           color: var(--pajara-muted);
@@ -653,20 +610,20 @@ export default function CustomerHome() {
           line-height: 1.6;
         }
 
-        .pajara-section {
+        .pajara-home .pajara-section {
           padding: 94px 0;
         }
 
-        .pajara-section-heading {
+        .pajara-home .pajara-section-heading {
           max-width: 600px;
           margin-bottom: 39px;
         }
 
-        .pajara-section-heading .pajara-eyebrow {
+        .pajara-home .pajara-section-heading .pajara-eyebrow {
           margin-bottom: 15px;
         }
 
-        .pajara-section-heading h2 {
+        .pajara-home .pajara-section-heading h2 {
           margin: 0;
           color: var(--pajara-deep);
           font-family: Georgia, "Times New Roman", serif;
@@ -676,7 +633,7 @@ export default function CustomerHome() {
           letter-spacing: -1.4px;
         }
 
-        .pajara-section-heading > p:last-child {
+        .pajara-home .pajara-section-heading > p:last-child {
           max-width: 510px;
           margin: 15px 0 0;
           color: var(--pajara-muted);
@@ -684,13 +641,13 @@ export default function CustomerHome() {
           line-height: 1.9;
         }
 
-        .pajara-steps {
+        .pajara-home .pajara-steps {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 15px;
         }
 
-        .pajara-step {
+        .pajara-home .pajara-step {
           min-height: 245px;
           padding: 24px 21px;
           border: 1px solid var(--pajara-line);
@@ -702,27 +659,27 @@ export default function CustomerHome() {
             box-shadow 220ms ease;
         }
 
-        .pajara-step:hover {
+        .pajara-home .pajara-step:hover {
           transform: translateY(-5px);
           border-color: rgba(47, 107, 69, 0.36);
           box-shadow: 0 16px 40px rgba(33, 77, 50, 0.06);
         }
 
-        .pajara-step-top {
+        .pajara-home .pajara-step-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
           margin-bottom: 32px;
         }
 
-        .pajara-step-number {
+        .pajara-home .pajara-step-number {
           color: var(--pajara-brown);
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 1px;
         }
 
-        .pajara-step-icon {
+        .pajara-home .pajara-step-icon {
           display: flex;
           width: 39px;
           height: 39px;
@@ -734,7 +691,7 @@ export default function CustomerHome() {
           font-size: 19px;
         }
 
-        .pajara-step h3 {
+        .pajara-home .pajara-step h3 {
           margin: 0 0 10px;
           color: var(--pajara-deep);
           font-size: 14px;
@@ -742,30 +699,30 @@ export default function CustomerHome() {
           letter-spacing: -0.3px;
         }
 
-        .pajara-step p {
+        .pajara-home .pajara-step p {
           margin: 0;
           color: var(--pajara-muted);
           font-size: 11px;
           line-height: 1.9;
         }
 
-        .pajara-facilities-section {
+        .pajara-home .pajara-facilities-section {
           background: #eeece4;
         }
 
-        .pajara-facilities-layout {
+        .pajara-home .pajara-facilities-layout {
           display: grid;
           grid-template-columns: 0.8fr 1.2fr;
           align-items: start;
           gap: 72px;
         }
 
-        .pajara-facilities-intro {
+        .pajara-home .pajara-facilities-intro {
           position: sticky;
           top: 115px;
         }
 
-        .pajara-facilities-intro h2 {
+        .pajara-home .pajara-facilities-intro h2 {
           margin: 0;
           color: var(--pajara-deep);
           font-family: Georgia, "Times New Roman", serif;
@@ -775,20 +732,20 @@ export default function CustomerHome() {
           letter-spacing: -1.4px;
         }
 
-        .pajara-facilities-intro > p {
+        .pajara-home .pajara-facilities-intro > p {
           margin: 18px 0 24px;
           color: var(--pajara-muted);
           font-size: 13px;
           line-height: 1.95;
         }
 
-        .pajara-facilities-list {
+        .pajara-home .pajara-facilities-list {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 13px;
         }
 
-        .pajara-facility {
+        .pajara-home .pajara-facility {
           min-height: 190px;
           padding: 22px;
           border: 1px solid rgba(33, 77, 50, 0.12);
@@ -799,12 +756,12 @@ export default function CustomerHome() {
             background 200ms ease;
         }
 
-        .pajara-facility:hover {
+        .pajara-home .pajara-facility:hover {
           transform: translateY(-3px);
           background: rgba(255, 255, 255, 0.82);
         }
 
-        .pajara-facility-icon {
+        .pajara-home .pajara-facility-icon {
           display: flex;
           width: 37px;
           height: 37px;
@@ -817,38 +774,38 @@ export default function CustomerHome() {
           font-size: 16px;
         }
 
-        .pajara-facility h3 {
+        .pajara-home .pajara-facility h3 {
           margin: 0 0 8px;
           color: var(--pajara-deep);
           font-size: 13px;
           font-weight: 800;
         }
 
-        .pajara-facility p {
+        .pajara-home .pajara-facility p {
           margin: 0;
           color: var(--pajara-muted);
           font-size: 11px;
           line-height: 1.85;
         }
 
-        .pajara-quote {
+        .pajara-home .pajara-quote {
           padding: 73px 0;
           color: white;
           background: var(--pajara-deep);
         }
 
-        .pajara-quote-inner {
+        .pajara-home .pajara-quote-inner {
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
           gap: 36px;
         }
 
-        .pajara-quote .pajara-eyebrow {
+        .pajara-home .pajara-quote .pajara-eyebrow {
           color: #d3dfd0;
         }
 
-        .pajara-quote h2 {
+        .pajara-home .pajara-quote h2 {
           max-width: 680px;
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
@@ -858,12 +815,12 @@ export default function CustomerHome() {
           letter-spacing: -1.4px;
         }
 
-        .pajara-quote h2 em {
+        .pajara-home .pajara-quote h2 em {
           color: #c8ad8f;
           font-weight: 400;
         }
 
-        .pajara-quote p {
+        .pajara-home .pajara-quote p {
           max-width: 550px;
           margin: 16px 0 0;
           color: #d2dbd0;
@@ -871,29 +828,29 @@ export default function CustomerHome() {
           line-height: 1.9;
         }
 
-        .pajara-quote .pajara-button-primary {
+        .pajara-home .pajara-quote .pajara-button-primary {
           flex-shrink: 0;
           color: var(--pajara-deep);
           background: var(--pajara-cream);
         }
 
-        .pajara-quote .pajara-button-primary:hover {
+        .pajara-home .pajara-quote .pajara-button-primary:hover {
           background: white;
         }
 
-        .pajara-footer {
+        .pajara-home .pajara-footer {
           padding: 26px 0;
           background: var(--pajara-cream);
         }
 
-        .pajara-footer-inner {
+        .pajara-home .pajara-footer-inner {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 20px;
         }
 
-        .pajara-footer-brand {
+        .pajara-home .pajara-footer-brand {
           display: flex;
           align-items: center;
           gap: 10px;
@@ -902,58 +859,48 @@ export default function CustomerHome() {
           font-weight: 800;
         }
 
-        .pajara-footer-brand img {
+        .pajara-home .pajara-footer-brand img {
           width: 30px;
           height: 30px;
           border-radius: 9px;
           object-fit: cover;
         }
 
-        .pajara-footer p {
+        .pajara-home .pajara-footer p {
           margin: 0;
           color: var(--pajara-muted);
           font-size: 10px;
           line-height: 1.7;
         }
 
-        .pajara-footer-links {
+        .pajara-home .pajara-footer-links {
           display: flex;
           gap: 17px;
         }
 
-        .pajara-footer-links a {
+        .pajara-home .pajara-footer-links a {
           color: var(--pajara-muted);
           font-size: 11px;
           text-decoration: none;
         }
 
-        .pajara-footer-links a:hover {
+        .pajara-home .pajara-footer-links a:hover {
           color: var(--pajara-green);
         }
 
-        .pajara-reveal {
-          opacity: 0;
-          transform: translateY(18px);
-          transition:
-            opacity 650ms ease,
-            transform 650ms ease;
-        }
+        /* Semua konten langsung terlihat tanpa menunggu IntersectionObserver */
 
-        .pajara-reveal.is-visible {
+        .pajara-home .pajara-reveal,
+        .pajara-home .pajara-reveal.is-visible {
           opacity: 1;
-          transform: translateY(0);
+          transform: none;
+          transition: none;
         }
 
-        .pajara-reveal-delay-1 {
-          transition-delay: 90ms;
-        }
-
-        .pajara-reveal-delay-2 {
-          transition-delay: 180ms;
-        }
-
-        .pajara-reveal-delay-3 {
-          transition-delay: 270ms;
+        .pajara-home .pajara-reveal-delay-1,
+        .pajara-home .pajara-reveal-delay-2,
+        .pajara-home .pajara-reveal-delay-3 {
+          transition-delay: 0ms;
         }
 
         @keyframes pajara-rise {
@@ -1013,92 +960,92 @@ export default function CustomerHome() {
         }
 
         @media (max-width: 900px) {
-          .pajara-hero {
+          .pajara-home .pajara-hero {
             padding: 70px 0;
           }
 
-          .pajara-hero-grid {
+          .pajara-home .pajara-hero-grid {
             grid-template-columns: 1fr 0.85fr;
             gap: 28px;
           }
 
-          .pajara-hero h1 {
+          .pajara-home .pajara-hero h1 {
             font-size: clamp(40px, 6vw, 58px);
           }
 
-          .pajara-hero-art {
+          .pajara-home .pajara-hero-art {
             min-height: 340px;
           }
 
-          .pajara-art-card {
+          .pajara-home .pajara-art-card {
             width: 260px;
             padding: 23px;
           }
 
-          .pajara-art-shape-one {
+          .pajara-home .pajara-art-shape-one {
             top: 39px;
             right: 8px;
             width: 195px;
             height: 245px;
           }
 
-          .pajara-art-shape-two {
+          .pajara-home .pajara-art-shape-two {
             top: 55px;
             left: 0;
             width: 175px;
             height: 220px;
           }
 
-          .pajara-art-shape-three {
+          .pajara-home .pajara-art-shape-three {
             right: 10px;
             bottom: 23px;
             width: 105px;
             height: 95px;
           }
 
-          .pajara-steps {
+          .pajara-home .pajara-steps {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .pajara-facilities-layout {
+          .pajara-home .pajara-facilities-layout {
             grid-template-columns: 1fr;
             gap: 32px;
           }
 
-          .pajara-facilities-intro {
+          .pajara-home .pajara-facilities-intro {
             position: static;
           }
 
-          .pajara-section {
+          .pajara-home .pajara-section {
             padding: 72px 0;
           }
         }
 
         @media (max-width: 600px) {
-          .pajara-container {
+          .pajara-home .pajara-container {
             width: calc(100% - 36px);
           }
 
-          .pajara-navbar-inner {
+          .pajara-home .pajara-navbar-inner {
             min-height: 66px;
           }
 
-          .pajara-brand {
+          .pajara-home .pajara-brand {
             gap: 9px;
             font-size: 14px;
           }
 
-          .pajara-brand-logo {
+          .pajara-home .pajara-brand-logo {
             width: 35px;
             height: 35px;
             border-radius: 10px;
           }
 
-          .pajara-menu-toggle {
+          .pajara-home .pajara-menu-toggle {
             display: inline-flex;
           }
 
-          .pajara-nav {
+          .pajara-home .pajara-nav {
             position: absolute;
             top: calc(100% + 1px);
             right: 0;
@@ -1112,231 +1059,226 @@ export default function CustomerHome() {
             background: var(--pajara-cream);
           }
 
-          .pajara-nav.is-open {
+          .pajara-home .pajara-nav.is-open {
             display: flex;
             animation: pajara-rise 180ms ease both;
           }
 
-          .pajara-nav a {
+          .pajara-home .pajara-nav a {
             padding: 14px 4px;
           }
 
-          .pajara-nav .pajara-nav-cta {
+          .pajara-home .pajara-nav .pajara-nav-cta {
             margin-top: 5px;
             padding: 13px 18px;
             text-align: center;
           }
 
-          .pajara-hero {
+          .pajara-home .pajara-hero {
             padding: 57px 0 47px;
           }
 
-          .pajara-hero-grid {
+          .pajara-home .pajara-hero-grid {
             grid-template-columns: 1fr;
             gap: 25px;
           }
 
-          .pajara-eyebrow {
+          .pajara-home .pajara-eyebrow {
             margin-bottom: 17px;
             font-size: 9px;
             letter-spacing: 2px;
           }
 
-          .pajara-hero h1 {
+          .pajara-home .pajara-hero h1 {
             max-width: 470px;
             font-size: clamp(42px, 12vw, 57px);
             line-height: 1.08;
             letter-spacing: -1.9px;
           }
 
-          .pajara-hero-description {
+          .pajara-home .pajara-hero-description {
             margin-top: 17px;
             font-size: 13px;
             line-height: 1.9;
           }
 
-          .pajara-hero-actions {
+          .pajara-home .pajara-hero-actions {
             gap: 9px;
             margin-top: 25px;
           }
 
-          .pajara-button {
+          .pajara-home .pajara-button {
             min-height: 46px;
             padding: 0 18px;
             font-size: 12px;
           }
 
-          .pajara-hero-note {
+          .pajara-home .pajara-hero-note {
             margin-top: 20px;
             font-size: 10px;
           }
 
-          .pajara-hero-art {
+          .pajara-home .pajara-hero-art {
             min-height: 330px;
             margin-top: 4px;
           }
 
-          .pajara-art-card {
+          .pajara-home .pajara-art-card {
             width: 245px;
             padding: 23px;
             border-radius: 21px;
           }
 
-          .pajara-art-logo-frame {
+          .pajara-home .pajara-art-logo-frame {
             width: 75px;
             height: 75px;
             margin: 27px 0 22px;
             border-radius: 21px;
           }
 
-          .pajara-art-card h2 {
+          .pajara-home .pajara-art-card h2 {
             font-size: 26px;
           }
 
-          .pajara-art-shape-one {
+          .pajara-home .pajara-art-shape-one {
             top: 34px;
             right: 5px;
             width: 190px;
             height: 245px;
           }
 
-          .pajara-art-shape-two {
+          .pajara-home .pajara-art-shape-two {
             top: 51px;
             left: 1px;
             width: 165px;
             height: 218px;
           }
 
-          .pajara-art-shape-three {
+          .pajara-home .pajara-art-shape-three {
             right: 7px;
             bottom: 17px;
             width: 95px;
             height: 82px;
           }
 
-          .pajara-trust-inner {
+          .pajara-home .pajara-trust-inner {
             grid-template-columns: 1fr;
             padding-block: 8px;
           }
 
-          .pajara-trust-item {
+          .pajara-home .pajara-trust-item {
             padding: 14px 8px;
           }
 
-          .pajara-trust-item + .pajara-trust-item {
+          .pajara-home .pajara-trust-item + .pajara-trust-item {
             border-top: 1px solid var(--pajara-line);
             border-left: 0;
           }
 
-          .pajara-trust-item strong {
+          .pajara-home .pajara-trust-item strong {
             font-size: 18px;
           }
 
-          .pajara-trust-item span {
+          .pajara-home .pajara-trust-item span {
             font-size: 10px;
           }
 
-          .pajara-section {
+          .pajara-home .pajara-section {
             padding: 62px 0;
           }
 
-          .pajara-section-heading {
+          .pajara-home .pajara-section-heading {
             margin-bottom: 27px;
           }
 
-          .pajara-section-heading h2,
-          .pajara-facilities-intro h2 {
+          .pajara-home .pajara-section-heading h2,
+          .pajara-home .pajara-facilities-intro h2 {
             font-size: 35px;
             letter-spacing: -1px;
           }
 
-          .pajara-section-heading > p:last-child,
-          .pajara-facilities-intro > p {
+          .pajara-home .pajara-section-heading > p:last-child,
+          .pajara-home .pajara-facilities-intro > p {
             font-size: 12px;
           }
 
-          .pajara-steps {
+          .pajara-home .pajara-steps {
             grid-template-columns: 1fr;
             gap: 11px;
           }
 
-          .pajara-step {
+          .pajara-home .pajara-step {
             min-height: auto;
             padding: 20px;
           }
 
-          .pajara-step-top {
+          .pajara-home .pajara-step-top {
             margin-bottom: 21px;
           }
 
-          .pajara-step h3 {
+          .pajara-home .pajara-step h3 {
             font-size: 14px;
           }
 
-          .pajara-step p {
+          .pajara-home .pajara-step p {
             font-size: 11px;
           }
 
-          .pajara-facilities-list {
+          .pajara-home .pajara-facilities-list {
             grid-template-columns: 1fr;
             gap: 10px;
           }
 
-          .pajara-facility {
+          .pajara-home .pajara-facility {
             min-height: auto;
             padding: 19px;
           }
 
-          .pajara-facility-icon {
+          .pajara-home .pajara-facility-icon {
             margin-bottom: 15px;
           }
 
-          .pajara-quote {
+          .pajara-home .pajara-quote {
             padding: 58px 0;
           }
 
-          .pajara-quote-inner {
+          .pajara-home .pajara-quote-inner {
             grid-template-columns: 1fr;
             gap: 26px;
           }
 
-          .pajara-quote h2 {
+          .pajara-home .pajara-quote h2 {
             font-size: 39px;
             letter-spacing: -1px;
           }
 
-          .pajara-quote p {
+          .pajara-home .pajara-quote p {
             font-size: 12px;
           }
 
-          .pajara-quote .pajara-button {
+          .pajara-home .pajara-quote .pajara-button {
             justify-self: start;
           }
 
-          .pajara-footer-inner {
+          .pajara-home .pajara-footer-inner {
             align-items: flex-start;
             flex-direction: column;
             gap: 15px;
           }
 
-          .pajara-footer-links {
+          .pajara-home .pajara-footer-links {
             gap: 20px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
+          .pajara-home *,
+          .pajara-home *::before,
+          .pajara-home *::after {
             scroll-behavior: auto !important;
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
-          }
-
-          .pajara-reveal {
-            opacity: 1;
-            transform: none;
           }
         }
       `}</style>
@@ -1492,19 +1434,8 @@ export default function CustomerHome() {
         </div>
       </div>
 
-      <section
-        id="cara-order"
-        className="pajara-section"
-        ref={(element) => {
-          sectionRefs.current[0] = element;
-        }}
-        data-reveal-index={0}
-      >
-        <div
-          className={`pajara-container pajara-reveal ${
-            visible.includes(0) ? "is-visible" : ""
-          }`}
-        >
+      <section id="cara-order" className="pajara-section">
+        <div className="pajara-container pajara-reveal">
           <div className="pajara-section-heading">
             <p className="pajara-eyebrow">Mulai dari sini</p>
 
@@ -1522,14 +1453,8 @@ export default function CustomerHome() {
           </div>
 
           <div className="pajara-steps">
-            {steps.map((step, index) => (
-              <article
-                className={`pajara-step pajara-reveal pajara-reveal-delay-${Math.min(
-                  index,
-                  3
-                )} ${visible.includes(0) ? "is-visible" : ""}`}
-                key={step.number}
-              >
+            {steps.map((step) => (
+              <article className="pajara-step" key={step.number}>
                 <div className="pajara-step-top">
                   <span className="pajara-step-number">{step.number}</span>
 
@@ -1549,16 +1474,8 @@ export default function CustomerHome() {
       <section
         id="fasilitas"
         className="pajara-section pajara-facilities-section"
-        ref={(element) => {
-          sectionRefs.current[1] = element;
-        }}
-        data-reveal-index={1}
       >
-        <div
-          className={`pajara-container pajara-facilities-layout pajara-reveal ${
-            visible.includes(1) ? "is-visible" : ""
-          }`}
-        >
+        <div className="pajara-container pajara-facilities-layout pajara-reveal">
           <div className="pajara-facilities-intro">
             <p className="pajara-eyebrow">Di dalam akunmu</p>
 
@@ -1579,13 +1496,8 @@ export default function CustomerHome() {
           </div>
 
           <div className="pajara-facilities-list">
-            {facilities.map((facility, index) => (
-              <article
-                className={`pajara-facility pajara-reveal pajara-reveal-delay-${
-                  index % 3
-                } ${visible.includes(1) ? "is-visible" : ""}`}
-                key={facility.number}
-              >
+            {facilities.map((facility) => (
+              <article className="pajara-facility" key={facility.number}>
                 <div className="pajara-facility-icon" aria-hidden="true">
                   {facility.icon}
                 </div>
