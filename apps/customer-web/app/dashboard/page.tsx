@@ -1,1394 +1,554 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@pajara/supabase";
 import CustomerBottomNav from "../components/CustomerBottomNav";
+import "./dashboard.css";
 
 type Order = {
-id: string;
-order_code: string;
-service_name: string | null;
-design_type: string | null;
-quantity: number | null;
-status: string | null;
-deadline: string | null;
+  id: string;
+  order_code: string;
+  service_name: string | null;
+  design_type: string | null;
+  quantity: number | null;
+  status: string | null;
+  deadline: string | null;
 };
 
 type Subscription = {
-id: string;
-plan_id: string;
-expires_at: string | null;
-quota_total: number;
-quota_used: number;
-status: string;
+  id: string;
+  plan_id: string;
+  expires_at: string | null;
+  quota_total: number;
+  quota_used: number;
+  status: string;
 };
 
 type SubscriptionPlan = {
-id: string;
-name: string;
+  id: string;
+  name: string;
 };
 
 const logo =
-"/755809946_17926162029385149_3739923509439876817_n.jpg";
+  "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
 export default function CustomerDashboard() {
-const [orders, setOrders] = useState<Order[]>([]);
-const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
-const [customerName, setCustomerName] = useState("");
-const [menuOpen, setMenuOpen] = useState(false);
-
-useEffect(() => {
-let mounted = true;
-
-const loadDashboard = async () => {  
-  setLoading(true);  
-  setError("");  
-
-  const {  
-    data: { user },  
-    error: userError,  
-  } = await supabase.auth.getUser();  
-
-  if (userError || !user) {  
-    if (mounted) {  
-      setError("Sesi login tidak ditemukan. Silakan login kembali.");  
-      setLoading(false);  
-    }  
-    return;  
-  }  
-
-  if (mounted) {  
-    setCustomerName(  
-      user.user_metadata?.full_name ||  
-        user.user_metadata?.name ||  
-        "Pelanggan Pajara"  
-    );  
-  }  
-
-  const [ordersResult, subscriptionsResult, plansResult] =  
-    await Promise.all([  
-      supabase  
-        .from("orders")  
-        .select(  
-          "id, order_code, service_name, design_type, quantity, status, deadline"  
-        )  
-        .eq("customer_id", user.id)  
-        .order("created_at", { ascending: false }),  
-
-      supabase  
-        .from("subscriptions")  
-        .select(  
-          "id, plan_id, expires_at, quota_total, quota_used, status"  
-        )  
-        .eq("customer_id", user.id)  
-        .order("created_at", { ascending: false }),  
-
-      supabase  
-        .from("subscription_plans")  
-        .select("id, name")  
-        .eq("is_active", true)  
-        .order("price", { ascending: true }),  
-    ]);  
-
-  if (!mounted) return;  
-
-  if (ordersResult.error) {  
-    setError("Pesanan belum dapat dimuat. Silakan muat ulang halaman.");  
-  } else {  
-    setOrders(ordersResult.data || []);  
-  }  
-
-  setSubscriptions(  
-    subscriptionsResult.error ? [] : subscriptionsResult.data || []  
-  );  
-  setPlans(plansResult.error ? [] : plansResult.data || []);  
-
-  setLoading(false);  
-};  
-
-loadDashboard();  
-
-return () => {  
-  mounted = false;  
-};
-
-}, []);
-
-const statusLabel = (status: string | null) => {
-switch (status) {
-case "pending":
-return "Pesanan Baru";
-case "waiting_dp":
-return "Menunggu Pembayaran DP";
-case "processing":
-return "Sedang Diproses";
-case "revision":
-return "Dalam Revisi";
-case "waiting_payment":
-return "Menunggu Pelunasan";
-case "completed":
-return "Selesai";
-case "cancelled":
-return "Dibatalkan";
-default:
-return status || "Menunggu";
-}
-};
-
-const statusClass = (status: string | null) => {
-switch (status) {
-case "completed":
-return "status-completed";
-case "processing":
-return "status-processing";
-case "revision":
-return "status-revision";
-case "cancelled":
-return "status-cancelled";
-case "waiting_payment":
-case "waiting_dp":
-return "status-payment";
-default:
-return "status-pending";
-}
-};
-
-const formatDate = (date: string | null) => {
-if (!date) return "Belum ditentukan";
-
-return new Date(date).toLocaleDateString("id-ID", {  
-  day: "numeric",  
-  month: "short",  
-  year: "numeric",  
-});
-
-};
-
-const now = Date.now();
-
-const currentSubscription =
-subscriptions.find(
-(item) =>
-item.status === "active" &&
-!!item.expires_at &&
-new Date(item.expires_at).getTime() > now
-) ||
-subscriptions.find((item) => item.status === "pending") ||
-null;
-
-const currentPlan = currentSubscription
-? plans.find((plan) => plan.id === currentSubscription.plan_id)
-: undefined;
-
-const isSubscriptionPending = currentSubscription?.status === "pending";
-
-const isSubscriptionActive =
-currentSubscription?.status === "active" &&
-!!currentSubscription.expires_at &&
-new Date(currentSubscription.expires_at).getTime() > now;
-
-const remainingQuota = currentSubscription
-? Math.max(
-0,
-currentSubscription.quota_total - currentSubscription.quota_used
-)
-: 0;
-
-const activeOrders = orders.filter(
-(order) =>
-order.status !== "completed" && order.status !== "cancelled"
-);
-
-const paymentOrders = orders.filter(
-(order) =>
-order.status === "waiting_dp" ||
-order.status === "waiting_payment"
-);
-
-const latestOrder = orders[0] || null;
-
-if (loading) {
-return (
-<main className="pajara-loading-screen">
-<style jsx global>{`
-.pajara-loading-screen {
-position: fixed;
-inset: 0;
-z-index: 9999;
-min-height: 100vh;
-min-height: 100dvh;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 30px 24px;
-overflow: hidden;
-background:
-radial-gradient(
-circle at 15% 18%,
-rgba(47, 107, 69, 0.13),
-transparent 36%
-),
-radial-gradient(
-circle at 85% 78%,
-rgba(138, 106, 74, 0.13),
-transparent 34%
-),
-#f7f4ee;
-color: #214d32;
-font-family: "DM Sans", Arial, sans-serif;
-text-align: center;
-}
-
-.pajara-loading-screen *,  
-      .pajara-loading-screen *::before,  
-      .pajara-loading-screen *::after {  
-        box-sizing: border-box;  
-      }  
-
-      .pajara-loading-orb {  
-        position: absolute;  
-        border: 1px solid rgba(47, 107, 69, 0.10);  
-        border-radius: 50%;  
-        pointer-events: none;  
-      }  
-
-      .pajara-loading-orb-one {  
-        top: -95px;  
-        right: -85px;  
-        width: 270px;  
-        height: 270px;  
-      }  
-
-      .pajara-loading-orb-two {  
-        bottom: -115px;  
-        left: -100px;  
-        width: 310px;  
-        height: 310px;  
-      }  
-
-      .pajara-loading-orb-three {  
-        top: 18%;  
-        left: -45px;  
-        width: 100px;  
-        height: 100px;  
-        background: rgba(255, 255, 255, 0.15);  
-        filter: blur(2px);  
-      }  
-
-      .pajara-loading-glass {  
-        position: relative;  
-        z-index: 1;  
-        width: 100%;  
-        max-width: 370px;  
-        padding: 38px 27px 35px;  
-        display: flex;  
-        flex-direction: column;  
-        align-items: center;  
-        border: 1px solid rgba(255, 255, 255, 0.78);  
-        border-radius: 27px;  
-        background: rgba(255, 255, 255, 0.48);  
-        -webkit-backdrop-filter: blur(24px) saturate(160%);  
-        backdrop-filter: blur(24px) saturate(160%);  
-        box-shadow:  
-          0 22px 70px rgba(33, 77, 50, 0.12),  
-          0 5px 18px rgba(33, 77, 50, 0.04),  
-          inset 0 1px 0 rgba(255, 255, 255, 0.85);  
-        animation: pajaraLoadingAppear 650ms ease both;  
-      }  
-
-      .pajara-loading-logo-wrap {  
-        width: 94px;  
-        height: 94px;  
-        display: flex;  
-        align-items: center;  
-        justify-content: center;  
-        padding: 8px;  
-        margin-bottom: 25px;  
-        border: 1px solid rgba(255, 255, 255, 0.9);  
-        border-radius: 23px;  
-        background: rgba(255, 255, 255, 0.76);  
-        box-shadow:  
-          0 9px 26px rgba(33, 77, 50, 0.10),  
-          inset 0 1px 0 rgba(255, 255, 255, 1);  
-      }  
-
-      .pajara-loading-logo {  
-        display: block;  
-        width: 100%;  
-        height: 100%;  
-        border-radius: 15px;  
-        object-fit: contain;  
-      }  
-
-      .pajara-loading-brand {  
-        margin: 0 0 10px;  
-        color: #8a6a4a;  
-        font-size: 10px;  
-        font-weight: 800;  
-        letter-spacing: 3px;  
-      }  
-
-      .pajara-loading-title {  
-        margin: 0;  
-        color: #214d32;  
-        font-family: Georgia, "Times New Roman", serif;  
-        font-size: 29px;  
-        font-weight: 500;  
-        letter-spacing: -0.8px;  
-        line-height: 1.25;  
-      }  
-
-      .pajara-loading-description {  
-        max-width: 270px;  
-        margin: 12px 0 0;  
-        color: #777d73;  
-        font-size: 12px;  
-        line-height: 1.9;  
-      }  
-
-      .pajara-loading-track {  
-        width: 155px;  
-        height: 3px;  
-        overflow: hidden;  
-        margin-top: 31px;  
-        border-radius: 10px;  
-        background: rgba(47, 107, 69, 0.13);  
-      }  
-
-      .pajara-loading-progress {  
-        width: 40%;  
-        height: 100%;  
-        border-radius: 10px;  
-        background: linear-gradient(  
-          90deg,  
-          #214d32,  
-          #477b50,  
-          #8a6a4a  
-        );  
-        animation: pajaraLoadingProgress 1.4s ease-in-out infinite;  
-      }  
-
-      .pajara-loading-footer {  
-        position: static;  
-        margin-top: 27px;  
-        padding-top: 17px;  
-        border-top: 1px solid rgba(47, 107, 69, 0.13);  
-        color: #9b978c;  
-        font-size: 9px;  
-        font-weight: 700;  
-        letter-spacing: 1.5px;  
-      }  
-
-      @keyframes pajaraLoadingAppear {  
-        from {  
-          opacity: 0;  
-          transform: translateY(13px) scale(0.98);  
-        }  
-        to {  
-          opacity: 1;  
-          transform: translateY(0) scale(1);  
-        }  
-      }  
-
-      @keyframes pajaraLoadingProgress {  
-        0% {  
-          transform: translateX(-110%);  
-        }  
-        100% {  
-          transform: translateX(260%);  
-        }  
-      }  
-
-      @media (max-width: 380px) {  
-        .pajara-loading-glass {  
-          padding: 32px 21px 30px;  
-          border-radius: 23px;  
-        }  
-
-        .pajara-loading-title {  
-          font-size: 26px;  
-        }  
-
-        .pajara-loading-logo-wrap {  
-          width: 84px;  
-          height: 84px;  
-        }  
-      }  
-
-      @media (prefers-reduced-motion: reduce) {  
-        .pajara-loading-glass,  
-        .pajara-loading-progress {  
-          animation: none !important;  
-        }  
-      }  
-    `}</style>  
-
-    <div className="pajara-loading-orb pajara-loading-orb-one" />  
-    <div className="pajara-loading-orb pajara-loading-orb-two" />  
-    <div className="pajara-loading-orb pajara-loading-orb-three" />  
-
-    <div className="pajara-loading-glass">  
-      <div className="pajara-loading-logo-wrap">  
-        <img  
-          src={logo}  
-          alt="Pajara Studio"  
-          className="pajara-loading-logo"  
-        />  
-      </div>  
-
-      <p className="pajara-loading-brand">  
-        PAJARA STUDIO  
-      </p>  
-
-      <h1 className="pajara-loading-title">  
-        Menyiapkan Dashboard  
-      </h1>  
-
-      <p className="pajara-loading-description">  
-        Sebentar, kami sedang menyiapkan ruang pelanggan  
-        Kang/Teh.  
-      </p>  
-
-      <div className="pajara-loading-track">  
-        <div className="pajara-loading-progress" />  
-      </div>  
-
-      <div className="pajara-loading-footer">  
-        DESAIN YANG PUNYA ARAH.  
-      </div>  
-    </div>  
-  </main>  
-);
-
-}
-
-return (
-<main className="dashboard-page">
-<style jsx global>{`
-.dashboard-page {
-min-height: 100vh;
-padding-bottom: 90px;
-background: #f7f4ee;
-color: #243b2c;
-font-family: "DM Sans", Arial, sans-serif;
-}
-
-.dashboard-page *,  
-    .dashboard-page *::before,  
-    .dashboard-page *::after {  
-      box-sizing: border-box;  
-    }  
-
-    .dashboard-page a {  
-      -webkit-tap-highlight-color: transparent;  
-    }  
-
-    .dashboard-container {  
-      width: min(100% - 32px, 680px);  
-      margin: 0 auto;  
-    }  
-
-    .dashboard-header {  
-      position: sticky;  
-      top: 0;  
-      z-index: 100;  
-      border-bottom: 1px solid rgba(47, 107, 69, 0.1);  
-      background: rgba(247, 244, 238, 0.88);  
-      -webkit-backdrop-filter: blur(22px) saturate(160%);  
-      backdrop-filter: blur(22px) saturate(160%);  
-      transition: background 0.3s ease;  
-    }  
-
-    .dashboard-header-inner {  
-      display: flex;  
-      min-height: 70px;  
-      align-items: center;  
-      justify-content: space-between;  
-      gap: 12px;  
-    }  
-
-    .dashboard-brand {  
-      display: inline-flex;  
-      min-width: 0;  
-      align-items: center;  
-      gap: 10px;  
-      color: #214d32;  
-      font-size: 15px;  
-      font-weight: 800;  
-      text-decoration: none;  
-    }  
-
-    .dashboard-logo {  
-      display: block !important;  
-      width: 39px !important;  
-      height: 39px !important;  
-      min-width: 39px !important;  
-      max-width: 39px !important;  
-      min-height: 39px !important;  
-      max-height: 39px !important;  
-      flex: 0 0 39px !important;  
-      border-radius: 12px;  
-      object-fit: cover;  
-    }  
-
-    .dashboard-header-actions {  
-      display: flex;  
-      align-items: center;  
-      gap: 9px;  
-      flex-shrink: 0;  
-    }  
-
-    .dashboard-menu-button {  
-      display: flex;  
-      width: 42px;  
-      height: 42px;  
-      align-items: center;  
-      justify-content: center;  
-      flex-direction: column;  
-      gap: 5px;  
-      border: 1px solid rgba(47, 107, 69, 0.2);  
-      border-radius: 11px;  
-      background: rgba(255, 255, 255, 0.55);  
-      cursor: pointer;  
-      transition: all 0.2s ease;  
-    }  
-
-    .dashboard-menu-button:hover {  
-      border-color: #2f6b45;  
-      background: #fff;  
-    }  
-
-    .dashboard-menu-button span {  
-      display: block;  
-      width: 17px;  
-      height: 2px;  
-      border-radius: 5px;  
-      background: #214d32;  
-      transition: transform 0.2s ease;  
-    }  
-
-    .dashboard-menu-button.is-open span:first-child {  
-      transform: translateY(3.5px) rotate(45deg);  
-    }  
-
-    .dashboard-menu-button.is-open span:last-child {  
-      transform: translateY(-3.5px) rotate(-45deg);  
-    }  
-
-    .dashboard-header-link {  
-      display: inline-flex;  
-      align-items: center;  
-      justify-content: center;  
-      gap: 7px;  
-      flex-shrink: 0;  
-      min-height: 42px;  
-      padding: 10px 14px;  
-      border: 1px solid rgba(47, 107, 69, 0.2);  
-      border-radius: 10px;  
-      background: #214d32;  
-      color: #fff;  
-      font-size: 12px;  
-      font-weight: 700;  
-      text-decoration: none;  
-      transition: all 0.25s ease;  
-    }  
-
-    .dashboard-header-link:hover {  
-      border-color: #2f6b45;  
-      background: #2f6b45;  
-    }  
-
-    .dashboard-menu {  
-      position: absolute;  
-      top: calc(100% + 8px);  
-      left: 50%;  
-      width: min(680px, calc(100% - 32px));  
-      padding: 13px;  
-      border: 1px solid rgba(47, 107, 69, 0.12);  
-      border-radius: 15px;  
-      background: rgba(255, 255, 255, 0.97);  
-      box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12);  
-      transform: translateX(-50%);  
-      animation: dashboard-menu-in 0.18s ease;  
-    }  
-
-    @keyframes dashboard-menu-in {  
-      from {  
-        opacity: 0;  
-        transform: translate(-50%, -5px);  
-      }  
-      to {  
-        opacity: 1;  
-        transform: translate(-50%, 0);  
-      }  
-    }  
-
-    .dashboard-menu-label {  
-      margin: 2px 9px 9px;  
-      color: #999487;  
-      font-size: 9px;  
-      font-weight: 800;  
-      letter-spacing: 1.5px;  
-    }  
-
-    .dashboard-menu a {  
-      display: flex;  
-      min-height: 43px;  
-      align-items: center;  
-      justify-content: space-between;  
-      padding: 10px 11px;  
-      border-radius: 9px;  
-      color: #214d32;  
-      font-size: 12px;  
-      font-weight: 700;  
-      text-decoration: none;  
-      transition: background 0.2s ease;  
-    }  
-
-    .dashboard-menu a:hover {  
-      background: #f1f5ed;  
-    }  
-
-    .dashboard-menu a span:last-child {  
-      color: #8a6a4a;  
-    }  
-
-    .dashboard-main {  
-      padding-top: 22px;  
-    }  
-
-    .dashboard-welcome {  
-      position: relative;  
-      overflow: hidden;  
-      padding: 25px 22px;  
-      border-radius: 22px;  
-      background: linear-gradient(130deg, #214d32, #2f6b45 72%, #477b50);  
-      color: #fff;  
-    }  
-
-    .dashboard-welcome::after {  
-      position: absolute;  
-      top: -55px;  
-      right: -55px;  
-      width: 170px;  
-      height: 170px;  
-      border: 1px solid rgba(255, 255, 255, 0.15);  
-      border-radius: 50%;  
-      content: "";  
-      pointer-events: none;  
-    }  
-
-    .dashboard-eyebrow {  
-      position: relative;  
-      z-index: 1;  
-      margin: 0 0 12px;  
-      color: #d8e7d8;  
-      font-size: 10px;  
-      font-weight: 800;  
-      letter-spacing: 1.6px;  
-      text-transform: uppercase;  
-    }  
-
-    .dashboard-welcome h1 {  
-      position: relative;  
-      z-index: 1;  
-      margin: 0;  
-      font-family: Georgia, "Times New Roman", serif;  
-      font-size: clamp(27px, 7vw, 35px);  
-      font-weight: 500;  
-      letter-spacing: -1px;  
-      line-height: 1.2;  
-      overflow-wrap: anywhere;  
-    }  
-
-    .dashboard-welcome h1 span {  
-      color: #d8e6bd;  
-      font-style: italic;  
-    }  
-
-    .dashboard-welcome p.description {  
-      position: relative;  
-      z-index: 1;  
-      margin: 11px 0 0;  
-      color: #e0e9df;  
-      font-size: 12px;  
-      line-height: 1.8;  
-    }  
-
-    .dashboard-welcome-actions {  
-      position: relative;  
-      z-index: 1;  
-      display: flex;  
-      flex-wrap: wrap;  
-      gap: 10px;  
-      margin-top: 20px;  
-    }  
-
-    .dashboard-button {  
-      display: inline-flex;  
-      min-height: 42px;  
-      align-items: center;  
-      justify-content: center;  
-      gap: 8px;  
-      padding: 11px 14px;  
-      border-radius: 11px;  
-      background: #f7f4ee;  
-      color: #214d32;  
-      font-size: 12px;  
-      font-weight: 800;  
-      text-decoration: none;  
-    }  
-
-    .dashboard-button.secondary {  
-      border: 1px solid rgba(255, 255, 255, 0.3);  
-      background: transparent;  
-      color: #fff;  
-    }  
-
-    .dashboard-section {  
-      margin-top: 27px;  
-    }  
-
-    .dashboard-section-heading {  
-      display: flex;  
-      align-items: flex-end;  
-      justify-content: space-between;  
-      gap: 12px;  
-      margin-bottom: 13px;  
-    }  
-
-    .dashboard-section-heading h2 {  
-      margin: 0;  
-      color: #214d32;  
-      font-family: Georgia, "Times New Roman", serif;  
-      font-size: 23px;  
-      font-weight: 500;  
-      letter-spacing: -0.5px;  
-    }  
-
-    .dashboard-section-heading p {  
-      margin: 5px 0 0;  
-      color: #7a8076;  
-      font-size: 11px;  
-      line-height: 1.6;  
-    }  
-
-    .dashboard-text-link {  
-      flex-shrink: 0;  
-      color: #2f6b45;  
-      font-size: 11px;  
-      font-weight: 800;  
-      text-decoration: none;  
-    }  
-
-    .dashboard-summary-grid {  
-      display: grid;  
-      grid-template-columns: repeat(2, minmax(0, 1fr));  
-      gap: 12px;  
-    }  
-
-    .dashboard-summary-card {  
-      min-width: 0;  
-      padding: 17px;  
-      border: 1px solid #e6e5dc;  
-      border-radius: 17px;  
-      background: #fff;  
-      text-decoration: none;  
-      color: inherit;  
-    }  
-
-    .dashboard-summary-label {  
-      margin: 0;  
-      color: #777d73;  
-      font-size: 11px;  
-      line-height: 1.6;  
-    }  
-
-    .dashboard-summary-value {  
-      display: block;  
-      margin-top: 7px;  
-      color: #214d32;  
-      font-size: 27px;  
-      font-weight: 800;  
-      letter-spacing: -0.8px;  
-    }  
-
-    .dashboard-summary-note {  
-      margin: 6px 0 0;  
-      color: #777d73;  
-      font-size: 10px;  
-      line-height: 1.7;  
-    }  
-
-    .dashboard-card {  
-      padding: 18px;  
-      border: 1px solid #e6e5dc;  
-      border-radius: 18px;  
-      background: #fff;  
-    }  
-
-    .dashboard-order-top {  
-      display: flex;  
-      align-items: flex-start;  
-      justify-content: space-between;  
-      gap: 10px;  
-    }  
-
-    .dashboard-order-code {  
-      margin: 0;  
-      color: #8a6a4a;  
-      font-size: 10px;  
-      font-weight: 800;  
-      letter-spacing: 0.7px;  
-      overflow-wrap: anywhere;  
-    }  
-
-    .dashboard-order-name {  
-      margin: 8px 0 0;  
-      color: #214d32;  
-      font-size: 15px;  
-      font-weight: 800;  
-      line-height: 1.5;  
-      overflow-wrap: anywhere;  
-    }  
-
-    .dashboard-order-meta {  
-      margin: 6px 0 0;  
-      color: #777d73;  
-      font-size: 11px;  
-      line-height: 1.7;  
-    }  
-
-    .dashboard-status {  
-      display: inline-flex;  
-      flex-shrink: 0;  
-      max-width: 155px;  
-      padding: 7px 9px;  
-      border-radius: 8px;  
-      font-size: 10px;  
-      font-weight: 800;  
-      line-height: 1.5;  
-    }  
-
-    .status-pending {  
-      background: #f5eddb;  
-      color: #86601e;  
-    }  
-
-    .status-payment {  
-      background: #fff0d8;  
-      color: #89591b;  
-    }  
-
-    .status-processing {  
-      background: #e8efff;  
-      color: #38588d;  
-    }  
-
-    .status-revision {  
-      background: #f4e9fa;  
-      color: #78508d;  
-    }  
-
-    .status-completed {  
-      background: #e4f3e7;  
-      color: #246238;  
-    }  
-
-    .status-cancelled {  
-      background: #f8e8e6;  
-      color: #9a4339;  
-    }  
-
-    .dashboard-card-link {  
-      display: inline-flex;  
-      align-items: center;  
-      gap: 7px;  
-      margin-top: 15px;  
-      color: #2f6b45;  
-      font-size: 12px;  
-      font-weight: 800;  
-      text-decoration: none;  
-    }  
-
-    .dashboard-empty {  
-      padding: 19px;  
-      border: 1px dashed #cbd9c8;  
-      border-radius: 15px;  
-      background: #fafbf8;  
-    }  
-
-    .dashboard-empty strong {  
-      display: block;  
-      color: #214d32;  
-      font-size: 13px;  
-    }  
-
-    .dashboard-empty p {  
-      margin: 7px 0 0;  
-      color: #747970;  
-      font-size: 12px;  
-      line-height: 1.8;  
-    }  
-
-    .dashboard-subscription {  
-      display: flex;  
-      align-items: center;  
-      gap: 14px;  
-    }  
-
-    .dashboard-subscription-icon {  
-      display: flex;  
-      width: 46px;  
-      height: 46px;  
-      flex: 0 0 46px;  
-      align-items: center;  
-      justify-content: center;  
-      border-radius: 14px;  
-      background: #edf3e9;  
-      color: #2f6b45;  
-      font-family: Georgia, serif;  
-      font-size: 23px;  
-    }  
-
-    .dashboard-subscription-content {  
-      min-width: 0;  
-      flex: 1;  
-    }  
-
-    .dashboard-subscription-content strong {  
-      display: block;  
-      color: #214d32;  
-      font-size: 14px;  
-      line-height: 1.5;  
-      overflow-wrap: anywhere;  
-    }  
-
-    .dashboard-subscription-content p {  
-      margin: 5px 0 0;  
-      color: #777d73;  
-      font-size: 11px;  
-      line-height: 1.7;  
-    }  
-
-    .dashboard-alert {  
-      margin: 13px 0;  
-      padding: 12px 13px;  
-      border: 1px solid #f0d5a9;  
-      border-radius: 11px;  
-      background: #fff5e4;  
-      color: #89591b;  
-      font-size: 12px;  
-      line-height: 1.7;  
-    }  
-
-    .dashboard-footer {  
-      display: flex;  
-      align-items: center;  
-      gap: 13px;  
-      border-top: 1px solid #e4ddd1;  
-      padding-top: 22px;  
-      margin-top: 36px;  
-      margin-bottom: 20px;  
-    }  
-
-    .dashboard-footer-logo {  
-      display: block;  
-      width: 43px;  
-      height: 43px;  
-      flex: 0 0 43px;  
-      border-radius: 10px;  
-      object-fit: contain;  
-      background: #fff;  
-    }  
-
-    .dashboard-footer-copy {  
-      min-width: 0;  
-    }  
-
-    .dashboard-footer-copy strong {  
-      display: block;  
-      color: #214d32;  
-      font-size: 13px;  
-      line-height: 1.5;  
-    }  
-
-    .dashboard-footer-copy p {  
-      margin: 4px 0 0;  
-      color: #8a6a4a;  
-      font-size: 11px;  
-      line-height: 1.5;  
-    }  
-
-    .dashboard-footer-copy small {  
-      display: block;  
-      margin-top: 3px;  
-      color: #999387;  
-      font-size: 10px;  
-      line-height: 1.5;  
-    }  
-
-    @media (max-width: 380px) {  
-      .dashboard-container {  
-        width: calc(100% - 24px);  
-      }  
-
-      .dashboard-welcome {  
-        padding: 22px 18px;  
-      }  
-
-      .dashboard-summary-grid {  
-        gap: 9px;  
-      }  
-
-      .dashboard-summary-card {  
-        padding: 13px;  
-      }  
-
-      .dashboard-summary-value {  
-        font-size: 24px;  
-      }  
-
-      .dashboard-card {  
-        padding: 15px;  
-      }  
-
-      .dashboard-status {  
-        max-width: 120px;  
-        font-size: 9px;  
-      }  
-
-      .dashboard-subscription {  
-        align-items: flex-start;  
-      }  
-    }  
-
-    @media (prefers-reduced-motion: reduce) {  
-      .dashboard-page *,  
-      .dashboard-page *::before,  
-      .dashboard-page *::after {  
-        animation-duration: 0.01ms !important;  
-        transition-duration: 0.01ms !important;  
-      }  
-    }  
-  `}</style>  
-
-  <header className="dashboard-header">  
-    <div className="dashboard-container dashboard-header-inner">  
-      <a href="/" className="dashboard-brand">  
-        <img  
-          src={logo}  
-          alt="Logo Pajara Studio"  
-          className="dashboard-logo"  
-          width={39}  
-          height={39}  
-          style={{  
-            display: "block",  
-            width: "39px",  
-            height: "39px",  
-            minWidth: "39px",  
-            maxWidth: "39px",  
-            minHeight: "39px",  
-            maxHeight: "39px",  
-            objectFit: "cover",  
-            borderRadius: "12px",  
-            flexShrink: 0,  
-          }}  
-        />  
-        <span>Pajara Studio</span>  
-      </a>  
-
-      <div className="dashboard-header-actions">  
-        <button  
-          type="button"  
-          className={`dashboard-menu-button ${  
-            menuOpen ? "is-open" : ""  
-          }`}  
-          aria-label={menuOpen ? "Tutup menu" : "Buka menu"}  
-          aria-expanded={menuOpen}  
-          onClick={() => setMenuOpen((current) => !current)}  
-        >  
-          <span />  
-          <span />  
-        </button>  
-
-        <a href="/order" className="dashboard-header-link">  
-          Pesan Desain <span aria-hidden="true">↗</span>  
-        </a>  
-      </div>  
-    </div>  
-
-    {menuOpen && (  
-      <nav className="dashboard-menu" aria-label="Navigasi dashboard">  
-        <p className="dashboard-menu-label">MENU PELANGGAN</p>  
-
-        <a href="/dashboard" onClick={() => setMenuOpen(false)}>  
-          Dashboard <span>↗</span>  
-        </a>  
-
-        <a href="/orders/list" onClick={() => setMenuOpen(false)}>  
-          Pesanan Saya <span>↗</span>  
-        </a>  
-
-        <a href="/subscriptions" onClick={() => setMenuOpen(false)}>  
-          Paket Desain <span>↗</span>  
-        </a>  
-
-        <a href="/payments" onClick={() => setMenuOpen(false)}>  
-          Pembayaran <span>↗</span>  
-        </a>  
-      </nav>  
-    )}  
-  </header>  
-
-  <section className="dashboard-main">  
-    <div className="dashboard-container">  
-      <section className="dashboard-welcome">  
-        <p className="dashboard-eyebrow">Ruang Pelanggan Pajara</p>  
-
-        <h1>  
-          Wilujeng sumping,  
-          <br />  
-          <span>{customerName}.</span>  
-        </h1>  
-
-        <p className="description">  
-          Pantau pesanan dan kebutuhan desain Kang/Teh, semua dari satu  
-          tempat.  
-        </p>  
-
-        <div className="dashboard-welcome-actions">  
-          <a href="/order" className="dashboard-button">  
-            Pesan Desain <span aria-hidden="true">↗</span>  
-          </a>  
-          <a href="/orders/list" className="dashboard-button secondary">  
-            Lihat Pesanan  
-          </a>  
-        </div>  
-      </section>  
-
-      {error && (  
-        <div className="dashboard-alert" role="alert">  
-          {error}{" "}  
-          <a  
-            href="/login"  
-            style={{ color: "inherit", fontWeight: 800 }}  
-          >  
-            Login kembali  
-          </a>  
-        </div>  
-      )}  
-
-      <section className="dashboard-section">  
-        <div className="dashboard-section-heading">  
-          <div>  
-            <h2>Ringkasan Anda</h2>  
-            <p>Informasi penting tanpa perlu membuka banyak menu.</p>  
-          </div>  
-        </div>  
-
-        <div className="dashboard-summary-grid">  
-          <a href="/orders/list" className="dashboard-summary-card">  
-            <p className="dashboard-summary-label">Pesanan aktif</p>  
-            <strong className="dashboard-summary-value">  
-              {activeOrders.length}  
-            </strong>  
-            <p className="dashboard-summary-note">  
-              Pesanan yang masih berjalan  
-            </p>  
-          </a>  
-
-          <a  
-            href={  
-              paymentOrders[0]  
-                ? `/orders/payment?id=${encodeURIComponent(paymentOrders[0].id)}`  
-                : "/payments"  
-            }  
-            className="dashboard-summary-card"  
-          >  
-            <p className="dashboard-summary-label">Perlu pembayaran</p>  
-            <strong className="dashboard-summary-value">  
-              {paymentOrders.length}  
-            </strong>  
-            <p className="dashboard-summary-note">  
-              Pesanan menunggu DP atau pelunasan  
-            </p>  
-          </a>  
-        </div>  
-      </section>  
-
-      <section className="dashboard-section">  
-        <div className="dashboard-section-heading">  
-          <div>  
-            <h2>Pesanan terbaru</h2>  
-            <p>Lihat perkembangan pesanan terakhir Kang/Teh.</p>  
-          </div>  
-
-          <a href="/orders/list" className="dashboard-text-link">  
-            Semua pesanan ↗  
-          </a>  
-        </div>  
-
-        {latestOrder ? (  
-          <article className="dashboard-card">  
-            <div className="dashboard-order-top">  
-              <div>  
-                <p className="dashboard-order-code">  
-                  {latestOrder.order_code}  
-                </p>  
-                <h3 className="dashboard-order-name">  
-                  {latestOrder.service_name || "Layanan desain"}  
-                </h3>  
-              </div>  
-
-              <span  
-                className={`dashboard-status ${statusClass(  
-                  latestOrder.status  
-                )}`}  
-              >  
-                {statusLabel(latestOrder.status)}  
-              </span>  
-            </div>  
-
-            <p className="dashboard-order-meta">  
-              {latestOrder.design_type || "Desain"} ·{" "}  
-              {latestOrder.quantity || 1} desain  
-            </p>  
-
-            <p className="dashboard-order-meta">  
-              Tenggat: {formatDate(latestOrder.deadline)}  
-            </p>  
-
-            <a  
-              href={`/orders?id=${encodeURIComponent(latestOrder.id)}`}  
-              className="dashboard-card-link"  
-            >  
-              Lihat detail pesanan <span aria-hidden="true">↗</span>  
-            </a>  
-          </article>  
-        ) : (  
-          <div className="dashboard-empty">  
-            <strong>Belum ada pesanan desain.</strong>  
-            <p>  
-              Saat Kang/Teh siap, buat pesanan pertama dan pantau  
-              perkembangannya dari dashboard ini.  
-            </p>  
-            <a href="/order" className="dashboard-card-link">  
-              Buat pesanan pertama ↗  
-            </a>  
-          </div>  
-        )}  
-      </section>  
-
-      <section className="dashboard-section">  
-        <div className="dashboard-section-heading">  
-          <div>  
-            <h2>Paket desain</h2>  
-            <p>Ringkasan langganan Kang/Teh.</p>  
-          </div>  
-
-          <a href="/subscriptions" className="dashboard-text-link">  
-            Lihat paket ↗  
-          </a>  
-        </div>  
-
-        <div className="dashboard-card">  
-          {currentSubscription ? (  
-            <div className="dashboard-subscription">  
-              <div className="dashboard-subscription-icon">✳</div>  
-
-              <div className="dashboard-subscription-content">  
-                <strong>  
-                  {currentPlan?.name ||  
-                    (isSubscriptionPending  
-                      ? "Paket menunggu pembayaran"  
-                      : "Paket langganan")}  
-                </strong>  
-
-                {isSubscriptionPending ? (  
-                  <>  
-                    <p>  
-                      Paket belum aktif. Lanjutkan pembayaran agar dapat  
-                      digunakan setelah diverifikasi.  
-                    </p>  
-                    <a  
-                      href={`/subscriptions/payment?subscription=${encodeURIComponent(  
-                        currentSubscription.id  
-                      )}`}  
-                      className="dashboard-card-link"  
-                    >  
-                      Lanjutkan pembayaran ↗  
-                    </a>  
-                  </>  
-                ) : isSubscriptionActive ? (  
-                  <>  
-                    <p>  
-                      Sisa kuota: {remainingQuota} dari{" "}  
-                      {currentSubscription.quota_total} desain.  
-                    </p>  
-                    <p>  
-                      Berakhir: {formatDate(currentSubscription.expires_at)}  
-                    </p>  
-                    <a  
-                      href="/subscriptions/request"  
-                      className="dashboard-card-link"  
-                    >  
-                      Pesan desain dengan paket ↗  
-                    </a>  
-                  </>  
-                ) : (  
-                  <p>  
-                    Paket ini sudah tidak aktif. Lihat pilihan paket  
-                    terbaru untuk melanjutkan.  
-                  </p>  
-                )}  
-              </div>  
-            </div>  
-          ) : (  
-            <div className="dashboard-subscription">  
-              <div className="dashboard-subscription-icon">✳</div>  
-
-              <div className="dashboard-subscription-content">  
-                <strong>Belum berlangganan paket</strong>  
-                <p>  
-                  Paket mingguan dan bulanan tersedia untuk kebutuhan  
-                  desain yang berkelanjutan.  
-                </p>  
-                <a href="/subscriptions" className="dashboard-card-link">  
-                  Lihat pilihan paket ↗  
-                </a>  
-              </div>  
-            </div>  
-          )}  
-        </div>  
-      </section>  
-
-      <footer className="dashboard-footer">  
-        <img  
-          src={logo}  
-          alt="Logo Pajara Studio"  
-          width={43}  
-          height={43}  
-          className="dashboard-footer-logo"  
-        />  
-
-        <div className="dashboard-footer-copy">  
-          <strong>Pajara Studio</strong>  
-          <p>Berakar di Tanah Pasundan.</p>  
-          <small>  
-            © 2026 Pajara Studio. Desain yang punya arah.  
-          </small>  
-        </div>  
-      </footer>  
-    </div>  
-  </section>  
-
-  <CustomerBottomNav />  
-</main>
-
-);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDashboard = async () => {
+      setLoading(true);
+      setError("");
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        if (mounted) {
+          setError("Sesi login tidak ditemukan. Silakan login kembali.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (mounted) {
+        setCustomerName(
+          user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            "Pelanggan Pajara"
+        );
+      }
+
+      const [ordersResult, subscriptionsResult, plansResult] =
+        await Promise.all([
+          supabase
+            .from("orders")
+            .select(
+              "id, order_code, service_name, design_type, quantity, status, deadline"
+            )
+            .eq("customer_id", user.id)
+            .order("created_at", { ascending: false }),
+
+          supabase
+            .from("subscriptions")
+            .select(
+              "id, plan_id, expires_at, quota_total, quota_used, status"
+            )
+            .eq("customer_id", user.id)
+            .order("created_at", { ascending: false }),
+
+          supabase
+            .from("subscription_plans")
+            .select("id, name")
+            .eq("is_active", true)
+            .order("price", { ascending: true }),
+        ]);
+
+      if (!mounted) return;
+
+      if (ordersResult.error) {
+        setError("Pesanan belum dapat dimuat. Silakan muat ulang halaman.");
+      } else {
+        setOrders(ordersResult.data || []);
+      }
+
+      setSubscriptions(
+        subscriptionsResult.error ? [] : subscriptionsResult.data || []
+      );
+      setPlans(plansResult.error ? [] : plansResult.data || []);
+
+      setLoading(false);
+    };
+
+    loadDashboard();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const statusLabel = (status: string | null) => {
+    switch (status) {
+      case "pending":
+        return "Pesanan Baru";
+      case "waiting_dp":
+        return "Menunggu Pembayaran DP";
+      case "processing":
+        return "Sedang Diproses";
+      case "revision":
+        return "Dalam Revisi";
+      case "waiting_payment":
+        return "Menunggu Pelunasan";
+      case "completed":
+        return "Selesai";
+      case "cancelled":
+        return "Dibatalkan";
+      default:
+        return status || "Menunggu";
+    }
+  };
+
+  const statusClass = (status: string | null) => {
+    switch (status) {
+      case "completed":
+        return "status-completed";
+      case "processing":
+        return "status-processing";
+      case "revision":
+        return "status-revision";
+      case "cancelled":
+        return "status-cancelled";
+      case "waiting_payment":
+      case "waiting_dp":
+        return "status-payment";
+      default:
+        return "status-pending";
+    }
+  };
+
+  const formatDate = (date: string | null) => {
+    if (!date) return "Belum ditentukan";
+
+    return new Date(date).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const now = Date.now();
+
+  const currentSubscription =
+    subscriptions.find(
+      (item) =>
+        item.status === "active" &&
+        !!item.expires_at &&
+        new Date(item.expires_at).getTime() > now
+    ) ||
+    subscriptions.find((item) => item.status === "pending") ||
+    null;
+
+  const currentPlan = currentSubscription
+    ? plans.find((plan) => plan.id === currentSubscription.plan_id)
+    : undefined;
+
+  const isSubscriptionPending = currentSubscription?.status === "pending";
+
+  const isSubscriptionActive =
+    currentSubscription?.status === "active" &&
+    !!currentSubscription.expires_at &&
+    new Date(currentSubscription.expires_at).getTime() > now;
+
+  const remainingQuota = currentSubscription
+    ? Math.max(
+        0,
+        currentSubscription.quota_total - currentSubscription.quota_used
+      )
+    : 0;
+
+  const activeOrders = orders.filter(
+    (order) =>
+      order.status !== "completed" && order.status !== "cancelled"
+  );
+
+  const paymentOrders = orders.filter(
+    (order) =>
+      order.status === "waiting_dp" ||
+      order.status === "waiting_payment"
+  );
+
+  const latestOrder = orders[0] || null;
+
+  if (loading) {
+    return (
+      <main className="pajara-loading-screen">
+        <div className="pajara-loading-orb pajara-loading-orb-one" />
+        <div className="pajara-loading-orb pajara-loading-orb-two" />
+        <div className="pajara-loading-orb pajara-loading-orb-three" />
+
+        <div className="pajara-loading-glass">
+          <div className="pajara-loading-logo-wrap">
+            <img
+              src={logo}
+              alt="Pajara Studio"
+              className="pajara-loading-logo"
+            />
+          </div>
+
+          <p className="pajara-loading-brand">PAJARA STUDIO</p>
+
+          <h1 className="pajara-loading-title">
+            Menyiapkan Dashboard
+          </h1>
+
+          <p className="pajara-loading-description">
+            Sebentar, kami sedang menyiapkan ruang pelanggan Kang/Teh.
+          </p>
+
+          <div className="pajara-loading-track">
+            <div className="pajara-loading-progress" />
+          </div>
+
+          <div className="pajara-loading-footer">
+            DESAIN YANG PUNYA ARAH.
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="dashboard-page">
+      <header className="dashboard-header">
+        <div className="dashboard-container dashboard-header-inner">
+          <a href="/" className="dashboard-brand">
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              className="dashboard-logo"
+              width={39}
+              height={39}
+            />
+            <span>Pajara Studio</span>
+          </a>
+
+          <div className="dashboard-header-actions">
+            <button
+              type="button"
+              className={`dashboard-menu-button ${
+                menuOpen ? "is-open" : ""
+              }`}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
+            >
+              <span />
+              <span />
+            </button>
+
+            <a href="/order" className="dashboard-header-link">
+              Pesan Desain <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+
+        {menuOpen && (
+          <nav className="dashboard-menu" aria-label="Navigasi dashboard">
+            <p className="dashboard-menu-label">MENU PELANGGAN</p>
+
+            <a href="/dashboard" onClick={() => setMenuOpen(false)}>
+              Dashboard <span>↗</span>
+            </a>
+
+            <a href="/orders/list" onClick={() => setMenuOpen(false)}>
+              Pesanan Saya <span>↗</span>
+            </a>
+
+            <a href="/subscriptions" onClick={() => setMenuOpen(false)}>
+              Paket Desain <span>↗</span>
+            </a>
+
+            <a href="/payments" onClick={() => setMenuOpen(false)}>
+              Pembayaran <span>↗</span>
+            </a>
+          </nav>
+        )}
+      </header>
+
+      <section className="dashboard-main">
+        <div className="dashboard-container">
+          <section className="dashboard-welcome">
+            <p className="dashboard-eyebrow">Ruang Pelanggan Pajara</p>
+
+            <h1>
+              Wilujeng sumping,
+              <br />
+              <span>{customerName}.</span>
+            </h1>
+
+            <p className="description">
+              Pantau pesanan dan kebutuhan desain Kang/Teh, semua dari satu
+              tempat.
+            </p>
+
+            <div className="dashboard-welcome-actions">
+              <a href="/order" className="dashboard-button">
+                Pesan Desain <span aria-hidden="true">↗</span>
+              </a>
+
+              <a href="/orders/list" className="dashboard-button secondary">
+                Lihat Pesanan
+              </a>
+            </div>
+          </section>
+
+          {error && (
+            <div className="dashboard-alert" role="alert">
+              {error}{" "}
+              <a href="/login" className="dashboard-alert-link">
+                Login kembali
+              </a>
+            </div>
+          )}
+
+          <section className="dashboard-section">
+            <div className="dashboard-section-heading">
+              <div>
+                <h2>Ringkasan Anda</h2>
+                <p>Informasi penting tanpa perlu membuka banyak menu.</p>
+              </div>
+            </div>
+
+            <div className="dashboard-summary-grid">
+              <a href="/orders/list" className="dashboard-summary-card">
+                <p className="dashboard-summary-label">Pesanan aktif</p>
+                <strong className="dashboard-summary-value">
+                  {activeOrders.length}
+                </strong>
+                <p className="dashboard-summary-note">
+                  Pesanan yang masih berjalan
+                </p>
+              </a>
+
+              <a
+                href={
+                  paymentOrders[0]
+                    ? `/orders/payment?id=${encodeURIComponent(
+                        paymentOrders[0].id
+                      )}`
+                    : "/payments"
+                }
+                className="dashboard-summary-card"
+              >
+                <p className="dashboard-summary-label">Perlu pembayaran</p>
+                <strong className="dashboard-summary-value">
+                  {paymentOrders.length}
+                </strong>
+                <p className="dashboard-summary-note">
+                  Pesanan menunggu DP atau pelunasan
+                </p>
+              </a>
+            </div>
+          </section>
+
+          <section className="dashboard-section">
+            <div className="dashboard-section-heading">
+              <div>
+                <h2>Pesanan terbaru</h2>
+                <p>Lihat perkembangan pesanan terakhir Kang/Teh.</p>
+              </div>
+
+              <a href="/orders/list" className="dashboard-text-link">
+                Semua pesanan ↗
+              </a>
+            </div>
+
+            {latestOrder ? (
+              <article className="dashboard-card">
+                <div className="dashboard-order-top">
+                  <div>
+                    <p className="dashboard-order-code">
+                      {latestOrder.order_code}
+                    </p>
+                    <h3 className="dashboard-order-name">
+                      {latestOrder.service_name || "Layanan desain"}
+                    </h3>
+                  </div>
+
+                  <span
+                    className={`dashboard-status ${statusClass(
+                      latestOrder.status
+                    )}`}
+                  >
+                    {statusLabel(latestOrder.status)}
+                  </span>
+                </div>
+
+                <p className="dashboard-order-meta">
+                  {latestOrder.design_type || "Desain"} ·{" "}
+                  {latestOrder.quantity || 1} desain
+                </p>
+
+                <p className="dashboard-order-meta">
+                  Tenggat: {formatDate(latestOrder.deadline)}
+                </p>
+
+                <a
+                  href={`/orders?id=${encodeURIComponent(latestOrder.id)}`}
+                  className="dashboard-card-link"
+                >
+                  Lihat detail pesanan <span aria-hidden="true">↗</span>
+                </a>
+              </article>
+            ) : (
+              <div className="dashboard-empty">
+                <strong>Belum ada pesanan desain.</strong>
+                <p>
+                  Saat Kang/Teh siap, buat pesanan pertama dan pantau
+                  perkembangannya dari dashboard ini.
+                </p>
+                <a href="/order" className="dashboard-card-link">
+                  Buat pesanan pertama ↗
+                </a>
+              </div>
+            )}
+          </section>
+
+          <section className="dashboard-section">
+            <div className="dashboard-section-heading">
+              <div>
+                <h2>Paket desain</h2>
+                <p>Ringkasan langganan Kang/Teh.</p>
+              </div>
+
+              <a href="/subscriptions" className="dashboard-text-link">
+                Lihat paket ↗
+              </a>
+            </div>
+
+            <div className="dashboard-card">
+              {currentSubscription ? (
+                <div className="dashboard-subscription">
+                  <div className="dashboard-subscription-icon">✳</div>
+
+                  <div className="dashboard-subscription-content">
+                    <strong>
+                      {currentPlan?.name ||
+                        (isSubscriptionPending
+                          ? "Paket menunggu pembayaran"
+                          : "Paket langganan")}
+                    </strong>
+
+                    {isSubscriptionPending ? (
+                      <>
+                        <p>
+                          Paket belum aktif. Lanjutkan pembayaran agar dapat
+                          digunakan setelah diverifikasi.
+                        </p>
+                        <a
+                          href={`/subscriptions/payment?subscription=${encodeURIComponent(
+                            currentSubscription.id
+                          )}`}
+                          className="dashboard-card-link"
+                        >
+                          Lanjutkan pembayaran ↗
+                        </a>
+                      </>
+                    ) : isSubscriptionActive ? (
+                      <>
+                        <p>
+                          Sisa kuota: {remainingQuota} dari{" "}
+                          {currentSubscription.quota_total} desain.
+                        </p>
+                        <p>
+                          Berakhir: {formatDate(currentSubscription.expires_at)}
+                        </p>
+                        <a
+                          href="/subscriptions/request"
+                          className="dashboard-card-link"
+                        >
+                          Pesan desain dengan paket ↗
+                        </a>
+                      </>
+                    ) : (
+                      <p>
+                        Paket ini sudah tidak aktif. Lihat pilihan paket
+                        terbaru untuk melanjutkan.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="dashboard-subscription">
+                  <div className="dashboard-subscription-icon">✳</div>
+
+                  <div className="dashboard-subscription-content">
+                    <strong>Belum berlangganan paket</strong>
+                    <p>
+                      Paket mingguan dan bulanan tersedia untuk kebutuhan
+                      desain yang berkelanjutan.
+                    </p>
+                    <a href="/subscriptions" className="dashboard-card-link">
+                      Lihat pilihan paket ↗
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <footer className="dashboard-footer">
+            <img
+              src={logo}
+              alt="Logo Pajara Studio"
+              width={43}
+              height={43}
+              className="dashboard-footer-logo"
+            />
+
+            <div className="dashboard-footer-copy">
+              <strong>Pajara Studio</strong>
+              <p>Berakar di Tanah Pasundan.</p>
+              <small>
+                © 2026 Pajara Studio. Desain yang punya arah.
+              </small>
+            </div>
+          </footer>
+        </div>
+      </section>
+
+      <CustomerBottomNav />
+    </main>
+  );
 }
