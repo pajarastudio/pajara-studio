@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
+import "./home.css";
+import { useEffect, useRef, useState } from "react";
 
 const logo = "/755809946_17926162029385149_3739923509439876817_n.jpg";
 
