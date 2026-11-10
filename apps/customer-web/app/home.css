@@ -1,0 +1,1142 @@
+
+:root {
+  --pajara-green: #2f6b45;
+  --pajara-deep: #214d32;
+  --pajara-brown: #8a6a4a;
+  --pajara-cream: #f7f4ee;
+  --pajara-ink: #252a25;
+  --pajara-muted: #70766f;
+  --pajara-line: rgba(33, 77, 50, 0.13);
+}
+
+.pajara-home {
+  min-height: 100vh;
+  overflow: clip;
+  color: var(--pajara-ink);
+  background: var(--pajara-cream);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.pajara-home *,
+.pajara-home *::before,
+.pajara-home *::after {
+  box-sizing: border-box;
+}
+
+.pajara-home .pajara-container {
+  width: min(1120px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.pajara-home .pajara-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: rgba(247, 244, 238, 0.94);
+  border-bottom: 1px solid var(--pajara-line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.pajara-home .pajara-navbar-inner {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.pajara-home .pajara-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--pajara-deep);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}
+
+.pajara-home .pajara-brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.pajara-home .pajara-nav {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.pajara-home .pajara-nav a {
+  color: var(--pajara-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.pajara-home .pajara-nav a:hover {
+  color: var(--pajara-green);
+}
+
+.pajara-home .pajara-nav .pajara-nav-cta {
+  padding: 11px 18px;
+  color: white;
+  background: var(--pajara-green);
+  border-radius: 999px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.pajara-home .pajara-nav .pajara-nav-cta:hover {
+  color: white;
+  background: var(--pajara-deep);
+  transform: translateY(-1px);
+}
+
+.pajara-home .pajara-menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pajara-line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--pajara-deep);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.pajara-home .pajara-hero {
+  position: relative;
+  padding: 94px 0 86px;
+  background:
+    radial-gradient(circle at 85% 18%, rgba(138, 106, 74, 0.1), transparent 26%),
+    radial-gradient(circle at 7% 90%, rgba(47, 107, 69, 0.09), transparent 27%);
+}
+
+.pajara-home .pajara-hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 66px;
+}
+
+.pajara-home .pajara-hero-content {
+  position: relative;
+  z-index: 2;
+  animation: pajara-rise 700ms ease both;
+}
+
+.pajara-home .pajara-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 22px;
+  color: var(--pajara-green);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+}
+
+.pajara-home .pajara-eyebrow::before {
+  width: 25px;
+  height: 1px;
+  background: var(--pajara-brown);
+  content: "";
+}
+
+.pajara-home .pajara-hero h1 {
+  max-width: 620px;
+  margin: 0;
+  color: var(--pajara-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(43px, 5.7vw, 70px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -2.8px;
+}
+
+.pajara-home .pajara-hero h1 span {
+  color: var(--pajara-brown);
+  font-style: italic;
+}
+
+.pajara-home .pajara-hero-description {
+  max-width: 465px;
+  margin: 23px 0 0;
+  color: var(--pajara-muted);
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+.pajara-home .pajara-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.pajara-home .pajara-button {
+  display: inline-flex;
+  min-height: 49px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 23px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.pajara-home .pajara-button:hover {
+  transform: translateY(-2px);
+}
+
+.pajara-home .pajara-button-primary {
+  color: white;
+  background: var(--pajara-green);
+}
+
+.pajara-home .pajara-button-primary:hover {
+  background: var(--pajara-deep);
+}
+
+.pajara-home .pajara-button-secondary {
+  color: var(--pajara-deep);
+  border-color: var(--pajara-line);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.pajara-home .pajara-button-secondary:hover {
+  border-color: var(--pajara-green);
+  background: white;
+}
+
+.pajara-home .pajara-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 27px;
+  color: var(--pajara-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.pajara-home .pajara-note-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--pajara-green);
+  box-shadow: 0 0 0 4px rgba(47, 107, 69, 0.1);
+}
+
+.pajara-home .pajara-hero-art {
+  position: relative;
+  isolation: isolate;
+  min-height: 410px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pajara-rise 850ms 100ms ease both;
+}
+
+.pajara-home .pajara-art-card {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 300px);
+  padding: 28px;
+  overflow: hidden;
+  color: white;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.1), transparent 35%),
+    linear-gradient(145deg, #285b3b, var(--pajara-deep) 72%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 24px;
+  box-shadow: 0 32px 70px rgba(33, 77, 50, 0.2), 0 8px 20px rgba(33, 77, 50, 0.08);
+  transform: rotate(-3deg);
+  animation: pajara-float 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.pajara-home .pajara-art-card::before {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  content: "";
+  pointer-events: none;
+}
+
+.pajara-home .pajara-art-card::after {
+  position: absolute;
+  top: -76px;
+  right: -68px;
+  width: 185px;
+  height: 185px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(255, 255, 255, 0.025), 0 0 0 38px rgba(255, 255, 255, 0.02);
+  content: "";
+  pointer-events: none;
+}
+
+.pajara-home .pajara-art-card-label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d7dfd5;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.pajara-home .pajara-art-card-label::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c8ad8f;
+  box-shadow: 0 0 0 4px rgba(200, 173, 143, 0.12);
+  content: "";
+}
+
+.pajara-home .pajara-art-logo-frame {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 86px;
+  height: 86px;
+  align-items: center;
+  justify-content: center;
+  margin: 34px 0 26px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 24px;
+  background: rgba(247, 244, 238, 0.96);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 0 0 4px rgba(255, 255, 255, 0.38);
+  transform: rotate(-2deg);
+  transition: transform 350ms ease, box-shadow 350ms ease;
+}
+
+.pajara-home .pajara-art-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pajara-home .pajara-art-card:hover .pajara-art-logo-frame {
+  transform: rotate(0deg) scale(1.04);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.17);
+}
+
+.pajara-home .pajara-art-card h2 {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.7px;
+}
+
+.pajara-home .pajara-art-card p {
+  position: relative;
+  z-index: 2;
+  margin: 10px 0 0;
+  color: #d7dfd5;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.pajara-home .pajara-art-shape {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.pajara-home .pajara-art-shape-one {
+  z-index: 1;
+  top: 52px;
+  right: 24px;
+  width: 235px;
+  height: 290px;
+  border: 1px solid rgba(138, 106, 74, 0.35);
+  border-radius: 36px 13px 36px 13px;
+  background: linear-gradient(145deg, rgba(200, 173, 143, 0.28), rgba(200, 173, 143, 0.05));
+  transform: rotate(12deg);
+  animation: pajara-sheet-one 7s ease-in-out infinite;
+}
+
+.pajara-home .pajara-art-shape-two {
+  z-index: 2;
+  top: 72px;
+  left: 14px;
+  width: 210px;
+  height: 255px;
+  border: 1px solid rgba(47, 107, 69, 0.2);
+  border-radius: 12px 34px 12px 34px;
+  background: linear-gradient(155deg, rgba(47, 107, 69, 0.12), rgba(47, 107, 69, 0.025));
+  transform: rotate(-13deg);
+  animation: pajara-sheet-two 8s ease-in-out infinite;
+}
+
+.pajara-home .pajara-art-shape-three {
+  z-index: 0;
+  right: 32px;
+  bottom: 31px;
+  width: 130px;
+  height: 115px;
+  border: 1px solid rgba(138, 106, 74, 0.4);
+  border-radius: 9px 30px 9px 30px;
+  background: linear-gradient(135deg, rgba(138, 106, 74, 0.16), rgba(138, 106, 74, 0.035));
+  transform: rotate(24deg);
+  animation: pajara-sheet-three 6s ease-in-out infinite;
+}
+
+.pajara-home .pajara-art-shape-one::before,
+.pajara-home .pajara-art-shape-two::before,
+.pajara-home .pajara-art-shape-three::before {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  left: 18px;
+  height: 1px;
+  background: rgba(138, 106, 74, 0.32);
+  content: "";
+}
+
+.pajara-home .pajara-art-shape-two::before {
+  background: rgba(47, 107, 69, 0.27);
+}
+
+.pajara-home .pajara-art-shape-three::before {
+  background: rgba(138, 106, 74, 0.4);
+}
+
+.pajara-home .pajara-art-shape-one::after,
+.pajara-home .pajara-art-shape-two::after {
+  position: absolute;
+  top: 30px;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: rgba(138, 106, 74, 0.45);
+  content: "";
+}
+
+.pajara-home .pajara-art-shape-two::after {
+  color: rgba(47, 107, 69, 0.35);
+}
+
+.pajara-home .pajara-trust-strip {
+  border-top: 1px solid var(--pajara-line);
+  border-bottom: 1px solid var(--pajara-line);
+  background: rgba(255, 255, 255, 0.27);
+}
+
+.pajara-home .pajara-trust-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-block: 23px;
+}
+
+.pajara-home .pajara-trust-item {
+  padding: 5px 20px;
+  text-align: center;
+}
+
+.pajara-home .pajara-trust-item + .pajara-trust-item {
+  border-left: 1px solid var(--pajara-line);
+}
+
+.pajara-home .pajara-trust-item strong {
+  display: block;
+  color: var(--pajara-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.pajara-home .pajara-trust-item span {
+  display: block;
+  margin-top: 5px;
+  color: var(--pajara-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.pajara-home .pajara-section {
+  padding: 94px 0;
+}
+
+.pajara-home .pajara-section-heading {
+  max-width: 600px;
+  margin-bottom: 39px;
+}
+
+.pajara-home .pajara-section-heading .pajara-eyebrow {
+  margin-bottom: 15px;
+}
+
+.pajara-home .pajara-section-heading h2 {
+  margin: 0;
+  color: var(--pajara-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 4vw, 47px);
+  font-weight: 500;
+  line-height: 1.17;
+  letter-spacing: -1.4px;
+}
+
+.pajara-home .pajara-section-heading > p:last-child {
+  max-width: 510px;
+  margin: 15px 0 0;
+  color: var(--pajara-muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.pajara-home .pajara-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.pajara-home .pajara-step {
+  min-height: 245px;
+  padding: 24px 21px;
+  border: 1px solid var(--pajara-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.pajara-home .pajara-step:hover {
+  transform: translateY(-5px);
+  border-color: rgba(47, 107, 69, 0.36);
+  box-shadow: 0 16px 40px rgba(33, 77, 50, 0.06);
+}
+
+.pajara-home .pajara-step-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.pajara-home .pajara-step-number {
+  color: var(--pajara-brown);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.pajara-home .pajara-step-icon {
+  display: flex;
+  width: 39px;
+  height: 39px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--pajara-green);
+  background: rgba(47, 107, 69, 0.08);
+  font-size: 19px;
+}
+
+.pajara-home .pajara-step h3 {
+  margin: 0 0 10px;
+  color: var(--pajara-deep);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.pajara-home .pajara-step p {
+  margin: 0;
+  color: var(--pajara-muted);
+  font-size: 11px;
+  line-height: 1.9;
+}
+
+.pajara-home .pajara-facilities-section {
+  background: #eeece4;
+}
+
+.pajara-home .pajara-facilities-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: start;
+  gap: 72px;
+}
+
+.pajara-home .pajara-facilities-intro {
+  position: sticky;
+  top: 115px;
+}
+
+.pajara-home .pajara-facilities-intro h2 {
+  margin: 0;
+  color: var(--pajara-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(33px, 4vw, 47px);
+  font-weight: 500;
+  line-height: 1.18;
+  letter-spacing: -1.4px;
+}
+
+.pajara-home .pajara-facilities-intro > p {
+  margin: 18px 0 24px;
+  color: var(--pajara-muted);
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+.pajara-home .pajara-facilities-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.pajara-home .pajara-facility {
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid rgba(33, 77, 50, 0.12);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.45);
+  transition: transform 200ms ease, background 200ms ease;
+}
+
+.pajara-home .pajara-facility:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.pajara-home .pajara-facility-icon {
+  display: flex;
+  width: 37px;
+  height: 37px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  color: white;
+  background: var(--pajara-green);
+  font-size: 16px;
+}
+
+.pajara-home .pajara-facility h3 {
+  margin: 0 0 8px;
+  color: var(--pajara-deep);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pajara-home .pajara-facility p {
+  margin: 0;
+  color: var(--pajara-muted);
+  font-size: 11px;
+  line-height: 1.85;
+}
+
+.pajara-home .pajara-quote {
+  padding: 73px 0;
+  color: white;
+  background: var(--pajara-deep);
+}
+
+.pajara-home .pajara-quote-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 36px;
+}
+
+.pajara-home .pajara-quote .pajara-eyebrow {
+  color: #d3dfd0;
+}
+
+.pajara-home .pajara-quote h2 {
+  max-width: 680px;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 4.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.17;
+  letter-spacing: -1.4px;
+}
+
+.pajara-home .pajara-quote h2 em {
+  color: #c8ad8f;
+  font-weight: 400;
+}
+
+.pajara-home .pajara-quote p {
+  max-width: 550px;
+  margin: 16px 0 0;
+  color: #d2dbd0;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.pajara-home .pajara-quote .pajara-button-primary {
+  flex-shrink: 0;
+  color: var(--pajara-deep);
+  background: var(--pajara-cream);
+}
+
+.pajara-home .pajara-quote .pajara-button-primary:hover {
+  background: white;
+}
+
+.pajara-home .pajara-footer {
+  padding: 26px 0;
+  background: var(--pajara-cream);
+}
+
+.pajara-home .pajara-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.pajara-home .pajara-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pajara-deep);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pajara-home .pajara-footer-brand img {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.pajara-home .pajara-footer p {
+  margin: 0;
+  color: var(--pajara-muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.pajara-home .pajara-footer-links {
+  display: flex;
+  gap: 17px;
+}
+
+.pajara-home .pajara-footer-links a {
+  color: var(--pajara-muted);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.pajara-home .pajara-footer-links a:hover {
+  color: var(--pajara-green);
+}
+
+.pajara-home .pajara-reveal,
+.pajara-home .pajara-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.pajara-home .pajara-reveal-delay-1,
+.pajara-home .pajara-reveal-delay-2,
+.pajara-home .pajara-reveal-delay-3 {
+  transition-delay: 0ms;
+}
+
+@keyframes pajara-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pajara-float {
+  0%, 100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
+  }
+}
+
+@keyframes pajara-sheet-one {
+  0%, 100% {
+    transform: rotate(12deg) translate(0, 0);
+  }
+  50% {
+    transform: rotate(15deg) translate(5px, -8px);
+  }
+}
+
+@keyframes pajara-sheet-two {
+  0%, 100% {
+    transform: rotate(-13deg) translate(0, 0);
+  }
+  50% {
+    transform: rotate(-9deg) translate(-5px, 7px);
+  }
+}
+
+@keyframes pajara-sheet-three {
+  0%, 100% {
+    transform: rotate(24deg) translate(0, 0);
+  }
+  50% {
+    transform: rotate(19deg) translate(4px, -6px);
+  }
+}
+
+@media (max-width: 900px) {
+  .pajara-home .pajara-hero {
+    padding: 70px 0;
+  }
+
+  .pajara-home .pajara-hero-grid {
+    grid-template-columns: 1fr 0.85fr;
+    gap: 28px;
+  }
+
+  .pajara-home .pajara-hero h1 {
+    font-size: clamp(40px, 6vw, 58px);
+  }
+
+  .pajara-home .pajara-hero-art {
+    min-height: 340px;
+  }
+
+  .pajara-home .pajara-art-card {
+    width: 260px;
+    padding: 23px;
+  }
+
+  .pajara-home .pajara-art-shape-one {
+    top: 39px;
+    right: 8px;
+    width: 195px;
+    height: 245px;
+  }
+
+  .pajara-home .pajara-art-shape-two {
+    top: 55px;
+    left: 0;
+    width: 175px;
+    height: 220px;
+  }
+
+  .pajara-home .pajara-art-shape-three {
+    right: 10px;
+    bottom: 23px;
+    width: 105px;
+    height: 95px;
+  }
+
+  .pajara-home .pajara-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pajara-home .pajara-facilities-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .pajara-home .pajara-facilities-intro {
+    position: static;
+  }
+
+  .pajara-home .pajara-section {
+    padding: 72px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .pajara-home .pajara-container {
+    width: calc(100% - 36px);
+  }
+
+  .pajara-home .pajara-navbar-inner {
+    min-height: 66px;
+  }
+
+  .pajara-home .pajara-brand {
+    gap: 9px;
+    font-size: 14px;
+  }
+
+  .pajara-home .pajara-brand-logo {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+  }
+
+  .pajara-home .pajara-menu-toggle {
+    display: inline-flex;
+  }
+
+  .pajara-home .pajara-nav {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 18px 17px;
+    border-bottom: 1px solid var(--pajara-line);
+    background: var(--pajara-cream);
+  }
+
+  .pajara-home .pajara-nav.is-open {
+    display: flex;
+    animation: pajara-rise 180ms ease both;
+  }
+
+  .pajara-home .pajara-nav a {
+    padding: 14px 4px;
+  }
+
+  .pajara-home .pajara-nav .pajara-nav-cta {
+    margin-top: 5px;
+    padding: 13px 18px;
+    text-align: center;
+  }
+
+  .pajara-home .pajara-hero {
+    padding: 57px 0 47px;
+  }
+
+  .pajara-home .pajara-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .pajara-home .pajara-eyebrow {
+    margin-bottom: 17px;
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .pajara-home .pajara-hero h1 {
+    max-width: 470px;
+    font-size: clamp(42px, 12vw, 57px);
+    line-height: 1.08;
+    letter-spacing: -1.9px;
+  }
+
+  .pajara-home .pajara-hero-description {
+    margin-top: 17px;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .pajara-home .pajara-hero-actions {
+    gap: 9px;
+    margin-top: 25px;
+  }
+
+  .pajara-home .pajara-button {
+    min-height: 46px;
+    padding: 0 18px;
+    font-size: 12px;
+  }
+
+  .pajara-home .pajara-hero-note {
+    margin-top: 20px;
+    font-size: 10px;
+  }
+
+  .pajara-home .pajara-hero-art {
+    min-height: 330px;
+    margin-top: 4px;
+  }
+
+  .pajara-home .pajara-art-card {
+    width: 245px;
+    padding: 23px;
+    border-radius: 21px;
+  }
+
+  .pajara-home .pajara-art-logo-frame {
+    width: 75px;
+    height: 75px;
+    margin: 27px 0 22px;
+    border-radius: 21px;
+  }
+
+  .pajara-home .pajara-art-card h2 {
+    font-size: 26px;
+  }
+
+  .pajara-home .pajara-art-shape-one {
+    top: 34px;
+    right: 5px;
+    width: 190px;
+    height: 245px;
+  }
+
+  .pajara-home .pajara-art-shape-two {
+    top: 51px;
+    left: 1px;
+    width: 165px;
+    height: 218px;
+  }
+
+  .pajara-home .pajara-art-shape-three {
+    right: 7px;
+    bottom: 17px;
+    width: 95px;
+    height: 82px;
+  }
+
+  .pajara-home .pajara-trust-inner {
+    grid-template-columns: 1fr;
+    padding-block: 8px;
+  }
+
+  .pajara-home .pajara-trust-item {
+    padding: 14px 8px;
+  }
+
+  .pajara-home .pajara-trust-item + .pajara-trust-item {
+    border-top: 1px solid var(--pajara-line);
+    border-left: 0;
+  }
+
+  .pajara-home .pajara-trust-item strong {
+    font-size: 18px;
+  }
+
+  .pajara-home .pajara-trust-item span {
+    font-size: 10px;
+  }
+
+  .pajara-home .pajara-section {
+    padding: 62px 0;
+  }
+
+  .pajara-home .pajara-section-heading {
+    margin-bottom: 27px;
+  }
+
+  .pajara-home .pajara-section-heading h2,
+  .pajara-home .pajara-facilities-intro h2 {
+    font-size: 35px;
+    letter-spacing: -1px;
+  }
+
+  .pajara-home .pajara-section-heading > p:last-child,
+  .pajara-home .pajara-facilities-intro > p {
+    font-size: 12px;
+  }
+
+  .pajara-home .pajara-steps {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .pajara-home .pajara-step {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .pajara-home .pajara-step-top {
+    margin-bottom: 21px;
+  }
+
+  .pajara-home .pajara-step h3 {
+    font-size: 14px;
+  }
+
+  .pajara-home .pajara-step p {
+    font-size: 11px;
+  }
+
+  .pajara-home .pajara-facilities-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pajara-home .pajara-facility {
+    min-height: auto;
+    padding: 19px;
+  }
+
+  .pajara-home .pajara-facility-icon {
+    margin-bottom: 15px;
+  }
+
+  .pajara-home .pajara-quote {
+    padding: 58px 0;
+  }
+
+  .pajara-home .pajara-quote-inner {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .pajara-home .pajara-quote h2 {
+    font-size: 39px;
+    letter-spacing: -1px;
+  }
+
+  .pajara-home .pajara-quote p {
+    font-size: 12px;
+  }
+
+  .pajara-home .pajara-quote .pajara-button {
+    justify-self: start;
+  }
+
+  .pajara-home .pajara-footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .pajara-home .pajara-footer-links {
+    gap: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pajara-home *,
+  .pajara-home *::before,
+  .pajara-home *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
