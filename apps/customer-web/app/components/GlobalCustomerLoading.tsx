@@ -81,6 +81,7 @@ export default function GlobalCustomerLoading({
   return (
     <>
       <div
+        id="pajara-customer-content"
         style={{
           visibility: showLoading ? "hidden" : "visible",
         }}
