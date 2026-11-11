@@ -10,6 +10,8 @@ export default function CustomerLoading({
   title,
   description,
 }: CustomerLoadingProps) {
+  const logo = "/logo.jpg";
+
   return (
     <main className="pajara-loading-screen">
       <style jsx>{`
@@ -91,6 +93,40 @@ export default function CustomerLoading({
           animation: pajaraLoadingAppear 650ms ease both;
         }
 
+        .pajara-loading-logo-wrap {
+          width: 94px;
+          height: 94px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 15px;
+          padding: 8px;
+          overflow: hidden;
+          border: 1px solid rgba(47, 107, 69, 0.1);
+          border-radius: 23px;
+          background: rgba(255, 255, 255, 0.72);
+          box-shadow: 0 8px 24px rgba(33, 77, 50, 0.08);
+        }
+
+        .pajara-loading-logo {
+          display: block;
+          width: 100%;
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          border-radius: 14px;
+        }
+
+        .pajara-loading-brand {
+          margin: 0 0 23px;
+          color: #8a6a4a;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 3px;
+          line-height: 1.5;
+        }
+
         .pajara-loading-title {
           margin: 0;
           color: #214d32;
@@ -163,6 +199,11 @@ export default function CustomerLoading({
             border-radius: 23px;
           }
 
+          .pajara-loading-logo-wrap {
+            width: 84px;
+            height: 84px;
+          }
+
           .pajara-loading-title {
             font-size: 26px;
           }
@@ -182,6 +223,16 @@ export default function CustomerLoading({
       <div className="pajara-loading-orb pajara-loading-orb-three" />
 
       <div className="pajara-loading-glass">
+        <div className="pajara-loading-logo-wrap">
+          <img
+            src={logo}
+            alt="Pajara Studio"
+            className="pajara-loading-logo"
+          />
+        </div>
+
+        <p className="pajara-loading-brand">PAJARA STUDIO</p>
+
         <h1 className="pajara-loading-title">{title}</h1>
 
         <p className="pajara-loading-description">
