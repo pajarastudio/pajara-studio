@@ -1904,3 +1904,25 @@ html:not([data-pajara-ready="true"]) #pajara-initial-loading {
     flex-basis: 36px !important;
   }
 }
+
+/* =========================================
+   PAJARA CUSTOMER — SCROLL FIX
+========================================= */
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto;
+}
+
+body {
+  position: relative;
+  touch-action: pan-y;
+}
+
+#pajara-initial-loading {
+  display: none !important;
+}
