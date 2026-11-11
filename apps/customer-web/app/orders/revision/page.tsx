@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../components/CustomerLoading";
+import CustomerLoading from "../../components/CustomerLoading";
 
 const REVISION_PRICE = 15000;
 const EXTRA_REVISIONS = 2;
