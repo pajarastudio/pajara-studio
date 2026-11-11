@@ -18,7 +18,214 @@
   font-family: "DM Sans", Arial, sans-serif;
 }
 
-/* NAVBAR */
+/* =========================================
+   PAJARA CUSTOMER LOADING
+   DASHBOARD LOADING STYLE
+========================================= */
+
+.pajara-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 30px 24px;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(138, 106, 74, 0.09),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(47, 107, 69, 0.10),
+      transparent 38%
+    ),
+    #f7f4ee;
+  isolation: isolate;
+}
+
+.pajara-loading-orb {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.pajara-loading-orb-one {
+  top: 12%;
+  left: -65px;
+  width: 180px;
+  height: 180px;
+  background: rgba(47, 107, 69, 0.07);
+}
+
+.pajara-loading-orb-two {
+  right: -75px;
+  bottom: 12%;
+  width: 210px;
+  height: 210px;
+  background: rgba(138, 106, 74, 0.08);
+}
+
+.pajara-loading-orb-three {
+  top: 48%;
+  right: 12%;
+  width: 70px;
+  height: 70px;
+  background: rgba(47, 107, 69, 0.045);
+}
+
+.pajara-loading-glass {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 370px;
+  padding: 38px 27px 35px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 27px;
+  background: rgba(255, 255, 255, 0.57);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  box-shadow:
+    0 24px 70px rgba(33, 77, 50, 0.075),
+    0 4px 18px rgba(33, 77, 50, 0.035);
+  animation: pajaraLoadingAppear 650ms ease both;
+}
+
+.pajara-loading-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 94px;
+  height: 94px;
+  flex: 0 0 94px;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 1px solid rgba(47, 107, 69, 0.09);
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 9px 25px rgba(33, 77, 50, 0.08);
+}
+
+.pajara-loading-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 14px;
+}
+
+.pajara-loading-brand {
+  margin: 0 0 23px;
+  color: #8a6a4a;
+  font-family: "DM Sans", Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.pajara-loading-title {
+  margin: 0;
+  color: #214d32;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.pajara-loading-description {
+  max-width: 270px;
+  margin: 12px 0 0;
+  color: #77766e;
+  font-family: "DM Sans", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.pajara-loading-track {
+  position: relative;
+  width: 155px;
+  height: 3px;
+  margin-top: 31px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(47, 107, 69, 0.12);
+}
+
+.pajara-loading-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #8a6a4a, #2f6b45);
+  animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
+}
+
+.pajara-loading-footer {
+  margin-top: 27px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(47, 107, 69, 0.10);
+  color: #999387;
+  font-family: "DM Sans", Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+/* LOADING ANIMATIONS */
+
+@keyframes pajaraLoadingAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pajaraLoadingProgress {
+  0% {
+    left: -40%;
+  }
+
+  100% {
+    left: 110%;
+  }
+}
+
+/* HIDE LEGACY INITIAL LOADING */
+
+#pajara-initial-loading {
+  display: none !important;
+}
+
+/* =========================================
+   NAVBAR
+========================================= */
+
 .order-page .dashboard-header {
   position: sticky !important;
   top: 0 !important;
@@ -51,6 +258,7 @@
 }
 
 /* BRAND */
+
 .order-page .dashboard-brand {
   display: inline-flex !important;
   flex-direction: row !important;
@@ -85,6 +293,7 @@
 }
 
 /* LOGO NAVBAR */
+
 .order-page img.dashboard-logo {
   display: block !important;
   position: relative !important;
@@ -104,6 +313,7 @@
 }
 
 /* HEADER ACTIONS */
+
 .order-page .dashboard-header-actions {
   display: flex !important;
   flex-direction: row !important;
@@ -161,6 +371,7 @@
 }
 
 /* DROPDOWN */
+
 .order-page .dashboard-menu {
   position: absolute !important;
   z-index: 1002 !important;
@@ -200,7 +411,10 @@
   text-decoration: none !important;
 }
 
-/* FOOTER */
+/* =========================================
+   FOOTER
+========================================= */
+
 .order-page .dashboard-footer {
   display: flex !important;
   flex-direction: row !important;
@@ -263,7 +477,10 @@
   line-height: 1.5 !important;
 }
 
-/* MOBILE */
+/* =========================================
+   MOBILE
+========================================= */
+
 @media (max-width: 420px) {
   .order-page {
     padding-right: 13px !important;
@@ -293,6 +510,11 @@
     max-height: 39px !important;
     flex-basis: 39px !important;
   }
+
+  .pajara-loading-glass {
+    max-width: 370px;
+    padding: 38px 23px 35px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -304,5 +526,18 @@
     padding-right: 10px !important;
     padding-left: 10px !important;
     font-size: 11px !important;
+  }
+
+  .pajara-loading-title {
+    font-size: 27px;
+  }
+}
+
+/* REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  .pajara-loading-glass,
+  .pajara-loading-progress {
+    animation: none !important;
   }
 }
