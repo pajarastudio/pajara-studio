@@ -6,6 +6,7 @@ import "./orders-list.css";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -20,54 +21,6 @@ type Order = {
 
 const logo =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
-
-/* ========================================
-   PAJARA ORDER LOADING
-======================================== */
-
-function OrderLoading({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <main className="pajara-loading-screen">
-      <div className="pajara-loading-orb pajara-loading-orb-one" />
-      <div className="pajara-loading-orb pajara-loading-orb-two" />
-      <div className="pajara-loading-orb pajara-loading-orb-three" />
-
-      <div className="pajara-loading-glass">
-        <div className="pajara-loading-logo-wrap">
-          <img
-            src={logo}
-            alt="Pajara Studio"
-            className="pajara-loading-logo"
-            width={94}
-            height={94}
-          />
-        </div>
-
-        <p className="pajara-loading-brand">PAJARA STUDIO</p>
-
-        <h1 className="pajara-loading-title">{title}</h1>
-
-        <p className="pajara-loading-description">
-          {description}
-        </p>
-
-        <div className="pajara-loading-track">
-          <div className="pajara-loading-progress" />
-        </div>
-
-        <div className="pajara-loading-footer">
-          BERAKAR DI TANAH PASUNDAN
-        </div>
-      </div>
-    </main>
-  );
-}
 
 /* ========================================
    ORDER HELPERS
@@ -264,7 +217,7 @@ export default function OrderListPage() {
 
   if (loading) {
     return (
-      <OrderLoading
+      <CustomerLoading
         title="Menyiapkan Pesanan"
         description="Sebentar, kami sedang menyiapkan ruang pesanan Kang/Teh."
       />
