@@ -1020,3 +1020,60 @@
   }
 }
 
+
+/* =========================================
+   PAJARA — STICKY GLASS NAVBAR
+========================================= */
+
+.pajara-detail-page .pajara-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+
+  width: 100%;
+  background: rgba(247, 244, 238, 0.78) !important;
+
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+
+  border-bottom: 1px solid rgba(33, 77, 50, 0.12);
+
+  box-shadow: 0 5px 22px rgba(33, 77, 50, 0.045);
+
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.pajara-detail-page .pajara-header-inner {
+  background: transparent !important;
+}
+
+/* Logo dan teks tetap jelas */
+.pajara-detail-page .pajara-brand {
+  position: relative;
+  z-index: 2;
+}
+
+/* Tombol menu */
+.pajara-detail-page .pajara-menu-toggle {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.65) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* Dropdown tetap di atas konten */
+.pajara-detail-page .pajara-dropdown-menu {
+  z-index: 1002;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .pajara-detail-page .pajara-header {
+    background: rgba(247, 244, 238, 0.76) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+}
