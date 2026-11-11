@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import type { CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../components/CustomerLoading";
 
 const REVISION_PRICE = 15000;
 const EXTRA_REVISIONS = 2;
@@ -382,138 +384,15 @@ function RevisionNavbar({ orderId = "" }: { orderId?: string }) {
 }
 
 /* =========================
-   LOADING
+   LOADING PAJARA
 ========================= */
 
 function RevisionLoading() {
   return (
-    <main
-      style={{
-        ...pageStyle,
-        minHeight: "100vh",
-        padding: 18,
-        display: "grid",
-        placeItems: "center",
-        background: "rgba(247,244,238,.78)",
-        backdropFilter: "blur(22px) saturate(160%)",
-        WebkitBackdropFilter: "blur(22px) saturate(160%)",
-      }}
-    >
-      <section
-        style={{
-          width: "100%",
-          maxWidth: 370,
-          boxSizing: "border-box",
-          padding: "38px 25px 30px",
-          borderRadius: 24,
-          background: "rgba(255,255,255,.48)",
-          border: "1px solid rgba(255,255,255,.85)",
-          boxShadow: "0 20px 60px rgba(33,77,50,.09)",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            width: 100,
-            height: 100,
-            margin: "0 auto 23px",
-            display: "grid",
-            placeItems: "center",
-            borderRadius: 25,
-            background: "rgba(255,255,255,.7)",
-            border: "1px solid rgba(47,107,69,.08)",
-            boxShadow: "0 8px 24px rgba(33,77,50,.05)",
-          }}
-        >
-          <Image
-            src={LOGO}
-            alt="Logo Pajara Studio"
-            width={90}
-            height={90}
-            priority
-            unoptimized
-            style={{
-              width: 90,
-              height: 90,
-              objectFit: "contain",
-              borderRadius: 18,
-            }}
-          />
-        </div>
-
-        <p
-          style={{
-            margin: "0 0 10px",
-            color: "#8a6a4a",
-            fontSize: 10,
-            fontWeight: 800,
-            letterSpacing: ".2em",
-          }}
-        >
-          PAJARA STUDIO
-        </p>
-
-        <h1
-          style={{
-            margin: "0 0 12px",
-            color: "#214d32",
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: 26,
-            lineHeight: 1.35,
-            fontWeight: 600,
-          }}
-        >
-          Menyiapkan Revisi
-        </h1>
-
-        <p
-          style={{
-            margin: "0 auto",
-            maxWidth: 270,
-            color: "#747d74",
-            fontSize: 12,
-            lineHeight: 1.8,
-          }}
-        >
-          Sebentar, kami sedang menyiapkan informasi revisimu.
-        </p>
-
-        <div
-          style={{
-            width: 155,
-            height: 3,
-            margin: "25px auto 20px",
-            overflow: "hidden",
-            borderRadius: 99,
-            background: "rgba(47,107,69,.12)",
-          }}
-        >
-          <div
-            className="revision-loading-progress"
-            style={{
-              width: "55%",
-              height: "100%",
-              borderRadius: 99,
-              background: "#2f6b45",
-            }}
-          />
-        </div>
-
-        <p
-          style={{
-            margin: 0,
-            color: "#8a6a4a",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: ".12em",
-          }}
-        >
-          DESAIN YANG PUNYA ARAH
-        </p>
-      </section>
-
-      <RevisionGlobalStyles />
-    </main>
+    <CustomerLoading
+      title="Menyiapkan Revisi"
+      description="Sebentar, kami sedang menyiapkan informasi revisimu."
+    />
   );
 }
 
@@ -526,10 +405,6 @@ function RevisionGlobalStyles() {
     <style jsx global>{`
       .revision-page * {
         box-sizing: border-box;
-      }
-
-      .revision-loading-progress {
-        animation: revisionLoading 1.3s ease-in-out infinite alternate;
       }
 
       .revision-quota-grid {
@@ -610,17 +485,6 @@ function RevisionGlobalStyles() {
       .revision-page button:active,
       .revision-page a:active {
         transform: scale(.99);
-      }
-
-      @keyframes revisionLoading {
-        from {
-          width: 20%;
-          opacity: .65;
-        }
-        to {
-          width: 100%;
-          opacity: 1;
-        }
       }
 
       @media (hover: hover) {
