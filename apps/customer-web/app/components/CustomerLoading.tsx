@@ -20,6 +20,7 @@ export default function CustomerLoading({
           min-height: 100vh;
           min-height: 100dvh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           padding: 30px 24px;
@@ -91,37 +92,35 @@ export default function CustomerLoading({
         }
 
         .pajara-loading-logo-wrap {
+          display: flex;
           width: 94px;
           height: 94px;
-          display: flex;
           align-items: center;
           justify-content: center;
           padding: 8px;
-          margin-bottom: 15px;
-          border: 1px solid rgba(47, 107, 69, 0.09);
+          margin-bottom: 25px;
+          border: 1px solid rgba(255, 255, 255, 0.9);
           border-radius: 23px;
-          background: rgba(255, 255, 255, 0.75);
-          box-shadow: 0 8px 24px rgba(33, 77, 50, 0.08);
+          background: rgba(255, 255, 255, 0.76);
+          box-shadow:
+            0 9px 26px rgba(33, 77, 50, 0.1),
+            inset 0 1px 0 #fff;
         }
 
         .pajara-loading-logo {
           display: block;
           width: 100%;
           height: 100%;
+          border-radius: 15px;
           object-fit: contain;
-          border-radius: 13px;
         }
 
         .pajara-loading-brand {
-          margin: 0 0 23px;
+          margin: 0 0 10px;
           color: #8a6a4a;
-          font-family: "DM Sans", Arial, sans-serif;
           font-size: 10px;
-          font-weight: 700;
-          line-height: 1;
+          font-weight: 800;
           letter-spacing: 3px;
-          text-align: center;
-          text-transform: uppercase;
         }
 
         .pajara-loading-title {
@@ -196,13 +195,13 @@ export default function CustomerLoading({
             border-radius: 23px;
           }
 
+          .pajara-loading-title {
+            font-size: 26px;
+          }
+
           .pajara-loading-logo-wrap {
             width: 84px;
             height: 84px;
-          }
-
-          .pajara-loading-title {
-            font-size: 26px;
           }
         }
 
