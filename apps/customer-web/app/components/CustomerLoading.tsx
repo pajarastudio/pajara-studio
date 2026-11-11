@@ -15,18 +15,18 @@ export default function CustomerLoading({
 }: CustomerLoadingProps) {
   return (
     <main className="pajara-loading-screen">
-      <style jsx global>{`
+      <style jsx>{`
         .pajara-loading-screen {
           position: fixed;
           inset: 0;
           z-index: 9999;
+          width: 100%;
           min-height: 100vh;
           min-height: 100dvh;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 30px 24px;
+          padding: 24px;
           overflow: hidden;
           background:
             radial-gradient(
@@ -43,6 +43,7 @@ export default function CustomerLoading({
           color: #214d32;
           font-family: "DM Sans", Arial, sans-serif;
           text-align: center;
+          box-sizing: border-box;
         }
 
         .pajara-loading-screen *,
@@ -86,6 +87,7 @@ export default function CustomerLoading({
           z-index: 1;
           width: 100%;
           max-width: 370px;
+          min-width: 0;
           padding: 38px 27px 35px;
           display: flex;
           flex-direction: column;
@@ -103,13 +105,20 @@ export default function CustomerLoading({
         }
 
         .pajara-loading-logo-wrap {
+          position: relative;
+          flex: 0 0 94px;
           width: 94px;
+          min-width: 94px;
+          max-width: 94px;
           height: 94px;
+          min-height: 94px;
+          max-height: 94px;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 8px;
-          margin-bottom: 25px;
+          margin: 0 0 25px;
+          overflow: hidden;
           border: 1px solid rgba(255, 255, 255, 0.9);
           border-radius: 23px;
           background: rgba(255, 255, 255, 0.76);
@@ -118,23 +127,37 @@ export default function CustomerLoading({
             inset 0 1px 0 rgba(255, 255, 255, 1);
         }
 
-        .pajara-loading-logo {
+        .pajara-loading-screen img.pajara-loading-logo {
           display: block;
+          flex: 0 0 100%;
           width: 100%;
+          min-width: 0;
+          max-width: 100%;
           height: 100%;
+          min-height: 0;
+          max-height: 100%;
+          margin: 0;
+          padding: 0;
+          border: 0;
           border-radius: 15px;
           object-fit: contain;
+          object-position: center;
         }
 
         .pajara-loading-brand {
+          display: block;
+          width: 100%;
           margin: 0 0 10px;
           color: #8a6a4a;
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 3px;
+          line-height: 1.5;
         }
 
         .pajara-loading-title {
+          display: block;
+          width: 100%;
           margin: 0;
           color: #214d32;
           font-family: Georgia, "Times New Roman", serif;
@@ -142,17 +165,23 @@ export default function CustomerLoading({
           font-weight: 500;
           letter-spacing: -0.8px;
           line-height: 1.25;
+          overflow-wrap: anywhere;
         }
 
         .pajara-loading-description {
+          display: block;
+          width: 100%;
           max-width: 270px;
           margin: 12px 0 0;
           color: #777d73;
           font-size: 12px;
+          font-weight: 400;
           line-height: 1.9;
+          overflow-wrap: break-word;
         }
 
         .pajara-loading-track {
+          flex: 0 0 3px;
           width: 155px;
           height: 3px;
           overflow: hidden;
@@ -176,6 +205,8 @@ export default function CustomerLoading({
 
         .pajara-loading-footer {
           position: static;
+          display: block;
+          width: 100%;
           margin-top: 27px;
           padding-top: 17px;
           border-top: 1px solid rgba(47, 107, 69, 0.13);
@@ -183,6 +214,7 @@ export default function CustomerLoading({
           font-size: 9px;
           font-weight: 700;
           letter-spacing: 1.5px;
+          line-height: 1.5;
         }
 
         @keyframes pajaraLoadingAppear {
@@ -216,15 +248,20 @@ export default function CustomerLoading({
           }
 
           .pajara-loading-logo-wrap {
+            flex-basis: 84px;
             width: 84px;
+            min-width: 84px;
+            max-width: 84px;
             height: 84px;
+            min-height: 84px;
+            max-height: 84px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .pajara-loading-glass,
           .pajara-loading-progress {
-            animation: none !important;
+            animation: none;
           }
         }
       `}</style>
@@ -239,20 +276,16 @@ export default function CustomerLoading({
             src={logo}
             alt="Pajara Studio"
             className="pajara-loading-logo"
+            width={78}
+            height={78}
           />
         </div>
 
-        <p className="pajara-loading-brand">
-          PAJARA STUDIO
-        </p>
+        <p className="pajara-loading-brand">PAJARA STUDIO</p>
 
-        <h1 className="pajara-loading-title">
-          {title}
-        </h1>
+        <h1 className="pajara-loading-title">{title}</h1>
 
-        <p className="pajara-loading-description">
-          {description}
-        </p>
+        <p className="pajara-loading-description">{description}</p>
 
         <div className="pajara-loading-track">
           <div className="pajara-loading-progress" />
