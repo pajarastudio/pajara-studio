@@ -36,26 +36,50 @@ function statusLabel(status: string | null) {
 
 function statusStyle(status: string | null) {
   if (status === "completed") {
-    return { background: "#e7f4e9", color: "#246338", dot: "#3a8950" };
+    return {
+      background: "#e7f4e9",
+      color: "#246338",
+      dot: "#3a8950",
+    };
   }
 
   if (status === "cancelled") {
-    return { background: "#fbe9e7", color: "#a33e35", dot: "#c34c43" };
+    return {
+      background: "#fbe9e7",
+      color: "#a33e35",
+      dot: "#c34c43",
+    };
   }
 
   if (status === "revision") {
-    return { background: "#fff1d8", color: "#94601c", dot: "#c78b2d" };
+    return {
+      background: "#fff1d8",
+      color: "#94601c",
+      dot: "#c78b2d",
+    };
   }
 
   if (status === "waiting_payment" || status === "waiting_dp") {
-    return { background: "#fff3df", color: "#95621d", dot: "#c78b2d" };
+    return {
+      background: "#fff3df",
+      color: "#95621d",
+      dot: "#c78b2d",
+    };
   }
 
   if (status === "processing") {
-    return { background: "#e7efff", color: "#365c9b", dot: "#5079bb" };
+    return {
+      background: "#e7efff",
+      color: "#365c9b",
+      dot: "#5079bb",
+    };
   }
 
-  return { background: "#edf3ed", color: "#456b4d", dot: "#6e9775" };
+  return {
+    background: "#edf3ed",
+    color: "#456b4d",
+    dot: "#6e9775",
+  };
 }
 
 function formatDate(value: string | null) {
@@ -87,36 +111,76 @@ export default function OrderListPage() {
     setLoading(true);
     setError("");
 
-    try {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-      if (authError || !user) {
+    try {
+      const request = async () => {
+        const {
+          data: { session },
+          error: authError,
+        } = await supabase.auth.getSession();
+
+        if (authError) {
+          throw authError;
+        }
+
+        if (!session?.user) {
+          return {
+            type: "auth" as const,
+            orders: [] as Order[],
+          };
+        }
+
+        const { data, error: queryError } = await supabase
+          .from("orders")
+          .select(
+            "id, order_code, service_name, design_type, quantity, status, deadline, created_at"
+          )
+          .eq("customer_id", session.user.id)
+          .order("created_at", { ascending: false });
+
+        if (queryError) {
+          throw queryError;
+        }
+
+        return {
+          type: "success" as const,
+          orders: (data || []) as Order[],
+        };
+      };
+
+      const result = await Promise.race([
+        request(),
+        new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error("timeout"));
+          }, 15000);
+        }),
+      ]);
+
+      if (result.type === "auth") {
         setError("Sesi Anda tidak ditemukan. Silakan login kembali.");
         return;
       }
 
-      const { data, error: queryError } = await supabase
-        .from("orders")
-        .select(
-          "id, order_code, service_name, design_type, quantity, status, deadline, created_at"
-        )
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
+      setOrders(result.orders);
+    } catch (err) {
+      console.error("Gagal memuat daftar pesanan:", err);
 
-      if (queryError) {
-        console.error("Gagal memuat daftar pesanan:", queryError);
-        setError("Pesanan gagal dimuat. Periksa koneksi lalu coba kembali.");
-        return;
+      if (err instanceof Error && err.message === "timeout") {
+        setError(
+          "Koneksi terlalu lama. Silakan periksa internet Kang/Teh lalu coba kembali."
+        );
+      } else {
+        setError(
+          "Pesanan gagal dimuat. Periksa koneksi lalu coba kembali."
+        );
+      }
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
 
-      setOrders((data || []) as Order[]);
-    } catch (err) {
-      console.error("Kesalahan saat memuat pesanan:", err);
-      setError("Terjadi kendala koneksi. Silakan coba kembali.");
-    } finally {
       setLoading(false);
     }
   }, []);
@@ -126,7 +190,8 @@ export default function OrderListPage() {
   }, [loadOrders]);
 
   const activeOrders = orders.filter(
-    (order) => !["completed", "cancelled"].includes(order.status || "")
+    (order) =>
+      !["completed", "cancelled"].includes(order.status || "")
   );
 
   const completedOrders = orders.filter(
@@ -179,7 +244,7 @@ export default function OrderListPage() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* NAVBAR - MENGIKUTI DASHBOARD */
+        /* NAVBAR */
 
         .dashboard-header {
           position: sticky;
@@ -383,7 +448,7 @@ export default function OrderListPage() {
           color: #8a6a4a;
         }
 
-        /* KONTEN UTAMA */
+        /* KONTEN */
 
         .order-container {
           width: 100%;
@@ -463,7 +528,7 @@ export default function OrderListPage() {
           line-height: 1.5;
         }
 
-        /* JUDUL DAN FILTER */
+        /* FILTER */
 
         .section-heading {
           display: flex;
@@ -645,7 +710,7 @@ export default function OrderListPage() {
           line-height: 1.5;
         }
 
-        /* EMPTY DAN ERROR STATE */
+        /* ERROR DAN EMPTY STATE */
 
         .state-card {
           margin: 0;
@@ -942,7 +1007,9 @@ export default function OrderListPage() {
             </div>
 
             <div className="summary-card">
-              <span className="summary-number">{completedOrders.length}</span>
+              <span className="summary-number">
+                {completedOrders.length}
+              </span>
               <span className="summary-label">Selesai</span>
             </div>
           </section>
