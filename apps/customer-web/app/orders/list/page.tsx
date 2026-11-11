@@ -136,55 +136,22 @@ export default function OrderListPage() {
   useEffect(() => {
     let mounted = true;
 
-    async function fetchOrders() {
+    async function initialLoad() {
       try {
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (!mounted) return;
-
-        if (authError || !user) {
-          setError("Sesi Anda tidak ditemukan. Silakan login kembali.");
-          return;
-        }
-
-        const { data, error: queryError } = await supabase
-          .from("orders")
-          .select(
-            "id, order_code, service_name, design_type, quantity, status, deadline, created_at"
-          )
-          .eq("customer_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (!mounted) return;
-
-        if (queryError) {
-          console.error("Gagal memuat daftar pesanan:", queryError);
-          setError("Pesanan gagal dimuat. Periksa koneksi lalu coba kembali.");
-        } else {
-          setOrders((data || []) as Order[]);
-        }
-      } catch (err) {
-        if (mounted) {
-          console.error("Kesalahan saat memuat pesanan:", err);
-          setError("Terjadi kendala koneksi. Silakan coba kembali.");
-        }
+        await loadOrders();
       } finally {
         if (mounted) {
-          setLoading(false);
           setPageLoading(false);
         }
       }
     }
 
-    fetchOrders();
+    initialLoad();
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [loadOrders]);
 
   const activeOrders = orders.filter(
     (order) => !["completed", "cancelled"].includes(order.status || "")
@@ -212,159 +179,215 @@ export default function OrderListPage() {
 
   return (
     <main className="order-page">
-      <style jsx>{`
-        .order-page {
-          min-height: 100vh;
-          padding: 0 16px 36px;
-          background: ${COLORS.cream};
-          color: ${COLORS.text};
-          font-family: "DM Sans", Arial, sans-serif;
-        }
-
+      <style jsx global>{`
+        .order-page,
         .order-page *,
         .order-page *::before,
         .order-page *::after {
-          box-sizing: border-box;
+          box-sizing: border-box !important;
         }
 
-        .order-page a {
+        .order-page {
+          position: relative;
+          width: 100%;
+          min-height: 100vh;
+          margin: 0;
+          padding: 0 16px 36px;
+          overflow-x: clip;
+          background: #f7f4ee;
+          color: #243329;
+          font-family: "DM Sans", Arial, sans-serif;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .order-page a,
+        .order-page button {
+          font-family: "DM Sans", Arial, sans-serif;
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* NAVBAR - SAMA DENGAN DASHBOARD */
+        /* NAVBAR */
 
-        .dashboard-header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          width: calc(100% + 32px);
-          margin-left: -16px;
-          border-bottom: 1px solid rgba(47, 107, 69, 0.1);
-          background: rgba(247, 244, 238, 0.88);
-          -webkit-backdrop-filter: blur(22px) saturate(160%);
-          backdrop-filter: blur(22px) saturate(160%);
-          transition: background 0.3s ease;
+        .order-page .dashboard-header {
+          position: sticky !important;
+          top: 0 !important;
+          z-index: 1000 !important;
+          display: block !important;
+          width: calc(100% + 32px) !important;
+          min-height: 70px !important;
+          margin: 0 0 0 -16px !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-bottom: 1px solid rgba(47, 107, 69, 0.12) !important;
+          background: rgba(247, 244, 238, 0.78) !important;
+          -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+          backdrop-filter: blur(22px) saturate(160%) !important;
         }
 
-        .dashboard-container {
-          width: min(100% - 32px, 680px);
-          margin: 0 auto;
+        .order-page .dashboard-container {
+          width: min(100% - 32px, 680px) !important;
+          max-width: 680px !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
         }
 
-        .dashboard-header-inner {
-          display: flex;
-          min-height: 70px;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+        .order-page .dashboard-header-inner {
+          display: flex !important;
+          width: 100% !important;
+          min-height: 70px !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
         }
 
-        .dashboard-brand {
-          display: inline-flex;
-          min-width: 0;
-          align-items: center;
-          gap: 10px;
-          color: #214d32;
-          font-size: 15px;
-          font-weight: 800;
-          text-decoration: none;
+        .order-page .dashboard-brand {
+          display: inline-flex !important;
+          width: auto !important;
+          min-width: 0 !important;
+          max-width: 70% !important;
+          flex: 0 1 auto !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          gap: 10px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #214d32 !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 15px !important;
+          font-weight: 800 !important;
+          line-height: 1.3 !important;
+          letter-spacing: normal !important;
+          text-decoration: none !important;
+          white-space: nowrap !important;
         }
 
-        .dashboard-logo {
+        .order-page .dashboard-brand span {
+          display: inline-block !important;
+          width: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #214d32 !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 15px !important;
+          font-weight: 800 !important;
+          line-height: 1.3 !important;
+          letter-spacing: normal !important;
+          white-space: nowrap !important;
+        }
+
+        .order-page img.dashboard-logo {
+          position: relative !important;
           display: block !important;
           width: 39px !important;
           height: 39px !important;
           min-width: 39px !important;
-          max-width: 39px !important;
           min-height: 39px !important;
+          max-width: 39px !important;
           max-height: 39px !important;
           flex: 0 0 39px !important;
-          border-radius: 12px;
-          object-fit: cover;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-radius: 12px !important;
+          object-fit: cover !important;
+          object-position: center !important;
+          overflow: hidden !important;
         }
 
-        .dashboard-header-actions {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          flex-shrink: 0;
+        .order-page .dashboard-header-actions {
+          display: flex !important;
+          flex: 0 0 auto !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
+          gap: 9px !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
-        .dashboard-menu-button {
-          display: flex;
-          width: 42px;
-          height: 42px;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 5px;
-          border: 1px solid rgba(47, 107, 69, 0.2);
-          border-radius: 11px;
-          background: rgba(255, 255, 255, 0.55);
+        .order-page .dashboard-menu-button {
+          display: flex !important;
+          width: 42px !important;
+          height: 42px !important;
+          min-width: 42px !important;
+          min-height: 42px !important;
+          flex: 0 0 42px !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 5px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 1px solid rgba(47, 107, 69, 0.2) !important;
+          border-radius: 11px !important;
+          background: rgba(255, 255, 255, 0.65) !important;
           cursor: pointer;
-          transition: all 0.2s ease;
         }
 
-        .dashboard-menu-button:hover {
-          border-color: #2f6b45;
-          background: #fff;
-        }
-
-        .dashboard-menu-button span {
-          display: block;
-          width: 17px;
-          height: 2px;
-          border-radius: 5px;
-          background: #214d32;
+        .order-page .dashboard-menu-button span {
+          display: block !important;
+          width: 17px !important;
+          height: 2px !important;
+          min-height: 2px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-radius: 5px !important;
+          background: #214d32 !important;
           transition: transform 0.2s ease;
         }
 
-        .dashboard-menu-button.is-open span:first-child {
+        .order-page .dashboard-menu-button.is-open span:first-child {
           transform: translateY(3.5px) rotate(45deg);
         }
 
-        .dashboard-menu-button.is-open span:last-child {
+        .order-page .dashboard-menu-button.is-open span:last-child {
           transform: translateY(-3.5px) rotate(-45deg);
         }
 
-        .dashboard-header-link {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-          flex-shrink: 0;
-          min-height: 42px;
-          padding: 10px 14px;
-          border: 1px solid rgba(47, 107, 69, 0.2);
-          border-radius: 10px;
-          background: #214d32;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.25s ease;
+        .order-page .dashboard-header-link {
+          display: inline-flex !important;
+          min-height: 42px !important;
+          flex: 0 0 auto !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 7px !important;
+          margin: 0 !important;
+          padding: 10px 14px !important;
+          border: 1px solid rgba(47, 107, 69, 0.2) !important;
+          border-radius: 10px !important;
+          background: #214d32 !important;
+          color: #ffffff !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          line-height: 1.3 !important;
+          text-decoration: none !important;
+          white-space: nowrap !important;
         }
 
-        .dashboard-header-link:hover {
-          border-color: #2f6b45;
-          background: #2f6b45;
-        }
-
-        .dashboard-menu {
-          position: absolute;
-          top: calc(100% + 8px);
-          left: 50%;
-          width: min(680px, calc(100% - 32px));
-          padding: 13px;
-          border: 1px solid rgba(47, 107, 69, 0.12);
-          border-radius: 15px;
-          background: rgba(255, 255, 255, 0.97);
-          box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12);
+        .order-page .dashboard-menu {
+          position: absolute !important;
+          top: calc(100% + 8px) !important;
+          left: 50% !important;
+          z-index: 1002 !important;
+          display: block !important;
+          width: min(680px, calc(100% - 32px)) !important;
+          margin: 0 !important;
+          padding: 13px !important;
+          border: 1px solid rgba(47, 107, 69, 0.12) !important;
+          border-radius: 15px !important;
+          background: rgba(255, 255, 255, 0.97) !important;
+          box-shadow: 0 12px 35px rgba(33, 77, 50, 0.12) !important;
           transform: translateX(-50%);
-          animation: dashboard-menu-in 0.18s ease;
+          animation: order-menu-in 0.18s ease;
         }
 
-        @keyframes dashboard-menu-in {
+        @keyframes order-menu-in {
           from {
             opacity: 0;
             transform: translate(-50%, -5px);
@@ -375,459 +398,553 @@ export default function OrderListPage() {
           }
         }
 
-        .dashboard-menu-label {
-          margin: 2px 9px 9px;
-          color: #999487;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: 1.5px;
+        .order-page .dashboard-menu-label {
+          display: block !important;
+          margin: 2px 9px 9px !important;
+          padding: 0 !important;
+          color: #999487 !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 9px !important;
+          font-weight: 800 !important;
+          line-height: 1.5 !important;
+          letter-spacing: 1.5px !important;
         }
 
-        .dashboard-menu a {
-          display: flex;
-          min-height: 43px;
-          align-items: center;
-          justify-content: space-between;
-          padding: 10px 11px;
-          border-radius: 9px;
-          color: #214d32;
-          font-size: 12px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: background 0.2s ease;
+        .order-page .dashboard-menu a {
+          display: flex !important;
+          min-height: 43px !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          margin: 0 !important;
+          padding: 10px 11px !important;
+          border-radius: 9px !important;
+          color: #214d32 !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          line-height: 1.5 !important;
+          text-decoration: none !important;
         }
 
-        .dashboard-menu a:hover {
-          background: #f1f5ed;
+        .order-page .dashboard-menu a span:last-child {
+          color: #8a6a4a !important;
         }
 
-        .dashboard-menu a span:last-child {
-          color: #8a6a4a;
+        /* KONTEN */
+
+        .order-page .order-container {
+          width: 100% !important;
+          max-width: 760px !important;
+          margin: 0 auto !important;
+          padding: 27px 0 0 !important;
         }
 
-        /* ISI HALAMAN PESANAN */
-
-        .order-container {
-          width: 100%;
-          max-width: 760px;
-          margin: 0 auto;
-          padding-top: 27px;
+        .order-page .eyebrow {
+          margin: 0 0 9px !important;
+          padding: 0 !important;
+          color: #8a6a4a !important;
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          line-height: 1.5 !important;
+          letter-spacing: 0.2em !important;
         }
 
-        .eyebrow {
-          margin: 0 0 9px;
-          color: ${COLORS.brown};
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.2em;
+        .order-page .page-title {
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #243329 !important;
+          font-family: Georgia, serif !important;
+          font-size: clamp(32px, 7vw, 43px) !important;
+          font-weight: 500 !important;
+          line-height: 1.15 !important;
+          letter-spacing: -1.2px !important;
         }
 
-        .page-title {
-          margin: 0;
-          font-family: Georgia, serif;
-          font-size: clamp(32px, 7vw, 43px);
-          font-weight: 500;
-          letter-spacing: -1.2px;
-          line-height: 1.15;
+        .order-page .page-title span {
+          color: #2f6b45 !important;
+          font-family: Georgia, serif !important;
+          font-size: inherit !important;
+          font-style: italic !important;
+          font-weight: inherit !important;
         }
 
-        .page-title span {
-          color: ${COLORS.green};
-          font-style: italic;
+        .order-page .subtitle {
+          max-width: 450px !important;
+          margin: 12px 0 25px !important;
+          padding: 0 !important;
+          color: #778078 !important;
+          font-size: 13px !important;
+          line-height: 1.8 !important;
         }
 
-        .subtitle {
-          margin: 12px 0 25px;
-          max-width: 450px;
-          color: ${COLORS.muted};
-          font-size: 13px;
-          line-height: 1.8;
+        .order-page .summary {
+          display: grid !important;
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          gap: 10px !important;
+          margin: 0 0 27px !important;
+          padding: 0 !important;
         }
 
-        .summary {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-          margin-bottom: 27px;
+        .order-page .summary-card {
+          min-width: 0 !important;
+          margin: 0 !important;
+          padding: 15px 12px !important;
+          border: 1px solid rgba(33, 77, 50, 0.1) !important;
+          border-radius: 17px !important;
+          background: #ffffff !important;
+          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035) !important;
         }
 
-        .summary-card {
-          min-width: 0;
-          padding: 15px 12px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 17px;
-          background: ${COLORS.white};
-          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
+        .order-page .summary-number {
+          display: block !important;
+          margin: 0 0 6px !important;
+          color: #214d32 !important;
+          font-family: Georgia, serif !important;
+          font-size: 27px !important;
+          font-weight: 400 !important;
+          line-height: 1 !important;
         }
 
-        .summary-number {
-          display: block;
-          margin-bottom: 6px;
-          color: ${COLORS.darkGreen};
-          font-family: Georgia, serif;
-          font-size: 27px;
-          line-height: 1;
+        .order-page .summary-label {
+          display: block !important;
+          margin: 0 !important;
+          color: #778078 !important;
+          font-size: 10px !important;
+          line-height: 1.5 !important;
         }
 
-        .summary-label {
-          display: block;
-          color: ${COLORS.muted};
-          font-size: 10px;
-          line-height: 1.5;
+        .order-page .section-heading {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 10px !important;
+          margin: 0 0 14px !important;
         }
 
-        .section-heading {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 14px;
+        .order-page .section-title {
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #243329 !important;
+          font-family: Georgia, serif !important;
+          font-size: 23px !important;
+          font-weight: 500 !important;
+          line-height: 1.3 !important;
         }
 
-        .section-title {
-          margin: 0;
-          font-family: Georgia, serif;
-          font-size: 23px;
-          font-weight: 500;
+        .order-page .count-label {
+          color: #778078 !important;
+          font-size: 11px !important;
+          line-height: 1.5 !important;
         }
 
-        .count-label {
-          color: ${COLORS.muted};
-          font-size: 11px;
-        }
-
-        .filters {
-          display: flex;
-          gap: 8px;
-          overflow-x: auto;
-          padding: 2px 0 14px;
+        .order-page .filters {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 8px !important;
+          overflow-x: auto !important;
+          margin: 0 !important;
+          padding: 2px 0 14px !important;
           scrollbar-width: none;
         }
 
-        .filters::-webkit-scrollbar {
+        .order-page .filters::-webkit-scrollbar {
           display: none;
         }
 
-        .filter-button {
-          flex-shrink: 0;
-          padding: 10px 15px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 30px;
-          background: ${COLORS.white};
-          color: ${COLORS.muted};
-          font-size: 11px;
-          font-weight: 700;
+        .order-page .filter-button {
+          flex: 0 0 auto !important;
+          min-height: 36px !important;
+          margin: 0 !important;
+          padding: 10px 15px !important;
+          border: 1px solid rgba(33, 77, 50, 0.1) !important;
+          border-radius: 30px !important;
+          background: #ffffff !important;
+          color: #778078 !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          line-height: 1.3 !important;
           cursor: pointer;
         }
 
-        .filter-button.active {
-          background: ${COLORS.darkGreen};
-          border-color: ${COLORS.darkGreen};
-          color: white;
+        .order-page .filter-button.active {
+          border-color: #214d32 !important;
+          background: #214d32 !important;
+          color: #ffffff !important;
         }
 
-        .order-list {
-          display: grid;
-          gap: 13px;
+        .order-page .order-list {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) !important;
+          gap: 13px !important;
         }
 
-        .order-card {
-          display: block;
-          width: 100%;
-          padding: 19px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 19px;
-          background: ${COLORS.white};
-          color: ${COLORS.text};
-          text-align: left;
-          box-shadow: 0 6px 23px rgba(33, 77, 50, 0.035);
+        .order-page .order-card {
+          display: block !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          margin: 0 !important;
+          padding: 19px !important;
+          border: 1px solid rgba(33, 77, 50, 0.1) !important;
+          border-radius: 19px !important;
+          background: #ffffff !important;
+          color: #243329 !important;
+          text-align: left !important;
+          box-shadow: 0 6px 23px rgba(33, 77, 50, 0.035) !important;
           cursor: pointer;
-          transition:
-            transform 160ms ease,
-            box-shadow 160ms ease;
-          -webkit-tap-highlight-color: transparent;
+          transition: transform 160ms ease, box-shadow 160ms ease;
         }
 
-        .order-card:active {
+        .order-page .order-card:active {
           transform: scale(0.99);
         }
 
-        .card-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 12px;
+        .order-page .card-top {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: flex-start !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
         }
 
-        .order-code {
-          margin: 0 0 8px;
-          color: ${COLORS.brown};
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.09em;
-          overflow-wrap: anywhere;
+        .order-page .order-code {
+          margin: 0 0 8px !important;
+          padding: 0 !important;
+          color: #8a6a4a !important;
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          line-height: 1.5 !important;
+          letter-spacing: 0.09em !important;
+          overflow-wrap: anywhere !important;
         }
 
-        .service-title {
-          margin: 0 0 6px;
-          font-family: Georgia, serif;
-          font-size: 20px;
-          font-weight: 500;
-          line-height: 1.3;
-          overflow-wrap: anywhere;
+        .order-page .service-title {
+          margin: 0 0 6px !important;
+          padding: 0 !important;
+          color: #243329 !important;
+          font-family: Georgia, serif !important;
+          font-size: 20px !important;
+          font-weight: 500 !important;
+          line-height: 1.3 !important;
+          overflow-wrap: anywhere !important;
         }
 
-        .design-type {
-          margin: 0;
-          color: ${COLORS.muted};
-          font-size: 12px;
-          line-height: 1.6;
+        .order-page .design-type {
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #778078 !important;
+          font-size: 12px !important;
+          line-height: 1.6 !important;
         }
 
-        .status {
-          display: inline-flex;
-          flex-shrink: 0;
-          align-items: center;
-          gap: 6px;
-          max-width: 48%;
-          padding: 8px 10px;
-          border-radius: 30px;
-          font-size: 10px;
-          font-weight: 800;
-          line-height: 1.3;
+        .order-page .status {
+          display: inline-flex !important;
+          max-width: 48% !important;
+          flex: 0 0 auto !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 6px !important;
+          margin: 0 !important;
+          padding: 8px 10px !important;
+          border-radius: 30px !important;
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          line-height: 1.3 !important;
         }
 
-        .status-dot {
-          width: 6px;
-          height: 6px;
-          flex-shrink: 0;
-          border-radius: 50%;
+        .order-page .status-dot {
+          display: block !important;
+          width: 6px !important;
+          height: 6px !important;
+          min-width: 6px !important;
+          min-height: 6px !important;
+          flex: 0 0 6px !important;
+          border-radius: 50% !important;
         }
 
-        .card-divider {
-          height: 1px;
-          margin: 17px 0 13px;
-          background: ${COLORS.border};
+        .order-page .card-divider {
+          width: 100% !important;
+          height: 1px !important;
+          margin: 17px 0 13px !important;
+          padding: 0 !important;
+          background: rgba(33, 77, 50, 0.1) !important;
         }
 
-        .card-bottom {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+        .order-page .card-bottom {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
         }
 
-        .detail-meta {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          color: ${COLORS.muted};
-          font-size: 11px;
-          line-height: 1.7;
+        .order-page .detail-meta {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: wrap !important;
+          gap: 12px !important;
+          color: #778078 !important;
+          font-size: 11px !important;
+          line-height: 1.7 !important;
         }
 
-        .detail-link {
-          flex-shrink: 0;
-          color: ${COLORS.green};
-          font-size: 11px;
-          font-weight: 800;
+        .order-page .detail-link {
+          flex: 0 0 auto !important;
+          color: #2f6b45 !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          line-height: 1.5 !important;
         }
 
-        .state-card {
-          padding: 30px 22px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 20px;
-          background: ${COLORS.white};
-          text-align: center;
-          box-shadow: 0 7px 25px rgba(33, 77, 50, 0.04);
+        /* EMPTY, ERROR, LOADING */
+
+        .order-page .state-card {
+          margin: 0 !important;
+          padding: 30px 22px !important;
+          border: 1px solid rgba(33, 77, 50, 0.1) !important;
+          border-radius: 20px !important;
+          background: #ffffff !important;
+          text-align: center !important;
+          box-shadow: 0 7px 25px rgba(33, 77, 50, 0.04) !important;
         }
 
-        .state-icon {
-          display: grid;
-          width: 56px;
-          height: 56px;
-          place-items: center;
-          margin: 0 auto 17px;
-          border-radius: 18px;
-          background: #edf4ee;
-          color: ${COLORS.green};
-          font-size: 26px;
+        .order-page .state-icon {
+          display: grid !important;
+          width: 56px !important;
+          height: 56px !important;
+          place-items: center !important;
+          margin: 0 auto 17px !important;
+          padding: 0 !important;
+          border-radius: 18px !important;
+          background: #edf4ee !important;
+          color: #2f6b45 !important;
+          font-size: 26px !important;
         }
 
-        .state-title {
-          margin: 0 0 9px;
-          font-family: Georgia, serif;
-          font-size: 23px;
-          font-weight: 500;
+        .order-page .state-title {
+          margin: 0 0 9px !important;
+          padding: 0 !important;
+          color: #243329 !important;
+          font-family: Georgia, serif !important;
+          font-size: 23px !important;
+          font-weight: 500 !important;
+          line-height: 1.3 !important;
         }
 
-        .state-description {
-          margin: 0 auto 19px;
-          max-width: 360px;
-          color: ${COLORS.muted};
-          font-size: 12px;
-          line-height: 1.8;
+        .order-page .state-description {
+          max-width: 360px !important;
+          margin: 0 auto 19px !important;
+          padding: 0 !important;
+          color: #778078 !important;
+          font-size: 12px !important;
+          line-height: 1.8 !important;
         }
 
-        .primary-button {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          min-height: 45px;
-          padding: 0 19px;
-          border: 0;
-          border-radius: 13px;
-          background: ${COLORS.green};
-          color: white;
-          font-size: 12px;
-          font-weight: 800;
+        .order-page .primary-button {
+          display: inline-flex !important;
+          min-height: 45px !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          margin: 0 !important;
+          padding: 0 19px !important;
+          border: 0 !important;
+          border-radius: 13px !important;
+          background: #2f6b45 !important;
+          color: #ffffff !important;
+          font-size: 12px !important;
+          font-weight: 800 !important;
+          line-height: 1.3 !important;
           cursor: pointer;
         }
 
-        .secondary-button {
-          margin-top: 12px;
-          padding: 10px 16px;
-          border: 1px solid ${COLORS.border};
-          border-radius: 12px;
-          background: white;
-          color: ${COLORS.green};
-          font-size: 12px;
-          font-weight: 700;
+        .order-page .secondary-button {
+          min-height: 40px !important;
+          margin: 12px 0 0 !important;
+          padding: 10px 16px !important;
+          border: 1px solid rgba(33, 77, 50, 0.1) !important;
+          border-radius: 12px !important;
+          background: #ffffff !important;
+          color: #2f6b45 !important;
+          font-size: 12px !important;
+          font-weight: 700 !important;
           cursor: pointer;
         }
 
-        .loading-line {
-          height: 13px;
-          margin: 12px 0;
-          border-radius: 8px;
-          background: #e9eee8;
-          animation: pulse 1.2s ease-in-out infinite alternate;
+        .order-page .loading-line {
+          height: 13px !important;
+          margin: 12px 0 !important;
+          padding: 0 !important;
+          border-radius: 8px !important;
+          background: #e9eee8 !important;
+          animation: order-pulse 1.2s ease-in-out infinite alternate;
         }
 
-        @keyframes pulse {
-          from {
-            opacity: 0.5;
-          }
-          to {
-            opacity: 1;
-          }
+        @keyframes order-pulse {
+          from { opacity: 0.5; }
+          to { opacity: 1; }
         }
 
-        /* FOOTER - SAMA DENGAN DASHBOARD */
+        /* FOOTER */
 
-        .dashboard-footer {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          border-top: 1px solid #e4ddd1;
-          padding-top: 22px;
-          margin-top: 36px;
-          margin-bottom: 20px;
+        .order-page .dashboard-footer {
+          display: flex !important;
+          width: 100% !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          gap: 13px !important;
+          margin: 36px 0 20px !important;
+          padding: 22px 0 0 !important;
+          border: 0 !important;
+          border-top: 1px solid #e4ddd1 !important;
         }
 
-        .dashboard-footer-logo {
-          display: block;
-          width: 43px;
-          height: 43px;
-          flex: 0 0 43px;
-          border-radius: 10px;
-          object-fit: contain;
-          background: #fff;
+        .order-page img.dashboard-footer-logo {
+          display: block !important;
+          position: relative !important;
+          width: 43px !important;
+          height: 43px !important;
+          min-width: 43px !important;
+          min-height: 43px !important;
+          max-width: 43px !important;
+          max-height: 43px !important;
+          flex: 0 0 43px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-radius: 10px !important;
+          object-fit: cover !important;
+          object-position: center !important;
         }
 
-        .dashboard-footer-copy {
-          min-width: 0;
+        .order-page .dashboard-footer-copy {
+          display: block !important;
+          min-width: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          text-align: left !important;
         }
 
-        .dashboard-footer-copy strong {
-          display: block;
-          color: #214d32;
-          font-size: 13px;
-          line-height: 1.5;
+        .order-page .dashboard-footer-copy strong {
+          display: block !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          color: #214d32 !important;
+          font-family: "DM Sans", Arial, sans-serif !important;
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          line-height: 1.5 !important;
         }
 
-        .dashboard-footer-copy p {
-          margin: 4px 0 0;
-          color: #8a6a4a;
-          font-size: 11px;
-          line-height: 1.5;
+        .order-page .dashboard-footer-copy p {
+          display: block !important;
+          margin: 4px 0 0 !important;
+          padding: 0 !important;
+          color: #8a6a4a !important;
+          font-size: 11px !important;
+          line-height: 1.5 !important;
         }
 
-        .dashboard-footer-copy small {
-          display: block;
-          margin-top: 3px;
-          color: #999387;
-          font-size: 10px;
-          line-height: 1.5;
+        .order-page .dashboard-footer-copy small {
+          display: block !important;
+          margin: 3px 0 0 !important;
+          padding: 0 !important;
+          color: #999387 !important;
+          font-size: 10px !important;
+          line-height: 1.5 !important;
         }
+
+        /* RESPONSIVE */
 
         @media (max-width: 420px) {
           .order-page {
-            padding-right: 13px;
-            padding-left: 13px;
+            padding-right: 13px !important;
+            padding-left: 13px !important;
           }
 
-          .dashboard-header {
-            width: calc(100% + 26px);
-            margin-left: -13px;
+          .order-page .dashboard-header {
+            width: calc(100% + 26px) !important;
+            margin-left: -13px !important;
           }
 
-          .dashboard-container {
-            width: calc(100% - 26px);
+          .order-page .dashboard-container {
+            width: calc(100% - 26px) !important;
           }
 
-          .dashboard-brand {
-            gap: 8px;
-            font-size: 13px;
+          .order-page .dashboard-brand {
+            gap: 8px !important;
+            font-size: 13px !important;
           }
 
-          .summary {
-            gap: 7px;
+          .order-page .dashboard-brand span {
+            font-size: 13px !important;
           }
 
-          .summary-card {
-            padding: 13px 9px;
-            border-radius: 14px;
+          .order-page img.dashboard-logo {
+            width: 39px !important;
+            height: 39px !important;
+            min-width: 39px !important;
+            min-height: 39px !important;
+            max-width: 39px !important;
+            max-height: 39px !important;
+            flex-basis: 39px !important;
           }
 
-          .summary-number {
-            font-size: 24px;
+          .order-page .summary {
+            gap: 7px !important;
           }
 
-          .summary-label {
-            font-size: 9px;
+          .order-page .summary-card {
+            padding: 13px 9px !important;
+            border-radius: 14px !important;
           }
 
-          .order-card {
-            padding: 16px;
+          .order-page .summary-number {
+            font-size: 24px !important;
           }
 
-          .card-top {
-            flex-direction: column;
+          .order-page .summary-label {
+            font-size: 9px !important;
           }
 
-          .status {
-            max-width: 100%;
+          .order-page .order-card {
+            padding: 16px !important;
           }
 
-          .card-bottom {
-            align-items: flex-start;
+          .order-page .card-top {
+            flex-direction: column !important;
           }
 
-          .detail-meta {
-            flex-direction: column;
-            gap: 3px;
+          .order-page .status {
+            max-width: 100% !important;
           }
 
-          .detail-link {
-            margin-top: 3px;
+          .order-page .card-bottom {
+            align-items: flex-start !important;
+          }
+
+          .order-page .detail-meta {
+            flex-direction: column !important;
+            gap: 3px !important;
+          }
+
+          .order-page .detail-link {
+            margin-top: 3px !important;
           }
         }
 
         @media (max-width: 380px) {
-          .dashboard-container {
-            width: calc(100% - 24px);
+          .order-page .dashboard-container {
+            width: calc(100% - 24px) !important;
+          }
+
+          .order-page .dashboard-header-link {
+            padding-right: 10px !important;
+            padding-left: 10px !important;
+            font-size: 11px !important;
           }
         }
 
@@ -850,18 +967,6 @@ export default function OrderListPage() {
               className="dashboard-logo"
               width={39}
               height={39}
-              style={{
-                display: "block",
-                width: "39px",
-                height: "39px",
-                minWidth: "39px",
-                maxWidth: "39px",
-                minHeight: "39px",
-                maxHeight: "39px",
-                objectFit: "cover",
-                borderRadius: "12px",
-                flexShrink: 0,
-              }}
             />
             <span>Pajara Studio</span>
           </a>
@@ -869,9 +974,7 @@ export default function OrderListPage() {
           <div className="dashboard-header-actions">
             <button
               type="button"
-              className={`dashboard-menu-button ${
-                menuOpen ? "is-open" : ""
-              }`}
+              className={`dashboard-menu-button ${menuOpen ? "is-open" : ""}`}
               aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((current) => !current)}
@@ -912,9 +1015,11 @@ export default function OrderListPage() {
       <div className="order-container">
         <header>
           <p className="eyebrow">PAJARA STUDIO · CUSTOMER SPACE</p>
+
           <h1 className="page-title">
             Pesanan <span>Saya.</span>
           </h1>
+
           <p className="subtitle">
             Setiap desain punya prosesnya sendiri. Pantau perkembangan
             pesananmu dengan mudah, dari awal hingga selesai.
@@ -927,10 +1032,12 @@ export default function OrderListPage() {
               <span className="summary-number">{orders.length}</span>
               <span className="summary-label">Total Pesanan</span>
             </div>
+
             <div className="summary-card">
               <span className="summary-number">{activeOrders.length}</span>
               <span className="summary-label">Dalam Proses</span>
             </div>
+
             <div className="summary-card">
               <span className="summary-number">{completedOrders.length}</span>
               <span className="summary-label">Selesai</span>
@@ -941,6 +1048,7 @@ export default function OrderListPage() {
         <section>
           <div className="section-heading">
             <h2 className="section-title">Daftar Pesanan</h2>
+
             {!loading && !error && (
               <span className="count-label">
                 {filteredOrders.length} pesanan
@@ -958,6 +1066,7 @@ export default function OrderListPage() {
               >
                 Semua
               </button>
+
               <button
                 type="button"
                 className={`filter-button ${filter === "active" ? "active" : ""}`}
@@ -966,6 +1075,7 @@ export default function OrderListPage() {
               >
                 Dalam Proses
               </button>
+
               <button
                 type="button"
                 className={`filter-button ${filter === "completed" ? "active" : ""}`}
@@ -993,6 +1103,7 @@ export default function OrderListPage() {
               <div className="state-icon">!</div>
               <h3 className="state-title">Belum bisa memuat data</h3>
               <p className="state-description">{error}</p>
+
               {error.includes("Sesi") ? (
                 <button
                   type="button"
@@ -1068,9 +1179,11 @@ export default function OrderListPage() {
                         <p className="order-code">
                           ORDER #{order.order_code}
                         </p>
+
                         <h3 className="service-title">
                           {order.service_name || "Pesanan Desain"}
                         </h3>
+
                         <p className="design-type">
                           {order.design_type || "Jenis desain belum ditentukan"}
                         </p>
@@ -1098,6 +1211,7 @@ export default function OrderListPage() {
                         <span>◇ {order.quantity || 1} desain</span>
                         <span>Tenggat: {formatDate(order.deadline)}</span>
                       </div>
+
                       <span className="detail-link">Detail ↗</span>
                     </div>
                   </button>
@@ -1119,9 +1233,7 @@ export default function OrderListPage() {
           <div className="dashboard-footer-copy">
             <strong>Pajara Studio</strong>
             <p>Berakar di Tanah Pasundan.</p>
-            <small>
-              © 2026 Pajara Studio. Desain yang punya arah.
-            </small>
+            <small>© 2026 Pajara Studio. Desain yang punya arah.</small>
           </div>
         </footer>
       </div>
