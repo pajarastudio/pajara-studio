@@ -1,9 +1,11 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@pajara/supabase";
+import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -113,70 +115,10 @@ function PaymentNavbar({ orderId = "" }: { orderId?: string }) {
 
 function PaymentLoading() {
   return (
-    <main style={loadingPageStyle}>
-      <section style={loadingGlassStyle}>
-        <div style={loadingLogoFrameStyle}>
-          <Image
-            src={LOGO}
-            alt="Logo Pajara Studio"
-            width={90}
-            height={90}
-            priority
-            unoptimized
-            style={loadingLogoStyle}
-          />
-        </div>
-
-        <p style={loadingEyebrowStyle}>PAJARA STUDIO</p>
-
-        <h1 style={loadingTitleStyle}>Menyiapkan Pembayaran</h1>
-
-        <div style={loadingProgressTrackStyle}>
-          <div style={loadingProgressStyle} />
-        </div>
-
-        <p style={loadingTextStyle}>
-          Sebentar, kami sedang menyiapkan informasi pembayaranmu.
-        </p>
-
-        <p style={loadingTaglineStyle}>
-          BERAKAR DI TANAH PASUNDAN
-        </p>
-      </section>
-
-      <style jsx>{`
-        @keyframes pajara-loading {
-          0% {
-            transform: translateX(-100%);
-          }
-          50% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes pajara-fade {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-          }
-        }
-      `}</style>
-    </main>
+    <CustomerLoading
+      title="Menyiapkan Pembayaran"
+      description="Sebentar, kami sedang menyiapkan informasi pembayaran Kang/Teh."
+    />
   );
 }
 
@@ -1297,101 +1239,6 @@ const navbarBackStyle: React.CSSProperties = {
   fontWeight: 800,
   textDecoration: "none",
   whiteSpace: "nowrap",
-};
-
-const loadingPageStyle: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  zIndex: 9999,
-  display: "grid",
-  placeItems: "center",
-  boxSizing: "border-box",
-  padding: "24px",
-  background: "rgba(247,244,238,.78)",
-  backdropFilter: "blur(22px) saturate(160%)",
-  WebkitBackdropFilter: "blur(22px) saturate(160%)",
-  fontFamily: '"DM Sans", Arial, sans-serif',
-};
-
-const loadingGlassStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "370px",
-  boxSizing: "border-box",
-  padding: "38px 25px 30px",
-  borderRadius: "24px",
-  background: "rgba(255,255,255,.48)",
-  border: "1px solid rgba(255,255,255,.85)",
-  boxShadow: "0 18px 45px rgba(33,77,50,.09)",
-  textAlign: "center",
-  animation: "pajara-fade 450ms ease both",
-};
-
-const loadingLogoFrameStyle: React.CSSProperties = {
-  width: "100px",
-  height: "100px",
-  margin: "0 auto 22px",
-  display: "grid",
-  placeItems: "center",
-  overflow: "hidden",
-  borderRadius: "22px",
-  background: "rgba(247,244,238,.8)",
-  border: "1px solid rgba(47,107,69,.08)",
-};
-
-const loadingLogoStyle: React.CSSProperties = {
-  width: "90px",
-  height: "90px",
-  objectFit: "contain",
-};
-
-const loadingEyebrowStyle: React.CSSProperties = {
-  margin: "0 0 10px",
-  color: "#8a6a4a",
-  fontSize: "10px",
-  fontWeight: 800,
-  letterSpacing: "0.22em",
-};
-
-const loadingTitleStyle: React.CSSProperties = {
-  margin: "0 0 25px",
-  color: "#214d32",
-  fontFamily: '"Playfair Display", Georgia, serif',
-  fontSize: "25px",
-  lineHeight: 1.4,
-  fontWeight: 600,
-};
-
-const loadingProgressTrackStyle: React.CSSProperties = {
-  width: "155px",
-  height: "3px",
-  margin: "0 auto 20px",
-  overflow: "hidden",
-  borderRadius: "10px",
-  background: "rgba(47,107,69,.13)",
-};
-
-const loadingProgressStyle: React.CSSProperties = {
-  width: "55%",
-  height: "100%",
-  borderRadius: "10px",
-  background: "#2f6b45",
-  animation: "pajara-loading 1.3s ease-in-out infinite",
-};
-
-const loadingTextStyle: React.CSSProperties = {
-  margin: "0 auto",
-  maxWidth: "270px",
-  color: "#747d74",
-  fontSize: "12px",
-  lineHeight: 1.8,
-};
-
-const loadingTaglineStyle: React.CSSProperties = {
-  margin: "25px 0 0",
-  color: "#8a6a4a",
-  fontSize: "9px",
-  fontWeight: 800,
-  letterSpacing: "0.18em",
 };
 
 const pageHeaderStyle: React.CSSProperties = {
