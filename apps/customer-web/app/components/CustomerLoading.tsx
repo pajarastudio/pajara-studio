@@ -17,30 +17,21 @@ export default function CustomerLoading({
           position: fixed;
           inset: 0;
           z-index: 9999;
-          width: 100%;
           min-height: 100vh;
           min-height: 100dvh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 24px;
+          padding: 30px 24px;
           overflow: hidden;
           background:
-            radial-gradient(
-              circle at 15% 18%,
-              rgba(47, 107, 69, 0.13),
-              transparent 36%
-            ),
-            radial-gradient(
-              circle at 85% 78%,
-              rgba(138, 106, 74, 0.13),
-              transparent 34%
-            ),
+            radial-gradient(circle at 15% 18%, rgba(47, 107, 69, 0.13), transparent 36%),
+            radial-gradient(circle at 85% 78%, rgba(138, 106, 74, 0.13), transparent 34%),
             #f7f4ee;
           color: #214d32;
           font-family: "DM Sans", Arial, sans-serif;
           text-align: center;
-          box-sizing: border-box;
         }
 
         .pajara-loading-screen *,
@@ -51,7 +42,7 @@ export default function CustomerLoading({
 
         .pajara-loading-orb {
           position: absolute;
-          border: 1px solid rgba(47, 107, 69, 0.10);
+          border: 1px solid rgba(47, 107, 69, 0.1);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -82,13 +73,12 @@ export default function CustomerLoading({
         .pajara-loading-glass {
           position: relative;
           z-index: 1;
+          display: flex;
           width: 100%;
           max-width: 370px;
-          min-width: 0;
-          padding: 38px 27px 35px;
-          display: flex;
           flex-direction: column;
           align-items: center;
+          padding: 38px 27px 35px;
           border: 1px solid rgba(255, 255, 255, 0.78);
           border-radius: 27px;
           background: rgba(255, 255, 255, 0.48);
@@ -101,32 +91,7 @@ export default function CustomerLoading({
           animation: pajaraLoadingAppear 650ms ease both;
         }
 
-        .pajara-loading-mark {
-          width: 42px;
-          height: 42px;
-          margin: 0 0 25px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(47, 107, 69, 0.16);
-          border-radius: 14px;
-          background: rgba(47, 107, 69, 0.07);
-        }
-
-        .pajara-loading-mark span {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #2f6b45;
-          box-shadow:
-            12px 0 0 #8a6a4a,
-            -12px 0 0 #214d32;
-          animation: pajaraLoadingPulse 1.2s ease-in-out infinite;
-        }
-
         .pajara-loading-title {
-          display: block;
-          width: 100%;
           margin: 0;
           color: #214d32;
           font-family: Georgia, "Times New Roman", serif;
@@ -134,23 +99,17 @@ export default function CustomerLoading({
           font-weight: 500;
           letter-spacing: -0.8px;
           line-height: 1.25;
-          overflow-wrap: anywhere;
         }
 
         .pajara-loading-description {
-          display: block;
-          width: 100%;
           max-width: 270px;
           margin: 12px 0 0;
           color: #777d73;
           font-size: 12px;
-          font-weight: 400;
           line-height: 1.9;
-          overflow-wrap: break-word;
         }
 
         .pajara-loading-track {
-          flex: 0 0 3px;
           width: 155px;
           height: 3px;
           overflow: hidden;
@@ -163,19 +122,12 @@ export default function CustomerLoading({
           width: 40%;
           height: 100%;
           border-radius: 10px;
-          background: linear-gradient(
-            90deg,
-            #214d32,
-            #477b50,
-            #8a6a4a
-          );
+          background: linear-gradient(90deg, #214d32, #477b50, #8a6a4a);
           animation: pajaraLoadingProgress 1.4s ease-in-out infinite;
         }
 
         .pajara-loading-footer {
           position: static;
-          display: block;
-          width: 100%;
           margin-top: 27px;
           padding-top: 17px;
           border-top: 1px solid rgba(47, 107, 69, 0.13);
@@ -183,7 +135,6 @@ export default function CustomerLoading({
           font-size: 9px;
           font-weight: 700;
           letter-spacing: 1.5px;
-          line-height: 1.5;
         }
 
         @keyframes pajaraLoadingAppear {
@@ -206,17 +157,6 @@ export default function CustomerLoading({
           }
         }
 
-        @keyframes pajaraLoadingPulse {
-          0%, 100% {
-            opacity: 0.55;
-            transform: scale(0.85);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.1);
-          }
-        }
-
         @media (max-width: 380px) {
           .pajara-loading-glass {
             padding: 32px 21px 30px;
@@ -230,9 +170,9 @@ export default function CustomerLoading({
 
         @media (prefers-reduced-motion: reduce) {
           .pajara-loading-glass,
-          .pajara-loading-progress,
-          .pajara-loading-mark span {
-            animation: none;
+          .pajara-loading-progress {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
           }
         }
       `}</style>
@@ -242,10 +182,6 @@ export default function CustomerLoading({
       <div className="pajara-loading-orb pajara-loading-orb-three" />
 
       <div className="pajara-loading-glass">
-        <div className="pajara-loading-mark">
-          <span />
-        </div>
-
         <h1 className="pajara-loading-title">{title}</h1>
 
         <p className="pajara-loading-description">
