@@ -4,7 +4,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@pajara/supabase";
-import CustomerLoading from "../../components/CustomerLoading";
 
 type Order = {
   id: string;
@@ -19,6 +18,286 @@ type Order = {
 
 const logo =
   "/755809946_17926162029385149_3739923509439876817_n.jpg";
+
+/* ========================================
+   PAJARA ORDER LOADING
+======================================== */
+
+function OrderLoading({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <>
+      <style jsx global>{`
+        .pajara-loading-screen,
+        .pajara-loading-screen * {
+          box-sizing: border-box;
+        }
+
+        .pajara-loading-screen {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          display: flex;
+          min-height: 100vh;
+          min-height: 100dvh;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          padding: 24px;
+          background:
+            radial-gradient(
+              circle at 15% 15%,
+              rgba(47, 107, 69, 0.09),
+              transparent 35%
+            ),
+            radial-gradient(
+              circle at 85% 85%,
+              rgba(138, 106, 74, 0.1),
+              transparent 35%
+            ),
+            #f7f4ee;
+          color: #243329;
+          font-family: "DM Sans", Arial, sans-serif;
+        }
+
+        .pajara-loading-orb {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          filter: blur(2px);
+          opacity: 0.55;
+        }
+
+        .pajara-loading-orb-one {
+          top: -100px;
+          left: -90px;
+          width: 260px;
+          height: 260px;
+          background: rgba(47, 107, 69, 0.07);
+        }
+
+        .pajara-loading-orb-two {
+          right: -110px;
+          bottom: -100px;
+          width: 300px;
+          height: 300px;
+          background: rgba(138, 106, 74, 0.09);
+        }
+
+        .pajara-loading-orb-three {
+          top: 20%;
+          right: 12%;
+          width: 75px;
+          height: 75px;
+          background: rgba(47, 107, 69, 0.045);
+        }
+
+        .pajara-loading-glass {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          width: 100%;
+          max-width: 370px;
+          flex-direction: column;
+          align-items: center;
+          padding: 38px 27px 25px;
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          border-radius: 25px;
+          background: rgba(255, 255, 255, 0.68);
+          box-shadow:
+            0 22px 65px rgba(33, 77, 50, 0.075),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+          -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
+          animation: pajaraLoadingAppear 0.65s ease both;
+        }
+
+        .pajara-loading-logo-wrap {
+          display: flex;
+          width: 94px;
+          height: 94px;
+          min-width: 94px;
+          min-height: 94px;
+          align-items: center;
+          justify-content: center;
+          margin: 0 0 20px;
+          padding: 10px;
+          overflow: hidden;
+          border: 1px solid rgba(47, 107, 69, 0.1);
+          border-radius: 24px;
+          background: #fff;
+          box-shadow: 0 9px 28px rgba(33, 77, 50, 0.1);
+        }
+
+        .pajara-loading-logo {
+          display: block;
+          width: 100%;
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 14px;
+          object-fit: contain;
+          object-position: center;
+        }
+
+        .pajara-loading-brand {
+          margin: 0 0 12px;
+          color: #8a6a4a;
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1.5;
+          letter-spacing: 0.22em;
+          text-align: center;
+        }
+
+        .pajara-loading-title {
+          margin: 0;
+          color: #214d32;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 25px;
+          font-weight: 500;
+          line-height: 1.3;
+          text-align: center;
+        }
+
+        .pajara-loading-description {
+          max-width: 270px;
+          margin: 10px 0 23px;
+          color: #778078;
+          font-size: 12px;
+          line-height: 1.8;
+          text-align: center;
+        }
+
+        .pajara-loading-track {
+          position: relative;
+          width: 100%;
+          height: 4px;
+          overflow: hidden;
+          border-radius: 20px;
+          background: rgba(47, 107, 69, 0.12);
+        }
+
+        .pajara-loading-progress {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 42%;
+          height: 100%;
+          border-radius: 20px;
+          background: linear-gradient(
+            90deg,
+            #214d32,
+            #5d9369
+          );
+          animation: pajaraLoadingProgress 1.5s ease-in-out infinite;
+        }
+
+        .pajara-loading-footer {
+          margin: 22px 0 0;
+          color: #a39b8e;
+          font-size: 9px;
+          font-weight: 700;
+          line-height: 1.5;
+          letter-spacing: 0.16em;
+          text-align: center;
+        }
+
+        @keyframes pajaraLoadingAppear {
+          from {
+            opacity: 0;
+            transform: translateY(12px) scale(0.98);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes pajaraLoadingProgress {
+          0% {
+            left: -42%;
+          }
+
+          100% {
+            left: 100%;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .pajara-loading-glass {
+            padding: 32px 22px 23px;
+          }
+
+          .pajara-loading-logo-wrap {
+            width: 84px;
+            height: 84px;
+            min-width: 84px;
+            min-height: 84px;
+          }
+
+          .pajara-loading-title {
+            font-size: 23px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .pajara-loading-glass,
+          .pajara-loading-progress {
+            animation: none !important;
+          }
+        }
+      `}</style>
+
+      <main className="pajara-loading-screen">
+        <div className="pajara-loading-orb pajara-loading-orb-one" />
+        <div className="pajara-loading-orb pajara-loading-orb-two" />
+        <div className="pajara-loading-orb pajara-loading-orb-three" />
+
+        <div className="pajara-loading-glass">
+          <div className="pajara-loading-logo-wrap">
+            <img
+              src={logo}
+              alt="Pajara Studio"
+              className="pajara-loading-logo"
+              width={94}
+              height={94}
+            />
+          </div>
+
+          <p className="pajara-loading-brand">PAJARA STUDIO</p>
+
+          <h1 className="pajara-loading-title">{title}</h1>
+
+          <p className="pajara-loading-description">
+            {description}
+          </p>
+
+          <div className="pajara-loading-track">
+            <div className="pajara-loading-progress" />
+          </div>
+
+          <div className="pajara-loading-footer">
+            BERAKAR DI TANAH PASUNDAN
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
+
+/* ========================================
+   ORDER HELPERS
+======================================== */
 
 function statusLabel(status: string | null) {
   const labels: Record<string, string> = {
@@ -97,6 +376,10 @@ function formatDate(value: string | null) {
     year: "numeric",
   });
 }
+
+/* ========================================
+   ORDER LIST PAGE
+======================================== */
 
 export default function OrderListPage() {
   const router = useRouter();
@@ -207,7 +490,7 @@ export default function OrderListPage() {
 
   if (loading) {
     return (
-      <CustomerLoading
+      <OrderLoading
         title="Menyiapkan Pesanan"
         description="Sebentar, kami sedang menyiapkan ruang pesanan Kang/Teh."
       />
