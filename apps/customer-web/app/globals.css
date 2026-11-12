@@ -1621,23 +1621,35 @@ textarea::placeholder {
   }
 }
 
+
 /* =========================================
-   PAJARA CUSTOMER — SCROLL FIX
+   PAJARA CUSTOMER — GLOBAL SCROLL FIX
 ========================================= */
 
 html,
 body {
   width: 100%;
   min-height: 100%;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
   overscroll-behavior-y: auto;
 }
 
 body {
-  position: relative;
+  position: static;
   touch-action: pan-y;
 }
+
+/* GLOBAL TOP NAVIGATION */
+
+.pajara-header,
+.pajara-navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+}
+
+/* INITIAL LOADING */
 
 #pajara-initial-loading {
   display: none !important;
