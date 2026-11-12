@@ -364,6 +364,10 @@ export default function DashboardPage() {
                   height={41}
                   priority
                   className="brand-logo"
+                  style={{
+                    borderRadius: "15px",
+                    clipPath: "inset(0 round 15px)",
+                  }}
                 />
               </div>
 
@@ -639,7 +643,7 @@ export default function DashboardPage() {
           width: 41px;
           height: 41px;
           object-fit: contain;
-          border-radius: 13px;
+          border-radius: 15px;
           overflow: hidden;
         }
 
