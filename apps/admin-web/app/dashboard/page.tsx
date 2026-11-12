@@ -626,9 +626,11 @@ export default function DashboardPage() {
           flex-shrink: 0;
           place-items: center;
           padding: 4px;
+          box-sizing: border-box;
           border: 1px solid rgba(247, 244, 238, 0.35);
-          border-radius: 15px;
+          border-radius: 18px;
           background: rgba(247, 244, 238, 0.12);
+          overflow: hidden;
         }
 
         .brand-logo {
