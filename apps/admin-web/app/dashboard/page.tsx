@@ -173,241 +173,174 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="admin-loading">
-        <div className="loading-decoration loading-decoration-one" />
-        <div className="loading-decoration loading-decoration-two" />
-
-        <div className="loading-content">
-          <div className="loading-logo-frame">
+      <main
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 2147483647,
+          width: "100%",
+          height: "100%",
+          minHeight: "100dvh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          padding: "24px",
+          boxSizing: "border-box",
+          background: "#F1ECE6",
+          color: "#214D32",
+          fontFamily: "Arial, Helvetica, sans-serif",
+          WebkitFontSmoothing: "antialiased",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            maxWidth: "300px",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: "82px",
+              height: "82px",
+              flexShrink: 0,
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "12px",
+              boxSizing: "border-box",
+              border: "1px solid rgba(138,106,74,0.4)",
+              borderRadius: "22px",
+              background: "#FFFFFF",
+              boxShadow: "0 8px 24px rgba(33,77,50,0.07)",
+            }}
+          >
             <Image
               src="/icon-512.png"
               alt="Pajara Studio"
-              width={64}
-              height={64}
+              width={58}
+              height={58}
               priority
-              className="loading-logo"
+              unoptimized
               style={{
                 display: "block",
-                width: "64px",
-                height: "64px",
-                maxWidth: "64px",
+                width: "58px",
+                height: "58px",
+                minWidth: "58px",
+                maxWidth: "58px",
                 objectFit: "contain",
+                flexShrink: 0,
               }}
             />
           </div>
 
-          <div className="loading-brand">
-            <p className="loading-brand-name">PAJARA ADMIN</p>
-            <p className="loading-brand-caption">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginTop: "24px",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: "12px",
+                lineHeight: "18px",
+                fontWeight: 800,
+                letterSpacing: "2.5px",
+                color: "#214D32",
+              }}
+            >
+              PAJARA ADMIN
+            </p>
+
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: "8px",
+                lineHeight: "14px",
+                fontWeight: 700,
+                letterSpacing: "1.8px",
+                color: "#8A6A4A",
+              }}
+            >
               MANAGEMENT WORKSPACE
             </p>
           </div>
 
           <div
-            className="loading-progress"
-            role="status"
-            aria-label="Menyiapkan Pajara Admin"
+            style={{
+              width: "110px",
+              height: "3px",
+              marginTop: "32px",
+              overflow: "hidden",
+              borderRadius: "20px",
+              background: "#DED9D0",
+            }}
           >
-            <span />
+            <div
+              style={{
+                width: "38%",
+                height: "100%",
+                borderRadius: "20px",
+                background: "#2F6B45",
+                animation:
+                  "pajaraAdminProgress 1.3s ease-in-out infinite alternate",
+              }}
+            />
           </div>
 
-          <h1 className="loading-title">
+          <h1
+            style={{
+              margin: "20px 0 0",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontSize: "21px",
+              lineHeight: "29px",
+              fontWeight: 400,
+              letterSpacing: "-0.4px",
+              color: "#214D32",
+            }}
+          >
             Menyiapkan ruang kerja
           </h1>
 
-          <p className="loading-description">
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: "11px",
+              lineHeight: "19px",
+              color: "#777D75",
+            }}
+          >
             Sebentar, kami sedang menyiapkan dashboard.
           </p>
 
-          <p className="loading-footer">
+          <p
+            style={{
+              margin: "42px 0 0",
+              fontSize: "8px",
+              lineHeight: "14px",
+              fontWeight: 700,
+              letterSpacing: "1.8px",
+              color: "#8A6A4A",
+            }}
+          >
             DESAIN YANG PUNYA ARAH.
           </p>
         </div>
 
-        <style jsx>{`
-          .admin-loading {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            isolation: isolate;
-            display: grid;
-            place-items: center;
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow: hidden;
-            padding: 24px;
-            background:
-              radial-gradient(
-                circle at 50% 43%,
-                rgba(255, 255, 255, 0.9),
-                transparent 43%
-              ),
-              #f1ece6;
-            color: #214d32;
-            font-family:
-              "DM Sans", Inter, ui-sans-serif, system-ui,
-              -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
-          }
-
-          .loading-decoration {
-            position: absolute;
-            z-index: -1;
-            width: 280px;
-            height: 280px;
-            border: 1px solid rgba(33, 77, 50, 0.07);
-            border-radius: 50%;
-            pointer-events: none;
-          }
-
-          .loading-decoration-one {
-            top: -170px;
-            right: -130px;
-          }
-
-          .loading-decoration-two {
-            bottom: -200px;
-            left: -150px;
-            width: 340px;
-            height: 340px;
-            border-color: rgba(138, 106, 74, 0.1);
-          }
-
-          .loading-content {
-            display: flex;
-            width: 100%;
-            max-width: 320px;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            animation: loading-appear 0.55s ease both;
-          }
-
-          .loading-logo-frame {
-            display: grid;
-            width: 94px;
-            height: 94px;
-            flex-shrink: 0;
-            place-items: center;
-            padding: 14px;
-            border: 1px solid rgba(138, 106, 74, 0.45);
-            border-radius: 27px;
-            background: rgba(255, 255, 255, 0.65);
-            box-shadow:
-              0 12px 32px rgba(33, 77, 50, 0.08),
-              inset 0 0 0 4px rgba(255, 255, 255, 0.35);
-            animation: logo-float 3.2s ease-in-out infinite;
-          }
-
-          .loading-logo {
-            display: block;
-            width: 64px;
-            height: 64px;
-            max-width: 64px;
-            object-fit: contain;
-          }
-
-          .loading-brand {
-            margin-top: 27px;
-          }
-
-          .loading-brand-name {
-            margin: 0;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 3px;
-          }
-
-          .loading-brand-caption {
-            margin: 8px 0 0;
-            color: #8a6a4a;
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 1.7px;
-          }
-
-          .loading-progress {
-            position: relative;
-            width: 112px;
-            height: 3px;
-            margin-top: 34px;
-            overflow: hidden;
-            border-radius: 99px;
-            background: #dedbd1;
-          }
-
-          .loading-progress span {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -42%;
-            width: 42%;
-            border-radius: 99px;
-            background: linear-gradient(
-              90deg,
-              #2f6b45,
-              #8a6a4a
-            );
-            animation: loading-progress 1.5s ease-in-out infinite;
-          }
-
-          .loading-title {
-            margin: 19px 0 0;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 21px;
-            font-weight: 500;
-            letter-spacing: -0.4px;
-          }
-
-          .loading-description {
-            margin: 9px 0 0;
-            color: #777d75;
-            font-size: 11px;
-            line-height: 1.8;
-          }
-
-          .loading-footer {
-            margin-top: 48px;
-            color: #8a6a4a;
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 2px;
-          }
-
-          @keyframes loading-progress {
+        <style jsx global>{`
+          @keyframes pajaraAdminProgress {
             from {
-              left: -42%;
+              transform: translateX(-5px);
             }
             to {
-              left: 100%;
-            }
-          }
-
-          @keyframes logo-float {
-            0%,
-            100% {
-              transform: translateY(0);
-            }
-            50% {
-              transform: translateY(-4px);
-            }
-          }
-
-          @keyframes loading-appear {
-            from {
-              opacity: 0;
-              transform: translateY(7px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .loading-content,
-            .loading-logo-frame {
-              animation: none;
+              transform: translateX(75px);
             }
           }
         `}</style>
@@ -421,17 +354,14 @@ export default function DashboardPage() {
 
       <main className="pajara-page">
         <header className="pajara-header">
-          <div className="header-decoration header-decoration-one" />
-          <div className="header-decoration header-decoration-two" />
-
           <div className="header-content">
             <div className="brand-row">
               <div className="brand-logo-wrap">
                 <Image
                   src="/icon-512.png"
                   alt="Logo Pajara Studio"
-                  width={42}
-                  height={42}
+                  width={39}
+                  height={39}
                   priority
                   className="brand-logo"
                 />
@@ -500,8 +430,8 @@ export default function DashboardPage() {
               <Image
                 src="/icon-512.png"
                 alt="Pajara Studio"
-                width={42}
-                height={42}
+                width={36}
+                height={36}
                 className="greeting-logo"
               />
             </div>
@@ -569,8 +499,8 @@ export default function DashboardPage() {
                   <Image
                     src="/icon-512.png"
                     alt="Logo Pajara Studio"
-                    width={48}
-                    height={48}
+                    width={45}
+                    height={45}
                     className="workspace-logo"
                   />
                 </div>
@@ -663,7 +593,7 @@ export default function DashboardPage() {
         .pajara-header {
           position: relative;
           overflow: hidden;
-          border-radius: 0 0 27px 27px;
+          border-radius: 0 0 26px 26px;
           background: linear-gradient(
             145deg,
             #173923 0%,
@@ -671,7 +601,7 @@ export default function DashboardPage() {
             #2f6b45 100%
           );
           color: ${COLORS.cream};
-          box-shadow: 0 10px 28px rgba(33, 77, 50, 0.1);
+          box-shadow: 0 8px 24px rgba(33, 77, 50, 0.08);
         }
 
         .header-content {
@@ -681,27 +611,6 @@ export default function DashboardPage() {
           max-width: 1080px;
           margin: 0 auto;
           padding: 22px 20px 19px;
-        }
-
-        .header-decoration {
-          position: absolute;
-          width: 240px;
-          height: 240px;
-          border: 1px solid rgba(247, 244, 238, 0.08);
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .header-decoration-one {
-          top: -130px;
-          right: -100px;
-        }
-
-        .header-decoration-two {
-          top: -90px;
-          right: -65px;
-          width: 170px;
-          height: 170px;
         }
 
         .brand-row {
@@ -718,7 +627,7 @@ export default function DashboardPage() {
           place-items: center;
           padding: 4px;
           border: 1px solid rgba(247, 244, 238, 0.35);
-          border-radius: 16px;
+          border-radius: 15px;
           background: rgba(247, 244, 238, 0.12);
         }
 
@@ -758,7 +667,7 @@ export default function DashboardPage() {
           flex-shrink: 0;
           place-items: center;
           border: 1px solid rgba(247, 244, 238, 0.2);
-          border-radius: 13px;
+          border-radius: 12px;
           background: rgba(247, 244, 238, 0.08);
           color: ${COLORS.cream};
           cursor: pointer;
@@ -860,13 +769,14 @@ export default function DashboardPage() {
 
         .greeting-logo-wrap {
           display: grid;
-          width: 48px;
-          height: 48px;
+          width: 54px;
+          height: 54px;
           flex-shrink: 0;
           place-items: center;
-          padding: 5px;
+          padding: 6px;
+          box-sizing: border-box;
           border: 1px solid #d9e1d5;
-          border-radius: 14px;
+          border-radius: 16px;
           background: #edf1e9;
         }
 
@@ -875,7 +785,7 @@ export default function DashboardPage() {
           width: 36px;
           height: 36px;
           object-fit: contain;
-          border-radius: 8px;
+          border-radius: 9px;
         }
 
         .greeting-copy {
@@ -1115,14 +1025,16 @@ export default function DashboardPage() {
 
         .workspace-logo-wrap {
           display: grid;
-          width: 59px;
-          height: 59px;
+          width: 64px;
+          height: 64px;
           flex-shrink: 0;
           place-items: center;
-          padding: 6px;
-          border: 1px solid rgba(247, 244, 238, 0.3);
-          border-radius: 17px;
+          padding: 7px;
+          box-sizing: border-box;
+          border: 1px solid rgba(247, 244, 238, 0.4);
+          border-radius: 19px;
           background: ${COLORS.cream};
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
 
         .workspace-logo {
@@ -1130,7 +1042,7 @@ export default function DashboardPage() {
           width: 45px;
           height: 45px;
           object-fit: contain;
-          border-radius: 9px;
+          border-radius: 10px;
         }
 
         .workspace-description {
@@ -1343,13 +1255,13 @@ export default function DashboardPage() {
           }
 
           .workspace-logo-wrap {
-            width: 68px;
-            height: 68px;
+            width: 70px;
+            height: 70px;
           }
 
           .workspace-logo {
-            width: 52px;
-            height: 52px;
+            width: 50px;
+            height: 50px;
           }
 
           .workspace-button {
@@ -1372,14 +1284,14 @@ export default function DashboardPage() {
           }
 
           .workspace-logo-wrap {
-            width: 51px;
-            height: 51px;
+            width: 54px;
+            height: 54px;
             padding: 5px;
           }
 
           .workspace-logo {
-            width: 39px;
-            height: 39px;
+            width: 40px;
+            height: 40px;
           }
 
           .pajara-footer {
