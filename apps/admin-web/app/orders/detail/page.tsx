@@ -1077,6 +1077,7 @@ function OrderDetailContent() {
           </div>
         )}
 
+        {/* 1. INFORMASI PESANAN */}
         <Section
           title="Informasi Pesanan"
           description="Ringkasan data dan jadwal pesanan customer."
@@ -1091,6 +1092,7 @@ function OrderDetailContent() {
           </div>
         </Section>
 
+        {/* 2. BRIEF & CATATAN */}
         <Section
           title="Brief & Catatan"
           description="Arahan dan informasi tambahan dari customer."
@@ -1119,7 +1121,46 @@ function OrderDetailContent() {
           </div>
         </Section>
 
-        {/* 1. REFERENSI CUSTOMER */}
+        {/* 3. STATUS PESANAN */}
+        <Section
+          title="Status Pesanan"
+          description="Perbarui tahap pengerjaan pesanan jika diperlukan."
+        >
+          <div className="rounded-2xl bg-[#faf8f4] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <label htmlFor="order-status" className="text-sm font-semibold">
+                Status saat ini
+              </label>
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-bold ${getStatusClass(order.status)}`}
+              >
+                {getStatusLabel(order.status)}
+              </span>
+            </div>
+            <select
+              id="order-status"
+              value={order.status}
+              onChange={handleStatusChange}
+              disabled={changingStatus}
+              className="w-full rounded-xl border border-[#ded8cc] bg-white px-4 py-3.5 text-sm font-medium outline-none transition focus:border-[#2f6b45] focus:ring-2 focus:ring-[#2f6b45]/10"
+            >
+              <option value="pending">Pesanan Baru</option>
+              <option value="waiting_dp">Menunggu DP</option>
+              <option value="processing">Diproses</option>
+              <option value="revision">Revisi</option>
+              <option value="waiting_payment">Menunggu Pelunasan</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
+            </select>
+            {changingStatus && (
+              <p className="mt-2 text-xs text-[#777166]">
+                Menyimpan perubahan status...
+              </p>
+            )}
+          </div>
+        </Section>
+
+        {/* 4. REFERENSI CUSTOMER */}
         <Section
           title="Referensi Customer"
           description="File referensi yang dikirim customer untuk pengerjaan desain."
@@ -1197,7 +1238,7 @@ function OrderDetailContent() {
           )}
         </Section>
 
-        {/* 2. REVISI CUSTOMER */}
+        {/* 5. REVISI CUSTOMER */}
         <Section
           title="Revisi Customer"
           description="Tinjau permintaan revisi dan kelola tindak lanjutnya."
@@ -1329,7 +1370,7 @@ function OrderDetailContent() {
           )}
         </Section>
 
-        {/* 3. PEMBAYARAN & PEMBAYARAN DP */}
+        {/* 6. PEMBAYARAN & PEMBAYARAN DP */}
         {isPackageOrder ? (
           <Section
             title="Pembayaran & Pembayaran DP"
@@ -1658,45 +1699,7 @@ function OrderDetailContent() {
           </Section>
         )}
 
-        <Section
-          title="Status Pesanan"
-          description="Perbarui tahap pengerjaan pesanan jika diperlukan."
-        >
-          <div className="rounded-2xl bg-[#faf8f4] p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <label htmlFor="order-status" className="text-sm font-semibold">
-                Status saat ini
-              </label>
-              <span
-                className={`rounded-full border px-3 py-1 text-xs font-bold ${getStatusClass(order.status)}`}
-              >
-                {getStatusLabel(order.status)}
-              </span>
-            </div>
-            <select
-              id="order-status"
-              value={order.status}
-              onChange={handleStatusChange}
-              disabled={changingStatus}
-              className="w-full rounded-xl border border-[#ded8cc] bg-white px-4 py-3.5 text-sm font-medium outline-none transition focus:border-[#2f6b45] focus:ring-2 focus:ring-[#2f6b45]/10"
-            >
-              <option value="pending">Pesanan Baru</option>
-              <option value="waiting_dp">Menunggu DP</option>
-              <option value="processing">Diproses</option>
-              <option value="revision">Revisi</option>
-              <option value="waiting_payment">Menunggu Pelunasan</option>
-              <option value="completed">Selesai</option>
-              <option value="cancelled">Dibatalkan</option>
-            </select>
-            {changingStatus && (
-              <p className="mt-2 text-xs text-[#777166]">
-                Menyimpan perubahan status...
-              </p>
-            )}
-          </div>
-        </Section>
-
-        {/* 4. FINAL FILE */}
+        {/* 7. FINAL FILE */}
         <Section
           title="Final File"
           description="Upload hasil desain final agar dapat diteruskan kepada customer."
