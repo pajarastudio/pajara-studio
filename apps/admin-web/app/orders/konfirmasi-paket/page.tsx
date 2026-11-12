@@ -26,6 +26,20 @@ type Payment = {
   proof_url?: string;
 };
 
+function getErrorMessage(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error
+  ) {
+    return String(error.message);
+  }
+
+  return error instanceof Error
+    ? error.message
+    : "Terjadi kesalahan yang tidak diketahui.";
+}
+
 export default function PackagePaymentConfirmationPage() {
   const router = useRouter();
 
@@ -66,12 +80,19 @@ export default function PackagePaymentConfirmationPage() {
 
       const { data: paymentData, error: paymentError } = await supabase
         .from("subscription_payments")
-        .select("*")
+        .select(
+          "id, subscription_id, customer_id, amount, payment_method, transaction_id, status, created_at, verified_at, verified_by"
+        )
         .order("created_at", { ascending: false });
 
       if (paymentError) throw paymentError;
 
       const rows = paymentData || [];
+
+      if (rows.length === 0) {
+        setPayments([]);
+        return;
+      }
 
       const subscriptionIds = [
         ...new Set(rows.map((item) => item.subscription_id).filter(Boolean)),
@@ -81,13 +102,13 @@ export default function PackagePaymentConfirmationPage() {
         ...new Set(rows.map((item) => item.customer_id).filter(Boolean)),
       ];
 
+      const paymentIds = rows.map((item) => item.id);
+
       const { data: subscriptions, error: subscriptionError } =
-        subscriptionIds.length > 0
-          ? await supabase
-              .from("subscriptions")
-              .select("id, plan_id")
-              .in("id", subscriptionIds)
-          : { data: [], error: null };
+        await supabase
+          .from("subscriptions")
+          .select("id, plan_id")
+          .in("id", subscriptionIds);
 
       if (subscriptionError) throw subscriptionError;
 
@@ -107,26 +128,21 @@ export default function PackagePaymentConfirmationPage() {
 
       if (plansError) throw plansError;
 
-      const { data: customers, error: customersError } =
-        customerIds.length > 0
-          ? await supabase
-              .from("profiles_v2")
-              .select("*")
-              .in("id", customerIds)
-          : { data: [], error: null };
+      const { data: customers, error: customersError } = await supabase
+        .from("profiles_v2")
+        .select("id, full_name, email")
+        .in("id", customerIds);
 
       if (customersError) throw customersError;
 
-      const { data: proofFiles, error: proofError } =
-        rows.length > 0
-          ? await supabase
-              .from("subscription_payment_files")
-              .select("*")
-              .in(
-                "payment_id",
-                rows.map((item) => item.id)
-              )
-          : { data: [], error: null };
+      // Kolom relasi yang benar adalah subscription_payment_id.
+      const { data: proofFiles, error: proofError } = await supabase
+        .from("subscription_payment_files")
+        .select(
+          "id, subscription_payment_id, file_name, storage_path, mime_type, created_at"
+        )
+        .in("subscription_payment_id", paymentIds)
+        .order("created_at", { ascending: false });
 
       if (proofError) throw proofError;
 
@@ -145,32 +161,27 @@ export default function PackagePaymentConfirmationPage() {
           );
 
           const proof = (proofFiles || []).find(
-            (item) => item.payment_id === payment.id
+            (item) => item.subscription_payment_id === payment.id
           );
-
-          const filePath =
-            proof?.file_path ||
-            proof?.storage_path ||
-            proof?.path ||
-            null;
 
           let proofUrl = "";
 
-          if (filePath) {
-            const { data } = await supabase.storage
+          if (proof?.storage_path) {
+            const { data, error: storageError } = await supabase.storage
               .from("pajara-files")
-              .createSignedUrl(filePath, 3600);
+              .createSignedUrl(proof.storage_path, 60 * 60);
 
-            proofUrl = data?.signedUrl || "";
+            if (storageError) {
+              console.error("Gagal membuat URL bukti:", storageError);
+            } else {
+              proofUrl = data?.signedUrl || "";
+            }
           }
 
           return {
             ...payment,
             customer_name:
-              customer?.full_name ||
-              customer?.name ||
-              customer?.email ||
-              "Customer",
+              customer?.full_name || customer?.email || "Customer",
             plan_name: plan?.name || "Paket Langganan",
             proof_url: proofUrl,
           };
@@ -179,11 +190,8 @@ export default function PackagePaymentConfirmationPage() {
 
       setPayments(enriched);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memuat konfirmasi pembayaran."
-      );
+      console.error("Gagal memuat konfirmasi pembayaran paket:", err);
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -218,17 +226,31 @@ export default function PackagePaymentConfirmationPage() {
         throw new Error("Sesi admin tidak ditemukan.");
       }
 
-      const { error: updateError } = await supabase
+      const updateData: {
+        status: string;
+        verified_by?: string;
+        verified_at?: string;
+      } = { status };
+
+      if (status === "verified") {
+        updateData.verified_by = user.id;
+        updateData.verified_at = new Date().toISOString();
+      }
+
+      const { data, error: updateError } = await supabase
         .from("subscription_payments")
-        .update({
-          status,
-          verified_by: user.id,
-          verified_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", paymentId)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
 
       if (updateError) throw updateError;
+
+      if (!data?.length) {
+        throw new Error(
+          "Pembayaran sudah diproses atau statusnya telah berubah."
+        );
+      }
 
       setMessage(
         status === "verified"
@@ -238,11 +260,8 @@ export default function PackagePaymentConfirmationPage() {
 
       await loadPayments();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memperbarui pembayaran."
-      );
+      console.error("Gagal memperbarui pembayaran paket:", err);
+      setError(getErrorMessage(err));
     } finally {
       setProcessingId(null);
     }
@@ -253,7 +272,7 @@ export default function PackagePaymentConfirmationPage() {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
-    }).format(value);
+    }).format(value || 0);
   }
 
   function formatDate(value: string) {
@@ -449,9 +468,7 @@ export default function PackagePaymentConfirmationPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs text-gray-400">
-                        ID Transaksi
-                      </p>
+                      <p className="text-xs text-gray-400">ID Transaksi</p>
                       <p className="mt-1 break-all text-sm font-semibold text-gray-700">
                         {payment.transaction_id || "-"}
                       </p>
@@ -485,9 +502,7 @@ export default function PackagePaymentConfirmationPage() {
                   {payment.status === "pending" && (
                     <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <button
-                        onClick={() =>
-                          updatePayment(payment.id, "rejected")
-                        }
+                        onClick={() => updatePayment(payment.id, "rejected")}
                         disabled={processingId === payment.id}
                         className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
                       >
@@ -495,9 +510,7 @@ export default function PackagePaymentConfirmationPage() {
                       </button>
 
                       <button
-                        onClick={() =>
-                          updatePayment(payment.id, "verified")
-                        }
+                        onClick={() => updatePayment(payment.id, "verified")}
                         disabled={processingId === payment.id}
                         className="rounded-2xl bg-[#2f6b45] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#214d32] disabled:opacity-50"
                       >
