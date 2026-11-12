@@ -133,6 +133,10 @@ export default function PackageOrdersPage() {
         label: "Pesanan Baru",
         style: "border-amber-200 bg-amber-50 text-amber-700",
       },
+      waiting_dp: {
+        label: "Menunggu DP",
+        style: "border-orange-200 bg-orange-50 text-orange-700",
+      },
       processing: {
         label: "Diproses",
         style: "border-blue-200 bg-blue-50 text-blue-700",
@@ -161,67 +165,175 @@ export default function PackageOrdersPage() {
     };
   }
 
+  const activeOrders = orders.filter(
+    (order) =>
+      !["completed", "cancelled"].includes(order.status || "")
+  ).length;
+
   return (
     <main className="min-h-screen bg-[#f7f6f1] px-4 pb-32 pt-5 sm:px-6 sm:pt-7 md:px-8">
       <div className="mx-auto max-w-6xl">
+        {/* HEADER */}
         <header className="relative mb-7 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#214d32] via-[#2f6b45] to-[#365f43] p-5 text-white shadow-[0_12px_32px_rgba(33,77,50,0.15)] sm:p-8">
           <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full border border-white/10" />
 
           <div className="relative">
             <button
+              type="button"
               onClick={() => router.push("/orders")}
-              className="mb-5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-white transition hover:bg-white/20"
             >
-              ← Kembali ke Kelola Pesanan
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-4 w-4"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+              Kembali ke Kelola Pesanan
             </button>
 
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">
               Manajemen Pesanan
             </p>
+
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Pesanan Paket
             </h1>
+
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/75">
-              Kelola pesanan pelanggan yang menggunakan layanan berlangganan atau paket.
+              Kelola seluruh pesanan pelanggan yang menggunakan layanan
+              berlangganan atau paket Pajara Studio.
             </p>
           </div>
         </header>
 
-        <section className="mb-6 rounded-3xl border border-[#e8e5dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">
-            Total Pesanan Paket
-          </p>
-          <p className="mt-2 text-3xl font-bold text-[#214d32]">
-            {loading ? "—" : orders.length}
-          </p>
-          <p className="mt-1 text-xs text-gray-400">
-            Pesanan yang terdaftar melalui sistem paket
-          </p>
+        {/* STATISTICS */}
+        <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="relative overflow-hidden rounded-3xl border border-[#e8e5dc] bg-white p-5 shadow-[0_4px_24px_rgba(33,77,50,0.04)]">
+            <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#f0f5ef]" />
+
+            <div className="relative">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f0f5ef] text-[#2f6b45]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-5 w-5"
+                >
+                  <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                </svg>
+              </div>
+
+              <p className="text-sm font-medium text-gray-500">
+                Total Pesanan Paket
+              </p>
+
+              <p className="mt-1.5 text-3xl font-bold tracking-tight text-[#214d32]">
+                {loading ? "—" : orders.length}
+              </p>
+
+              <p className="mt-1 text-xs text-gray-400">
+                Seluruh pesanan yang terdaftar
+              </p>
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-[#e8e5dc] bg-white p-5 shadow-[0_4px_24px_rgba(33,77,50,0.04)]">
+            <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#faf8f2]" />
+
+            <div className="relative">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#faf8f2] text-[#8a6a4a]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-5 w-5"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              </div>
+
+              <p className="text-sm font-medium text-gray-500">
+                Pesanan Aktif
+              </p>
+
+              <p className="mt-1.5 text-3xl font-bold tracking-tight text-[#214d32]">
+                {loading ? "—" : activeOrders}
+              </p>
+
+              <p className="mt-1 text-xs text-gray-400">
+                Pesanan yang belum diselesaikan
+              </p>
+            </div>
+          </div>
         </section>
 
+        {/* ERROR */}
         {error && (
           <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+            <div className="flex items-start gap-2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="mt-0.5 h-4 w-4 shrink-0"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5m0 3h.01" />
+              </svg>
+              <p>{error}</p>
+            </div>
           </div>
         )}
 
+        {/* LOADING */}
         {loading ? (
-          <div className="rounded-3xl border border-[#e8e5dc] bg-white p-10 text-center">
-            <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[#dce6da] border-t-[#2f6b45]" />
-            <p className="text-sm font-medium text-[#214d32]">
+          <div className="rounded-3xl border border-[#e8e5dc] bg-white px-5 py-14 text-center shadow-[0_4px_24px_rgba(33,77,50,0.04)]">
+            <div className="mx-auto mb-4 h-9 w-9 animate-spin rounded-full border-[3px] border-[#e2e9df] border-t-[#2f6b45]" />
+
+            <p className="text-sm font-semibold text-[#214d32]">
               Memuat pesanan paket...
+            </p>
+
+            <p className="mt-1 text-xs text-gray-400">
+              Mohon tunggu sebentar.
             </p>
           </div>
         ) : error ? null : orders.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[#dcded3] bg-white/70 px-5 py-12 text-center">
+          /* EMPTY STATE */
+          <div className="rounded-3xl border border-dashed border-[#dcded3] bg-white/70 px-5 py-14 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0f5ef] text-[#2f6b45]">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                className="h-7 w-7"
+              >
+                <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" />
+                <path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9M8 5.3l8 4.5" />
+              </svg>
+            </div>
+
             <h3 className="font-semibold text-[#214d32]">
-              Belum ada pesanan paket
+              Belum Ada Pesanan Paket
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Pesanan paket pelanggan akan tampil di sini.
+
+            <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-gray-500">
+              Pesanan pelanggan yang menggunakan layanan paket akan
+              ditampilkan di halaman ini.
             </p>
           </div>
         ) : (
+          /* ORDER LIST */
           <div className="space-y-4">
             {orders.map((order) => {
               const status = getStatus(order.status);
@@ -249,15 +361,22 @@ export default function PackageOrdersPage() {
                         </p>
                       </div>
 
-                      <span className={`w-fit shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold ${status.style}`}>
+                      <span
+                        className={`w-fit shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold ${status.style}`}
+                      >
                         {status.label}
                       </span>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-[#f0eee8] pt-3 text-xs text-gray-500 sm:text-sm">
-                      <span>Dibuat: {formatDate(order.created_at)}</span>
+                      <span>
+                        Dibuat: {formatDate(order.created_at)}
+                      </span>
+
                       {order.deadline && (
-                        <span>Tenggat: {formatDate(order.deadline)}</span>
+                        <span>
+                          Tenggat: {formatDate(order.deadline)}
+                        </span>
                       )}
                     </div>
 
@@ -289,7 +408,10 @@ export default function PackageOrdersPage() {
                           <p className="text-xs font-medium text-gray-500">
                             {item.label}
                           </p>
-                          <p className={`mt-1.5 break-words text-base font-bold ${item.text}`}>
+
+                          <p
+                            className={`mt-1.5 break-words text-base font-bold ${item.text}`}
+                          >
                             {item.value}
                           </p>
                         </div>
@@ -306,6 +428,7 @@ export default function PackageOrdersPage() {
                       className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2f6b45] px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#214d32] active:scale-[0.99]"
                     >
                       Lihat Detail Pesanan
+
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
@@ -323,10 +446,12 @@ export default function PackageOrdersPage() {
           </div>
         )}
 
+        {/* FOOTER */}
         <footer className="mt-10 border-t border-[#e5e2d9] pt-5 text-center">
           <p className="text-xs font-medium tracking-wide text-gray-400">
             PAJARA STUDIO
           </p>
+
           <p className="mt-1 text-xs text-gray-400">
             Desain yang punya arah.
           </p>
