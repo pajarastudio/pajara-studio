@@ -360,8 +360,8 @@ export default function DashboardPage() {
                 <Image
                   src="/icon-512.png"
                   alt="Logo Pajara Studio"
-                  width={39}
-                  height={39}
+                  width={41}
+                  height={41}
                   priority
                   className="brand-logo"
                 />
@@ -619,6 +619,7 @@ export default function DashboardPage() {
           gap: 12px;
         }
 
+        /* LOGO HEADER PALING ATAS */
         .brand-logo-wrap {
           display: grid;
           width: 49px;
@@ -627,18 +628,19 @@ export default function DashboardPage() {
           place-items: center;
           padding: 4px;
           box-sizing: border-box;
+          overflow: hidden;
           border: 1px solid rgba(247, 244, 238, 0.35);
           border-radius: 18px;
           background: rgba(247, 244, 238, 0.12);
-          overflow: hidden;
         }
 
         .brand-logo {
           display: block;
-          width: 39px;
-          height: 39px;
+          width: 41px;
+          height: 41px;
           object-fit: contain;
-          border-radius: 10px;
+          border-radius: 13px;
+          overflow: hidden;
         }
 
         .brand-copy {
