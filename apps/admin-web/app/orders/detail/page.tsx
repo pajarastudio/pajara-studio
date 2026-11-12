@@ -94,30 +94,20 @@ function formatDate(value: string | null | undefined) {
 function formatFileSize(bytes: number | null | undefined) {
   if (!bytes) return "-";
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function getStatusLabel(status: string | null | undefined) {
   switch (status) {
-    case "pending":
-      return "Pesanan Baru";
-    case "waiting_dp":
-      return "Menunggu DP";
-    case "processing":
-      return "Diproses";
-    case "revision":
-      return "Revisi";
-    case "waiting_payment":
-      return "Menunggu Pelunasan";
-    case "completed":
-      return "Selesai";
-    case "cancelled":
-      return "Dibatalkan";
-    default:
-      return status || "-";
+    case "pending": return "Pesanan Baru";
+    case "waiting_dp": return "Menunggu DP";
+    case "processing": return "Diproses";
+    case "revision": return "Revisi";
+    case "waiting_payment": return "Menunggu Pelunasan";
+    case "completed": return "Selesai";
+    case "cancelled": return "Dibatalkan";
+    default: return status || "-";
   }
 }
 
@@ -141,14 +131,10 @@ function getStatusClass(status: string | null | undefined) {
 
 function getPaymentStatusLabel(status: string | null | undefined) {
   switch (status) {
-    case "pending":
-      return "Menunggu Verifikasi";
-    case "verified":
-      return "Terverifikasi";
-    case "rejected":
-      return "Ditolak";
-    default:
-      return status || "-";
+    case "pending": return "Menunggu Verifikasi";
+    case "verified": return "Terverifikasi";
+    case "rejected": return "Ditolak";
+    default: return status || "-";
   }
 }
 
@@ -165,16 +151,11 @@ function getPaymentStatusClass(status: string | null | undefined) {
 
 function getRevisionStatusLabel(status: string | null | undefined) {
   switch (status) {
-    case "pending":
-      return "Menunggu Diproses";
-    case "processing":
-      return "Sedang Diproses";
-    case "completed":
-      return "Selesai";
-    case "rejected":
-      return "Ditolak";
-    default:
-      return status || "-";
+    case "pending": return "Menunggu Diproses";
+    case "processing": return "Sedang Diproses";
+    case "completed": return "Selesai";
+    case "rejected": return "Ditolak";
+    default: return status || "-";
   }
 }
 
@@ -208,24 +189,76 @@ function Section({
   title,
   description,
   children,
+  collapsible = false,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
+  collapsible?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <section className="overflow-hidden rounded-3xl border border-[#e9e3d8] bg-white shadow-sm">
-      <div className="border-b border-[#eee9df] px-5 py-5 sm:px-6">
-        <h2 className="text-lg font-bold tracking-tight text-[#26382b]">
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-1.5 text-sm leading-6 text-[#858074]">
-            {description}
-          </p>
-        )}
-      </div>
-      <div className="p-5 sm:p-6">{children}</div>
+    <section className="overflow-hidden rounded-3xl border border-[#e8e5dc] bg-white shadow-[0_4px_24px_rgba(33,77,50,0.04)]">
+      {collapsible ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            aria-expanded={open}
+            className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-[#faf9f6] sm:px-6 sm:py-5"
+          >
+            <div className="min-w-0">
+              <h2 className="text-base font-bold tracking-tight text-[#214d32] sm:text-lg">
+                {title}
+              </h2>
+              {description && (
+                <p className="mt-1.5 text-sm leading-6 text-[#858074]">
+                  {description}
+                </p>
+              )}
+            </div>
+
+            <span
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#f1f5f0] text-[#2f6b45] transition-transform duration-200 ${
+                open ? "rotate-90" : ""
+              }`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-5 w-5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </span>
+          </button>
+
+          {open && (
+            <div className="border-t border-[#eee9df] p-5 sm:p-6">
+              {children}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="border-b border-[#eee9df] px-5 py-5 sm:px-6">
+            <h2 className="text-lg font-bold tracking-tight text-[#26382b]">
+              {title}
+            </h2>
+            {description && (
+              <p className="mt-1.5 text-sm leading-6 text-[#858074]">
+                {description}
+              </p>
+            )}
+          </div>
+          <div className="p-5 sm:p-6">{children}</div>
+        </>
+      )}
     </section>
   );
 }
@@ -280,12 +313,8 @@ function OrderDetailContent() {
   const [payment, setPayment] = useState<Payment | null>(null);
   const [paymentProof, setPaymentProof] = useState<PaymentProof | null>(null);
   const [revisions, setRevisions] = useState<Revision[]>([]);
-  const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>(
-    {}
-  );
-  const [revisionActions, setRevisionActions] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({});
+  const [revisionActions, setRevisionActions] = useState<Record<string, boolean>>({});
 
   const [loading, setLoading] = useState(true);
   const [loadingPayment, setLoadingPayment] = useState(false);
@@ -295,9 +324,7 @@ function OrderDetailContent() {
   const [totalInput, setTotalInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [changingStatus, setChangingStatus] = useState(false);
-  const [paymentAction, setPaymentAction] = useState<
-    "verify" | "reject" | null
-  >(null);
+  const [paymentAction, setPaymentAction] = useState<"verify" | "reject" | null>(null);
   const [uploadingFinal, setUploadingFinal] = useState(false);
 
   useEffect(() => {
@@ -389,9 +416,7 @@ function OrderDetailContent() {
       }
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memuat detail pesanan."
+        err instanceof Error ? err.message : "Gagal memuat detail pesanan."
       );
     } finally {
       setLoading(false);
@@ -494,10 +519,7 @@ function OrderDetailContent() {
         .createSignedUrl(proofData.file_path, 60 * 60);
 
       if (signedError) {
-        console.error(
-          "Gagal membuat signed URL bukti pembayaran:",
-          signedError
-        );
+        console.error("Gagal membuat signed URL bukti pembayaran:", signedError);
       }
 
       setPaymentProof({
@@ -627,9 +649,7 @@ function OrderDetailContent() {
       );
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memperbarui status revisi."
+        err instanceof Error ? err.message : "Gagal memperbarui status revisi."
       );
     } finally {
       setRevisionActions((current) => ({
@@ -670,14 +690,10 @@ function OrderDetailContent() {
         )
       );
 
-      setMessage(
-        `Catatan revisi #${revision.revision_number} berhasil disimpan.`
-      );
+      setMessage(`Catatan revisi #${revision.revision_number} berhasil disimpan.`);
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal menyimpan catatan revisi."
+        err instanceof Error ? err.message : "Gagal menyimpan catatan revisi."
       );
     } finally {
       setRevisionActions((current) => ({
@@ -726,9 +742,7 @@ function OrderDetailContent() {
       setTotalInput(String(data.total_amount ?? ""));
       setMessage("Harga pesanan berhasil disimpan.");
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Gagal menyimpan harga."
-      );
+      setError(err instanceof Error ? err.message : "Gagal menyimpan harga.");
     } finally {
       setSavingPrice(false);
     }
@@ -765,9 +779,7 @@ function OrderDetailContent() {
       setMessage(`Status pesanan diubah menjadi ${getStatusLabel(newStatus)}.`);
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal mengubah status pesanan."
+        err instanceof Error ? err.message : "Gagal mengubah status pesanan."
       );
     } finally {
       setChangingStatus(false);
@@ -868,9 +880,7 @@ function OrderDetailContent() {
       }
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memproses pembayaran."
+        err instanceof Error ? err.message : "Gagal memproses pembayaran."
       );
     } finally {
       setPaymentAction(null);
@@ -934,9 +944,7 @@ function OrderDetailContent() {
       setMessage("File final berhasil diupload.");
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal mengupload file final."
+        err instanceof Error ? err.message : "Gagal mengupload file final."
       );
     } finally {
       setUploadingFinal(false);
@@ -946,7 +954,7 @@ function OrderDetailContent() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f4ee] px-5">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f6f1] px-5">
         <div className="text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#dce6dc] border-t-[#2f6b45]" />
           <p className="mt-4 text-sm font-medium text-[#625d53]">
@@ -959,8 +967,8 @@ function OrderDetailContent() {
 
   if (!order) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f4ee] px-5 py-10">
-        <div className="w-full max-w-md rounded-3xl border border-[#e9e3d8] bg-white p-7 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f6f1] px-5 py-10">
+        <div className="w-full max-w-md rounded-3xl border border-[#e8e5dc] bg-white p-7 text-center shadow-sm">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-2xl font-bold text-red-600">
             !
           </span>
@@ -991,21 +999,44 @@ function OrderDetailContent() {
     : "Nominal DP";
 
   return (
-    <main className="min-h-screen bg-[#f7f4ee] px-4 py-5 text-[#373b32] sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#f7f6f1] px-4 py-5 text-[#373b32] sm:px-6 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-5">
-        <header className="rounded-3xl border border-[#e9e3d8] bg-white p-5 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8a6a4a]">
+        <header className="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-[#214d32] via-[#2f6b45] to-[#365f43] p-5 text-white shadow-[0_8px_30px_rgba(33,77,50,0.12)] sm:p-7">
+          <div className="pointer-events-none absolute -right-12 -top-20 h-56 w-56 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -right-2 -top-10 h-36 w-36 rounded-full border border-white/10" />
+
+          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="h-4 w-4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+                Kembali ke Pesanan
+              </button>
+
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/65">
                 PAJARA ADMIN / PESANAN
               </p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#214d32] sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
                 Detail Pesanan
               </h1>
-              <p className="mt-2 break-words text-sm text-[#858074]">
+              <p className="mt-2 break-words text-sm text-white/75">
                 {order.order_code}
               </p>
             </div>
+
             <span
               className={`inline-flex w-fit items-center rounded-full border px-4 py-2 text-sm font-bold ${getStatusClass(order.status)}`}
             >
@@ -1013,16 +1044,18 @@ function OrderDetailContent() {
             </span>
           </div>
 
-          <div className="mt-6 border-t border-[#eee9df] pt-5">
+          <div className="relative mt-6 border-t border-white/15 pt-5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-bold">{order.service_name || "Layanan"}</span>
+              <span className="text-lg font-bold">
+                {order.service_name || "Layanan"}
+              </span>
               {order.design_type && (
-                <span className="rounded-full bg-[#f1ece6] px-3 py-1 text-xs font-semibold text-[#77654f]">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
                   {order.design_type}
                 </span>
               )}
               {isPackageOrder && (
-                <span className="rounded-full bg-[#edf5ef] px-3 py-1 text-xs font-semibold text-[#2f6b45]">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
                   Pesanan Paket
                 </span>
               )}
@@ -1059,8 +1092,38 @@ function OrderDetailContent() {
         </Section>
 
         <Section
+          title="Brief & Catatan"
+          description="Arahan dan informasi tambahan dari customer."
+        >
+          <div className="space-y-4">
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8a6a4a]">
+                Brief desain
+              </p>
+              <div className="rounded-2xl border border-[#eee9df] bg-[#faf8f4] p-4">
+                <p className="whitespace-pre-wrap break-words text-sm leading-7 text-[#514c42]">
+                  {order.brief || "Tidak ada brief."}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8a6a4a]">
+                Catatan tambahan
+              </p>
+              <div className="rounded-2xl border border-[#eee9df] bg-[#faf8f4] p-4">
+                <p className="whitespace-pre-wrap break-words text-sm leading-7 text-[#514c42]">
+                  {order.notes || "Tidak ada catatan."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* 1. REFERENSI CUSTOMER */}
+        <Section
           title="Referensi Customer"
           description="File referensi yang dikirim customer untuk pengerjaan desain."
+          collapsible
         >
           {referenceFiles.length === 0 ? (
             <EmptyState
@@ -1109,6 +1172,7 @@ function OrderDetailContent() {
                       )}
                     </div>
                   )}
+
                   <div className="border-t border-[#e9e3d8] p-4">
                     <p className="break-words text-sm font-semibold">
                       {file.file_name}
@@ -1133,37 +1197,11 @@ function OrderDetailContent() {
           )}
         </Section>
 
-        <Section
-          title="Brief & Catatan"
-          description="Arahan dan informasi tambahan dari customer."
-        >
-          <div className="space-y-4">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8a6a4a]">
-                Brief desain
-              </p>
-              <div className="rounded-2xl border border-[#eee9df] bg-[#faf8f4] p-4">
-                <p className="whitespace-pre-wrap break-words text-sm leading-7 text-[#514c42]">
-                  {order.brief || "Tidak ada brief."}
-                </p>
-              </div>
-            </div>
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8a6a4a]">
-                Catatan tambahan
-              </p>
-              <div className="rounded-2xl border border-[#eee9df] bg-[#faf8f4] p-4">
-                <p className="whitespace-pre-wrap break-words text-sm leading-7 text-[#514c42]">
-                  {order.notes || "Tidak ada catatan."}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Section>
-
+        {/* 2. REVISI CUSTOMER */}
         <Section
           title="Revisi Customer"
           description="Tinjau permintaan revisi dan kelola tindak lanjutnya."
+          collapsible
         >
           {loadingRevisions ? (
             <div className="rounded-2xl bg-[#faf8f4] p-5 text-sm text-[#777166]">
@@ -1291,10 +1329,12 @@ function OrderDetailContent() {
           )}
         </Section>
 
+        {/* 3. PEMBAYARAN & PEMBAYARAN DP */}
         {isPackageOrder ? (
           <Section
-            title="Pembayaran Paket"
+            title="Pembayaran & Pembayaran DP"
             description="Informasi pembayaran untuk pesanan berbasis kuota paket."
+            collapsible
           >
             <div className="flex items-start gap-4 rounded-2xl border border-[#d8e6dc] bg-[#edf5ef] p-4 sm:p-5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-xl">
@@ -1317,8 +1357,9 @@ function OrderDetailContent() {
           </Section>
         ) : (
           <Section
-            title="Pembayaran"
+            title="Pembayaran & Pembayaran DP"
             description="Kelola harga pesanan serta verifikasi DP dan pelunasan."
+            collapsible
           >
             <div className="rounded-2xl border border-[#e9e3d8] bg-[#faf8f4] p-4 sm:p-5">
               <h3 className="text-sm font-bold">Harga Pesanan</h3>
@@ -1423,17 +1464,13 @@ function OrderDetailContent() {
                 <div className="mt-5 space-y-5">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl bg-[#faf8f4] p-4">
-                      <p className="text-xs text-[#858074]">
-                        Metode Pembayaran
-                      </p>
+                      <p className="text-xs text-[#858074]">Metode Pembayaran</p>
                       <p className="mt-2 break-words text-sm font-bold">
                         {payment.payment_method || "-"}
                       </p>
                     </div>
                     <div className="rounded-2xl bg-[#faf8f4] p-4">
-                      <p className="text-xs text-[#858074]">
-                        Jenis Pembayaran
-                      </p>
+                      <p className="text-xs text-[#858074]">Jenis Pembayaran</p>
                       <p className="mt-2 text-sm font-bold">
                         {payment.payment_type || "-"}
                       </p>
@@ -1447,9 +1484,7 @@ function OrderDetailContent() {
                       </p>
                     </div>
                     <div className="rounded-2xl bg-[#faf8f4] p-4">
-                      <p className="text-xs text-[#858074]">
-                        Waktu Pembayaran
-                      </p>
+                      <p className="text-xs text-[#858074]">Waktu Pembayaran</p>
                       <p className="mt-2 text-sm font-bold">
                         {formatDate(payment.created_at)}
                       </p>
@@ -1460,8 +1495,7 @@ function OrderDetailContent() {
                     <h4 className="text-sm font-bold">Bukti Pembayaran</h4>
                     {paymentProof && (
                       <p className="mt-1 break-words text-xs text-[#858074]">
-                        {paymentProof.file_name} ·{" "}
-                        {formatFileSize(paymentProof.file_size)}
+                        {paymentProof.file_name} · {formatFileSize(paymentProof.file_size)}
                       </p>
                     )}
 
@@ -1490,10 +1524,7 @@ function OrderDetailContent() {
                     ) : (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-[#e9e3d8] bg-[#faf8f4]">
                         {paymentProof.url &&
-                        isImageFile(
-                          paymentProof.file_type,
-                          paymentProof.file_name
-                        ) ? (
+                        isImageFile(paymentProof.file_type, paymentProof.file_name) ? (
                           <div className="bg-[#f1eee8] p-3">
                             <a
                               href={paymentProof.url}
@@ -1509,10 +1540,7 @@ function OrderDetailContent() {
                             </a>
                           </div>
                         ) : paymentProof.url &&
-                          isPdfFile(
-                            paymentProof.file_type,
-                            paymentProof.file_name
-                          ) ? (
+                          isPdfFile(paymentProof.file_type, paymentProof.file_name) ? (
                           <div className="p-3">
                             <iframe
                               src={paymentProof.url}
@@ -1602,11 +1630,7 @@ function OrderDetailContent() {
                   {payment.status === "verified" && (
                     <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
                       <p className="text-sm font-bold text-green-800">
-                        ✓{" "}
-                        {settlementPayment
-                          ? "Pembayaran pelunasan"
-                          : "Pembayaran DP"}{" "}
-                        sudah terverifikasi
+                        ✓ {settlementPayment ? "Pembayaran pelunasan" : "Pembayaran DP"} sudah terverifikasi
                       </p>
                       {payment.verified_at && (
                         <p className="mt-1 text-xs text-green-700">
@@ -1619,8 +1643,7 @@ function OrderDetailContent() {
                   {payment.status === "rejected" && (
                     <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
                       <p className="text-sm font-bold text-red-800">
-                        Pembayaran{" "}
-                        {settlementPayment ? "pelunasan" : "DP"} ditolak
+                        Pembayaran {settlementPayment ? "pelunasan" : "DP"} ditolak
                       </p>
                       {payment.verified_at && (
                         <p className="mt-1 text-xs text-red-700">
@@ -1673,9 +1696,11 @@ function OrderDetailContent() {
           </div>
         </Section>
 
+        {/* 4. FINAL FILE */}
         <Section
           title="Final File"
           description="Upload hasil desain final agar dapat diteruskan kepada customer."
+          collapsible
         >
           <div className="rounded-2xl border border-dashed border-[#cdddcf] bg-[#f5f9f5] p-5 sm:p-7">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl text-[#2f6b45] shadow-sm">
@@ -1710,9 +1735,14 @@ function OrderDetailContent() {
           </div>
         </Section>
 
-        <p className="px-2 pb-2 text-center text-xs text-[#9a9488]">
-          Pajara Studio · Berakar di Tanah Pasundan.
-        </p>
+        <footer className="px-2 pb-2 pt-2 text-center">
+          <p className="text-[11px] font-bold tracking-[0.18em] text-[#214d32]">
+            PAJARA STUDIO
+          </p>
+          <p className="mt-1 text-xs text-[#9a9488]">
+            Desain yang punya arah.
+          </p>
+        </footer>
       </div>
     </main>
   );
@@ -1722,7 +1752,7 @@ export default function OrderDetailPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#f7f4ee] px-5">
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f6f1] px-5">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#dce6dc] border-t-[#2f6b45]" />
             <p className="mt-4 text-sm font-medium text-[#625d53]">
