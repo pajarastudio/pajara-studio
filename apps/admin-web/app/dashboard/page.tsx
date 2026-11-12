@@ -16,7 +16,7 @@ type StatItem = {
   label: string;
   value: number;
   detail: string;
-  symbol: string;
+  number: string;
   tone: "green" | "brown" | "cream";
 };
 
@@ -68,46 +68,67 @@ export default function DashboardPage() {
       .eq("user_id", userId)
       .eq("is_read", false);
 
-    if (!error) setUnreadCount(count ?? 0);
+    if (!error) {
+      setUnreadCount(count ?? 0);
+    }
   }, []);
 
   useEffect(() => {
     let active = true;
 
     async function checkAdmin() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+      try {
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
 
-      if (!user) {
+        if (sessionError) {
+          router.replace("/");
+          return;
+        }
+
+        const user = sessionData.session?.user;
+
+        if (!user) {
+          router.replace("/");
+          return;
+        }
+
+        const { data: profile, error: profileError } =
+          await supabase
+            .from("profiles_v2")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        if (
+          profileError ||
+          !profile ||
+          profile.role !== "admin"
+        ) {
+          await supabase.auth.signOut();
+          router.replace("/");
+          return;
+        }
+
+        if (!active) return;
+
+        setAdminEmail(user.email || "");
+
+        await Promise.all([
+          loadOrders(),
+          loadUnreadCount(user.id),
+        ]);
+
+        if (active) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Gagal memuat dashboard:", error);
         router.replace("/");
-        return;
       }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles_v2")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError || !profile || profile.role !== "admin") {
-        await supabase.auth.signOut();
-        router.replace("/");
-        return;
-      }
-
-      if (!active) return;
-
-      setAdminEmail(user.email || "");
-
-      await Promise.all([
-        loadOrders(),
-        loadUnreadCount(user.id),
-      ]);
-
-      if (active) setLoading(false);
     }
 
-    checkAdmin();
+    void checkAdmin();
 
     return () => {
       active = false;
@@ -124,95 +145,102 @@ export default function DashboardPage() {
       label: "Total Pesanan",
       value: totalOrders,
       detail: "Seluruh pesanan masuk",
-      symbol: "01",
+      number: "01",
       tone: "green",
     },
     {
       label: "Pesanan Baru",
       value: newOrders,
       detail: "Menunggu diproses",
-      symbol: "02",
+      number: "02",
       tone: "brown",
     },
     {
       label: "Sedang Diproses",
       value: processingOrders,
       detail: "Dalam pengerjaan",
-      symbol: "03",
+      number: "03",
       tone: "cream",
     },
     {
       label: "Pesanan Selesai",
       value: completedOrders,
       detail: "Berhasil diselesaikan",
-      symbol: "04",
+      number: "04",
       tone: "green",
     },
   ];
 
   if (loading) {
     return (
-      <main className="pajara-loading">
+      <main className="admin-loading">
         <div className="loading-decoration loading-decoration-one" />
         <div className="loading-decoration loading-decoration-two" />
 
-        <div className="pajara-loading-inner">
+        <div className="loading-content">
           <div className="loading-logo-frame">
-            <div className="loading-logo-inner">
-              <Image
-                src="/icon-512.png"
-                alt="Logo Pajara Studio"
-                width={88}
-                height={88}
-                priority
-                className="loading-logo"
-              />
-            </div>
+            <Image
+              src="/icon-512.png"
+              alt="Pajara Studio"
+              width={64}
+              height={64}
+              priority
+              className="loading-logo"
+              style={{
+                display: "block",
+                width: "64px",
+                height: "64px",
+                maxWidth: "64px",
+                objectFit: "contain",
+              }}
+            />
           </div>
 
           <div className="loading-brand">
-            <p className="loading-brand-name">PAJARA STUDIO</p>
+            <p className="loading-brand-name">PAJARA ADMIN</p>
             <p className="loading-brand-caption">
-              BERAKAR DI TANAH PASUNDAN
+              MANAGEMENT WORKSPACE
             </p>
           </div>
 
           <div
             className="loading-progress"
             role="status"
-            aria-label="Sedang menyiapkan dashboard"
+            aria-label="Menyiapkan Pajara Admin"
           >
             <span />
           </div>
 
-          <p className="loading-message">
+          <h1 className="loading-title">
             Menyiapkan ruang kerja
+          </h1>
+
+          <p className="loading-description">
+            Sebentar, kami sedang menyiapkan dashboard.
           </p>
 
-          <p className="loading-submessage">
-            Sebentar, kami sedang menyiapkan semuanya.
-          </p>
-
-          <span className="loading-footer">
+          <p className="loading-footer">
             DESAIN YANG PUNYA ARAH.
-          </span>
+          </p>
         </div>
 
         <style jsx>{`
-          .pajara-loading {
-            position: relative;
+          .admin-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
             isolation: isolate;
-            min-height: 100vh;
-            min-height: 100dvh;
             display: grid;
             place-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
-            padding: 28px 22px;
+            padding: 24px;
             background:
               radial-gradient(
-                circle at 50% 42%,
-                rgba(255, 255, 255, 0.82),
-                transparent 42%
+                circle at 50% 43%,
+                rgba(255, 255, 255, 0.9),
+                transparent 43%
               ),
               #f1ece6;
             color: #214d32;
@@ -225,103 +253,84 @@ export default function DashboardPage() {
           .loading-decoration {
             position: absolute;
             z-index: -1;
-            width: 300px;
-            height: 300px;
+            width: 280px;
+            height: 280px;
             border: 1px solid rgba(33, 77, 50, 0.07);
             border-radius: 50%;
             pointer-events: none;
           }
 
           .loading-decoration-one {
-            top: -175px;
-            right: -135px;
+            top: -170px;
+            right: -130px;
           }
 
           .loading-decoration-two {
-            bottom: -205px;
-            left: -155px;
-            width: 360px;
-            height: 360px;
+            bottom: -200px;
+            left: -150px;
+            width: 340px;
+            height: 340px;
             border-color: rgba(138, 106, 74, 0.1);
           }
 
-          .pajara-loading-inner {
+          .loading-content {
             display: flex;
             width: 100%;
             max-width: 320px;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            animation: loading-appear 0.65s ease both;
+            animation: loading-appear 0.55s ease both;
           }
 
           .loading-logo-frame {
-            position: relative;
             display: grid;
-            width: 112px;
-            height: 112px;
+            width: 94px;
+            height: 94px;
+            flex-shrink: 0;
             place-items: center;
-            padding: 7px;
-            border: 1px solid rgba(138, 106, 74, 0.52);
-            border-radius: 35px;
-            background: rgba(255, 255, 255, 0.28);
-            box-shadow:
-              0 15px 38px rgba(33, 77, 50, 0.08),
-              inset 0 0 0 5px rgba(255, 255, 255, 0.2);
-            animation: logo-float 3.2s ease-in-out infinite;
-          }
-
-          .loading-logo-frame::before {
-            position: absolute;
-            inset: -6px;
-            border: 1px solid rgba(138, 106, 74, 0.2);
-            border-radius: 40px;
-            content: "";
-          }
-
-          .loading-logo-inner {
-            display: grid;
-            width: 100%;
-            height: 100%;
-            place-items: center;
-            overflow: hidden;
-            border: 1px solid #e7dfd5;
+            padding: 14px;
+            border: 1px solid rgba(138, 106, 74, 0.45);
             border-radius: 27px;
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow:
+              0 12px 32px rgba(33, 77, 50, 0.08),
+              inset 0 0 0 4px rgba(255, 255, 255, 0.35);
+            animation: logo-float 3.2s ease-in-out infinite;
           }
 
           .loading-logo {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 64px;
+            height: 64px;
+            max-width: 64px;
             object-fit: contain;
-            border-radius: 25px;
           }
 
           .loading-brand {
-            margin-top: 31px;
+            margin-top: 27px;
           }
 
           .loading-brand-name {
             margin: 0;
             font-size: 13px;
             font-weight: 900;
-            letter-spacing: 3.2px;
+            letter-spacing: 3px;
           }
 
           .loading-brand-caption {
-            margin: 9px 0 0;
+            margin: 8px 0 0;
             color: #8a6a4a;
             font-size: 8px;
             font-weight: 800;
-            letter-spacing: 1.65px;
+            letter-spacing: 1.7px;
           }
 
           .loading-progress {
             position: relative;
-            width: 116px;
+            width: 112px;
             height: 3px;
-            margin-top: 35px;
+            margin-top: 34px;
             overflow: hidden;
             border-radius: 99px;
             background: #dedbd1;
@@ -339,18 +348,18 @@ export default function DashboardPage() {
               #2f6b45,
               #8a6a4a
             );
-            animation: loading-progress 1.45s ease-in-out infinite;
+            animation: loading-progress 1.5s ease-in-out infinite;
           }
 
-          .loading-message {
+          .loading-title {
             margin: 19px 0 0;
             font-family: Georgia, "Times New Roman", serif;
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 500;
-            letter-spacing: -0.35px;
+            letter-spacing: -0.4px;
           }
 
-          .loading-submessage {
+          .loading-description {
             margin: 9px 0 0;
             color: #777d75;
             font-size: 11px;
@@ -358,7 +367,7 @@ export default function DashboardPage() {
           }
 
           .loading-footer {
-            margin-top: 53px;
+            margin-top: 48px;
             color: #8a6a4a;
             font-size: 8px;
             font-weight: 800;
@@ -366,10 +375,10 @@ export default function DashboardPage() {
           }
 
           @keyframes loading-progress {
-            0% {
+            from {
               left: -42%;
             }
-            100% {
+            to {
               left: 100%;
             }
           }
@@ -387,7 +396,7 @@ export default function DashboardPage() {
           @keyframes loading-appear {
             from {
               opacity: 0;
-              transform: translateY(8px);
+              transform: translateY(7px);
             }
             to {
               opacity: 1;
@@ -396,13 +405,9 @@ export default function DashboardPage() {
           }
 
           @media (prefers-reduced-motion: reduce) {
-            .pajara-loading-inner,
+            .loading-content,
             .loading-logo-frame {
               animation: none;
-            }
-
-            .loading-progress span {
-              animation-duration: 3s;
             }
           }
         `}</style>
@@ -418,24 +423,18 @@ export default function DashboardPage() {
         <header className="pajara-header">
           <div className="header-decoration header-decoration-one" />
           <div className="header-decoration header-decoration-two" />
-          <div className="header-decoration header-decoration-three" />
 
           <div className="header-content">
             <div className="brand-row">
               <div className="brand-logo-wrap">
-                <span className="brand-logo-orbit" aria-hidden="true" />
-                <span className="brand-logo-side-accent" aria-hidden="true" />
-
-                <div className="brand-logo-inner">
-                  <Image
-                    src="/icon-512.png"
-                    alt="Logo Pajara Studio"
-                    width={54}
-                    height={54}
-                    priority
-                    className="brand-logo"
-                  />
-                </div>
+                <Image
+                  src="/icon-512.png"
+                  alt="Logo Pajara Studio"
+                  width={42}
+                  height={42}
+                  priority
+                  className="brand-logo"
+                />
               </div>
 
               <div className="brand-copy">
@@ -451,7 +450,21 @@ export default function DashboardPage() {
                 aria-label={`Buka notifikasi, ${unreadCount} belum dibaca`}
                 onClick={() => router.push("/notifications")}
               >
-                <span className="bell-symbol">♧</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="21"
+                  height="21"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                  <path d="M10 21h4" />
+                </svg>
+
                 {unreadCount > 0 && (
                   <span className="notification-dot">
                     {unreadCount > 9 ? "9+" : unreadCount}
@@ -461,24 +474,22 @@ export default function DashboardPage() {
             </div>
 
             <div className="header-heading">
-              <p className="eyebrow">RUANG KENDALI</p>
+              <p className="eyebrow">RUANG KENDALI PAJARA</p>
               <h1>
                 Selamat datang
                 <br />
                 <span>di ruang kerja.</span>
               </h1>
               <p className="header-description">
-                Kelola setiap pesanan, jaga kualitas karya,
-                dan tumbuhkan perjalanan Pajara.
+                Kelola pesanan, jaga kualitas karya, dan tumbuhkan
+                perjalanan Pajara.
               </p>
             </div>
 
             <div className="header-bottom">
-              <span className="header-bottom-label">
-                ADMINISTRATION
-              </span>
+              <span>ADMINISTRATION</span>
               <span className="header-bottom-line" />
-              <span className="header-bottom-number">PS — 01</span>
+              <span>PS — 01</span>
             </div>
           </div>
         </header>
@@ -489,8 +500,8 @@ export default function DashboardPage() {
               <Image
                 src="/icon-512.png"
                 alt="Pajara Studio"
-                width={44}
-                height={44}
+                width={42}
+                height={42}
                 className="greeting-logo"
               />
             </div>
@@ -502,17 +513,14 @@ export default function DashboardPage() {
               <h2>Halo, Admin Pajara.</h2>
               <p className="admin-email">{adminEmail}</p>
             </div>
-
-            <span className="greeting-accent" aria-hidden="true" />
           </section>
 
           <section className="statistics-section">
             <div className="section-heading">
               <div>
-                <p className="section-eyebrow">GAMBARAN HARI INI</p>
+                <p className="section-eyebrow">GAMBARAN PESANAN</p>
                 <h2>Ringkasan pesanan</h2>
               </div>
-
               <span className="section-index">01 / 04</span>
             </div>
 
@@ -523,16 +531,13 @@ export default function DashboardPage() {
                   className={`stat-card stat-${stat.tone}`}
                 >
                   <div className="stat-top">
-                    <span className="stat-symbol">{stat.symbol}</span>
-                    <span className="stat-arrow" aria-hidden="true">
-                      ↗
-                    </span>
+                    <span className="stat-number">{stat.number}</span>
+                    <span className="stat-mark">↗</span>
                   </div>
 
                   <p className="stat-value">{stat.value}</p>
                   <h3>{stat.label}</h3>
                   <p className="stat-detail">{stat.detail}</p>
-
                   <div className="stat-bottom-line" />
                 </article>
               ))}
@@ -540,16 +545,12 @@ export default function DashboardPage() {
           </section>
 
           <section className="workspace-section">
-            <div className="workspace-pattern" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
+            <div className="workspace-decoration" aria-hidden="true" />
 
             <div className="workspace-content">
               <div className="workspace-topline">
-                <span className="workspace-label">PAJARA WORKSPACE</span>
-                <span className="workspace-number">01</span>
+                <span>PAJARA WORKSPACE</span>
+                <span>01</span>
               </div>
 
               <div className="workspace-title-row">
@@ -568,8 +569,8 @@ export default function DashboardPage() {
                   <Image
                     src="/icon-512.png"
                     alt="Logo Pajara Studio"
-                    width={52}
-                    height={52}
+                    width={48}
+                    height={48}
                     className="workspace-logo"
                   />
                 </div>
@@ -598,11 +599,12 @@ export default function DashboardPage() {
                 <h2>Aktivitas terbaru</h2>
               </div>
 
-              <span className="activity-clock">◷</span>
+              <span className="activity-symbol">◷</span>
             </div>
 
             <div className="activity-content">
               <div className="activity-icon">✳</div>
+
               <div className="activity-copy">
                 <h3>Perjalanan Pajara berlanjut</h3>
                 <p>
@@ -644,71 +646,6 @@ export default function DashboardPage() {
             <span>BERAKAR DI TANAH PASUNDAN.</span>
           </footer>
         </div>
-
-        <nav className="bottom-navigation" aria-label="Navigasi utama">
-          <div className="bottom-navigation-inner">
-            {[
-              { label: "Dashboard", icon: "⌂", action: "home" },
-              { label: "Pesanan", icon: "▤", action: "orders" },
-              {
-                label: "Customer Care",
-                icon: "✉",
-                action: "customer-care",
-              },
-              {
-                label: "Notifikasi",
-                icon: "♧",
-                action: "notifications",
-              },
-              { label: "Keuangan", icon: "Rp", action: "finance" },
-            ].map((item) => {
-              const selected = item.action === "home";
-
-              return (
-                <button
-                  key={item.action}
-                  type="button"
-                  aria-label={item.label}
-                  aria-current={selected ? "page" : undefined}
-                  onClick={() => {
-                    if (item.action === "home") {
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      });
-                    } else if (item.action === "orders") {
-                      router.push("/orders");
-                    } else if (item.action === "customer-care") {
-                      router.push("/customer-care");
-                    } else if (item.action === "notifications") {
-                      router.push("/notifications");
-                    } else {
-                      router.push("/finance");
-                    }
-                  }}
-                  className={`nav-item ${selected ? "nav-item-active" : ""}`}
-                >
-                  <span
-                    className={`nav-icon ${
-                      item.action === "finance" ? "nav-icon-rp" : ""
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-
-                  <span className="nav-label">{item.label}</span>
-
-                  {item.action === "notifications" &&
-                    unreadCount > 0 && (
-                      <span className="nav-badge">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
       </main>
 
       <style jsx>{`
@@ -726,53 +663,45 @@ export default function DashboardPage() {
         .pajara-header {
           position: relative;
           overflow: hidden;
+          border-radius: 0 0 27px 27px;
+          background: linear-gradient(
+            145deg,
+            #173923 0%,
+            #214d32 60%,
+            #2f6b45 100%
+          );
           color: ${COLORS.cream};
-          background:
-            radial-gradient(
-              circle at 100% 5%,
-              rgba(138, 106, 74, 0.24),
-              transparent 32%
-            ),
-            linear-gradient(145deg, #173923 0%, #214d32 58%, #2f6b45 100%);
-          border-radius: 0 0 30px 30px;
-          box-shadow: 0 12px 32px rgba(33, 77, 50, 0.12);
+          box-shadow: 0 10px 28px rgba(33, 77, 50, 0.1);
         }
 
         .header-content {
           position: relative;
-          z-index: 2;
+          z-index: 1;
+          width: 100%;
           max-width: 1080px;
           margin: 0 auto;
-          padding: 22px 22px 20px;
+          padding: 22px 20px 19px;
         }
 
         .header-decoration {
           position: absolute;
-          pointer-events: none;
-          border: 1px solid rgba(247, 244, 238, 0.09);
+          width: 240px;
+          height: 240px;
+          border: 1px solid rgba(247, 244, 238, 0.08);
           border-radius: 50%;
+          pointer-events: none;
         }
 
         .header-decoration-one {
-          width: 260px;
-          height: 260px;
-          right: -115px;
-          top: -100px;
+          top: -130px;
+          right: -100px;
         }
 
         .header-decoration-two {
-          width: 200px;
-          height: 200px;
+          top: -90px;
           right: -65px;
-          top: -70px;
-        }
-
-        .header-decoration-three {
-          width: 120px;
-          height: 120px;
-          right: -25px;
-          top: -30px;
-          border-color: rgba(247, 244, 238, 0.06);
+          width: 170px;
+          height: 170px;
         }
 
         .brand-row {
@@ -782,90 +711,23 @@ export default function DashboardPage() {
         }
 
         .brand-logo-wrap {
-          position: relative;
-          isolation: isolate;
-          width: 58px;
-          height: 58px;
-          flex-shrink: 0;
           display: grid;
+          width: 49px;
+          height: 49px;
+          flex-shrink: 0;
           place-items: center;
           padding: 4px;
-          border: 1px solid rgba(247, 244, 238, 0.42);
-          border-radius: 21px;
-          background: linear-gradient(
-            145deg,
-            rgba(247, 244, 238, 0.19),
-            rgba(247, 244, 238, 0.055)
-          );
-          box-shadow:
-            0 7px 18px rgba(0, 0, 0, 0.13),
-            inset 0 0 0 1px rgba(247, 244, 238, 0.045);
-        }
-
-        .brand-logo-wrap::before {
-          content: "";
-          position: absolute;
-          z-index: -1;
-          inset: -5px;
-          border: 1px solid rgba(216, 197, 173, 0.56);
-          border-radius: 25px;
-          pointer-events: none;
-        }
-
-        .brand-logo-wrap::after {
-          content: "";
-          position: absolute;
-          z-index: 2;
-          top: 8px;
-          right: -5px;
-          width: 9px;
-          height: 25px;
-          border-right: 1px solid rgba(216, 197, 173, 0.9);
-          border-radius: 0 9px 9px 0;
-          pointer-events: none;
-        }
-
-        .brand-logo-orbit {
-          position: absolute;
-          z-index: 2;
-          left: -5px;
-          bottom: 8px;
-          width: 9px;
-          height: 25px;
-          border-left: 1px solid rgba(216, 197, 173, 0.78);
-          border-radius: 9px 0 0 9px;
-          pointer-events: none;
-        }
-
-        .brand-logo-side-accent {
-          position: absolute;
-          z-index: 2;
-          right: 9px;
-          bottom: -4px;
-          width: 21px;
-          height: 7px;
-          border-bottom: 1px solid rgba(216, 197, 173, 0.9);
-          border-radius: 0 0 10px 10px;
-          pointer-events: none;
-        }
-
-        .brand-logo-inner {
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          display: grid;
-          place-items: center;
-          border: 1px solid rgba(247, 244, 238, 0.2);
+          border: 1px solid rgba(247, 244, 238, 0.35);
           border-radius: 16px;
-          background: rgba(247, 244, 238, 0.97);
+          background: rgba(247, 244, 238, 0.12);
         }
 
         .brand-logo {
-          width: 100%;
-          height: 100%;
           display: block;
+          width: 39px;
+          height: 39px;
           object-fit: contain;
-          border-radius: 15px;
+          border-radius: 10px;
         }
 
         .brand-copy {
@@ -877,7 +739,7 @@ export default function DashboardPage() {
           margin: 0;
           font-size: 12px;
           font-weight: 900;
-          letter-spacing: 2.2px;
+          letter-spacing: 2px;
         }
 
         .brand-caption {
@@ -885,35 +747,30 @@ export default function DashboardPage() {
           color: #d8c5ad;
           font-size: 8px;
           font-weight: 700;
-          letter-spacing: 1.15px;
+          letter-spacing: 1px;
         }
 
         .notification-shortcut {
           position: relative;
           display: grid;
-          place-items: center;
-          width: 42px;
-          height: 42px;
+          width: 40px;
+          height: 40px;
           flex-shrink: 0;
+          place-items: center;
           border: 1px solid rgba(247, 244, 238, 0.2);
-          border-radius: 14px;
+          border-radius: 13px;
           background: rgba(247, 244, 238, 0.08);
           color: ${COLORS.cream};
           cursor: pointer;
-        }
-
-        .bell-symbol {
-          font-size: 22px;
-          line-height: 1;
         }
 
         .notification-dot {
           position: absolute;
           top: -5px;
           right: -5px;
+          display: grid;
           min-width: 17px;
           height: 17px;
-          display: grid;
           place-items: center;
           padding: 0 4px;
           border: 2px solid #214d32;
@@ -925,30 +782,30 @@ export default function DashboardPage() {
         }
 
         .header-heading {
-          padding: 36px 0 31px;
           max-width: 540px;
+          padding: 35px 0 28px;
         }
 
         .eyebrow,
         .section-eyebrow {
           margin: 0;
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 850;
-          letter-spacing: 2px;
+          letter-spacing: 1.7px;
         }
 
         .eyebrow {
-          margin-bottom: 13px;
-          color: #d9c6ae;
+          margin-bottom: 12px;
+          color: #d8c5ad;
         }
 
         .header-heading h1 {
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(35px, 8vw, 51px);
+          font-size: clamp(34px, 8vw, 49px);
           font-weight: 400;
-          line-height: 1.06;
-          letter-spacing: -1.6px;
+          line-height: 1.08;
+          letter-spacing: -1.4px;
         }
 
         .header-heading h1 span {
@@ -957,10 +814,10 @@ export default function DashboardPage() {
         }
 
         .header-description {
-          max-width: 320px;
-          margin: 15px 0 0;
+          max-width: 330px;
+          margin: 13px 0 0;
           color: #e0e8df;
-          font-size: 12px;
+          font-size: 11px;
           line-height: 1.8;
         }
 
@@ -968,27 +825,18 @@ export default function DashboardPage() {
           display: flex;
           align-items: center;
           gap: 10px;
-          padding-top: 15px;
-          border-top: 1px solid rgba(247, 244, 238, 0.17);
-        }
-
-        .header-bottom-label,
-        .header-bottom-number {
+          padding-top: 14px;
+          border-top: 1px solid rgba(247, 244, 238, 0.16);
           color: #d8c5ad;
           font-size: 8px;
           font-weight: 800;
-          letter-spacing: 1.5px;
-          white-space: nowrap;
+          letter-spacing: 1.3px;
         }
 
         .header-bottom-line {
-          flex: 1;
           height: 1px;
-          background: rgba(247, 244, 238, 0.25);
-        }
-
-        .header-bottom-number {
-          letter-spacing: 1px;
+          flex: 1;
+          background: rgba(247, 244, 238, 0.22);
         }
 
         .pajara-content {
@@ -999,44 +847,38 @@ export default function DashboardPage() {
         }
 
         .admin-greeting {
-          position: relative;
           display: flex;
           align-items: center;
-          gap: 14px;
-          padding: 17px 16px;
-          margin-bottom: 31px;
-          overflow: hidden;
+          gap: 13px;
+          padding: 16px;
+          margin-bottom: 27px;
           border: 1px solid ${COLORS.border};
-          border-radius: 19px;
+          border-radius: 18px;
           background: ${COLORS.cream};
-          box-shadow: 0 5px 18px rgba(33, 77, 50, 0.035);
+          box-shadow: 0 4px 15px rgba(33, 77, 50, 0.025);
         }
 
         .greeting-logo-wrap {
-          position: relative;
-          z-index: 1;
-          width: 52px;
-          height: 52px;
-          flex-shrink: 0;
           display: grid;
+          width: 48px;
+          height: 48px;
+          flex-shrink: 0;
           place-items: center;
           padding: 5px;
           border: 1px solid #d9e1d5;
-          border-radius: 16px;
+          border-radius: 14px;
           background: #edf1e9;
         }
 
         .greeting-logo {
-          width: 100%;
-          height: 100%;
           display: block;
+          width: 36px;
+          height: 36px;
           object-fit: contain;
-          border-radius: 10px;
+          border-radius: 8px;
         }
 
         .greeting-copy {
-          position: relative;
-          z-index: 1;
           min-width: 0;
           flex: 1;
         }
@@ -1044,16 +886,16 @@ export default function DashboardPage() {
         .section-eyebrow {
           color: ${COLORS.brown};
           font-size: 8px;
-          letter-spacing: 1.5px;
+          letter-spacing: 1.4px;
           line-height: 1.6;
         }
 
         .greeting-copy h2 {
           margin: 4px 0 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: 20px;
+          font-size: 19px;
           font-weight: 500;
-          letter-spacing: -0.5px;
+          letter-spacing: -0.4px;
         }
 
         .admin-email {
@@ -1063,27 +905,8 @@ export default function DashboardPage() {
           font-size: 10px;
         }
 
-        .greeting-accent {
-          position: absolute;
-          right: -17px;
-          bottom: -36px;
-          width: 82px;
-          height: 82px;
-          border: 1px solid #e8e2d8;
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .greeting-accent::after {
-          position: absolute;
-          content: "";
-          inset: 12px;
-          border: 1px solid #e8e2d8;
-          border-radius: 50%;
-        }
-
         .statistics-section {
-          margin-bottom: 29px;
+          margin-bottom: 27px;
         }
 
         .section-heading {
@@ -1091,15 +914,15 @@ export default function DashboardPage() {
           align-items: flex-end;
           justify-content: space-between;
           gap: 12px;
-          margin-bottom: 15px;
+          margin-bottom: 14px;
         }
 
         .section-heading h2 {
           margin: 5px 0 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: 25px;
+          font-size: 24px;
           font-weight: 500;
-          letter-spacing: -0.8px;
+          letter-spacing: -0.6px;
         }
 
         .section-index {
@@ -1114,28 +937,23 @@ export default function DashboardPage() {
         .statistics-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 11px;
+          gap: 10px;
         }
 
         .stat-card {
           position: relative;
           min-width: 0;
-          min-height: 165px;
-          padding: 15px 14px 17px;
+          min-height: 150px;
+          padding: 14px;
           overflow: hidden;
           border: 1px solid ${COLORS.border};
-          border-radius: 19px;
+          border-radius: 17px;
           background: ${COLORS.white};
-          box-shadow: 0 4px 16px rgba(33, 77, 50, 0.025);
-        }
-
-        .stat-green {
-          background: #fff;
         }
 
         .stat-brown {
-          background: #f8f1e9;
           border-color: #e7d8c7;
+          background: #f8f1e9;
         }
 
         .stat-cream {
@@ -1146,34 +964,33 @@ export default function DashboardPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
         }
 
-        .stat-symbol {
+        .stat-number {
           color: ${COLORS.brown};
           font-size: 9px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .stat-arrow {
+        .stat-mark {
           display: grid;
+          width: 24px;
+          height: 24px;
           place-items: center;
-          width: 26px;
-          height: 26px;
           border: 1px solid ${COLORS.border};
-          border-radius: 9px;
+          border-radius: 8px;
           color: ${COLORS.greenLight};
-          font-size: 13px;
+          font-size: 12px;
         }
 
         .stat-value {
-          margin: 16px 0 7px;
+          margin: 14px 0 7px;
           color: ${COLORS.green};
-          font-size: 36px;
+          font-size: 34px;
           font-weight: 800;
           line-height: 1;
-          letter-spacing: -1.8px;
+          letter-spacing: -1.5px;
           font-variant-numeric: tabular-nums;
         }
 
@@ -1194,9 +1011,9 @@ export default function DashboardPage() {
 
         .stat-bottom-line {
           position: absolute;
+          right: 0;
           bottom: 0;
           left: 0;
-          width: 100%;
           height: 3px;
           background: ${COLORS.greenLight};
           opacity: 0.7;
@@ -1213,76 +1030,66 @@ export default function DashboardPage() {
         .workspace-section {
           position: relative;
           overflow: hidden;
-          margin-bottom: 29px;
-          border-radius: 24px;
-          background:
-            radial-gradient(
-              circle at 100% 0%,
-              rgba(138, 106, 74, 0.24),
-              transparent 34%
-            ),
-            linear-gradient(145deg, #173923 0%, #214d32 70%, #2f6b45 100%);
+          margin-bottom: 27px;
+          border-radius: 22px;
+          background: linear-gradient(
+            145deg,
+            #173923 0%,
+            #214d32 70%,
+            #2f6b45 100%
+          );
           color: ${COLORS.cream};
-          box-shadow: 0 12px 28px rgba(33, 77, 50, 0.12);
+          box-shadow: 0 10px 25px rgba(33, 77, 50, 0.1);
         }
 
-        .workspace-pattern {
+        .workspace-decoration {
           position: absolute;
+          top: 65px;
           right: -85px;
-          top: 70px;
-          width: 210px;
-          height: 210px;
+          width: 205px;
+          height: 205px;
+          border: 1px solid rgba(247, 244, 238, 0.12);
+          border-radius: 50%;
           pointer-events: none;
         }
 
-        .workspace-pattern span {
+        .workspace-decoration::before,
+        .workspace-decoration::after {
           position: absolute;
-          inset: 0;
-          border: 1px solid rgba(247, 244, 238, 0.12);
-          border-radius: 50%;
-        }
-
-        .workspace-pattern span:nth-child(2) {
           inset: 22px;
+          border: 1px solid rgba(247, 244, 238, 0.1);
+          border-radius: 50%;
+          content: "";
         }
 
-        .workspace-pattern span:nth-child(3) {
+        .workspace-decoration::after {
           inset: 44px;
         }
 
         .workspace-content {
           position: relative;
           z-index: 1;
-          padding: 21px;
+          padding: 20px;
         }
 
         .workspace-topline {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid rgba(247, 244, 238, 0.18);
-        }
-
-        .workspace-label,
-        .workspace-number {
+          padding-bottom: 14px;
+          border-bottom: 1px solid rgba(247, 244, 238, 0.17);
           color: #d8c5ad;
           font-size: 8px;
           font-weight: 850;
-          letter-spacing: 1.7px;
-        }
-
-        .workspace-number {
-          font-size: 10px;
+          letter-spacing: 1.6px;
         }
 
         .workspace-title-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 14px;
-          margin-top: 25px;
+          gap: 12px;
+          margin-top: 23px;
         }
 
         .workspace-title-row > div:first-child {
@@ -1294,65 +1101,62 @@ export default function DashboardPage() {
           color: #d8c5ad;
           font-size: 8px;
           font-weight: 800;
-          letter-spacing: 1.2px;
+          letter-spacing: 1.1px;
         }
 
         .workspace-title-row h2 {
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(31px, 7vw, 40px);
+          font-size: clamp(29px, 7vw, 39px);
           font-weight: 400;
-          line-height: 1.07;
-          letter-spacing: -1px;
+          line-height: 1.08;
+          letter-spacing: -0.8px;
         }
 
         .workspace-logo-wrap {
-          width: 64px;
-          height: 64px;
-          flex-shrink: 0;
           display: grid;
+          width: 59px;
+          height: 59px;
+          flex-shrink: 0;
           place-items: center;
           padding: 6px;
           border: 1px solid rgba(247, 244, 238, 0.3);
-          border-radius: 19px;
-          background: rgba(247, 244, 238, 0.96);
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+          border-radius: 17px;
+          background: ${COLORS.cream};
         }
 
         .workspace-logo {
-          width: 100%;
-          height: 100%;
           display: block;
+          width: 45px;
+          height: 45px;
           object-fit: contain;
-          border-radius: 11px;
+          border-radius: 9px;
         }
 
         .workspace-description {
-          max-width: 310px;
-          margin: 14px 0 22px;
+          max-width: 330px;
+          margin: 13px 0 19px;
           color: #e0e8df;
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.8;
         }
 
         .workspace-button {
-          width: 100%;
-          min-height: 49px;
           display: flex;
+          width: 100%;
+          min-height: 47px;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 12px 15px;
+          padding: 10px 14px;
           border: none;
-          border-radius: 13px;
+          border-radius: 12px;
           background: ${COLORS.cream};
           color: ${COLORS.green};
           font-size: 11px;
           font-weight: 850;
           cursor: pointer;
-          transition:
-            transform 0.2s ease,
-            background 0.2s ease;
+          transition: transform 0.2s ease;
         }
 
         .workspace-button:active {
@@ -1361,67 +1165,67 @@ export default function DashboardPage() {
 
         .button-arrow {
           display: grid;
+          width: 26px;
+          height: 26px;
           place-items: center;
-          width: 27px;
-          height: 27px;
-          border-radius: 9px;
+          border-radius: 8px;
           background: #e5e9df;
-          font-size: 15px;
+          font-size: 14px;
         }
 
         .activity-section {
-          margin-bottom: 22px;
-          padding: 19px;
+          margin-bottom: 21px;
+          padding: 18px;
           border: 1px solid ${COLORS.border};
-          border-radius: 20px;
+          border-radius: 19px;
           background: ${COLORS.cream};
         }
 
         .activity-heading {
           align-items: center;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
         }
 
         .activity-heading h2 {
-          font-size: 23px;
+          font-size: 22px;
         }
 
-        .activity-clock {
+        .activity-symbol {
           display: grid;
-          place-items: center;
-          width: 37px;
-          height: 37px;
+          width: 35px;
+          height: 35px;
           flex-shrink: 0;
+          place-items: center;
           border: 1px solid ${COLORS.border};
-          border-radius: 13px;
+          border-radius: 12px;
           color: ${COLORS.brown};
-          font-size: 21px;
+          font-size: 20px;
         }
 
         .activity-content {
           display: flex;
           align-items: flex-start;
-          gap: 12px;
-          padding: 15px 0;
+          gap: 11px;
+          padding: 14px 0;
           border-top: 1px solid ${COLORS.border};
           border-bottom: 1px solid ${COLORS.border};
         }
 
         .activity-icon {
-          width: 38px;
-          height: 38px;
-          flex-shrink: 0;
           display: grid;
+          width: 36px;
+          height: 36px;
+          flex-shrink: 0;
           place-items: center;
-          border-radius: 12px;
+          border-radius: 11px;
           background: #e6ede3;
           color: ${COLORS.greenLight};
-          font-size: 18px;
+          font-size: 17px;
         }
 
         .activity-copy h3 {
           margin: 1px 0 0;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 800;
         }
 
@@ -1435,8 +1239,8 @@ export default function DashboardPage() {
         .activity-link {
           display: flex;
           align-items: center;
-          gap: 9px;
-          margin-top: 15px;
+          gap: 8px;
+          margin-top: 14px;
           padding: 0;
           border: none;
           background: transparent;
@@ -1447,7 +1251,7 @@ export default function DashboardPage() {
         }
 
         .activity-link span {
-          font-size: 16px;
+          font-size: 15px;
         }
 
         .account-section {
@@ -1455,7 +1259,7 @@ export default function DashboardPage() {
           align-items: center;
           justify-content: space-between;
           gap: 14px;
-          padding: 18px 0;
+          padding: 17px 0;
           border-top: 1px solid #ddd4c8;
           border-bottom: 1px solid #ddd4c8;
         }
@@ -1464,7 +1268,7 @@ export default function DashboardPage() {
           margin: 0;
           font-size: 10px;
           font-weight: 900;
-          letter-spacing: 1.8px;
+          letter-spacing: 1.6px;
         }
 
         .account-caption {
@@ -1477,12 +1281,12 @@ export default function DashboardPage() {
 
         .logout-button {
           display: flex;
+          min-height: 37px;
           align-items: center;
-          gap: 10px;
-          min-height: 38px;
+          gap: 9px;
           padding: 0 12px;
           border: 1px solid #d8c9b8;
-          border-radius: 12px;
+          border-radius: 11px;
           background: rgba(255, 255, 255, 0.35);
           color: ${COLORS.brown};
           font-size: 10px;
@@ -1490,108 +1294,16 @@ export default function DashboardPage() {
           cursor: pointer;
         }
 
-        .logout-button span:last-child {
-          font-size: 14px;
-        }
-
         .pajara-footer {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
           gap: 8px;
-          padding: 20px 2px 5px;
+          padding: 19px 2px 5px;
           color: ${COLORS.muted};
           font-size: 8px;
           font-weight: 700;
-          letter-spacing: 0.8px;
-        }
-
-        .bottom-navigation {
-          position: fixed;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          z-index: 100;
-          padding: 8px 12px
-            calc(8px + env(safe-area-inset-bottom));
-          border-top: 1px solid rgba(228, 222, 213, 0.95);
-          background: rgba(255, 255, 255, 0.96);
-          box-shadow: 0 -8px 28px rgba(33, 77, 50, 0.07);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-        }
-
-        .bottom-navigation-inner {
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 3px;
-          width: 100%;
-          max-width: 680px;
-          margin: 0 auto;
-        }
-
-        .nav-item {
-          position: relative;
-          display: flex;
-          min-width: 0;
-          min-height: 54px;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          padding: 6px 2px;
-          border: none;
-          border-radius: 14px;
-          background: transparent;
-          color: ${COLORS.muted};
-          cursor: pointer;
-          transition: background 0.2s ease;
-        }
-
-        .nav-item-active {
-          background: #eaf1e9;
-          color: ${COLORS.green};
-        }
-
-        .nav-icon {
-          font-size: 21px;
-          font-weight: 800;
-          line-height: 1;
-        }
-
-        .nav-icon-rp {
-          font-size: 13px;
-        }
-
-        .nav-label {
-          max-width: 100%;
-          font-size: 8px;
-          font-weight: 700;
-          line-height: 1.2;
-          text-align: center;
-          white-space: normal;
-          overflow-wrap: anywhere;
-        }
-
-        .nav-item-active .nav-label {
-          font-weight: 900;
-        }
-
-        .nav-badge {
-          position: absolute;
-          top: 2px;
-          right: calc(50% - 21px);
-          display: grid;
-          place-items: center;
-          min-width: 15px;
-          height: 15px;
-          padding: 0 3px;
-          border: 2px solid #fff;
-          border-radius: 99px;
-          background: #b45e48;
-          color: #fff;
-          font-size: 8px;
-          font-weight: 900;
+          letter-spacing: 0.7px;
         }
 
         button:focus-visible {
@@ -1605,15 +1317,11 @@ export default function DashboardPage() {
           }
 
           .header-heading {
-            padding: 48px 0 38px;
+            padding: 43px 0 35px;
           }
 
           .pajara-content {
             padding: 25px 28px 0;
-          }
-
-          .admin-greeting {
-            padding: 20px 22px;
           }
 
           .statistics-grid {
@@ -1622,25 +1330,26 @@ export default function DashboardPage() {
           }
 
           .stat-card {
-            min-height: 185px;
-            padding: 18px;
+            min-height: 175px;
+            padding: 17px;
           }
 
           .stat-value {
-            font-size: 43px;
+            font-size: 40px;
           }
 
           .workspace-content {
-            padding: 29px;
+            padding: 27px;
           }
 
           .workspace-logo-wrap {
-            width: 72px;
-            height: 72px;
+            width: 68px;
+            height: 68px;
           }
 
-          .workspace-description {
-            max-width: 430px;
+          .workspace-logo {
+            width: 52px;
+            height: 52px;
           }
 
           .workspace-button {
@@ -1648,49 +1357,38 @@ export default function DashboardPage() {
           }
 
           .activity-section {
-            padding: 23px;
+            padding: 22px;
           }
         }
 
         @media (max-width: 360px) {
           .admin-greeting {
             gap: 10px;
-            padding: 14px 12px;
-          }
-
-          .greeting-logo-wrap {
-            width: 45px;
-            height: 45px;
+            padding: 13px;
           }
 
           .greeting-copy h2 {
-            font-size: 18px;
+            font-size: 17px;
           }
 
           .workspace-logo-wrap {
-            width: 52px;
-            height: 52px;
+            width: 51px;
+            height: 51px;
             padding: 5px;
-            border-radius: 16px;
           }
 
-          .bottom-navigation {
-            padding-right: 6px;
-            padding-left: 6px;
+          .workspace-logo {
+            width: 39px;
+            height: 39px;
           }
 
-          .bottom-navigation-inner {
-            gap: 2px;
-          }
-
-          .nav-label {
+          .pajara-footer {
             font-size: 7px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .workspace-button,
-          .nav-item {
+          .workspace-button {
             transition: none;
           }
         }
