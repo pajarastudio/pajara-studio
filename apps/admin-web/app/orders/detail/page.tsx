@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -13,6 +12,7 @@ const supabase = createClient(
 
 type Order = {
   id: string;
+  customer_id: string;
   order_code: string;
   service_name: string;
   design_type: string | null;
@@ -25,6 +25,12 @@ type Order = {
   status: string;
   deadline: string | null;
   created_at: string;
+};
+
+type Customer = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
 };
 
 type ReferenceFile = {
@@ -96,6 +102,20 @@ function formatFileSize(bytes: number | null | undefined) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getWhatsAppUrl(phone: string | null | undefined) {
+  if (!phone) return null;
+
+  let number = phone.replace(/\D/g, "");
+
+  if (number.startsWith("0")) {
+    number = "62" + number.slice(1);
+  } else if (number.startsWith("8")) {
+    number = "62" + number;
+  }
+
+  return number ? `https://wa.me/${number}` : null;
 }
 
 function getStatusLabel(status: string | null | undefined) {
@@ -308,6 +328,7 @@ function OrderDetailContent() {
   const orderId = searchParams.get("id");
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [isPackageOrder, setIsPackageOrder] = useState(false);
   const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
   const [payment, setPayment] = useState<Payment | null>(null);
@@ -368,6 +389,7 @@ function OrderDetailContent() {
       setLoading(true);
       setError("");
       setMessage("");
+      setCustomer(null);
 
       const user = await checkAdmin();
       if (!user) return;
@@ -375,12 +397,25 @@ function OrderDetailContent() {
       const { data, error: orderError } = await supabase
         .from("orders")
         .select(
-          "id, order_code, service_name, design_type, quantity, brief, notes, total_amount, dp_amount, remaining_amount, status, deadline, created_at"
+          "id, customer_id, order_code, service_name, design_type, quantity, brief, notes, total_amount, dp_amount, remaining_amount, status, deadline, created_at"
         )
         .eq("id", id)
         .single();
 
       if (orderError) throw orderError;
+
+      // Memuat informasi customer dari profil pendaftaran.
+      const { data: customerData, error: customerError } = await supabase
+        .from("profiles_v2")
+        .select("id, full_name, phone")
+        .eq("id", data.customer_id)
+        .maybeSingle();
+
+      if (customerError) {
+        console.error("Gagal memuat data customer:", customerError);
+      }
+
+      setCustomer(customerData as Customer | null);
 
       const { data: subscriptionRequest, error: subscriptionError } =
         await supabase
@@ -732,7 +767,7 @@ function OrderDetailContent() {
         })
         .eq("id", order.id)
         .select(
-          "id, order_code, service_name, design_type, quantity, brief, notes, total_amount, dp_amount, remaining_amount, status, deadline, created_at"
+          "id, customer_id, order_code, service_name, design_type, quantity, brief, notes, total_amount, dp_amount, remaining_amount, status, deadline, created_at"
         )
         .single();
 
@@ -998,6 +1033,8 @@ function OrderDetailContent() {
     ? "Nominal Pelunasan"
     : "Nominal DP";
 
+  const whatsappUrl = getWhatsAppUrl(customer?.phone);
+
   return (
     <main className="min-h-screen bg-[#f7f6f1] px-4 py-5 text-[#373b32] sm:px-6 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-5">
@@ -1092,7 +1129,57 @@ function OrderDetailContent() {
           </div>
         </Section>
 
-        {/* 2. BRIEF & CATATAN */}
+        {/* 2. INFORMASI CUSTOMER */}
+        <Section
+          title="Informasi Customer"
+          description="Informasi kontak customer yang terdaftar pada akun."
+        >
+          {customer ? (
+            <>
+              <div>
+                <InfoRow
+                  label="Nama Customer"
+                  value={customer.full_name || "-"}
+                />
+                <InfoRow
+                  label="Nomor WhatsApp"
+                  value={customer.phone || "Belum diisi"}
+                />
+              </div>
+
+              {whatsappUrl ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#2f6b45] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#245537]"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  >
+                    <path d="M12.04 2C6.52 2 2.03 6.48 2.03 12c0 1.77.47 3.5 1.36 5.03L2 22l5.1-1.34A10 10 0 1 0 12.04 2Zm0 18.2a8.15 8.15 0 0 1-4.15-1.13l-.3-.18-3.03.8.81-2.95-.2-.31a8.16 8.16 0 1 1 6.87 3.77Zm4.48-6.12c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.01-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.46-.4-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.15 1.51.09.46-.07 1.43-.58 1.63-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z" />
+                  </svg>
+                  HUBUNGI WHATSAPP
+                </a>
+              ) : (
+                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+                  Nomor WhatsApp customer belum tersedia atau belum valid.
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon="◎"
+              title="Informasi customer tidak tersedia"
+              description="Data profil customer tidak berhasil ditemukan untuk pesanan ini."
+            />
+          )}
+        </Section>
+
+        {/* 3. BRIEF & CATATAN */}
         <Section
           title="Brief & Catatan"
           description="Arahan dan informasi tambahan dari customer."
@@ -1121,7 +1208,7 @@ function OrderDetailContent() {
           </div>
         </Section>
 
-        {/* 3. STATUS PESANAN */}
+        {/* 4. STATUS PESANAN */}
         <Section
           title="Status Pesanan"
           description="Perbarui tahap pengerjaan pesanan jika diperlukan."
@@ -1160,7 +1247,7 @@ function OrderDetailContent() {
           </div>
         </Section>
 
-        {/* 4. REFERENSI CUSTOMER */}
+        {/* 5. REFERENSI CUSTOMER */}
         <Section
           title="Referensi Customer"
           description="File referensi yang dikirim customer untuk pengerjaan desain."
@@ -1238,7 +1325,7 @@ function OrderDetailContent() {
           )}
         </Section>
 
-        {/* 5. REVISI CUSTOMER */}
+        {/* 6. REVISI CUSTOMER */}
         <Section
           title="Revisi Customer"
           description="Tinjau permintaan revisi dan kelola tindak lanjutnya."
@@ -1370,7 +1457,7 @@ function OrderDetailContent() {
           )}
         </Section>
 
-        {/* 6. PEMBAYARAN & PEMBAYARAN DP */}
+        {/* 7. PEMBAYARAN */}
         {isPackageOrder ? (
           <Section
             title="Pembayaran & Pembayaran DP"
@@ -1699,7 +1786,7 @@ function OrderDetailContent() {
           </Section>
         )}
 
-        {/* 7. FINAL FILE */}
+        {/* 8. FINAL FILE */}
         <Section
           title="Final File"
           description="Upload hasil desain final agar dapat diteruskan kepada customer."
