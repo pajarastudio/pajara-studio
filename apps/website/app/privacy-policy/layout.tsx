@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://pajara-website.pajarastd.workers.dev/privacy-policy",
-    title: "Kebijakan Privasi | Pajara Studio",
+    title: "Pajara Studio",
     description:
       "Pelajari bagaimana Pajara Studio mengelola dan menjaga informasi pengunjung serta pelanggan.",
   },
