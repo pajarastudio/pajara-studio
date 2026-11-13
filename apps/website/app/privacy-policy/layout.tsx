@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,7 +17,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://pajara-website.pajarastd.workers.dev/privacy-policy",
-    title: "Pajara Studio",
+    title: "Kebijakan Privasi | Pajara Studio",
+    description:
+      "Pelajari bagaimana Pajara Studio mengelola dan menjaga informasi pengunjung serta pelanggan.",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Kebijakan Privasi | Pajara Studio",
     description:
       "Pelajari bagaimana Pajara Studio mengelola dan menjaga informasi pengunjung serta pelanggan.",
   },
