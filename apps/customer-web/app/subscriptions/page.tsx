@@ -1,3 +1,4 @@
+
 "use client";
 
 import "./subscriptions.css";
@@ -26,6 +27,7 @@ export default function SubscriptionsPage() {
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hasAvailableQuota, setHasAvailableQuota] = useState(false);
 
   const loadPlans = useCallback(async () => {
     setLoading(true);
@@ -53,9 +55,62 @@ export default function SubscriptionsPage() {
     }
   }, []);
 
+  const loadQuotaAvailability = useCallback(async () => {
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        setHasAvailableQuota(false);
+        return;
+      }
+
+      const { data, error: queryError } = await supabase
+        .from("subscriptions")
+        .select(
+          "id, quota_total, quota_used, status, started_at, expires_at"
+        )
+        .eq("customer_id", user.id)
+        .eq("status", "active")
+        .order("expires_at", { ascending: true });
+
+      if (queryError) {
+        console.error("Gagal memeriksa kuota:", queryError);
+        setHasAvailableQuota(false);
+        return;
+      }
+
+      const now = Date.now();
+
+      const activeSubscription = (data || []).find((item) => {
+        const started = item.started_at
+          ? new Date(item.started_at).getTime()
+          : Infinity;
+
+        const expires = item.expires_at
+          ? new Date(item.expires_at).getTime()
+          : 0;
+
+        return (
+          started <= now &&
+          expires > now &&
+          item.quota_used < item.quota_total
+        );
+      });
+
+      setHasAvailableQuota(Boolean(activeSubscription));
+    } catch (err) {
+      console.error("Kesalahan saat memeriksa kuota:", err);
+      setHasAvailableQuota(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadPlans();
-  }, [loadPlans]);
+    loadQuotaAvailability();
+  }, [loadPlans, loadQuotaAvailability]);
 
   function formatRupiah(value: number) {
     return new Intl.NumberFormat("id-ID", {
@@ -126,8 +181,6 @@ export default function SubscriptionsPage() {
 
   return (
     <main className="subscriptions-page">
-      {/* NAVBAR */}
-
       <nav className="dashboard-navbar">
         <div className="dashboard-navbar-inner">
           <a href="/" className="dashboard-brand">
@@ -150,6 +203,16 @@ export default function SubscriptionsPage() {
               <span />
               <span />
             </button>
+
+            {hasAvailableQuota && (
+              <button
+                type="button"
+                className="dashboard-order-button"
+                onClick={() => router.push("/subscriptions/request")}
+              >
+                Gunakan Kuota ↗
+              </button>
+            )}
 
             <button
               type="button"
@@ -188,6 +251,16 @@ export default function SubscriptionsPage() {
                 Paket Desain
               </a>
 
+              {hasAvailableQuota && (
+                <a
+                  href="/subscriptions/request"
+                  className="dashboard-menu-link"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Gunakan Kuota
+                </a>
+              )}
+
               <a
                 href="/payments"
                 className="dashboard-menu-link"
@@ -225,6 +298,21 @@ export default function SubscriptionsPage() {
               setelah pembayaran diverifikasi oleh Admin Pajara Studio.
             </span>
           </div>
+
+          {hasAvailableQuota && (
+            <div style={{ marginTop: "22px" }}>
+              <button
+                type="button"
+                className="choose-button"
+                onClick={() => router.push("/subscriptions/request")}
+              >
+                Gunakan Kuota Paket
+                <span className="button-arrow" aria-hidden="true">
+                  →
+                </span>
+              </button>
+            </div>
+          )}
         </header>
 
         {error && (
